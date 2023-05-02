@@ -5,6 +5,19 @@ import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 lazy val appName: String = "find-your-national-insurance-number-frontend"
 
+lazy val scoverageSettings = {
+  import scoverage.ScoverageKeys
+  Seq(
+    // Semicolon-separated list of regexs matching classes to exclude
+    ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;models/.data/..*;view.*;models.*;.*(AuthService|BuildInfo|Routes).*",
+    ScoverageKeys.coverageMinimumStmtTotal := 75,
+    ScoverageKeys.coverageFailOnMinimum := true,
+    ScoverageKeys.coverageHighlighting := true,
+  )
+}
+
+addCommandAlias("report", ";clean; coverage; test; it:test; coverageReport")
+
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
@@ -15,7 +28,7 @@ lazy val root = (project in file("."))
   .settings(majorVersion := 0)
   .settings(useSuperShell in ThisBuild := false)
   .settings(
-    scalaVersion := "2.12.15",
+    scalaVersion := "2.13.8",
     name := appName,
     RoutesKeys.routesImport ++= Seq(
       "models._",
@@ -34,14 +47,9 @@ lazy val root = (project in file("."))
       "viewmodels.govuk.all._"
     ),
     PlayKeys.playDefaultPort := 9000,
-    ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;" +
-      ".*Routes.*;.*viewmodels.govuk.*;",
-    ScoverageKeys.coverageMinimumStmtTotal := 78,
-    ScoverageKeys.coverageFailOnMinimum := true,
-    ScoverageKeys.coverageHighlighting := true,
-        scalacOptions ++= Seq(
+    scalacOptions ++= Seq(
       "-feature",
-      "-Ypartial-unification",
+      "-language:postfixOps",
       "-rootdir",
       baseDirectory.value.getCanonicalPath,
       "-Wconf:cat=deprecation:ws,cat=feature:ws,cat=optimizer:ws,src=target/.*:s"
