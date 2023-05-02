@@ -58,9 +58,8 @@ class SessionRepository @Inject()(
     collection
       .updateOne(
         filter = byId(id),
-        update = Updates.set("lastUpdated", Instant.now(clock)),
-      )
-      .toFuture
+        update = Updates.set("lastUpdated", Instant.now(clock))
+      ).toFuture()
       .map(_ => true)
 
   def get(id: String): Future[Option[UserAnswers]] =
