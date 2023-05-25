@@ -55,3 +55,15 @@ signedOut.guidance = We did not save your answers.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
+
+setUpGGUserIDStart.title = setUpGGUserIDStart
+setUpGGUserIDStart.heading = setUpGGUserIDStart
+
+haveSetUpGGUserID.title = Have you set up a Government Gateway user ID before?
+haveSetUpGGUserID.heading = Have you set up a Government Gateway user ID before?
+haveSetUpGGUserID.yes = Yes
+haveSetUpGGUserID.no = No
+haveSetUpGGUserID.notSure = Not sure
+haveSetUpGGUserID.checkYourAnswersLabel = Have you set up a Government Gateway user ID before?
+haveSetUpGGUserID.error.required = Select haveSetUpGGUserID
+haveSetUpGGUserID.change.hidden = HaveSetUpGGUserID

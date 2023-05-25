@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package generators
+package forms
 
-import org.scalacheck.Arbitrary
-import pages._
+import javax.inject.Inject
 
-trait PageGenerators {
+import forms.mappings.Mappings
+import play.api.data.Form
+import models.HaveSetUpGGUserID
 
-  implicit lazy val arbitraryHaveSetUpGGUserIDPage: Arbitrary[HaveSetUpGGUserIDPage.type] =
-    Arbitrary(HaveSetUpGGUserIDPage)
+class HaveSetUpGGUserIDFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[HaveSetUpGGUserID] =
+    Form(
+      "value" -> enumerable[HaveSetUpGGUserID]("haveSetUpGGUserID.error.required")
+    )
 }

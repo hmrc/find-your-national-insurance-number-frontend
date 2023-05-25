@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package generators
+package pages
 
-import org.scalacheck.Arbitrary
-import pages._
+import models.HaveSetUpGGUserID
+import pages.behaviours.PageBehaviours
 
-trait PageGenerators {
+class HaveSetUpGGUserIDSpec extends PageBehaviours {
 
-  implicit lazy val arbitraryHaveSetUpGGUserIDPage: Arbitrary[HaveSetUpGGUserIDPage.type] =
-    Arbitrary(HaveSetUpGGUserIDPage)
+  "HaveSetUpGGUserIDPage" - {
+
+    beRetrievable[HaveSetUpGGUserID](HaveSetUpGGUserIDPage)
+
+    beSettable[HaveSetUpGGUserID](HaveSetUpGGUserIDPage)
+
+    beRemovable[HaveSetUpGGUserID](HaveSetUpGGUserIDPage)
+  }
 }
