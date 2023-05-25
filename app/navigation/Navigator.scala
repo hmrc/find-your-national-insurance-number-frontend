@@ -17,9 +17,9 @@
 package navigation
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.mvc.Call
 import controllers.routes
+import models.HaveSetUpGGUserID.{No, Yes}
 import pages._
 import models._
 
@@ -27,7 +27,8 @@ import models._
 class Navigator @Inject()() {
 
   private val normalRoutes: Page => UserAnswers => Call = {
-    case _ => _ => routes.IndexController.onPageLoad
+    case HaveSetUpGGUserIDPage    => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
+    case _                        => _ => routes.IndexController.onPageLoad
   }
 
   private val checkRouteMap: Page => UserAnswers => Call = {
@@ -40,4 +41,11 @@ class Navigator @Inject()() {
     case CheckMode =>
       checkRouteMap(page)(userAnswers)
   }
+
+  private def navigateHaveSetUpGGUserID(userAnswers: UserAnswers): Call =
+    userAnswers.get(HaveSetUpGGUserIDPage) match {
+      case Some(No) => controllers.routes.SetUpGGUserIDStartController.onPageLoad()
+      case Some(Yes) => controllers.routes.SetUpGGUserIDStartController.onPageLoad()
+      case _ => controllers.routes.SetUpGGUserIDStartController.onPageLoad()
+    }
 }
