@@ -35,9 +35,17 @@ error.number = Please enter a valid number
 error.required = Please enter a value
 error.summary.title = There is a problem
 
-index.title = find-your-national-insurance-number-frontend
-index.heading = find-your-national-insurance-number-frontend
-index.guidance = Welcome to your new frontend. Please see the README file for a guide to getting started.
+index.title = Find your National Insurance number
+index.heading = Before you start
+index.servicePurpose = Use this service if you need a reminder or official confirmation of your National Insurance number.
+index.whatYouWillNeed.heading = What you’ll need
+index.whatYouWillNeed.p1 = You’ll need:
+index.whatYouWillNeed.l1.li1 = an email address
+index.whatYouWillNeed.l1.li2 = a phone number or authenticator app
+index.whatYouWillNeed.p2 = Then you’ll need to:
+index.whatYouWillNeed.l2.li1 = answer some basic questions about yourself
+index.whatYouWillNeed.l2.li2 = confirm your identity to access your number online
+index.whatYouWillNeed.p3 = If you cannot prove your identity, HMRC still may be able to post your National Insurance number to you.
 
 checkYourAnswers.title = Check Your Answers
 checkYourAnswers.heading = Check Your Answers
@@ -56,8 +64,12 @@ signedOut.guidance = We did not save your answers.
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
 
-setUpGGUserIDStart.title = setUpGGUserIDStart
-setUpGGUserIDStart.heading = setUpGGUserIDStart
+setUpGGUserIDStart.title = Set up a Government Gateway user ID to use this service
+setUpGGUserIDStart.heading = Set up a Government Gateway user ID to use this service
+setUpGGUserIDStart.p1 = You’ll need:
+setUpGGUserIDStart.l1.li1 = an email address
+setUpGGUserIDStart.l1.li2 = a phone number or an authenticator app
+setUpGGUserIDStart.p2 = We can then search for your National Insurance number.
 
 haveSetUpGGUserID.title = Have you set up a Government Gateway user ID before?
 haveSetUpGGUserID.heading = Have you set up a Government Gateway user ID before?
@@ -65,5 +77,9 @@ haveSetUpGGUserID.yes = Yes
 haveSetUpGGUserID.no = No
 haveSetUpGGUserID.notSure = Not sure
 haveSetUpGGUserID.checkYourAnswersLabel = Have you set up a Government Gateway user ID before?
-haveSetUpGGUserID.error.required = Select haveSetUpGGUserID
+haveSetUpGGUserID.error.required = Select if you have set up a Government Gateway user ID before
 haveSetUpGGUserID.change.hidden = HaveSetUpGGUserID
+haveSetUpGGUserID.p1 = To check if you have, search your email for ’Government Gateway ID’. Your user ID may be included in an email we have sent you.
+haveSetUpGGUserID.p2 = You may have set one up to:
+haveSetUpGGUserID.l1.li1 = access your personal tax account to check your records with HMRC
+haveSetUpGGUserID.l1.li2 = sign up for another online government service

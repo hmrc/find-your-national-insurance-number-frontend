@@ -23,5 +23,15 @@
 
 @layout(pageTitle = titleNoForm(messages("setUpGGUserIDStart.title"))) {
 
-    <h1 class="govuk-heading-xl">@messages("setUpGGUserIDStart.heading")</h1>
+    <h1 class="govuk-heading-l">@messages("setUpGGUserIDStart.heading")</h1>
+    <p class="govuk-body">@messages("setUpGGUserIDStart.p1")</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@messages("setUpGGUserIDStart.l1.li1")</li>
+        <li>@messages("setUpGGUserIDStart.l1.li2")</li>
+    </ul>
+    <p class="govuk-body">@messages("setUpGGUserIDStart.p2")</p>
+
+    @govukButton(
+        ButtonViewModel(messages("site.continue"))
+    )
 }
