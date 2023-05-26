@@ -20,7 +20,7 @@ GET         /account/signed-out                          controllers.auth.Signed
 
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad
 
-GET        /setUpGGUserIDStart                       controllers.SetUpGGUserIDStartController.onPageLoad()
+GET        /setUpGGUserIDStart                          controllers.SetUpGGUserIDStartController.onPageLoad()
 
 GET        /haveSetUpGGUserID                        controllers.HaveSetUpGGUserIDController.onPageLoad(mode: Mode = NormalMode)
 POST       /haveSetUpGGUserID                        controllers.HaveSetUpGGUserIDController.onSubmit(mode: Mode = NormalMode)
