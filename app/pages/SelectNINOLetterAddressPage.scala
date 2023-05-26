@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,28 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(
-    layout: templates.Layout,
-    govukButton: GovukButton
-)
+package pages
 
-@()(implicit request: Request[_], messages: Messages)
+import models.SelectNINOLetterAddress
+import play.api.libs.json.JsPath
 
-@layout(
-      pageTitle    = titleNoForm(messages("index.title")),
-      showBackLink = false
-) {
+case object SelectNINOLetterAddressPage extends QuestionPage[SelectNINOLetterAddress] {
 
-<h1 class="govuk-heading-xl">@messages("index.heading")</h1>
+  override def path: JsPath = JsPath \ toString
 
-<p class="govuk-body">@messages("index.guidance")</p>
-
-@govukButton(Button(
-        href = Some("/find-your-national-insurance-number-frontend/postNINOLetter"),
-        isStartButton = true,
-        content = Text("Start now")
-    ))
-
+  override def toString: String = "selectNINOLetterAddress"
 }

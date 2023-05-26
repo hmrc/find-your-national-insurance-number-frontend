@@ -17,12 +17,11 @@
 package generators
 
 import models._
-import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
 
-  implicit lazy val arbitraryHaveSetUpGGUserID: Arbitrary[HaveSetUpGGUserID] =
+  implicit lazy val arbitrarySelectNINOLetterAddress: Arbitrary[SelectNINOLetterAddress] =
     Arbitrary {
-      Gen.oneOf(HaveSetUpGGUserID.values.toSeq)
+      Gen.oneOf(SelectNINOLetterAddress.values.toSeq)
     }
 }

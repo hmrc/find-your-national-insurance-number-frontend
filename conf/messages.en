@@ -56,6 +56,27 @@ signedOut.guidance = We did not save your answers.
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
 
+hasSetUpGGUserID.title = Find your national insurance number
+hasSetUpGGUserID.heading = Find your national insurance number
+hasSetUpGGUserID.yes = Yes
+hasSetUpGGUserID.no = No
+hasSetUpGGUserID.notSure = Not Sure
+hasSetUpGGUserID.checkYourAnswersLabel = Find your national insurance number
+hasSetUpGGUserID.error.required = Select hasSetUpGGUserID
+hasSetUpGGUserID.change.hidden = HasSetUpGGUserID
+
+setUpGGUserID.title = setUpGGUserID
+setUpGGUserID.heading = setUpGGUserID
+
+postNINOLetter.title = postNINOLetter
+postNINOLetter.heading = Would you like us to post your National Insurance number to you?
+postNINOLetter.confirmIdentity = As you’re not able to confirm your identity, you can instead get your number in the post.
+postNINOLetter.letterArrival = The letter will arrive within 15 days.
+postNINOLetter.notTellNINOViaPhone = HMRC will not tell you your National Insurance number over the phone.
+postNINOLetter.checkYourAnswersLabel = postNINOLetter
+postNINOLetter.error.required = Select yes if postNINOLetter
+postNINOLetter.change.hidden = postNINOLetter
+
 setUpGGUserIDStart.title = setUpGGUserIDStart
 setUpGGUserIDStart.heading = setUpGGUserIDStart
 
@@ -67,3 +88,16 @@ haveSetUpGGUserID.notSure = Not sure
 haveSetUpGGUserID.checkYourAnswersLabel = Have you set up a Government Gateway user ID before?
 haveSetUpGGUserID.error.required = Select haveSetUpGGUserID
 haveSetUpGGUserID.change.hidden = HaveSetUpGGUserID
+
+selectNINOLetterAddress.title = Where would you like the letter sent?
+selectNINOLetterAddress.heading = Where would you like the letter sent?
+selectNINOLetterAddress.postCode = To the address with the postcode {0}
+selectNINOLetterAddress.notThisAddress = Not to this address
+selectNINOLetterAddress.checkYourAnswersLabel = Where would you like the letter sent?
+selectNINOLetterAddress.error.required = Select selectNINOLetterAddress
+selectNINOLetterAddress.change.hidden = SelectNINOLetterAddress
+
+ninoLetterPostedConfirmation.title = National Insurance number sent by post
+ninoLetterPostedConfirmation.heading = Your National Insurance number will be sent by post
+ninoLetterPostedConfirmation.letterArrival = We’ll post the letter confirming your number. It will arrive within 15 days.
+ninoLetterPostedConfirmation.goBackToGovUK = Exit and go back to GOV.UK
