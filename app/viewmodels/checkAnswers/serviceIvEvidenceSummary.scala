@@ -20,6 +20,8 @@ import controllers.routes
 import models.{CheckMode, UserAnswers}
 import pages.ServiceIvEvidencePage
 import play.api.i18n.Messages
+import play.twirl.api.HtmlFormat
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
@@ -30,11 +32,15 @@ object ServiceIvEvidenceSummary  {
     answers.get(ServiceIvEvidencePage).map {
       answer =>
 
-        val value = if (answer) "site.yes" else "site.no"
+        val value = ValueViewModel(
+          HtmlContent(
+            HtmlFormat.escape(messages(s"serviceIvEvidence.$answer"))
+          )
+        )
 
         SummaryListRowViewModel(
           key     = "ServiceIvEvidence.checkYourAnswersLabel",
-          value   = ValueViewModel(value),
+          value   = value,
           actions = Seq(
             ActionItemViewModel("site.change", routes.ServiceIvEvidenceController.onPageLoad(CheckMode).url)
               .withVisuallyHiddenText(messages("ServiceIvEvidence.change.hidden"))

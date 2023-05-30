@@ -17,14 +17,14 @@
 package forms
 
 import javax.inject.Inject
-
 import forms.mappings.Mappings
+import models.ServiceIvEvidence
 import play.api.data.Form
 
 class ServiceIvEvidenceFormProvider @Inject() extends Mappings {
 
-  def apply(): Form[Boolean] =
+  def apply(): Form[ServiceIvEvidence] =
     Form(
-      "value" -> boolean("ServiceIvEvidence.error.required")
+      "value" -> enumerable[ServiceIvEvidence]("ServiceIvEvidence.error.required")
     )
 }

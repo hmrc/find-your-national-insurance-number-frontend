@@ -16,9 +16,10 @@
 
 package pages
 
+import models.ServiceIvEvidence
 import play.api.libs.json.JsPath
 
-case object ServiceIvEvidencePage extends QuestionPage[Boolean] {
+case object ServiceIvEvidencePage extends QuestionPage[ServiceIvEvidence] {
 
   override def path: JsPath = JsPath \ toString
 
