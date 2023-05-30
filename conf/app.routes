@@ -36,3 +36,8 @@ GET        /serviceIvId                        controllers.ServiceIvIdController
 POST       /serviceIvId                        controllers.ServiceIvIdController.onSubmit(mode: Mode = NormalMode)
 GET        /changeServiceIvId                  controllers.ServiceIvIdController.onPageLoad(mode: Mode = CheckMode)
 POST       /changeServiceIvId                  controllers.ServiceIvIdController.onSubmit(mode: Mode = CheckMode)
+
+GET        /serviceIvApp                        controllers.ServiceIvAppController.onPageLoad(mode: Mode = NormalMode)
+POST       /serviceIvApp                        controllers.ServiceIvAppController.onSubmit(mode: Mode = NormalMode)
+GET        /changeServiceIvApp                  controllers.ServiceIvAppController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeServiceIvApp                  controllers.ServiceIvAppController.onSubmit(mode: Mode = CheckMode)

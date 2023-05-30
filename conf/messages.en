@@ -108,3 +108,10 @@ serviceIvId.p1 = This is another way to confirm your identity and see your Natio
 serviceIvId.checkYourAnswersLabel = serviceIvId
 serviceIvId.error.required = Select yes if serviceIvId
 serviceIvId.change.hidden = ServiceIvId
+
+serviceIvApp.title = serviceIvApp
+serviceIvApp.heading = Can you download an app to your mobile device?
+serviceIvApp.p1 = You'll need to use an app and the camera on your mobile device to match your face to your ID document.
+serviceIvApp.checkYourAnswersLabel = serviceIvApp
+serviceIvApp.error.required = Select yes if serviceIvApp
+serviceIvApp.change.hidden = ServiceIvApp
