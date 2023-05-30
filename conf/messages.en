@@ -101,3 +101,10 @@ serviceIvEvidence.sp2 = For example, the year you took out a credit card or phon
 serviceIvEvidence.checkYourAnswersLabel = serviceIvEvidence
 serviceIvEvidence.error.required = Select yes if serviceIvEvidence
 serviceIvEvidence.change.hidden = serviceIvEvidence
+
+serviceIvId.title = serviceIvId
+serviceIvId.heading = Do you have a valid passport or a UK photocard driving licence?
+serviceIvId.p1 = This is another way to confirm your identity and see your National Insurance number online.
+serviceIvId.checkYourAnswersLabel = serviceIvId
+serviceIvId.error.required = Select yes if serviceIvId
+serviceIvId.change.hidden = ServiceIvId
