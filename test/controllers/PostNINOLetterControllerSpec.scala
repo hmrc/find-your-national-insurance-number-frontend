@@ -29,7 +29,7 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
-import views.html.postNINOLetterView
+import views.html.PostNINOLetterView
 
 import scala.concurrent.Future
 
@@ -40,7 +40,7 @@ class PostNINOLetterControllerSpec extends SpecBase with MockitoSugar {
   val formProvider = new PostNINOLetterFormProvider()
   val form = formProvider()
 
-  lazy val postNINOLetterRoute = routes.postNINOLetterController.onPageLoad(NormalMode).url
+  lazy val postNINOLetterRoute = routes.PostNINOLetterController.onPageLoad(NormalMode).url
 
   "postNINOLetter Controller" - {
 
@@ -53,7 +53,7 @@ class PostNINOLetterControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[postNINOLetterView]
+        val view = application.injector.instanceOf[PostNINOLetterView]
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
@@ -69,7 +69,7 @@ class PostNINOLetterControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request = FakeRequest(GET, postNINOLetterRoute)
 
-        val view = application.injector.instanceOf[postNINOLetterView]
+        val view = application.injector.instanceOf[PostNINOLetterView]
 
         val result = route(application, request).value
 
@@ -115,7 +115,7 @@ class PostNINOLetterControllerSpec extends SpecBase with MockitoSugar {
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[postNINOLetterView]
+        val view = application.injector.instanceOf[PostNINOLetterView]
 
         val result = route(application, request).value
 

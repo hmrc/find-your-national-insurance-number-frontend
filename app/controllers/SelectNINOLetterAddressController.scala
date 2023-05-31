@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
-import models.{Mode, UserAnswers}
+import models.Mode
 import navigation.Navigator
 import pages.SelectNINOLetterAddressPage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -27,7 +27,7 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SelectNINOLetterAddressView
 
-import java.time.{Clock, Instant}
+import java.time.Clock
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -46,39 +46,30 @@ class SelectNINOLetterAddressController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
 
-      //will require implementation of userData
+      //for this to dynamically work would require userData to be implemented however, this is not being shown in future iterations
       val postCode: String = "FX97 4TU"
 
-      //will need to be changed to retrieve user's NINO
-      val preparedForm = request.userAnswers match {
-        case Some(value) => value.get(SelectNINOLetterAddressPage) match {
+      val preparedForm = request.userAnswers.get(SelectNINOLetterAddressPage)  match {
           case None => form
           case Some(value) => form.fill(value)
         }
-        case None => form
-      }
 
       Ok(view(preparedForm, mode, postCode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, postcode = ""))),
+          Future.successful(BadRequest(view(formWithErrors, mode, postcode = "FX97 4TU"))),
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(
-              UserAnswers(
-                id = request.userId,
-                lastUpdated = Instant.now(clock)
-              )
-            ).set(SelectNINOLetterAddressPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectNINOLetterAddressPage, value))
             _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
       )

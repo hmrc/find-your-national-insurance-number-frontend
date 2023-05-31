@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions._
 import forms.PostNINOLetterFormProvider
-import models.{Mode, UserAnswers}
+import models.Mode
 import navigation.Navigator
 import pages.PostNINOLetterPage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -27,7 +27,7 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.PostNINOLetterView
 
-import java.time.{Clock, Instant}
+import java.time.Clock
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -46,21 +46,18 @@ class PostNINOLetterController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
 
-      val preparedForm = request.userAnswers match {
-        case Some(value) => value.get(PostNINOLetterPage) match {
+      val preparedForm = request.userAnswers.get(PostNINOLetterPage) match {
           case None => form
           case Some(value) => form.fill(value)
-        }
-        case None => form
       }
 
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
@@ -69,12 +66,7 @@ class PostNINOLetterController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(
-              UserAnswers(
-                id = request.userId,
-                lastUpdated = Instant.now(clock)
-              )
-            ).set(PostNINOLetterPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(PostNINOLetterPage, value))
             _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PostNINOLetterPage, mode, updatedAnswers))
       )

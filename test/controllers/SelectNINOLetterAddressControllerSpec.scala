@@ -37,10 +37,11 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
 
-  lazy val selectNINOLetterAddressRoute = routes.SelectNINOLetterAddressController.onPageLoad(NormalMode).url
+  lazy val selectNINOLetterAddressRoute: String = routes.SelectNINOLetterAddressController.onPageLoad(NormalMode).url
 
   val formProvider = new SelectNINOLetterAddressFormProvider()
   val form = formProvider()
+  val generatedPostcode = "FX97 4TU" //for testing purposes this is hard coded - postcode will not be displayed in future iterations
 
   "SelectNINOLetterAddress Controller" - {
 
@@ -56,7 +57,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[SelectNINOLetterAddressView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, generatedPostcode)(request, messages(application)).toString
       }
     }
 
@@ -74,7 +75,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(SelectNINOLetterAddress.values.head), NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(SelectNINOLetterAddress.values.head), NormalMode, generatedPostcode)(request, messages(application)).toString
       }
     }
 
@@ -120,7 +121,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, generatedPostcode)(request, messages(application)).toString
       }
     }
 

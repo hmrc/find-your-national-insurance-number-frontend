@@ -22,14 +22,14 @@
 
 @()(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("nINOLetterPostedConfirmation.title"))) {
+@layout(pageTitle = titleNoForm(messages("ninoLetterPostedConfirmation.title"))) {
 
     @govukPanel(Panel(title = messages("ninoLetterPostedConfirmation.heading")))
 
     <p class="govuk-body">@messages("ninoLetterPostedConfirmation.letterArrival")</p>
 
     <p class="govuk-body">
-        <a href="https://nino-prototype.herokuapp.com/v10/guidance-find-nino" class="govuk-link">
+        <a href="@controllers.routes.IndexController.onPageLoad.url" class="govuk-link">
             @messages("ninoLetterPostedConfirmation.goBackToGovUK")
         </a>
     </p>

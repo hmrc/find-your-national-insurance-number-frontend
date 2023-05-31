@@ -16,10 +16,15 @@
 
 package generators
 
+import org.scalacheck.Arbitrary
 import pages._
 
 trait PageGenerators {
 
+  implicit lazy val arbitraryHaveSetUpGGUserIDPage: Arbitrary[HaveSetUpGGUserIDPage.type] =
+    Arbitrary(HaveSetUpGGUserIDPage)
+
   implicit lazy val arbitrarySelectNINOLetterAddressPage: Arbitrary[SelectNINOLetterAddressPage.type] =
     Arbitrary(SelectNINOLetterAddressPage)
+
 }

@@ -16,12 +16,19 @@
 
 package pages
 
-import models.SelectNINOLetterAddress
+import models.{SelectNINOLetterAddress, UserAnswers}
 import play.api.libs.json.JsPath
+
+import scala.util.Try
 
 case object SelectNINOLetterAddressPage extends QuestionPage[SelectNINOLetterAddress] {
 
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "selectNINOLetterAddress"
+
+  //not yet cleaning current page data once they reach confirmation page
+  override def cleanup(value: Option[SelectNINOLetterAddress], userAnswers: UserAnswers): Try[UserAnswers] =
+    userAnswers.remove(PostNINOLetterPage)
+      .flatMap(_.remove(HaveSetUpGGUserIDPage))
 }
