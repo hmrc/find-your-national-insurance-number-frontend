@@ -16,25 +16,26 @@
 
 package forms
 
-import forms.behaviours.BooleanFieldBehaviours
+import forms.behaviours.{BooleanFieldBehaviours, OptionFieldBehaviours}
+import models.ServiceIvEvidence
 import play.api.data.FormError
 
-class serviceIvEvidenceFormProviderSpec extends BooleanFieldBehaviours {
-
-  val requiredKey = "serviceIvEvidence.error.required"
-  val invalidKey = "error.boolean"
+class ServiceIvEvidenceFormProviderSpec extends OptionFieldBehaviours {
 
   val form = new ServiceIvEvidenceFormProvider()()
 
   ".value" - {
 
     val fieldName = "value"
+    val requiredKey = "ServiceIvEvidence.error.required"
 
-    behave like booleanField(
+    behave like optionsField[ServiceIvEvidence](
       form,
       fieldName,
-      invalidError = FormError(fieldName, invalidKey)
+      validValues = ServiceIvEvidence.values,
+      invalidError = FormError(fieldName, "error.invalid")
     )
+
 
     behave like mandatoryField(
       form,

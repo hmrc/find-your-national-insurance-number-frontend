@@ -18,7 +18,8 @@ package controllers
 
 import base.SpecBase
 import forms.ServiceIvEvidenceFormProvider
-import models.{NormalMode, UserAnswers}
+import models.ServiceIvEvidence.Yes
+import models.{NormalMode, ServiceIvEvidence, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -29,18 +30,18 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
-import views.html.serviceIvEvidenceView
+import views.html.ServiceIvEvidenceView
 
 import scala.concurrent.Future
 
-class serviceIvEvidenceControllerSpec extends SpecBase with MockitoSugar {
+class ServiceIvEvidenceControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
 
   val formProvider = new ServiceIvEvidenceFormProvider()
   val form = formProvider()
 
-  lazy val serviceIvEvidenceRoute = routes.serviceIvEvidenceController.onPageLoad(NormalMode).url
+  lazy val serviceIvEvidenceRoute = routes.ServiceIvEvidenceController.onPageLoad(NormalMode).url
 
   "serviceIvEvidence Controller" - {
 
@@ -53,7 +54,7 @@ class serviceIvEvidenceControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[serviceIvEvidenceView]
+        val view = application.injector.instanceOf[ServiceIvEvidenceView]
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
@@ -62,19 +63,19 @@ class serviceIvEvidenceControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(ServiceIvEvidencePage, true).success.value
+      val userAnswers = UserAnswers(userAnswersId).set(ServiceIvEvidencePage, Yes).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, serviceIvEvidenceRoute)
 
-        val view = application.injector.instanceOf[serviceIvEvidenceView]
+        val view = application.injector.instanceOf[ServiceIvEvidenceView]
 
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(true), NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(Yes), NormalMode)(request, messages(application)).toString
       }
     }
 
@@ -95,7 +96,7 @@ class serviceIvEvidenceControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, serviceIvEvidenceRoute)
-            .withFormUrlEncodedBody(("value", "true"))
+            .withFormUrlEncodedBody(("value", ServiceIvEvidence.values.head.toString))
 
         val result = route(application, request).value
 
@@ -115,7 +116,7 @@ class serviceIvEvidenceControllerSpec extends SpecBase with MockitoSugar {
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[serviceIvEvidenceView]
+        val view = application.injector.instanceOf[ServiceIvEvidenceView]
 
         val result = route(application, request).value
 

@@ -27,8 +27,8 @@ trait PageGenerators {
   implicit lazy val arbitraryServiceIvIdPage: Arbitrary[ServiceIvIdPage.type] =
     Arbitrary(ServiceIvIdPage)
 
-  implicit lazy val arbitraryserviceIvEvidencePage: Arbitrary[serviceIvEvidencePage.type] =
-    Arbitrary(serviceIvEvidencePage)
+  implicit lazy val arbitraryserviceIvEvidencePage: Arbitrary[ServiceIvEvidencePage.type] =
+    Arbitrary(ServiceIvEvidencePage)
 
   implicit lazy val arbitraryHaveSetUpGGUserIDPage: Arbitrary[HaveSetUpGGUserIDPage.type] =
     Arbitrary(HaveSetUpGGUserIDPage)

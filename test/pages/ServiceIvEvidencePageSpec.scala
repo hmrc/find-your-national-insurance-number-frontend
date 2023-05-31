@@ -16,16 +16,18 @@
 
 package pages
 
+import models.ServiceIvEvidence
+import models.ServiceIvEvidence._
 import pages.behaviours.PageBehaviours
 
-class serviceIvEvidencePageSpec extends PageBehaviours {
+class ServiceIvEvidencePageSpec extends PageBehaviours {
 
   "serviceIvEvidencePage" - {
 
-    beRetrievable[Boolean](ServiceIvEvidencePage)
+    beRetrievable[ServiceIvEvidence](ServiceIvEvidencePage)
 
-    beSettable[Boolean](ServiceIvEvidencePage)
+    beSettable[ServiceIvEvidence](ServiceIvEvidencePage)
 
-    beRemovable[Boolean](ServiceIvEvidencePage)
+    beRemovable[ServiceIvEvidence](ServiceIvEvidencePage)
   }
 }
