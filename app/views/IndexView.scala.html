@@ -22,13 +22,27 @@
 @()(implicit request: Request[_], messages: Messages)
 
 @layout(
-      pageTitle    = titleNoForm(messages("index.title")),
-      showBackLink = false
+    pageTitle    = titleNoForm(messages("index.title")),
+    showBackLink = true
 ) {
 
-<h1 class="govuk-heading-xl">@messages("index.heading")</h1>
+    <h1 class="govuk-heading-l">@messages("index.heading")</h1>
 
-<p class="govuk-body">@messages("index.guidance")</p>
+    <p class="govuk-body">@messages("index.servicePurpose")</p>
+
+    <h1 class="govuk-heading-m">@messages("index.whatYouWillNeed.heading")</h1>
+    <p class="govuk-body">@messages("index.whatYouWillNeed.p1")</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@messages("index.whatYouWillNeed.l1.li1")</li>
+        <li>@messages("index.whatYouWillNeed.l1.li2")</li>
+    </ul>
+
+    <p class="govuk-body">@messages("index.whatYouWillNeed.p2")</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@messages("index.whatYouWillNeed.l2.li1")</li>
+        <li>@messages("index.whatYouWillNeed.l2.li2")</li>
+    </ul>
+    <p class="govuk-body">@messages("index.whatYouWillNeed.p3")</p>
 
 @govukButton(Button(
         href = Some("/find-your-national-insurance-number-frontend/haveSetUpGGUserID"),

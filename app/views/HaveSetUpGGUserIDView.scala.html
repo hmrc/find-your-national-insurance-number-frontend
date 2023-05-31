@@ -14,12 +14,14 @@
  * limitations under the License.
  *@
 
+@import viewmodels.LegendSize
+
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukRadios: GovukRadios,
-    govukButton: GovukButton
+    govukButton: GovukButton,
 )
 
 @(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
@@ -35,13 +37,22 @@
         @govukRadios(
             RadiosViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("haveSetUpGGUserID.heading")).asPageHeading(),
+                legend = LegendViewModel(messages("haveSetUpGGUserID.heading")).asPageHeading(LegendSize.Large),
                 items  = HaveSetUpGGUserID.options
-            )
+            ).withHint(HintViewModel(HtmlContent(hintText)))
         )
 
         @govukButton(
             ButtonViewModel(messages("site.continue"))
         )
     }
+}
+
+@hintText = {
+    <p class="govuk-body">@messages("haveSetUpGGUserID.p1")</p>
+    <p class="govuk-body">@messages("haveSetUpGGUserID.p2")</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@messages("haveSetUpGGUserID.l1.li1")</li>
+        <li>@messages("haveSetUpGGUserID.l1.li2")</li>
+    </ul>
 }

@@ -25,6 +25,7 @@ POST        /postNINOLetter                                 controllers.PostNINO
 GET         /changePostNINOLetter                           controllers.PostNINOLetterController.onPageLoad(mode: Mode = CheckMode)
 POST        /changePostNINOLetter                           controllers.PostNINOLetterController.onSubmit(mode: Mode = CheckMode)
 
+
 GET         /setUpGGUserIDStart                             controllers.SetUpGGUserIDStartController.onPageLoad()
 
 GET         /haveSetUpGGUserID                              controllers.HaveSetUpGGUserIDController.onPageLoad(mode: Mode = NormalMode)
