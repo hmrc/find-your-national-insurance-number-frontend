@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package generators
+package forms
 
-import org.scalacheck.Arbitrary
-import pages._
+import javax.inject.Inject
+import forms.mappings.Mappings
+import models.ServiceIvEvidence
+import play.api.data.Form
 
-trait PageGenerators {
+class ServiceIvEvidenceFormProvider @Inject() extends Mappings {
 
-  implicit lazy val arbitraryServiceIvAppPage: Arbitrary[ServiceIvAppPage.type] =
-    Arbitrary(ServiceIvAppPage)
-
-  implicit lazy val arbitraryServiceIvIdPage: Arbitrary[ServiceIvIdPage.type] =
-    Arbitrary(ServiceIvIdPage)
-
-  implicit lazy val arbitraryserviceIvEvidencePage: Arbitrary[ServiceIvEvidencePage.type] =
-    Arbitrary(ServiceIvEvidencePage)
-
-  implicit lazy val arbitraryHaveSetUpGGUserIDPage: Arbitrary[HaveSetUpGGUserIDPage.type] =
-    Arbitrary(HaveSetUpGGUserIDPage)
+  def apply(): Form[ServiceIvEvidence] =
+    Form(
+      "value" -> enumerable[ServiceIvEvidence]("ServiceIvEvidence.error.required")
+    )
 }

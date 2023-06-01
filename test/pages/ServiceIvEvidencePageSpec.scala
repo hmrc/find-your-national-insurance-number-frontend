@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package generators
+package pages
 
-import org.scalacheck.Arbitrary
-import pages._
+import models.ServiceIvEvidence
+import models.ServiceIvEvidence._
+import pages.behaviours.PageBehaviours
 
-trait PageGenerators {
+class ServiceIvEvidencePageSpec extends PageBehaviours {
 
-  implicit lazy val arbitraryServiceIvAppPage: Arbitrary[ServiceIvAppPage.type] =
-    Arbitrary(ServiceIvAppPage)
+  "serviceIvEvidencePage" - {
 
-  implicit lazy val arbitraryServiceIvIdPage: Arbitrary[ServiceIvIdPage.type] =
-    Arbitrary(ServiceIvIdPage)
+    beRetrievable[ServiceIvEvidence](ServiceIvEvidencePage)
 
-  implicit lazy val arbitraryserviceIvEvidencePage: Arbitrary[ServiceIvEvidencePage.type] =
-    Arbitrary(ServiceIvEvidencePage)
+    beSettable[ServiceIvEvidence](ServiceIvEvidencePage)
 
-  implicit lazy val arbitraryHaveSetUpGGUserIDPage: Arbitrary[HaveSetUpGGUserIDPage.type] =
-    Arbitrary(HaveSetUpGGUserIDPage)
+    beRemovable[ServiceIvEvidence](ServiceIvEvidencePage)
+  }
 }

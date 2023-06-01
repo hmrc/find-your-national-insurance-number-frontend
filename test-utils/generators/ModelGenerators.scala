@@ -25,4 +25,9 @@ trait ModelGenerators {
     Arbitrary {
       Gen.oneOf(HaveSetUpGGUserID.values.toSeq)
     }
+
+  implicit lazy val arbitraryServiceIvEvidence: Arbitrary[ServiceIvEvidence] =
+    Arbitrary {
+      Gen.oneOf(ServiceIvEvidence.values.toSeq)
+    }
 }
