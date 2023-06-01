@@ -21,6 +21,15 @@ import pages._
 
 trait PageGenerators {
 
+  implicit lazy val arbitraryServiceIvAppPage: Arbitrary[ServiceIvAppPage.type] =
+    Arbitrary(ServiceIvAppPage)
+
+  implicit lazy val arbitraryServiceIvIdPage: Arbitrary[ServiceIvIdPage.type] =
+    Arbitrary(ServiceIvIdPage)
+
+  implicit lazy val arbitraryserviceIvEvidencePage: Arbitrary[ServiceIvEvidencePage.type] =
+    Arbitrary(ServiceIvEvidencePage)
+
   implicit lazy val arbitraryHaveSetUpGGUserIDPage: Arbitrary[HaveSetUpGGUserIDPage.type] =
     Arbitrary(HaveSetUpGGUserIDPage)
 

@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package generators
+package forms
 
-import models._
-import org.scalacheck.{Arbitrary, Gen}
+import javax.inject.Inject
+import forms.mappings.Mappings
+import models.ServiceIvEvidence
+import play.api.data.Form
 
-trait ModelGenerators {
+class ServiceIvEvidenceFormProvider @Inject() extends Mappings {
 
-  implicit lazy val arbitrarySelectNINOLetterAddress: Arbitrary[SelectNINOLetterAddress] =
-    Arbitrary {
-      Gen.oneOf(SelectNINOLetterAddress.values.toSeq)
-    }
-
-  implicit lazy val arbitraryHaveSetUpGGUserID: Arbitrary[HaveSetUpGGUserID] =
-    Arbitrary {
-      Gen.oneOf(HaveSetUpGGUserID.values.toSeq)
-    }
-
-  implicit lazy val arbitraryServiceIvEvidence: Arbitrary[ServiceIvEvidence] =
-    Arbitrary {
-      Gen.oneOf(ServiceIvEvidence.values.toSeq)
-    }
+  def apply(): Form[ServiceIvEvidence] =
+    Form(
+      "value" -> enumerable[ServiceIvEvidence]("ServiceIvEvidence.error.required")
+    )
 }

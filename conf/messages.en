@@ -106,3 +106,35 @@ ninoLetterPostedConfirmation.title = Your National Insurance number will be sent
 ninoLetterPostedConfirmation.heading = Your National Insurance number will be sent by post
 ninoLetterPostedConfirmation.letterArrival = We’ll post the letter confirming your number. It will arrive within 15 days.
 ninoLetterPostedConfirmation.goBackToGovUK = Exit and go back to GOV.UK
+
+serviceIvEvidence.heading = Do you have 2 of the following nearby to confirm your identity?
+serviceIvEvidence.title = serviceIvEvidence
+serviceIvEvidence.yes = Yes
+serviceIvEvidence.no = No, I need another way to confirm my identity
+serviceIvEvidence.p1 = You need to prove who you are to get your National Insurance number online.
+serviceIvEvidence.p2 = One way to do this is to use details from any 2 of these documents or records.
+serviceIvEvidence.li1 = A valid UK passport
+serviceIvEvidence.li2 = A UK photocard driving licence (includes provisional licences)
+serviceIvEvidence.li3 = A payslip or P60 from 2022 to 2023
+serviceIvEvidence.sp1 = Many employers will give you a P60 to show the tax you've paid on your salary in the tax year
+serviceIvEvidence.li4 = A completed Self Assessment return for the last tax year
+serviceIvEvidence.li5 = A tax credit claim (includes Voice ID)
+serviceIvEvidence.li6 = Your credit records
+serviceIvEvidence.sp2 = For example, the year you took out a credit card or phone contract
+serviceIvEvidence.checkYourAnswersLabel = serviceIvEvidence
+serviceIvEvidence.error.required = Select yes if serviceIvEvidence
+serviceIvEvidence.change.hidden = serviceIvEvidence
+
+serviceIvId.title = serviceIvId
+serviceIvId.heading = Do you have a valid passport or a UK photocard driving licence?
+serviceIvId.p1 = This is another way to confirm your identity and see your National Insurance number online.
+serviceIvId.checkYourAnswersLabel = serviceIvId
+serviceIvId.error.required = Select yes if serviceIvId
+serviceIvId.change.hidden = ServiceIvId
+
+serviceIvApp.title = serviceIvApp
+serviceIvApp.heading = Can you download an app to your mobile device?
+serviceIvApp.p1 = You'll need to use an app and the camera on your mobile device to match your face to your ID document.
+serviceIvApp.checkYourAnswersLabel = serviceIvApp
+serviceIvApp.error.required = Select yes if serviceIvApp
+serviceIvApp.change.hidden = ServiceIvApp

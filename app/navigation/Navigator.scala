@@ -20,8 +20,11 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc.Call
 import controllers.routes
 import models.HaveSetUpGGUserID.{No, Yes}
+import models.ServiceIvEvidence
 import pages._
 import models._
+import controllers._
+
 @Singleton
 class Navigator @Inject()() {
 
@@ -29,7 +32,10 @@ class Navigator @Inject()() {
     case HaveSetUpGGUserIDPage        => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
     case PostNINOLetterPage           => userAnswers => navigatePostNINOLetterController(userAnswers)
     case SelectNINOLetterAddressPage  => userAnswers => navigateSelectNINOLetterAddressController(userAnswers)
-    case _                            => _           => routes.IndexController.onPageLoad
+    case ServiceIvEvidencePage    => userAnswers => navigateServiceIvEvidence(userAnswers)
+    case ServiceIvIdPage          => userAnswers => navigateServiceIvId(userAnswers)
+    case ServiceIvAppPage         => userAnswers => navigateServiceIvApp(userAnswers)
+    case _                        => _ => routes.IndexController.onPageLoad
   }
 
   private val checkRouteMap: Page => UserAnswers => Call = {
@@ -62,5 +68,26 @@ class Navigator @Inject()() {
       case Some(SelectNINOLetterAddress.Postcode) => routes.NINOLetterPostedConfirmationController.onPageLoad()
       case Some(SelectNINOLetterAddress.NotThisAddress) => routes.IndexController.onPageLoad
       case _ => routes.JourneyRecoveryController.onPageLoad()
+    }
+
+  private def navigateServiceIvEvidence(userAnswers: UserAnswers): Call =
+    userAnswers.get(ServiceIvEvidencePage) match {
+      case Some(ServiceIvEvidence.No) => controllers.routes.ServiceIvIdController.onPageLoad(NormalMode)
+      case Some(ServiceIvEvidence.Yes) => controllers.routes.ServiceIvEvidenceController.onPageLoad(NormalMode)
+      case _ => controllers.routes.ServiceIvEvidenceController.onPageLoad(NormalMode)
+    }
+
+  private def navigateServiceIvId(userAnswers: UserAnswers): Call =
+    userAnswers.get(ServiceIvIdPage) match {
+      case Some(false) => controllers.routes.ServiceIvIdController.onPageLoad(NormalMode)
+      case Some(true) => controllers.routes.ServiceIvAppController.onPageLoad(NormalMode)
+      case _ => controllers.routes.ServiceIvIdController.onPageLoad(NormalMode)
+    }
+
+  private def navigateServiceIvApp(userAnswers: UserAnswers): Call =
+    userAnswers.get(ServiceIvIdPage) match {
+      case Some(false) => controllers.routes.ServiceIvAppController.onPageLoad(NormalMode)
+      case Some(true) => controllers.routes.ServiceIvAppController.onPageLoad(NormalMode)
+      case _ => controllers.routes.ServiceIvAppController.onPageLoad(NormalMode)
     }
 }

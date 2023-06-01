@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-package generators
+package pages
 
-import models._
-import org.scalacheck.{Arbitrary, Gen}
+import pages.behaviours.PageBehaviours
 
-trait ModelGenerators {
+class ServiceIvAppPageSpec extends PageBehaviours {
 
-  implicit lazy val arbitrarySelectNINOLetterAddress: Arbitrary[SelectNINOLetterAddress] =
-    Arbitrary {
-      Gen.oneOf(SelectNINOLetterAddress.values.toSeq)
-    }
+  "ServiceIvAppPage" - {
 
-  implicit lazy val arbitraryHaveSetUpGGUserID: Arbitrary[HaveSetUpGGUserID] =
-    Arbitrary {
-      Gen.oneOf(HaveSetUpGGUserID.values.toSeq)
-    }
+    beRetrievable[Boolean](ServiceIvAppPage)
 
-  implicit lazy val arbitraryServiceIvEvidence: Arbitrary[ServiceIvEvidence] =
-    Arbitrary {
-      Gen.oneOf(ServiceIvEvidence.values.toSeq)
-    }
+    beSettable[Boolean](ServiceIvAppPage)
+
+    beRemovable[Boolean](ServiceIvAppPage)
+  }
 }

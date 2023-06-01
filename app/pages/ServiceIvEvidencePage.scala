@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
-package generators
+package pages
 
-import models._
-import org.scalacheck.{Arbitrary, Gen}
+import models.ServiceIvEvidence
+import play.api.libs.json.JsPath
 
-trait ModelGenerators {
+case object ServiceIvEvidencePage extends QuestionPage[ServiceIvEvidence] {
 
-  implicit lazy val arbitrarySelectNINOLetterAddress: Arbitrary[SelectNINOLetterAddress] =
-    Arbitrary {
-      Gen.oneOf(SelectNINOLetterAddress.values.toSeq)
-    }
+  override def path: JsPath = JsPath \ toString
 
-  implicit lazy val arbitraryHaveSetUpGGUserID: Arbitrary[HaveSetUpGGUserID] =
-    Arbitrary {
-      Gen.oneOf(HaveSetUpGGUserID.values.toSeq)
-    }
-
-  implicit lazy val arbitraryServiceIvEvidence: Arbitrary[ServiceIvEvidence] =
-    Arbitrary {
-      Gen.oneOf(ServiceIvEvidence.values.toSeq)
-    }
+  override def toString: String = "serviceIvEvidence"
 }

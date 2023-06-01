@@ -20,12 +20,6 @@ GET         /account/signed-out                             controllers.auth.Sig
 
 GET         /unauthorised                                   controllers.UnauthorisedController.onPageLoad
 
-GET         /postNINOLetter                                 controllers.PostNINOLetterController.onPageLoad(mode: Mode = NormalMode)
-POST        /postNINOLetter                                 controllers.PostNINOLetterController.onSubmit(mode: Mode = NormalMode)
-GET         /changePostNINOLetter                           controllers.PostNINOLetterController.onPageLoad(mode: Mode = CheckMode)
-POST        /changePostNINOLetter                           controllers.PostNINOLetterController.onSubmit(mode: Mode = CheckMode)
-
-
 GET         /setUpGGUserIDStart                             controllers.SetUpGGUserIDStartController.onPageLoad()
 
 GET         /haveSetUpGGUserID                              controllers.HaveSetUpGGUserIDController.onPageLoad(mode: Mode = NormalMode)
@@ -33,9 +27,29 @@ POST        /haveSetUpGGUserID                              controllers.HaveSetU
 GET         /changeHaveSetUpGGUserID                        controllers.HaveSetUpGGUserIDController.onPageLoad(mode: Mode = CheckMode)
 POST        /changeHaveSetUpGGUserID                        controllers.HaveSetUpGGUserIDController.onSubmit(mode: Mode = CheckMode)
 
+GET         /postNINOLetter                                 controllers.PostNINOLetterController.onPageLoad(mode: Mode = NormalMode)
+POST        /postNINOLetter                                 controllers.PostNINOLetterController.onSubmit(mode: Mode = NormalMode)
+GET         /changePostNINOLetter                           controllers.PostNINOLetterController.onPageLoad(mode: Mode = CheckMode)
+POST        /changePostNINOLetter                           controllers.PostNINOLetterController.onSubmit(mode: Mode = CheckMode)
+
 GET         /selectNINOLetterAddress                        controllers.SelectNINOLetterAddressController.onPageLoad(mode: Mode = NormalMode)
 POST        /selectNINOLetterAddress                        controllers.SelectNINOLetterAddressController.onSubmit(mode: Mode = NormalMode)
 GET         /changeSelectNINOLetterAddress                  controllers.SelectNINOLetterAddressController.onPageLoad(mode: Mode = CheckMode)
 POST        /changeSelectNINOLetterAddress                  controllers.SelectNINOLetterAddressController.onSubmit(mode: Mode = CheckMode)
 
 GET         /ninoLetterPostedConfirmation                   controllers.NINOLetterPostedConfirmationController.onPageLoad()
+
+GET         /serviceIvEvidence                              controllers.ServiceIvEvidenceController.onPageLoad(mode: Mode = NormalMode)
+POST        /serviceIvEvidence                              controllers.ServiceIvEvidenceController.onSubmit(mode: Mode = NormalMode)
+GET         /changeserviceIvEvidence                        controllers.ServiceIvEvidenceController.onPageLoad(mode: Mode = CheckMode)
+POST        /changeserviceIvEvidence                        controllers.ServiceIvEvidenceController.onSubmit(mode: Mode = CheckMode)
+
+GET         /serviceIvId                                    controllers.ServiceIvIdController.onPageLoad(mode: Mode = NormalMode)
+POST        /serviceIvId                                    controllers.ServiceIvIdController.onSubmit(mode: Mode = NormalMode)
+GET         /changeServiceIvId                              controllers.ServiceIvIdController.onPageLoad(mode: Mode = CheckMode)
+POST        /changeServiceIvId                              controllers.ServiceIvIdController.onSubmit(mode: Mode = CheckMode)
+
+GET         /serviceIvApp                                   controllers.ServiceIvAppController.onPageLoad(mode: Mode = NormalMode)
+POST        /serviceIvApp                                   controllers.ServiceIvAppController.onSubmit(mode: Mode = NormalMode)
+GET         /changeServiceIvApp                             controllers.ServiceIvAppController.onPageLoad(mode: Mode = CheckMode)
+POST        /changeServiceIvApp                             controllers.ServiceIvAppController.onSubmit(mode: Mode = CheckMode)
