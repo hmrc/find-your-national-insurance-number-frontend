@@ -16,17 +16,12 @@
 
 package pages
 
-import models.SelectNINOLetterAddress
-import pages.behaviours.PageBehaviours
+import models.SelectAlternativeService
+import play.api.libs.json.JsPath
 
-class SelectNINOLetterAddressPageSpec extends PageBehaviours {
+case object SelectAlternativeServicePage extends QuestionPage[SelectAlternativeService] {
 
-  "SelectNINOLetterAddressPage" - {
+  override def path: JsPath = JsPath \ toString
 
-    beRetrievable[SelectNINOLetterAddress](SelectNINOLetterAddressPage)
-
-    beSettable[SelectNINOLetterAddress](SelectNINOLetterAddressPage)
-
-    beRemovable[SelectNINOLetterAddress](SelectNINOLetterAddressPage)
-  }
+  override def toString: String = "selectAlternativeService"
 }

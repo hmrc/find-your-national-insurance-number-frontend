@@ -16,17 +16,17 @@
 
 package pages
 
-import models.SelectNINOLetterAddress
+import models.SelectAlternativeService
 import pages.behaviours.PageBehaviours
 
-class SelectNINOLetterAddressPageSpec extends PageBehaviours {
+class SelectAlternativeServicePageSpec extends PageBehaviours {
 
-  "SelectNINOLetterAddressPage" - {
+  "SelectAlternativeServicePage" - {
 
-    beRetrievable[SelectNINOLetterAddress](SelectNINOLetterAddressPage)
+    beRetrievable[SelectAlternativeService](SelectAlternativeServicePage)
 
-    beSettable[SelectNINOLetterAddress](SelectNINOLetterAddressPage)
+    beSettable[SelectAlternativeService](SelectAlternativeServicePage)
 
-    beRemovable[SelectNINOLetterAddress](SelectNINOLetterAddressPage)
+    beRemovable[SelectAlternativeService](SelectAlternativeServicePage)
   }
 }

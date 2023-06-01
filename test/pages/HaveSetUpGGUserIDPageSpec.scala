@@ -19,7 +19,7 @@ package pages
 import models.HaveSetUpGGUserID
 import pages.behaviours.PageBehaviours
 
-class HaveSetUpGGUserIDSpec extends PageBehaviours {
+class HaveSetUpGGUserIDPageSpec extends PageBehaviours {
 
   "HaveSetUpGGUserIDPage" - {
 

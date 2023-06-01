@@ -21,6 +21,11 @@ import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
 
+  implicit lazy val arbitrarySelectAlternativeService: Arbitrary[SelectAlternativeService] =
+    Arbitrary {
+      Gen.oneOf(SelectAlternativeService.values.toSeq)
+    }
+
   implicit lazy val arbitrarySelectNINOLetterAddress: Arbitrary[SelectNINOLetterAddress] =
     Arbitrary {
       Gen.oneOf(SelectNINOLetterAddress.values.toSeq)

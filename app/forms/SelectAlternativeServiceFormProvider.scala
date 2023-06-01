@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package pages
+package forms
 
-import models.SelectNINOLetterAddress
-import pages.behaviours.PageBehaviours
+import javax.inject.Inject
 
-class SelectNINOLetterAddressPageSpec extends PageBehaviours {
+import forms.mappings.Mappings
+import play.api.data.Form
+import models.SelectAlternativeService
 
-  "SelectNINOLetterAddressPage" - {
+class SelectAlternativeServiceFormProvider @Inject() extends Mappings {
 
-    beRetrievable[SelectNINOLetterAddress](SelectNINOLetterAddressPage)
-
-    beSettable[SelectNINOLetterAddress](SelectNINOLetterAddressPage)
-
-    beRemovable[SelectNINOLetterAddress](SelectNINOLetterAddressPage)
-  }
+  def apply(): Form[SelectAlternativeService] =
+    Form(
+      "value" -> enumerable[SelectAlternativeService]("selectAlternativeService.error.required")
+    )
 }
