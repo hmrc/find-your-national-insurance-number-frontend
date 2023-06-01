@@ -27,17 +27,17 @@ POST        /haveSetUpGGUserID                              controllers.HaveSetU
 GET         /changeHaveSetUpGGUserID                        controllers.HaveSetUpGGUserIDController.onPageLoad(mode: Mode = CheckMode)
 POST        /changeHaveSetUpGGUserID                        controllers.HaveSetUpGGUserIDController.onSubmit(mode: Mode = CheckMode)
 
-GET         /postNINOLetter                                 controllers.PostNINOLetterController.onPageLoad(mode: Mode = NormalMode)
-POST        /postNINOLetter                                 controllers.PostNINOLetterController.onSubmit(mode: Mode = NormalMode)
-GET         /changePostNINOLetter                           controllers.PostNINOLetterController.onPageLoad(mode: Mode = CheckMode)
-POST        /changePostNINOLetter                           controllers.PostNINOLetterController.onSubmit(mode: Mode = CheckMode)
+GET         /postNationalInsuranceLetter                    controllers.PostNINOLetterController.onPageLoad(mode: Mode = NormalMode)
+POST        /postNationalInsuranceLetter                    controllers.PostNINOLetterController.onSubmit(mode: Mode = NormalMode)
+GET         /changePostNationalInsuranceLetter              controllers.PostNINOLetterController.onPageLoad(mode: Mode = CheckMode)
+POST        /changePostNationalInsuranceLetter              controllers.PostNINOLetterController.onSubmit(mode: Mode = CheckMode)
 
-GET         /selectNINOLetterAddress                        controllers.SelectNINOLetterAddressController.onPageLoad(mode: Mode = NormalMode)
-POST        /selectNINOLetterAddress                        controllers.SelectNINOLetterAddressController.onSubmit(mode: Mode = NormalMode)
-GET         /changeSelectNINOLetterAddress                  controllers.SelectNINOLetterAddressController.onPageLoad(mode: Mode = CheckMode)
-POST        /changeSelectNINOLetterAddress                  controllers.SelectNINOLetterAddressController.onSubmit(mode: Mode = CheckMode)
+GET         /selectNationalInsuranceLetterAddress           controllers.SelectNINOLetterAddressController.onPageLoad(mode: Mode = NormalMode)
+POST        /selectNationalInsuranceLetterAddress           controllers.SelectNINOLetterAddressController.onSubmit(mode: Mode = NormalMode)
+GET         /changeSelectNationalInsuranceLetterAddress     controllers.SelectNINOLetterAddressController.onPageLoad(mode: Mode = CheckMode)
+POST        /changeSelectNationalInsuranceLetterAddress     controllers.SelectNINOLetterAddressController.onSubmit(mode: Mode = CheckMode)
 
-GET         /ninoLetterPostedConfirmation                   controllers.NINOLetterPostedConfirmationController.onPageLoad()
+GET         /NationalInsuranceLetterPosted                  controllers.NINOLetterPostedConfirmationController.onPageLoad()
 
 GET         /serviceIvEvidence                              controllers.ServiceIvEvidenceController.onPageLoad(mode: Mode = NormalMode)
 POST        /serviceIvEvidence                              controllers.ServiceIvEvidenceController.onSubmit(mode: Mode = NormalMode)
@@ -53,3 +53,10 @@ GET         /serviceIvApp                                   controllers.ServiceI
 POST        /serviceIvApp                                   controllers.ServiceIvAppController.onSubmit(mode: Mode = NormalMode)
 GET         /changeServiceIvApp                             controllers.ServiceIvAppController.onPageLoad(mode: Mode = CheckMode)
 POST        /changeServiceIvApp                             controllers.ServiceIvAppController.onSubmit(mode: Mode = CheckMode)
+
+GET         /selectAlternativeService                       controllers.SelectAlternativeServiceController.onPageLoad(mode: Mode = NormalMode)
+POST        /selectAlternativeService                       controllers.SelectAlternativeServiceController.onSubmit(mode: Mode = NormalMode)
+GET         /changeSelectAlternativeService                 controllers.SelectAlternativeServiceController.onPageLoad(mode: Mode = CheckMode)
+POST        /changeSelectAlternativeService                 controllers.SelectAlternativeServiceController.onSubmit(mode: Mode = CheckMode)
+
+GET         /phoneHMRCDetails                               controllers.PhoneHMRCDetailsController.onPageLoad()

@@ -19,7 +19,7 @@ package pages
 import models.SelectNINOLetterAddress
 import pages.behaviours.PageBehaviours
 
-class SelectNINOLetterAddressSpec extends PageBehaviours {
+class SelectNINOLetterAddressPageSpec extends PageBehaviours {
 
   "SelectNINOLetterAddressPage" - {
 
