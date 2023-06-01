@@ -27,7 +27,7 @@ class ServiceIvEvidenceFormProviderSpec extends OptionFieldBehaviours {
   ".value" - {
 
     val fieldName = "value"
-    val requiredKey = "ServiceIvEvidence.error.required"
+    val requiredKey = "serviceIvEvidence.error.required"
 
     behave like optionsField[ServiceIvEvidence](
       form,
