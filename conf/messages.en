@@ -108,7 +108,7 @@ ninoLetterPostedConfirmation.letterArrival = We’ll post the letter confirming 
 ninoLetterPostedConfirmation.goBackToGovUK = Exit and go back to GOV.UK
 
 serviceIvEvidence.heading = Do you have 2 of the following nearby to confirm your identity?
-serviceIvEvidence.title = serviceIvEvidence
+serviceIvEvidence.title = Do you have 2 of the following nearby to confirm your identity?
 serviceIvEvidence.yes = Yes
 serviceIvEvidence.no = No, I need another way to confirm my identity
 serviceIvEvidence.p1 = You need to prove who you are to get your National Insurance number online.
@@ -121,20 +121,20 @@ serviceIvEvidence.li4 = A completed Self Assessment return for the last tax year
 serviceIvEvidence.li5 = A tax credit claim (includes Voice ID)
 serviceIvEvidence.li6 = Your credit records
 serviceIvEvidence.sp2 = For example, the year you took out a credit card or phone contract
-serviceIvEvidence.checkYourAnswersLabel = serviceIvEvidence
-serviceIvEvidence.error.required = Select yes if serviceIvEvidence
+serviceIvEvidence.checkYourAnswersLabel = Do you have 2 of the following nearby to confirm your identity?
+serviceIvEvidence.error.required = Select yes or no if you have 2 of the following nearby to confirm your identity
 serviceIvEvidence.change.hidden = serviceIvEvidence
 
-serviceIvId.title = serviceIvId
+serviceIvId.title = Do you have a valid passport or a UK photocard driving licence?
 serviceIvId.heading = Do you have a valid passport or a UK photocard driving licence?
 serviceIvId.p1 = This is another way to confirm your identity and see your National Insurance number online.
-serviceIvId.checkYourAnswersLabel = serviceIvId
-serviceIvId.error.required = Select yes if serviceIvId
+serviceIvId.checkYourAnswersLabel = Do you have a valid passport or a UK photocard driving licence?
+serviceIvId.error.required = Select yes or no if you have a valid passport or a UK photocard driving licence
 serviceIvId.change.hidden = ServiceIvId
 
-serviceIvApp.title = serviceIvApp
+serviceIvApp.title = Can you download an app to your mobile device?
 serviceIvApp.heading = Can you download an app to your mobile device?
 serviceIvApp.p1 = You'll need to use an app and the camera on your mobile device to match your face to your ID document.
-serviceIvApp.checkYourAnswersLabel = serviceIvApp
-serviceIvApp.error.required = Select yes if serviceIvApp
+serviceIvApp.checkYourAnswersLabel = Can you download an app to your mobile device?
+serviceIvApp.error.required = Select yes or no if you can download an app to your mobile device
 serviceIvApp.change.hidden = ServiceIvApp

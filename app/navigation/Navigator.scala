@@ -23,7 +23,6 @@ import models.HaveSetUpGGUserID.{No, Yes}
 import models.ServiceIvEvidence
 import pages._
 import models._
-import controllers._
 
 @Singleton
 class Navigator @Inject()() {
