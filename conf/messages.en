@@ -138,3 +138,38 @@ serviceIvApp.p1 = You'll need to use an app and the camera on your mobile device
 serviceIvApp.checkYourAnswersLabel = Can you download an app to your mobile device?
 serviceIvApp.error.required = Select yes or no if you can download an app to your mobile device
 serviceIvApp.change.hidden = ServiceIvApp
+
+selectAlternativeService.title = What would you like to do?
+selectAlternativeService.heading = What would you like to do?
+selectAlternativeService.printForm = Print and post a form
+selectAlternativeService.printForm.hint = Once we have the completed form, we can send you a letter confirming your National Insurance number.
+selectAlternativeService.phoneHMRC = Phone HMRC
+selectAlternativeService.phoneHMRC.hint = You'll need to answer some questions, then we'll post you a letter with your number on it. We will not tell you your National Insurance number over the phone.
+selectAlternativeService.checkYourAnswersLabel = What would you like to do?
+selectAlternativeService.error.required = Select what would you like to do
+selectAlternativeService.change.hidden = SelectAlternativeService
+selectAlternativeService.tryAgain = Try again to confirm your identity online
+
+selectAlternativeService.options = These are your options if:
+selectAlternativeService.options.cannotConfirmIdentity = you are not able to confirm your identity online
+selectAlternativeService.options.postToAnotherAddress = you need us to post your National Insurance number to a different address
+selectAlternativeService.options.nameChange = you name has changed, and we have your old one
+
+phoneHMRCDetails.title = Phone HMRC for a letter with your National Insurance number on it
+phoneHMRCDetails.heading = Phone HMRC for a letter with your National Insurance number on it
+phoneHMRCDetails.options = When you call, you need to know that:
+phoneHMRCDetails.options.notTellNINOViaPhone = we will not tell you your National Insurance number over the phone
+phoneHMRCDetails.options.answerQuestions = you will need to answer some questions about yourself
+phoneHMRCDetails.options.arrivalTime = the letter can take up to 15 working days to arrive
+
+phoneHMRCDetails.telephone.label = Telephone:
+phoneHMRCDetails.telephone.number = 0300 200 3500
+phoneHMRCDetails.textphone.label = Textphone:
+phoneHMRCDetails.textphone.number = 0300 200 3519
+phoneHMRCDetails.outsideUK.label = Outside UK:
+phoneHMRCDetails.outsideUK.number = +44 191 203 7010
+
+phoneHMRCDetails.openingTimes.label = Opening times:
+phoneHMRCDetails.openingTimes.mondayToFriday = Monday to Friday: 8am to 6pm
+phoneHMRCDetails.openingTimes.weekendAndBankHoliday = Closed on Saturdays, Sundays and bank holidays.
+phoneHMRCDetails.goBackToGovUK = Exit and go back to GOV.UK

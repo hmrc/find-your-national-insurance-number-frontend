@@ -29,12 +29,13 @@ class Navigator @Inject()() {
 
   private val normalRoutes: Page => UserAnswers => Call = {
     case HaveSetUpGGUserIDPage        => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
-    case PostNINOLetterPage           => userAnswers => navigatePostNINOLetterController(userAnswers)
-    case SelectNINOLetterAddressPage  => userAnswers => navigateSelectNINOLetterAddressController(userAnswers)
-    case ServiceIvEvidencePage    => userAnswers => navigateServiceIvEvidence(userAnswers)
-    case ServiceIvIdPage          => userAnswers => navigateServiceIvId(userAnswers)
-    case ServiceIvAppPage         => userAnswers => navigateServiceIvApp(userAnswers)
-    case _                        => _ => routes.IndexController.onPageLoad
+    case PostNINOLetterPage           => userAnswers => navigatePostNINOLetter(userAnswers)
+    case SelectNINOLetterAddressPage  => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
+    case ServiceIvEvidencePage        => userAnswers => navigateServiceIvEvidence(userAnswers)
+    case ServiceIvIdPage              => userAnswers => navigateServiceIvId(userAnswers)
+    case ServiceIvAppPage             => userAnswers => navigateServiceIvApp(userAnswers)
+    case SelectAlternativeServicePage => userAnswers => navigateSelectAlternativeService(userAnswers)
+    case _                            => _           => routes.IndexController.onPageLoad
   }
 
   private val checkRouteMap: Page => UserAnswers => Call = {
@@ -50,43 +51,51 @@ class Navigator @Inject()() {
 
   private def navigateHaveSetUpGGUserID(userAnswers: UserAnswers): Call =
     userAnswers.get(HaveSetUpGGUserIDPage) match {
-      case Some(No) => routes.SetUpGGUserIDStartController.onPageLoad()
-      case Some(Yes) => routes.SetUpGGUserIDStartController.onPageLoad()
-      case _ => routes.SetUpGGUserIDStartController.onPageLoad()
+      case Some(No)   => routes.SetUpGGUserIDStartController.onPageLoad()
+      case Some(Yes)  => routes.SetUpGGUserIDStartController.onPageLoad()
+      case _          => routes.SetUpGGUserIDStartController.onPageLoad()
     }
 
-  private def navigatePostNINOLetterController(userAnswers: UserAnswers): Call =
+  private def navigatePostNINOLetter(userAnswers: UserAnswers): Call =
     userAnswers.get(PostNINOLetterPage) match {
-      case Some(true) => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
-      case Some(false) => routes.IndexController.onPageLoad
-      case _ => routes.JourneyRecoveryController.onPageLoad()
+      case Some(true)   => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
+      case Some(false)  => routes.SelectAlternativeServiceController.onPageLoad(mode = NormalMode)
+      case _            => routes.JourneyRecoveryController.onPageLoad()
     }
 
-  private def navigateSelectNINOLetterAddressController(userAnswers: UserAnswers): Call =
+  private def navigateSelectNINOLetterAddress(userAnswers: UserAnswers): Call =
     userAnswers.get(SelectNINOLetterAddressPage) match {
-      case Some(SelectNINOLetterAddress.Postcode) => routes.NINOLetterPostedConfirmationController.onPageLoad()
-      case Some(SelectNINOLetterAddress.NotThisAddress) => routes.IndexController.onPageLoad
-      case _ => routes.JourneyRecoveryController.onPageLoad()
+      case Some(SelectNINOLetterAddress.Postcode)       => routes.NINOLetterPostedConfirmationController.onPageLoad()
+      case Some(SelectNINOLetterAddress.NotThisAddress) => routes.SelectAlternativeServiceController.onPageLoad(mode = NormalMode)
+      case _                                            => routes.JourneyRecoveryController.onPageLoad()
     }
 
   private def navigateServiceIvEvidence(userAnswers: UserAnswers): Call =
     userAnswers.get(ServiceIvEvidencePage) match {
-      case Some(ServiceIvEvidence.No) => controllers.routes.ServiceIvIdController.onPageLoad(NormalMode)
-      case Some(ServiceIvEvidence.Yes) => controllers.routes.ServiceIvEvidenceController.onPageLoad(NormalMode)
-      case _ => controllers.routes.ServiceIvEvidenceController.onPageLoad(NormalMode)
+      case Some(ServiceIvEvidence.No)   => routes.ServiceIvIdController.onPageLoad(NormalMode)
+      case Some(ServiceIvEvidence.Yes)  => routes.ServiceIvEvidenceController.onPageLoad(NormalMode)
+      case _                            => routes.JourneyRecoveryController.onPageLoad()
     }
 
   private def navigateServiceIvId(userAnswers: UserAnswers): Call =
     userAnswers.get(ServiceIvIdPage) match {
-      case Some(false) => controllers.routes.ServiceIvIdController.onPageLoad(NormalMode)
-      case Some(true) => controllers.routes.ServiceIvAppController.onPageLoad(NormalMode)
-      case _ => controllers.routes.ServiceIvIdController.onPageLoad(NormalMode)
+      case Some(false)  => routes.PostNINOLetterController.onPageLoad(NormalMode)
+      case Some(true)   => routes.ServiceIvAppController.onPageLoad(NormalMode)
+      case _            => routes.JourneyRecoveryController.onPageLoad()
     }
 
   private def navigateServiceIvApp(userAnswers: UserAnswers): Call =
-    userAnswers.get(ServiceIvIdPage) match {
-      case Some(false) => controllers.routes.ServiceIvAppController.onPageLoad(NormalMode)
-      case Some(true) => controllers.routes.ServiceIvAppController.onPageLoad(NormalMode)
-      case _ => controllers.routes.ServiceIvAppController.onPageLoad(NormalMode)
+    userAnswers.get(ServiceIvAppPage) match {
+      case Some(false)  => routes.PostNINOLetterController.onPageLoad(NormalMode)
+      case Some(true)   => routes.ServiceIvAppController.onPageLoad(NormalMode)
+      case _            => routes.JourneyRecoveryController.onPageLoad()
     }
+
+  private def navigateSelectAlternativeService(userAnswers: UserAnswers): Call = {
+    userAnswers.get(SelectAlternativeServicePage) match {
+      case Some(SelectAlternativeService.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
+      case Some(SelectAlternativeService.PrintForm) => routes.SelectAlternativeServiceController.onPageLoad(NormalMode)
+      case _                                        => routes.JourneyRecoveryController.onPageLoad()
+    }
+  }
 }

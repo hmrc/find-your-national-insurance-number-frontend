@@ -21,6 +21,9 @@ import pages._
 
 trait PageGenerators {
 
+  implicit lazy val arbitrarySelectAlternativeServicePage: Arbitrary[SelectAlternativeServicePage.type] =
+    Arbitrary(SelectAlternativeServicePage)
+
   implicit lazy val arbitraryServiceIvAppPage: Arbitrary[ServiceIvAppPage.type] =
     Arbitrary(ServiceIvAppPage)
 
