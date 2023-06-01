@@ -17,25 +17,24 @@
 package forms
 
 import forms.behaviours.OptionFieldBehaviours
-import models.ServiceIvEvidence
+import models.SelectNINOLetterAddress
 import play.api.data.FormError
 
-class ServiceIvEvidenceFormProviderSpec extends OptionFieldBehaviours {
+class SelectNINOLetterAddressFormProviderSpec extends OptionFieldBehaviours {
 
-  val form = new ServiceIvEvidenceFormProvider()()
+  val form = new SelectNINOLetterAddressFormProvider()()
 
   ".value" - {
 
     val fieldName = "value"
-    val requiredKey = "serviceIvEvidence.error.required"
+    val requiredKey = "selectNINOLetterAddress.error.required"
 
-    behave like optionsField[ServiceIvEvidence](
+    behave like optionsField[SelectNINOLetterAddress](
       form,
       fieldName,
-      validValues = ServiceIvEvidence.values,
+      validValues  = SelectNINOLetterAddress.values,
       invalidError = FormError(fieldName, "error.invalid")
     )
-
 
     behave like mandatoryField(
       form,

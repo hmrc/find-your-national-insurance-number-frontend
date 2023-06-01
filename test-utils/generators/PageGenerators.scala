@@ -32,4 +32,8 @@ trait PageGenerators {
 
   implicit lazy val arbitraryHaveSetUpGGUserIDPage: Arbitrary[HaveSetUpGGUserIDPage.type] =
     Arbitrary(HaveSetUpGGUserIDPage)
+
+  implicit lazy val arbitrarySelectNINOLetterAddressPage: Arbitrary[SelectNINOLetterAddressPage.type] =
+    Arbitrary(SelectNINOLetterAddressPage)
+
 }

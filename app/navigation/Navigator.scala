@@ -23,13 +23,14 @@ import models.HaveSetUpGGUserID.{No, Yes}
 import models.ServiceIvEvidence
 import pages._
 import models._
-import controllers._
 
 @Singleton
 class Navigator @Inject()() {
 
   private val normalRoutes: Page => UserAnswers => Call = {
-    case HaveSetUpGGUserIDPage    => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
+    case HaveSetUpGGUserIDPage        => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
+    case PostNINOLetterPage           => userAnswers => navigatePostNINOLetterController(userAnswers)
+    case SelectNINOLetterAddressPage  => userAnswers => navigateSelectNINOLetterAddressController(userAnswers)
     case ServiceIvEvidencePage    => userAnswers => navigateServiceIvEvidence(userAnswers)
     case ServiceIvIdPage          => userAnswers => navigateServiceIvId(userAnswers)
     case ServiceIvAppPage         => userAnswers => navigateServiceIvApp(userAnswers)
@@ -49,9 +50,23 @@ class Navigator @Inject()() {
 
   private def navigateHaveSetUpGGUserID(userAnswers: UserAnswers): Call =
     userAnswers.get(HaveSetUpGGUserIDPage) match {
-      case Some(No) => controllers.routes.SetUpGGUserIDStartController.onPageLoad()
-      case Some(Yes) => controllers.routes.SetUpGGUserIDStartController.onPageLoad()
-      case _ => controllers.routes.SetUpGGUserIDStartController.onPageLoad()
+      case Some(No) => routes.SetUpGGUserIDStartController.onPageLoad()
+      case Some(Yes) => routes.SetUpGGUserIDStartController.onPageLoad()
+      case _ => routes.SetUpGGUserIDStartController.onPageLoad()
+    }
+
+  private def navigatePostNINOLetterController(userAnswers: UserAnswers): Call =
+    userAnswers.get(PostNINOLetterPage) match {
+      case Some(true) => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
+      case Some(false) => routes.IndexController.onPageLoad
+      case _ => routes.JourneyRecoveryController.onPageLoad()
+    }
+
+  private def navigateSelectNINOLetterAddressController(userAnswers: UserAnswers): Call =
+    userAnswers.get(SelectNINOLetterAddressPage) match {
+      case Some(SelectNINOLetterAddress.Postcode) => routes.NINOLetterPostedConfirmationController.onPageLoad()
+      case Some(SelectNINOLetterAddress.NotThisAddress) => routes.IndexController.onPageLoad
+      case _ => routes.JourneyRecoveryController.onPageLoad()
     }
 
   private def navigateServiceIvEvidence(userAnswers: UserAnswers): Call =

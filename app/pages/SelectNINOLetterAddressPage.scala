@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-package generators
+package pages
 
-import models._
-import org.scalacheck.{Arbitrary, Gen}
+import models.{SelectNINOLetterAddress, UserAnswers}
+import play.api.libs.json.JsPath
 
-trait ModelGenerators {
+import scala.util.Try
 
-  implicit lazy val arbitrarySelectNINOLetterAddress: Arbitrary[SelectNINOLetterAddress] =
-    Arbitrary {
-      Gen.oneOf(SelectNINOLetterAddress.values.toSeq)
-    }
+case object SelectNINOLetterAddressPage extends QuestionPage[SelectNINOLetterAddress] {
 
-  implicit lazy val arbitraryHaveSetUpGGUserID: Arbitrary[HaveSetUpGGUserID] =
-    Arbitrary {
-      Gen.oneOf(HaveSetUpGGUserID.values.toSeq)
-    }
+  override def path: JsPath = JsPath \ toString
 
-  implicit lazy val arbitraryServiceIvEvidence: Arbitrary[ServiceIvEvidence] =
-    Arbitrary {
-      Gen.oneOf(ServiceIvEvidence.values.toSeq)
-    }
+  override def toString: String = "selectNINOLetterAddress"
+
+  //not yet cleaning current page data once they reach confirmation page
+  override def cleanup(value: Option[SelectNINOLetterAddress], userAnswers: UserAnswers): Try[UserAnswers] =
+    userAnswers.remove(PostNINOLetterPage)
+      .flatMap(_.remove(HaveSetUpGGUserIDPage))
 }

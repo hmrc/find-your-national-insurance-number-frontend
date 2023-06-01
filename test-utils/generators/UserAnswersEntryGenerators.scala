@@ -23,6 +23,22 @@ import pages._
 import play.api.libs.json.{JsValue, Json}
 
 trait UserAnswersEntryGenerators extends PageGenerators with ModelGenerators {
+  
+  implicit lazy val arbitraryHaveSetUpGGUserIDUserAnswersEntry: Arbitrary[(HaveSetUpGGUserIDPage.type, JsValue)] =
+    Arbitrary {
+      for {
+        page  <- arbitrary[HaveSetUpGGUserIDPage.type]
+        value <- arbitrary[HaveSetUpGGUserID].map(Json.toJson(_))
+      } yield (page, value)
+    }
+
+  implicit lazy val arbitrarySelectNINOLetterAddressUserAnswersEntry: Arbitrary[(SelectNINOLetterAddressPage.type, JsValue)] =
+  Arbitrary {
+      for {
+        page  <- Arbitrary.arbitrary[SelectNINOLetterAddressPage.type]
+        value <- Arbitrary.arbitrary[SelectNINOLetterAddress].map(Json.toJson(_))
+      } yield (page, value)
+    }
 
   implicit lazy val arbitraryServiceIvAppUserAnswersEntry: Arbitrary[(ServiceIvAppPage.type, JsValue)] =
     Arbitrary {
@@ -45,14 +61,6 @@ trait UserAnswersEntryGenerators extends PageGenerators with ModelGenerators {
       for {
         page  <- arbitrary[ServiceIvEvidencePage.type]
         value <- arbitrary[Boolean].map(Json.toJson(_))
-      } yield (page, value)
-    }
-
-  implicit lazy val arbitraryHaveSetUpGGUserIDUserAnswersEntry: Arbitrary[(HaveSetUpGGUserIDPage.type, JsValue)] =
-    Arbitrary {
-      for {
-        page  <- arbitrary[HaveSetUpGGUserIDPage.type]
-        value <- arbitrary[HaveSetUpGGUserID].map(Json.toJson(_))
       } yield (page, value)
     }
 }

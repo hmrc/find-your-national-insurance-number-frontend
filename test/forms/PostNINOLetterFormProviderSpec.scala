@@ -14,25 +14,32 @@
  * limitations under the License.
  */
 
-package generators
+package forms
 
-import models._
-import org.scalacheck.{Arbitrary, Gen}
+import forms.behaviours.BooleanFieldBehaviours
+import play.api.data.FormError
 
-trait ModelGenerators {
+class PostNINOLetterFormProviderSpec extends BooleanFieldBehaviours {
 
-  implicit lazy val arbitrarySelectNINOLetterAddress: Arbitrary[SelectNINOLetterAddress] =
-    Arbitrary {
-      Gen.oneOf(SelectNINOLetterAddress.values.toSeq)
-    }
+  val requiredKey = "postNINOLetter.error.required"
+  val invalidKey = "error.boolean"
 
-  implicit lazy val arbitraryHaveSetUpGGUserID: Arbitrary[HaveSetUpGGUserID] =
-    Arbitrary {
-      Gen.oneOf(HaveSetUpGGUserID.values.toSeq)
-    }
+  val form = new PostNINOLetterFormProvider()()
 
-  implicit lazy val arbitraryServiceIvEvidence: Arbitrary[ServiceIvEvidence] =
-    Arbitrary {
-      Gen.oneOf(ServiceIvEvidence.values.toSeq)
-    }
+  ".value" - {
+
+    val fieldName = "value"
+
+    behave like booleanField(
+      form,
+      fieldName,
+      invalidError = FormError(fieldName, invalidKey)
+    )
+
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
 }

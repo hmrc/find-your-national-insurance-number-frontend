@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-package generators
+package models
 
-import models._
-import org.scalacheck.{Arbitrary, Gen}
+import uk.gov.hmrc.auth.core.retrieve.Name
 
-trait ModelGenerators {
+case class UserName(name: Name) {
 
-  implicit lazy val arbitrarySelectNINOLetterAddress: Arbitrary[SelectNINOLetterAddress] =
-    Arbitrary {
-      Gen.oneOf(SelectNINOLetterAddress.values.toSeq)
-    }
+  override def toString: String =
+    s"${name.name.getOrElse("")} ${name.lastName.getOrElse("")}".trim
 
-  implicit lazy val arbitraryHaveSetUpGGUserID: Arbitrary[HaveSetUpGGUserID] =
-    Arbitrary {
-      Gen.oneOf(HaveSetUpGGUserID.values.toSeq)
-    }
-
-  implicit lazy val arbitraryServiceIvEvidence: Arbitrary[ServiceIvEvidence] =
-    Arbitrary {
-      Gen.oneOf(ServiceIvEvidence.values.toSeq)
+  def getOrElse(defaultName: String): String =
+    name match {
+      case Name(None, None) => defaultName
+      case _                => this.toString
     }
 }

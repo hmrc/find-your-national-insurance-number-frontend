@@ -25,6 +25,6 @@ class ServiceIvEvidenceFormProvider @Inject() extends Mappings {
 
   def apply(): Form[ServiceIvEvidence] =
     Form(
-      "value" -> enumerable[ServiceIvEvidence]("ServiceIvEvidence.error.required")
+      "value" -> enumerable[ServiceIvEvidence]("serviceIvEvidence.error.required")
     )
 }

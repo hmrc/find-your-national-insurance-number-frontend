@@ -17,70 +17,61 @@
 package controllers
 
 import controllers.actions._
-import forms.HaveSetUpGGUserIDFormProvider
-
-import javax.inject.Inject
-import models.{Mode, NormalMode, UserAnswers}
+import forms.SelectNINOLetterAddressFormProvider
+import models.Mode
 import navigation.Navigator
-import pages.HaveSetUpGGUserIDPage
+import pages.SelectNINOLetterAddressPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.HaveSetUpGGUserIDView
+import views.html.SelectNINOLetterAddressView
 
+import java.time.Clock
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import java.time.{Clock, Instant}
 
-class HaveSetUpGGUserIDController @Inject()(
+class SelectNINOLetterAddressController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        sessionRepository: SessionRepository,
                                        navigator: Navigator,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
                                        requireData: DataRequiredAction,
-                                       formProvider: HaveSetUpGGUserIDFormProvider,
+                                       formProvider: SelectNINOLetterAddressFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
-                                       view: HaveSetUpGGUserIDView,
+                                       view: SelectNINOLetterAddressView,
                                        clock: Clock
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
 
-      val preparedForm = request.userAnswers match {
-        case Some(value) => value.get(HaveSetUpGGUserIDPage) match {
+      //for this to dynamically work would require userData to be implemented however, this is not being shown in future iterations
+      val postCode: String = "FX97 4TU"
+
+      val preparedForm = request.userAnswers.get(SelectNINOLetterAddressPage)  match {
           case None => form
           case Some(value) => form.fill(value)
         }
-        case None => form
-      }
 
-
-      Ok(view(preparedForm, mode))
+      Ok(view(preparedForm, mode, postCode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] =
-    (identify andThen getData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
+          Future.successful(BadRequest(view(formWithErrors, mode, postcode = "FX97 4TU"))),
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(
-              request.userAnswers.getOrElse(
-                UserAnswers(
-                  id = request.userId,
-                  lastUpdated = Instant.now(clock)
-                )
-              ).set(HaveSetUpGGUserIDPage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(HaveSetUpGGUserIDPage, mode, updatedAnswers))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectNINOLetterAddressPage, value))
+            _ <- sessionRepository.set(updatedAnswers)
+          } yield Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
       )
   }
 }
