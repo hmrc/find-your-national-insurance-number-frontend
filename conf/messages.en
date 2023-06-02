@@ -173,3 +173,6 @@ phoneHMRCDetails.openingTimes.label = Opening times:
 phoneHMRCDetails.openingTimes.mondayToFriday = Monday to Friday: 8am to 6pm
 phoneHMRCDetails.openingTimes.weekendAndBankHoliday = Closed on Saturdays, Sundays and bank holidays.
 phoneHMRCDetails.goBackToGovUK = Exit and go back to GOV.UK
+
+viewNinoInPTA.title = viewNinoInPTA
+viewNinoInPTA.heading = viewNinoInPTA
