@@ -52,7 +52,7 @@ class Navigator @Inject()() {
   private def navigateHaveSetUpGGUserID(userAnswers: UserAnswers): Call =
     userAnswers.get(HaveSetUpGGUserIDPage) match {
       case Some(No)   => routes.SetUpGGUserIDStartController.onPageLoad()
-      case Some(Yes)  => routes.SetUpGGUserIDStartController.onPageLoad()
+      case Some(Yes)  => routes.ViewNinoInPTAController.onPageLoad
       case _          => routes.SetUpGGUserIDStartController.onPageLoad()
     }
 
