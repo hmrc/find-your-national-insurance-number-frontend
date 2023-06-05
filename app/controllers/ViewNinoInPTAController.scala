@@ -17,7 +17,6 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions._
 import play.api.{Configuration, Environment}
 
 import javax.inject.Inject
@@ -26,14 +25,12 @@ import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.ViewNinoInPTAView
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class ViewNinoInPTAController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        authConnector: AuthConnector,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       view: ViewNinoInPTAView
+                                       view: ViewNinoInPTAView,
                                      )(implicit frontendAppConfig: FrontendAppConfig,
                                        config: Configuration,
                                        env: Environment,
@@ -42,9 +39,10 @@ class ViewNinoInPTAController @Inject()(
 
   implicit val loginContinueUrl: Call = routes.ViewNinoInPTAController.onPageLoad
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen authorisedAsFMNUser) {
+  def onPageLoad: Action[AnyContent] = authorisedAsFMNUser async {
     implicit request => {
-      Ok(view())
+      implicit val m = cc.messagesApi.preferred(request.request)
+      Future(Ok(view()(request.request, implicitly)))
     }
   }
 }

@@ -29,7 +29,8 @@ class IndexController @Inject()(
                                  view: IndexView
                                ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = identify { implicit request =>
+  def onPageLoad: Action[AnyContent] =
+    identify { implicit request =>
     Ok(view())
   }
 }

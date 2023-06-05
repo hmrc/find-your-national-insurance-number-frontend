@@ -27,6 +27,7 @@ import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
+import util.WireMockSupport
 
 trait SpecBase
   extends AnyFreeSpec
@@ -34,7 +35,8 @@ trait SpecBase
     with TryValues
     with OptionValues
     with ScalaFutures
-    with IntegrationPatience {
+    with IntegrationPatience
+    with WireMockSupport {
 
   val userAnswersId: String = "id"
 
@@ -44,6 +46,22 @@ trait SpecBase
 
   protected def applicationBuilder(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
+      .overrides(
+        bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[IdentifierAction].to[FakeIdentifierAction],
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+      )
+
+  protected def applicationBuilderWithConfig(
+                                              config: Map[String, Any] = Map(),
+                                              userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+    new GuiceApplicationBuilder()
+      .configure(
+        config ++ Map(
+          "microservice.services.auth.port" -> wiremockPort,
+          "microservice.host" -> "http://localhost:9900/fmn"
+        )
+      )
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
