@@ -30,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ViewNinoInPTAController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        authConnector: AuthConnector,
-                                       view: ViewNinoInPTAView,
+                                       view: ViewNinoInPTAView
                                      )(implicit frontendAppConfig: FrontendAppConfig,
                                        config: Configuration,
                                        env: Environment,
