@@ -30,20 +30,4 @@ object TestData {
       | "optionalName" : {"name": "somename"}
       |}
       |""".stripMargin
-
-  val NotFoundAccountError: String =
-    """
-      |{
-      |		"status": 404,
-      |		"description": "NOT_FOUND_CB_ACCOUNT - downstream service returned NOT_FOUND_IDENTIFIER, suggesting user does not have a child benefit account"
-      |	}
-      |""".stripMargin
-
-  val LockedOutErrorResponse: String =
-    """
-      |{
-      |		"status": 403,
-      |		"description": "ClaimantIsLockedOut"
-      |	}
-      |""".stripMargin
 }
