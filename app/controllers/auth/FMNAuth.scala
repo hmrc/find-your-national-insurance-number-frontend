@@ -124,7 +124,7 @@ object FMNAuth {
     if (call.absoluteURL.contains("://localhost")) {
       call.absoluteURL().replaceFirst(call.url, "/") + rh.uri.replaceFirst("/", "")
     } else {
-      rh.uri.replaceFirst("/", "")
+      rh.uri
     }
   }
 }
