@@ -23,5 +23,16 @@
 
 @layout(pageTitle = titleNoForm(messages("viewNinoInPTA.title"))) {
 
-    <h1 class="govuk-heading-xl">@messages("viewNinoInPTA.heading")</h1>
+    <h1 class="govuk-heading-l">@messages("viewNinoInPTA.heading")</h1>
+
+    <p class="govuk-body">@messages("viewNinoInPTA.body")</p>
+
+    <ul class="govuk-list govuk-list--bullet">
+     <li>@messages("viewNinoInPTA.li1")</li>
+     <li>@messages("viewNinoInPTA.li2")</li>
+    </ul>
+
+    @govukButton(
+     ButtonViewModel(messages("site.continue"))
+    )
 }
