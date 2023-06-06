@@ -19,7 +19,7 @@
         govukButton: GovukButton
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(continueUrl: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("viewNinoInPTA.title"))) {
 
@@ -34,5 +34,6 @@
 
     @govukButton(
      ButtonViewModel(messages("site.continue"))
+             .asLink(continueUrl)
     )
 }

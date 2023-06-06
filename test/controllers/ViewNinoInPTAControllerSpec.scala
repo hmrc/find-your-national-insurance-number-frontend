@@ -41,7 +41,7 @@ class ViewNinoInPTAControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[ViewNinoInPTAView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual view("http://localhost:14006/save-your-national-insurance-number")(request, messages(application)).toString
       }
     }
 
