@@ -174,5 +174,8 @@ phoneHMRCDetails.openingTimes.mondayToFriday = Monday to Friday: 8am to 6pm
 phoneHMRCDetails.openingTimes.weekendAndBankHoliday = Closed on Saturdays, Sundays and bank holidays.
 phoneHMRCDetails.goBackToGovUK = Exit and go back to GOV.UK
 
-viewNinoInPTA.title = viewNinoInPTA
-viewNinoInPTA.heading = viewNinoInPTA
+viewNinoInPTA.title = You can view your National Insurance number in your personal tax account
+viewNinoInPTA.heading = You can view your National Insurance number in your personal tax account
+viewNinoInPTA.body = You can now access your personal tax account to:
+viewNinoInPTA.li1 = get official confirmation of your National Insurance number
+viewNinoInPTA.li2 = check your tax records and manage your details with HMRC

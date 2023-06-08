@@ -42,7 +42,7 @@ class ViewNinoInPTAController @Inject()(
   def onPageLoad: Action[AnyContent] = authorisedAsFMNUser async {
     implicit request => {
       implicit val m = cc.messagesApi.preferred(request.request)
-      Future(Ok(view()(request.request, implicitly)))
+      Future(Ok(view(frontendAppConfig.storeMyNinoUrl)(request.request, implicitly)))
     }
   }
 }
