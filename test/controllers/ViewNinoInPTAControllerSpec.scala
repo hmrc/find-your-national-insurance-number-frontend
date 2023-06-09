@@ -20,28 +20,62 @@ import base.SpecBase
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import util.Stubs.{userLoggedInFMNUser, userLoggedInIsNotFMNUser}
-import util.TestData.NinoUser
-import views.html.ViewNinoInPTAView
+import util.TestData.{NinoUser, NotLiveNinoUser}
+import views.html.{ViewNinoInPTAView, InterruptView}
 
 class ViewNinoInPTAControllerSpec extends SpecBase {
 
   "ViewNinoInPTA Controller" - {
 
-    "must return OK and the correct view for a GET" in {
-      userLoggedInFMNUser(NinoUser)
+      "must return OK and the correct save your NINO view for a live NINO with GET request" in {
+        userLoggedInFMNUser(NinoUser)
+
+        val application = applicationBuilderWithConfig(userAnswers = Some(emptyUserAnswers)).build()
+
+
+        running(application) {
+          val request = FakeRequest(GET, routes.ViewNinoInPTAController.onPageLoad.url).withSession(("authToken", "Bearer 123"))
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[ViewNinoInPTAView]
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view("http://localhost:14006/save-your-national-insurance-number")(request, messages(application)).toString
+        }
+      }
+
+      "must return OK and the correct interruptPage view for a NOT live NINO with GET request" in {
+        userLoggedInFMNUser(NotLiveNinoUser)
+
+        val application = applicationBuilderWithConfig(userAnswers = Some(emptyUserAnswers)).build()
+
+
+        running(application) {
+          val request = FakeRequest(GET, routes.ViewNinoInPTAController.onPageLoad.url).withSession(("authToken", "Bearer 123"))
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[ViewNinoInPTAView]
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view("/find-your-national-insurance-number-frontend/interruptPage")(request, messages(application)).toString
+        }
+      }
+
+    "must return OK and the correct interruptPage view for a GET request" in {
 
       val application = applicationBuilderWithConfig(userAnswers = Some(emptyUserAnswers)).build()
 
-
       running(application) {
-        val request = FakeRequest(GET, routes.ViewNinoInPTAController.onPageLoad.url).withSession(("authToken", "Bearer 123"))
+        val request = FakeRequest(GET, routes.ViewNinoInPTAController.interruptPage.url)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[ViewNinoInPTAView]
+        val view = application.injector.instanceOf[InterruptView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("http://localhost:14006/save-your-national-insurance-number")(request, messages(application)).toString
+        contentAsString(result) mustEqual view()(request, messages(application)).toString
       }
     }
 
@@ -58,5 +92,6 @@ class ViewNinoInPTAControllerSpec extends SpecBase {
         status(result) mustEqual 500
       }
     }
+
   }
 }
