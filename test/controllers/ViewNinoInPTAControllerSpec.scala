@@ -17,14 +17,22 @@
 package controllers
 
 import base.SpecBase
+import connectors.CitizenDetailsConnector
+import models.PersonDetailsNotFoundResponse
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import util.Stubs.{userLoggedInFMNUser, userLoggedInIsNotFMNUser}
 import util.TestData.{NinoUser, NotLiveNinoUser}
 import play.api.i18n.MessagesApi
+import play.api.inject
 import play.api.inject.NewInstanceInjector.instanceOf
 import views.html.ViewNinoInPTAView
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class ViewNinoInPTAControllerSpec extends SpecBase with MockitoSugar {
 
@@ -55,8 +63,15 @@ class ViewNinoInPTAControllerSpec extends SpecBase with MockitoSugar {
       "must return OK and the correct interruptPage view for a NOT live NINO with GET request" in {
         userLoggedInFMNUser(NotLiveNinoUser)
 
-        val application = applicationBuilderWithConfig(userAnswers = Some(emptyUserAnswers)).build()
+        val mockCitizenDetailsConnector = mock[CitizenDetailsConnector]
 
+        val application = applicationBuilderWithConfig(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            inject.bind[CitizenDetailsConnector].toInstance(mockCitizenDetailsConnector)
+          )
+          .build()
+
+        when(mockCitizenDetailsConnector.personDetails(any())(any())).thenReturn(Future(PersonDetailsNotFoundResponse))
 
         running(application) {
           val request = FakeRequest(GET, routes.ViewNinoInPTAController.onPageLoad.url).withSession(("authToken", "Bearer 123"))

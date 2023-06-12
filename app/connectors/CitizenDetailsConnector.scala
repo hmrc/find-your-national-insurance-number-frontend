@@ -22,17 +22,12 @@ import config.FrontendAppConfig
 import models.PersonDetails
 import play.api.Logging
 import services.http.SimpleHttp
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
+import models.{PersonDetailsResponse, PersonDetailsSuccessResponse, PersonDetailsHiddenResponse,
+  PersonDetailsNotFoundResponse, PersonDetailsUnexpectedResponse, PersonDetailsErrorResponse}
 import uk.gov.hmrc.domain.Nino
 import play.api.http.Status._
 import scala.concurrent.Future
-
-sealed trait PersonDetailsResponse
-case class PersonDetailsSuccessResponse(personDetails: PersonDetails) extends PersonDetailsResponse
-case object PersonDetailsNotFoundResponse extends PersonDetailsResponse
-case object PersonDetailsHiddenResponse extends PersonDetailsResponse
-case class PersonDetailsUnexpectedResponse(r: HttpResponse) extends PersonDetailsResponse
-case class PersonDetailsErrorResponse(cause: Exception) extends PersonDetailsResponse
 
 @Singleton
 class CitizenDetailsConnector @Inject()(

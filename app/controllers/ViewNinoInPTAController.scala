@@ -17,7 +17,8 @@
 package controllers
 
 import config.FrontendAppConfig
-import connectors.{CitizenDetailsConnector, PersonDetailsNotFoundResponse}
+import connectors.CitizenDetailsConnector
+import models.PersonDetailsNotFoundResponse
 import play.api.{Configuration, Environment}
 
 import javax.inject.Inject
