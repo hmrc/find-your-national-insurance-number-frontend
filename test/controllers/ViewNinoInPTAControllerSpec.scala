@@ -22,11 +22,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import util.Stubs.{userLoggedInFMNUser, userLoggedInIsNotFMNUser}
 import util.TestData.{NinoUser, NotLiveNinoUser}
-import config.FrontendAppConfig
-import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import play.api.i18n.MessagesApi
 import play.api.inject.NewInstanceInjector.instanceOf
-import views.html.{InterruptView, ViewNinoInPTAView}
+import views.html.ViewNinoInPTAView
 
 class ViewNinoInPTAControllerSpec extends SpecBase with MockitoSugar {
 
@@ -76,14 +74,10 @@ class ViewNinoInPTAControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilderWithConfig(userAnswers = Some(emptyUserAnswers)).build()
 
-      val config = mock[FrontendAppConfig]
-
       running(application) {
         val request = FakeRequest(GET, routes.ViewNinoInPTAController.interruptPage.url)
 
         val result = route(application, request).value
-
-        val view = application.injector.instanceOf[InterruptView]
 
         status(result) mustEqual OK
         contentType(result) mustEqual Some("text/html")
