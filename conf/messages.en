@@ -180,10 +180,11 @@ viewNinoInPTA.body = You can now access your personal tax account to:
 viewNinoInPTA.li1 = get official confirmation of your National Insurance number
 viewNinoInPTA.li2 = check your tax records and manage your details with HMRC
 
+interruptView.title = You need to confirm your National Insurance number
 interruptView.heading = You need to confirm your National Insurance number
 interruptView.body = There are two ways to confirm:
 interruptView.li1 = call 0300 200 3500 to speak to an advisor and confirm your National Insurance number with them.
-interruptView.li2 = fill out a CA5403 form online then print it, and send it to:
+interruptView.li2 = <a href="{0}" target="_blank">fill out a CA5403 form online</a> then print it, and send it to:
 interruptView.li2.address.line1 = National Insurance contributions and Employers Office
 interruptView.li2.address.line2 = HM Revenue and Customs
 interruptView.li2.address.postcode = BX9 1AN

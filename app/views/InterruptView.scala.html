@@ -14,12 +14,15 @@
  * limitations under the License.
  *@
 
+@import config.FrontendAppConfig
+@import play.twirl.api.Html
+
 @this(layout: templates.Layout)
 
-@()(implicit request: Request[_], messages: Messages)
+@()(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
 @layout(
-    pageTitle = titleNoForm(messages("unauthorised.title")),
+    pageTitle = titleNoForm(messages("interruptView.title")),
     timeout   = false,
     showBackLink = false,
     showSignOut = false
@@ -31,7 +34,7 @@
 
     <ul class="govuk-list govuk-list--bullet govuk-list--spaced">
         <li>@messages("interruptView.li1")</li>
-        <li>@messages("interruptView.li2")</li>
+        <li>@Html(messages("interruptView.li2", config.getNinoUrl))</li>
         <p class="govuk-body">
             @messages("interruptView.li2.address.line1")</br>
             @messages("interruptView.li2.address.line2")</br>

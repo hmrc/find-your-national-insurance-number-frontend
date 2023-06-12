@@ -60,7 +60,7 @@ class ViewNinoInPTAController @Inject()(
   }
 
   def interruptPage: Action[AnyContent] = Action { implicit request =>
-    Ok(interruptView()(request, implicitly))
+    Ok(interruptView()(request, implicitly, implicitly))
   }
 
 }

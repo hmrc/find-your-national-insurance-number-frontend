@@ -57,4 +57,5 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   lazy val citizenDetailsServiceUrl: String = configuration.get[Service]("microservice.services.citizen-details-service").baseUrl
 
+  val getNinoUrl: String = configuration.get[String]("external-url.get-nino.CA5403form")
 }

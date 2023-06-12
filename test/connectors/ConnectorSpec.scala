@@ -21,7 +21,6 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import controllers.auth.requests.UserRequest
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -29,9 +28,6 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.http.{HeaderNames, MimeTypes, Status}
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.{Enrolment, Enrolments}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext
@@ -58,9 +54,6 @@ trait ConnectorSpec
       .configure(confStrings)
       .overrides(overrides: _*)
       .build()
-
-  // def userRequest(saUserType: SelfAssessmentUserType, providerId: String): UserRequest[AnyContentAsEmpty.type] =
-  //   buildUserRequest(request = FakeRequest(), enrolments = Enrolments.apply(Set[Enrolment]()))
 
   def stubGet(url: String, responseStatus: Int, responseBody: Option[String]): StubMapping = server.stubFor {
     val baseResponse = aResponse().withStatus(responseStatus).withHeader(CONTENT_TYPE, JSON)
