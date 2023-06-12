@@ -55,7 +55,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   val cacheTtl: Int = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
-  lazy val citizenDetailsServiceUrl: String = configuration.get[Service]("microservice.services.citizen-details-service").baseUrl
+  lazy val citizenDetailsServiceUrl: String = configuration.get[Service]("microservice.services.citizen-details").baseUrl
 
   val getNinoUrl: String = configuration.get[String]("external-url.get-nino.CA5403form")
 }

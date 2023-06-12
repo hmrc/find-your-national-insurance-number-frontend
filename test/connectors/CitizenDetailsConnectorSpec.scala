@@ -54,7 +54,7 @@ class CitizenDetailsConnectorSpec
     with Injecting {
 
   override implicit lazy val app: Application = app(
-    Map("microservice.services.citizen-details-service.port" -> server.port())
+    Map("microservice.services.citizen-details.port" -> server.port())
   )
 
   val nino: Nino = Nino(new Generator(new Random()).nextNino.nino)
