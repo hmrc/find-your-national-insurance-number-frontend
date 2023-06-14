@@ -29,7 +29,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val appName: String = configuration.get[String]("appName")
 
   private val contactHost = configuration.get[String]("contact-frontend.host")
-  private val contactFormServiceIdentifier = "find-your-national-insurance-number-frontend"
+  private val contactFormServiceIdentifier = "find-your-national-insurance-number"
 
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${SafeRedirectUrl(host + request.uri).encodedUrl}"
@@ -40,7 +40,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val storeMyNinoUrl: String       = configuration.get[String]("urls.storeMyNinoUrl")
 
   private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
-  val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/find-your-national-insurance-number-frontend"
+  val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/find-your-national-insurance-number"
 
   val languageTranslationEnabled: Boolean =
     configuration.get[Boolean]("features.welsh-translation")
