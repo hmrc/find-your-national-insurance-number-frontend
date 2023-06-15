@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import connectors.CitizenDetailsConnector
-import models.PersonDetailsNotFoundResponse
+import models.{PersonDetailsNotFoundResponse, PersonDetailsSuccessResponse}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -42,11 +42,18 @@ class ViewNinoInPTAControllerSpec extends SpecBase with MockitoSugar {
 
   "ViewNinoInPTA Controller" - {
 
-      "must return OK and the correct save your NINO view for a live NINO with GET request" in {
+    val mockCitizenDetailsConnector = mock[CitizenDetailsConnector]
+
+    "must return OK and the correct save your NINO view for a live NINO with GET request" in {
         userLoggedInFMNUser(NinoUser)
 
-        val application = applicationBuilderWithConfig(userAnswers = Some(emptyUserAnswers)).build()
+        val application = applicationBuilderWithConfig(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            inject.bind[CitizenDetailsConnector].toInstance(mockCitizenDetailsConnector)
+          )
+          .build()
 
+      when(mockCitizenDetailsConnector.personDetails(any())(any())).thenReturn(Future(PersonDetailsSuccessResponse(any())))
 
         running(application) {
           val request = FakeRequest(GET, routes.ViewNinoInPTAController.onPageLoad.url).withSession(("authToken", "Bearer 123"))
@@ -63,7 +70,6 @@ class ViewNinoInPTAControllerSpec extends SpecBase with MockitoSugar {
       "must return OK and the correct interruptPage view for a NOT live NINO with GET request" in {
         userLoggedInFMNUser(NotLiveNinoUser)
 
-        val mockCitizenDetailsConnector = mock[CitizenDetailsConnector]
 
         val application = applicationBuilderWithConfig(userAnswers = Some(emptyUserAnswers))
           .overrides(
