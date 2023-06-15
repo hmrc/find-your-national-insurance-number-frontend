@@ -17,31 +17,91 @@
 package controllers
 
 import base.SpecBase
+import connectors.CitizenDetailsConnector
+import models.{PersonDetailsNotFoundResponse, PersonDetailsSuccessResponse}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import util.Stubs.{userLoggedInFMNUser, userLoggedInIsNotFMNUser}
-import util.TestData.NinoUser
+import util.TestData.{NinoUser, NotLiveNinoUser}
+import play.api.i18n.MessagesApi
+import play.api.inject
+import play.api.inject.NewInstanceInjector.instanceOf
 import views.html.ViewNinoInPTAView
 
-class ViewNinoInPTAControllerSpec extends SpecBase {
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class ViewNinoInPTAControllerSpec extends SpecBase with MockitoSugar {
+
+  lazy val controller = instanceOf[ViewNinoInPTAController]
+
+  lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
   "ViewNinoInPTA Controller" - {
 
-    "must return OK and the correct view for a GET" in {
-      userLoggedInFMNUser(NinoUser)
+    val mockCitizenDetailsConnector = mock[CitizenDetailsConnector]
+
+    "must return OK and the correct save your NINO view for a live NINO with GET request" in {
+        userLoggedInFMNUser(NinoUser)
+
+        val application = applicationBuilderWithConfig(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            inject.bind[CitizenDetailsConnector].toInstance(mockCitizenDetailsConnector)
+          )
+          .build()
+
+      when(mockCitizenDetailsConnector.personDetails(any())(any())).thenReturn(Future(PersonDetailsSuccessResponse(any())))
+
+        running(application) {
+          val request = FakeRequest(GET, routes.ViewNinoInPTAController.onPageLoad.url).withSession(("authToken", "Bearer 123"))
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[ViewNinoInPTAView]
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view("http://localhost:14006/save-your-national-insurance-number")(request, messages(application)).toString
+        }
+      }
+
+      "must return OK and the correct interruptPage view for a NOT live NINO with GET request" in {
+        userLoggedInFMNUser(NotLiveNinoUser)
+
+
+        val application = applicationBuilderWithConfig(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            inject.bind[CitizenDetailsConnector].toInstance(mockCitizenDetailsConnector)
+          )
+          .build()
+
+        when(mockCitizenDetailsConnector.personDetails(any())(any())).thenReturn(Future(PersonDetailsNotFoundResponse))
+
+        running(application) {
+          val request = FakeRequest(GET, routes.ViewNinoInPTAController.onPageLoad.url).withSession(("authToken", "Bearer 123"))
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[ViewNinoInPTAView]
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view("/find-your-national-insurance-number-frontend/interruptPage")(request, messages(application)).toString
+        }
+      }
+
+    "must return OK and the correct interruptPage view for a GET request" in {
 
       val application = applicationBuilderWithConfig(userAnswers = Some(emptyUserAnswers)).build()
 
-
       running(application) {
-        val request = FakeRequest(GET, routes.ViewNinoInPTAController.onPageLoad.url).withSession(("authToken", "Bearer 123"))
+        val request = FakeRequest(GET, routes.ViewNinoInPTAController.interruptPage.url)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[ViewNinoInPTAView]
-
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("http://localhost:14006/save-your-national-insurance-number")(request, messages(application)).toString
+        contentType(result) mustEqual Some("text/html")
       }
     }
 
@@ -58,5 +118,6 @@ class ViewNinoInPTAControllerSpec extends SpecBase {
         status(result) mustEqual 500
       }
     }
+
   }
 }

@@ -62,3 +62,4 @@ POST        /changeSelectAlternativeService                 controllers.SelectAl
 GET         /phoneHMRCDetails                               controllers.PhoneHMRCDetailsController.onPageLoad()
 
 GET         /viewNinoInPTA                                  controllers.ViewNinoInPTAController.onPageLoad
+GET         /interruptPage                                  controllers.ViewNinoInPTAController.interruptPage

@@ -17,10 +17,10 @@
 package models
 
 import play.api.libs.json._
-import uk.gov.hmrc.auth.core.Nino
+//import uk.gov.hmrc.auth.core.Nino
 
 import java.time.LocalDate
-//import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.domain.Nino
 
 case class Person(
                    firstName: Option[String],
