@@ -87,7 +87,7 @@ class ViewNinoInPTAControllerSpec extends SpecBase with MockitoSugar {
           val view = application.injector.instanceOf[ViewNinoInPTAView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view("/find-your-national-insurance-number-frontend/interruptPage")(request, messages(application)).toString
+          contentAsString(result) mustEqual view("/find-your-national-insurance-number/interruptPage")(request, messages(application)).toString
         }
       }
 
