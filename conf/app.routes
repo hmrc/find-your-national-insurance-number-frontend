@@ -39,21 +39,6 @@ POST        /changeSelectNationalInsuranceLetterAddress     controllers.SelectNI
 
 GET         /NationalInsuranceLetterPosted                  controllers.NINOLetterPostedConfirmationController.onPageLoad()
 
-GET         /serviceIvEvidence                              controllers.ServiceIvEvidenceController.onPageLoad(mode: Mode = NormalMode)
-POST        /serviceIvEvidence                              controllers.ServiceIvEvidenceController.onSubmit(mode: Mode = NormalMode)
-GET         /changeserviceIvEvidence                        controllers.ServiceIvEvidenceController.onPageLoad(mode: Mode = CheckMode)
-POST        /changeserviceIvEvidence                        controllers.ServiceIvEvidenceController.onSubmit(mode: Mode = CheckMode)
-
-GET         /serviceIvId                                    controllers.ServiceIvIdController.onPageLoad(mode: Mode = NormalMode)
-POST        /serviceIvId                                    controllers.ServiceIvIdController.onSubmit(mode: Mode = NormalMode)
-GET         /changeServiceIvId                              controllers.ServiceIvIdController.onPageLoad(mode: Mode = CheckMode)
-POST        /changeServiceIvId                              controllers.ServiceIvIdController.onSubmit(mode: Mode = CheckMode)
-
-GET         /serviceIvApp                                   controllers.ServiceIvAppController.onPageLoad(mode: Mode = NormalMode)
-POST        /serviceIvApp                                   controllers.ServiceIvAppController.onSubmit(mode: Mode = NormalMode)
-GET         /changeServiceIvApp                             controllers.ServiceIvAppController.onPageLoad(mode: Mode = CheckMode)
-POST        /changeServiceIvApp                             controllers.ServiceIvAppController.onSubmit(mode: Mode = CheckMode)
-
 GET         /selectAlternativeService                       controllers.SelectAlternativeServiceController.onPageLoad(mode: Mode = NormalMode)
 POST        /selectAlternativeService                       controllers.SelectAlternativeServiceController.onSubmit(mode: Mode = NormalMode)
 GET         /changeSelectAlternativeService                 controllers.SelectAlternativeServiceController.onPageLoad(mode: Mode = CheckMode)
