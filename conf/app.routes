@@ -46,6 +46,3 @@ GET         /changeSelectAlternativeService                 controllers.SelectAl
 POST        /changeSelectAlternativeService                 controllers.SelectAlternativeServiceController.onSubmit(mode: Mode = CheckMode)
 
 GET         /phoneHMRCDetails                               controllers.PhoneHMRCDetailsController.onPageLoad()
-
-GET         /viewNinoInPTA                                  controllers.ViewNinoInPTAController.onPageLoad
-GET         /interruptPage                                  controllers.ViewNinoInPTAController.interruptPage
