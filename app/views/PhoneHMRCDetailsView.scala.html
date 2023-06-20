@@ -15,8 +15,8 @@
  *@
 
 @this(
-        layout: templates.Layout,
-        govukButton: GovukButton
+    layout: templates.Layout,
+    govukButton: GovukButton
 )
 
 @()(implicit request: Request[_], messages: Messages)
@@ -61,7 +61,7 @@
     <p class="govuk-body"> @messages("phoneHMRCDetails.openingTimes.weekendAndBankHoliday") </p>
 
     <p class="govuk-body">
-        <a href="@controllers.routes.IndexController.onPageLoad.url" class="govuk-link">
+        <a href="https://www.gov.uk/lost-national-insurance-number" class="govuk-link">
             @messages("phoneHMRCDetails.goBackToGovUK")
         </a>
     </p>
