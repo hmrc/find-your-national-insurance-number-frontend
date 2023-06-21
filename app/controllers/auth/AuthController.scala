@@ -53,4 +53,8 @@ class AuthController @Inject()(
         Redirect(config.signOutUrl, Map("continue" -> Seq(routes.SignedOutController.onPageLoad.url)))
       }
   }
+
+  def redirectToSMN(): Action[AnyContent] = identify {
+    Redirect(config.storeMyNinoUrl)
+  }
 }
