@@ -33,5 +33,6 @@
 
     @govukButton(
         ButtonViewModel(messages("site.continue"))
+            .asLink(routes.SetUpGGUserIDStartController.onContinue.url)
     )
 }

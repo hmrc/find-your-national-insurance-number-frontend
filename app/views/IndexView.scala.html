@@ -46,7 +46,7 @@
     <p class="govuk-body">@messages("index.whatYouWillNeed.p3")</p>
 
 @govukButton(Button(
-        href = Some("/find-your-national-insurance-number/haveSetUpGGUserID"),
+        href = Some(routes.HaveSetUpGGUserIDController.onPageLoad(NormalMode).url),
         isStartButton = true,
         content = Text("Start now")
     ))
