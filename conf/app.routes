@@ -17,11 +17,13 @@ GET         /check-your-answers                             controllers.CheckYou
 GET         /account/sign-out-survey                        controllers.auth.AuthController.signOut
 GET         /account/sign-out                               controllers.auth.AuthController.signOutNoSurvey
 GET         /account/signed-out                             controllers.auth.SignedOutController.onPageLoad
+GET         /account/register                               controllers.auth.AuthController.redirectToRegister(continueUrl: String)
 GET         /redirect-to-save                               controllers.auth.AuthController.redirectToSMN
 
 GET         /unauthorised                                   controllers.UnauthorisedController.onPageLoad
 
 GET         /setUpGGUserIDStart                             controllers.SetUpGGUserIDStartController.onPageLoad()
+GET         /setUpGGUserIDStart/register                    controllers.SetUpGGUserIDStartController.onContinue
 
 GET         /haveSetUpGGUserID                              controllers.HaveSetUpGGUserIDController.onPageLoad(mode: Mode = NormalMode)
 POST        /haveSetUpGGUserID                              controllers.HaveSetUpGGUserIDController.onSubmit(mode: Mode = NormalMode)

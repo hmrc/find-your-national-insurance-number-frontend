@@ -57,4 +57,11 @@ class AuthController @Inject()(
   def redirectToSMN(): Action[AnyContent] = identify {
     Redirect(config.storeMyNinoUrl)
   }
+
+  def redirectToRegister(continueUrl: String): Action[AnyContent] = Action { _ =>
+    Redirect(
+      config.registerUrl,
+      Map("origin" -> Seq(config.appName), "continueUrl" -> Seq(continueUrl), "accountType" -> Seq("Individual"))
+    )
+  }
 }
