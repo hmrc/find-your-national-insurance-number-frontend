@@ -38,7 +38,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
   val signOutUrl: String       = configuration.get[String]("urls.signOut")
   val registerUrl: String      = configuration.get[String]("urls.register")
-  val storeMyNinoUrl: String       = configuration.get[String]("urls.storeMyNinoUrl")
+  val storeMyNinoUrl: String   = configuration.get[String]("urls.storeMyNinoUrl")
 
   private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
   val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/find-your-national-insurance-number"
@@ -59,4 +59,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   lazy val citizenDetailsServiceUrl: String = configuration.get[Service]("microservice.services.citizen-details").baseUrl
 
   val getNinoUrl: String = configuration.get[String]("external-url.get-nino.CA5403form")
+
+  val getNinoByPostUrl: String = configuration.get[String]("urls.getNinoByPost")
+
 }

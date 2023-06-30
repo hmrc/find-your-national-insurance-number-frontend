@@ -29,9 +29,10 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton
 class FMNBaseController @Inject()(val authConnector: AuthConnector)(implicit
-                                                                    val config: Configuration,
-                                                                    val env: Environment,
-                                                                    cc: MessagesControllerComponents) extends FrontendController(cc) with FMNAuth with I18nSupport {
+    val config: Configuration,
+    val env: Environment,
+    cc: MessagesControllerComponents
+) extends FrontendController(cc) with FMNAuth with I18nSupport {
 
   override implicit def hc(implicit rh: RequestHeader): HeaderCarrier =
     HeaderCarrierConverter.fromRequestAndSession(rh, rh.session)
