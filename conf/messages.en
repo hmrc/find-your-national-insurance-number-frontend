@@ -64,12 +64,11 @@ signedOut.guidance = We did not save your answers.
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
 
-setUpGGUserIDStart.title = Set up a Government Gateway user ID to use this service
-setUpGGUserIDStart.heading = Set up a Government Gateway user ID to use this service
+setUpGGUserIDStart.title = Set up a Government Gateway user ID
+setUpGGUserIDStart.heading = Set up a Government Gateway user ID
 setUpGGUserIDStart.p1 = You’ll need:
 setUpGGUserIDStart.l1.li1 = an email address
 setUpGGUserIDStart.l1.li2 = a phone number or an authenticator app
-setUpGGUserIDStart.p2 = We can then search for your National Insurance number.
 
 haveSetUpGGUserID.title = Have you set up a Government Gateway user ID before?
 haveSetUpGGUserID.heading = Have you set up a Government Gateway user ID before?
