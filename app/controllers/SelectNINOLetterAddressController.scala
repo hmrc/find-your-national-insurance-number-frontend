@@ -65,7 +65,7 @@ class SelectNINOLetterAddressController @Inject()(
         formWithErrors =>
           for {
             postCode <- citizenDetailsService.getPostcode(request.nino.getOrElse(""))
-          } yield BadRequest(view(formWithErrors, mode, postCode))
+          } yield BadRequest(view(formWithErrors, mode, postCode)),
 
         value =>
           for {
