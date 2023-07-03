@@ -18,18 +18,14 @@ package controllers.actions
 
 import base.SpecBase
 import config.FrontendAppConfig
-import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.{Action, AnyContent, BodyParsers, Results}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders}
-import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class SessionActionSpec extends SpecBase {
 
@@ -70,13 +66,11 @@ class SessionActionSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val AuthPredicate = AuthProviders(GovernmentGateway)
-          val FMNRetrievals = Retrievals.nino
+
           implicit val hc: HeaderCarrier         = HeaderCarrier()
 
           val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
           val authConnector = mock[AuthConnector]
-          //when(authConnector.authorise(AuthPredicate, FMNRetrievals)).thenReturn(Future.successful(Some("AA000003B")))
           val config = mock[FrontendAppConfig]
 
           val sessionAction = new SessionIdentifierAction(authConnector, config, bodyParsers)
