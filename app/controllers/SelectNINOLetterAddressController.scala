@@ -20,14 +20,14 @@ import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
 import models.Mode
 import navigation.Navigator
-import pages.SelectNINOLetterAddressPage
+import pages.{SelectNINOLetterAddressPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.CitizenDetailsService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SelectNINOLetterAddressView
 
-import java.time.Clock
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -41,23 +41,21 @@ class SelectNINOLetterAddressController @Inject()(
                                        formProvider: SelectNINOLetterAddressFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: SelectNINOLetterAddressView,
-                                       clock: Clock
+                                       citizenDetailsService: CitizenDetailsService
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-
-      //for this to dynamically work would require userData to be implemented however, this is not being shown in future iterations
-      val postCode: String = "FX97 4TU"
-
-      val preparedForm = request.userAnswers.get(SelectNINOLetterAddressPage)  match {
+      val preparedForm = request.userAnswers.get(SelectNINOLetterAddressPage) match {
           case None => form
           case Some(value) => form.fill(value)
         }
 
-      Ok(view(preparedForm, mode, postCode))
+      for {
+        postCode <- citizenDetailsService.getPostcode(request.nino.getOrElse(""))
+      } yield Ok(view(preparedForm, mode, postCode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -65,7 +63,9 @@ class SelectNINOLetterAddressController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, postcode = "FX97 4TU"))),
+          for {
+            postCode <- citizenDetailsService.getPostcode(request.nino.getOrElse(""))
+          } yield BadRequest(view(formWithErrors, mode, postCode)),
 
         value =>
           for {

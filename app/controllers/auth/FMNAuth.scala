@@ -32,7 +32,6 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
 final case class AuthContext[A](
                                  nino: NationalInsuranceNumber,
                                  isUser: Boolean,
@@ -87,7 +86,7 @@ trait FMNAuth extends AuthorisedFunctions with AuthRedirects with Logging {
                                 hc: HeaderCarrier,
                                 config: FrontendAppConfig,
                                 request: Request[A]
-                               ) = {
+                               ): Future[Result] = {
     authorised(AuthPredicate)
       .retrieve(FMNRetrievals) {
         case Some(nino) ~ Some(User) ~ Some(internalId) ~ confidenceLevel ~ Some(affinityGroup) ~ allEnrolments ~ Some(name) =>

@@ -57,8 +57,6 @@ class HaveSetUpGGUserIDController @Inject()(
         }
         case None => form
       }
-
-
       Ok(view(preparedForm, mode))
   }
 
