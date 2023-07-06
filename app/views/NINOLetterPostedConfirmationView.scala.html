@@ -14,22 +14,25 @@
  * limitations under the License.
  *@
 
+@import config.FrontendAppConfig
+
 @this(
         layout: templates.Layout,
         govukPanel: GovukPanel,
-        govukButton: GovukButton
+        govukButton: GovukButton,
+        appConfig: FrontendAppConfig
 )
 
 @()(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("ninoLetterPostedConfirmation.title"))) {
+@layout(pageTitle = titleNoForm(messages("ninoLetterPostedConfirmation.title")), showBackLink = false) {
 
     @govukPanel(Panel(title = messages("ninoLetterPostedConfirmation.heading")))
 
     <p class="govuk-body">@messages("ninoLetterPostedConfirmation.letterArrival")</p>
 
     <p class="govuk-body">
-        <a href="@controllers.routes.IndexController.onPageLoad.url" class="govuk-link">
+        <a href="@appConfig.fmnGuidancePageUrl" class="govuk-link" target="_blank">
             @messages("ninoLetterPostedConfirmation.goBackToGovUK")
         </a>
     </p>
