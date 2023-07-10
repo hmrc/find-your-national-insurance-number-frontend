@@ -62,4 +62,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   val getNinoByPostUrl: String = configuration.get[String]("urls.getNinoByPost")
 
+  val fmnGuidancePageUrl: String = configuration.get[String]("urls.fmnGuidancePage")
+
 }
