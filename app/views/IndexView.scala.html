@@ -29,26 +29,29 @@
 
     <h1 class="govuk-heading-l">@messages("index.heading")</h1>
 
-    <p class="govuk-body">@messages("index.servicePurpose")</p>
+    <p class="govuk-body">@messages("index.p1")</p>
 
-    <h1 class="govuk-heading-m">@messages("index.whatYouWillNeed.heading")</h1>
-    <p class="govuk-body">@messages("index.whatYouWillNeed.p1")</p>
-    <ul class="govuk-list govuk-list--bullet">
-        <li>@messages("index.whatYouWillNeed.l1.li1")</li>
-        <li>@messages("index.whatYouWillNeed.l1.li2")</li>
-    </ul>
+    <h2 class="govuk-heading-m">@messages("index.whatYouWillNeedToDo.heading")</h2>
+    <p class="govuk-body">@messages("index.whatYouWillNeedToDo.p1")</p>
 
-    <p class="govuk-body">@messages("index.whatYouWillNeed.p2")</p>
+    <h2 class="govuk-heading-m">@messages("index.setUpOrLogInUsingGG.heading")</h2>
+    <p class="govuk-body">@messages("index.setUpOrLogInUsingGG.p1")</p>
+
+    <h2 class="govuk-heading-m">@messages("index.tellUsWhoYouAre.heading")</h2>
+    <p class="govuk-body">@messages("index.tellUsWhoYouAre.p1")</p>
+    <p class="govuk-body">@messages("index.tellUsWhoYouAre.p2")</p>
+
+    <h2 class="govuk-heading-m">@messages("index.confirmYourIdentity.heading")</h2>
+    <p class="govuk-body">@messages("index.confirmYourIdentity.p1")</p>
     <ul class="govuk-list govuk-list--bullet">
-        <li>@messages("index.whatYouWillNeed.l2.li1")</li>
-        <li>@messages("index.whatYouWillNeed.l2.li2")</li>
+        <li>@messages("index.confirmYourIdentity.l1.li1")</li>
+        <li>@messages("index.confirmYourIdentity.l1.li2")</li>
     </ul>
-    <p class="govuk-body">@messages("index.whatYouWillNeed.p3")</p>
 
 @govukButton(Button(
         href = Some(routes.HaveSetUpGGUserIDController.onPageLoad(NormalMode).url),
-        isStartButton = true,
-        content = Text("Start now")
+        isStartButton = false,
+        content = Text(messages("site.continue"))
     ))
 
 }
