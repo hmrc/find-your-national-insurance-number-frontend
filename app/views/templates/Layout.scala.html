@@ -27,7 +27,7 @@
     hmrcStandardFooter: HmrcStandardFooter,
     hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet,
     hmrcLanguageSelect: HmrcLanguageSelect,
-    hmrcTimeoutDialog: HmrcTimeoutDialog,
+    hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
     hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
     hmrcScripts: HmrcScripts,
     alphaBanner: StandardAlphaBanner
@@ -40,20 +40,16 @@
     @hmrcHead(
         nonce     = CSPNonce.get,
         headBlock = if(timeout) { Some(
-            hmrcTimeoutDialog(TimeoutDialog(
+            hmrcTimeoutDialogHelper(
                 timeout             = Some(appConfig.timeout),
                 countdown           = Some(appConfig.countdown),
                 keepAliveUrl        = Some(routes.KeepAliveController.keepAlive.url),
-                keepAliveButtonText = Some(messages("timeout.keepAlive")),
-                signOutUrl          = Some(controllers.auth.routes.AuthController.signOut.url),
-                signOutButtonText   = Some(messages("timeout.signOut")),
-                title               = Some(messages("timeout.title")),
-                message             = Some(messages("timeout.message"))
-            )))
+                signOutUrl          = controllers.auth.routes.AuthController.signOut.url
+            ))
         } else None
     )
 
-    <link href="@routes.Assets.versioned("stylesheets/application.css")" media="all" rel="stylesheet" type="text/css"@CSPNonce.get.map {n=> nonce="@n"} />
+    <link href='@routes.Assets.versioned("stylesheets/application.css")' media="all" rel="stylesheet" type="text/css"@CSPNonce.get.map {n=> nonce="@n"} />
 }
 
 @additionalScripts = {
