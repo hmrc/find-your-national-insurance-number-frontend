@@ -17,7 +17,7 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.PersonalDetailsValidationResponse
+import models.{PersonalDetailsValidation, PersonalDetailsValidationResponse}
 import repositories.PersonalDetailsValidationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -33,11 +33,16 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     connector.retrieveMatchingDetails(validationId)
 
   // Store personal details in the mongoDB
-  def createPersonalDetailsValidation(validationId: String, validationStatus: String, personalDetails: String, dateCreated: String)
-                                     (implicit ec: ExecutionContext): Either[Exception, String] = {
-    personalDetailsValidationRepository.insert(validationId, validationStatus, personalDetails, dateCreated)
-    Right(validationId)
-  }
+  //def createPersonalDetailsValidation(validationId: String, validationStatus: String, personalDetails: String, dateCreated: String)
+  def createPersonalDetailsValidation(pdValidation: PersonalDetailsValidation)
+                                     (implicit ec: ExecutionContext): Future[Unit] = //{
+                                     //(implicit ec: ExecutionContext): Either[Exception, String] = {
+    // TODO change pdValidation.personalDetails type from sting to something to accomodate all fileds of PersonalDetails
+    //personalDetailsValidationRepository.insert(pdValidation.id, pdValidation.validationStatus, pdValidation.personalDetails)
+    // TODO change .get from `pdValidation.personalDetails.get.firstName`
+    personalDetailsValidationRepository.insert(pdValidation.id, pdValidation.validationStatus, pdValidation.personalDetails.get.firstName)
+    //Right(pdValidation.id)
+  //}
 
   // Get personal details from db by id
   def getPersonalDetailsValidationByValidationId(validationId: String)(implicit ec: ExecutionContext): Future[Option[String]] = {
