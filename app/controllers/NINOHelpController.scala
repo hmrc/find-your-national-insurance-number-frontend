@@ -36,16 +36,9 @@ class NINOHelpController @Inject()(
                                     val controllerComponents: MessagesControllerComponents
                                   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
 
-
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       Ok(view(mode))
-  }
-
-
-  def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      ???
   }
 
 }
