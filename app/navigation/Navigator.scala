@@ -16,15 +16,18 @@
 
 package navigation
 
+import config.FrontendAppConfig
+
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.Call
 import controllers.routes
 import models.HaveSetUpGGUserID.{No, Yes}
 import pages._
 import models._
+import uk.gov.hmrc.http.HttpVerbs.GET
 
 @Singleton
-class Navigator @Inject()() {
+class Navigator @Inject()(implicit config: FrontendAppConfig) {
 
   private val normalRoutes: Page => UserAnswers => Call = {
     case HaveSetUpGGUserIDPage        => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
@@ -66,11 +69,10 @@ class Navigator @Inject()() {
       case _                                            => routes.JourneyRecoveryController.onPageLoad()
     }
 
-  private def navigateSelectAlternativeService(userAnswers: UserAnswers): Call = {
+  private def navigateSelectAlternativeService(userAnswers: UserAnswers): Call =
     userAnswers.get(SelectAlternativeServicePage) match {
       case Some(SelectAlternativeService.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
-      case Some(SelectAlternativeService.PrintForm) => routes.SelectAlternativeServiceController.onPageLoad(NormalMode)
+      case Some(SelectAlternativeService.PrintForm) => Call(GET, s"${config.ninoByPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
       case _                                        => routes.JourneyRecoveryController.onPageLoad()
     }
-  }
 }
