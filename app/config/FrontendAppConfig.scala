@@ -60,6 +60,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   val getNinoUrl: String = configuration.get[String]("external-url.get-nino.CA5403form")
 
+  val getNinoByPostUrl: String = configuration.get[String]("urls.getNinoByPost")
+
   val fmnGuidancePageUrl: String = configuration.get[String]("urls.fmnGuidancePage")
 
  val ninoByPostServiceUrl: String = configuration.get[Service]("microservice.services.national-insurance-number-by-post").baseUrl
