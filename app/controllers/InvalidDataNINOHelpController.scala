@@ -24,17 +24,17 @@ import pages.SelectAlternativeServicePage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.NINOHelpOnRLSView
+import views.html.InvalidDataNINOHelpView
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class NINOHelpOnRLSController @Inject()(
+class InvalidDataNINOHelpController @Inject()(
                                     override val messagesApi: MessagesApi,
                                     identify: IdentifierAction,
                                     getData: DataRetrievalAction,
                                     requireData: DataRequiredAction,
-                                    view: NINOHelpOnRLSView,
+                                    view: InvalidDataNINOHelpView,
                                     formProvider: SelectAlternativeServiceFormProvider,
                                     val controllerComponents: MessagesControllerComponents
                                   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport {

@@ -22,17 +22,17 @@ import models.Mode
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.NINOHelpView
+import views.html.ValidDataNINOHelpView
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class NINOHelpController @Inject()(
+class ValidDataNINOHelpController @Inject()(
                                     override val messagesApi: MessagesApi,
                                     identify: IdentifierAction,
                                     getData: DataRetrievalAction,
                                     requireData: DataRequiredAction,
-                                    view: NINOHelpView,
+                                    view: ValidDataNINOHelpView,
                                     val controllerComponents: MessagesControllerComponents
                                   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
 
