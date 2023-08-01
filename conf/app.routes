@@ -36,6 +36,7 @@ GET         /changePostNationalInsuranceLetter              controllers.PostNINO
 POST        /changePostNationalInsuranceLetter              controllers.PostNINOLetterController.onSubmit(mode: Mode = CheckMode)
 
 GET         /nationalInsuranceNumberHelp                    controllers.NINOHelpController.onPageLoad(mode: Mode = NormalMode)
+GET         /nationalInsuranceNumberOnRLSHelp               controllers.NINOHelpOnRLSController.onPageLoad(mode: Mode = NormalMode)
 
 GET         /selectNationalInsuranceLetterAddress           controllers.SelectNINOLetterAddressController.onPageLoad(mode: Mode = NormalMode)
 POST        /selectNationalInsuranceLetterAddress           controllers.SelectNINOLetterAddressController.onSubmit(mode: Mode = NormalMode)

@@ -99,3 +99,7 @@ ninoHelpView.p2 = Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y
 ninoHelpView.getYourNINOByPost = Cael eich rhif Yswiriant Gwladol drwy’r post
 ninoHelpView.contactHMRC = <a href="{0}">Cysylltwch â CThEF i wneud cais am lythyr</a>
 
+ninoHelpOnRLSView.title = Help gyda Rhif Yswiriant Gwladol
+ninoHelpOnRLSView.heading = Help gyda Rhif Yswiriant Gwladol
+ninoHelpOnRLSView.p1 = Mae angen i chi gysylltu â CThEF i gael eich rhif Yswiriant Gwladol drwy’r post os ydych angen nodyn atgoffa neu lythyr yn ei gadarnhau.
+ninoHelpOnRLSView.p2 = Beth yr hoffech ei wneud?

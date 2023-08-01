@@ -165,3 +165,8 @@ ninoHelpView.p1 = You can get your National Insurance number in the post if you 
 ninoHelpView.p2 = HMRC will not tell you your National Insurance number over the phone. They’ll post it to you and it’ll arrive within 15 working days.
 ninoHelpView.getYourNINOByPost = Get your National Insurance number by post
 ninoHelpView.contactHMRC = <a href="{0}">Contact HMRC to request a letter</a>
+
+ninoHelpOnRLSView.title = National Insurance number help
+ninoHelpOnRLSView.heading = National Insurance number help
+ninoHelpOnRLSView.p1 = You need to contact HMRC to get your National Insurance number in the post if you need a reminder or a letter confirming it.
+ninoHelpOnRLSView.p2 = What would you like to do?

@@ -17,29 +17,30 @@
 package controllers
 
 import base.SpecBase
+import forms.SelectAlternativeServiceFormProvider
 import models.NormalMode
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.NINOHelpView
+import views.html.NINOHelpOnRLSView
 
-class NINOHelpControllerSpec extends SpecBase {
+class NINOHelpOnRLSControllerSpec extends SpecBase {
 
-  "NINOHelp Controller" - {
+  "NINOHelpOnRLS Controller" - {
 
     "must return OK and the correct view for a GET" in {
-
+      val formProvider = new SelectAlternativeServiceFormProvider()
+      val form = formProvider()
       val application = applicationBuilder(userAnswers =  Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.NINOHelpController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.NINOHelpOnRLSController.onPageLoad().url)
 
         val result = route(application, request).value
         status(result) mustEqual OK
-        val view = application.injector.instanceOf[NINOHelpView]
-        contentAsString(result) mustEqual view(NormalMode)(request, messages(application), config).toString
+        val view = application.injector.instanceOf[NINOHelpOnRLSView]
+        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application), config).toString
       }
     }
-
   }
 
 }
