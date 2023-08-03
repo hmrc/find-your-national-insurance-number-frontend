@@ -14,12 +14,15 @@
  * limitations under the License.
  *@
 
+@import play.twirl.api.Html
+@import config.FrontendAppConfig
+
 @this(
     layout: templates.Layout,
     govukButton: GovukButton
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@()(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
 @layout(pageTitle = titleNoForm(messages("phoneHMRCDetails.title"))) {
 
@@ -56,13 +59,22 @@
         </strong>
     </p>
 
-    <p class="govuk-body"> @messages("phoneHMRCDetails.openingTimes.label") </p>
-    <p class="govuk-body"> @messages("phoneHMRCDetails.openingTimes.mondayToFriday") </p>
-    <p class="govuk-body"> @messages("phoneHMRCDetails.openingTimes.weekendAndBankHoliday") </p>
+    <p class="govuk-body">
+        @messages("phoneHMRCDetails.openingTimes.label")
+        <br/>
+        @messages("phoneHMRCDetails.openingTimes.mondayToFriday")
+        <br/>
+        @messages("phoneHMRCDetails.openingTimes.weekendAndBankHoliday")
+    </p>
+
+
+    <div class="govuk-inset-text">
+        <p class="govuk-body">
+            @Html(messages( "phoneHMRCDetails.hmrcExtraHelp", config.hmrcExtraSupportUrl))
+        </p>
+    </div>
 
     <p class="govuk-body">
-        <a href="https://www.gov.uk/lost-national-insurance-number" class="govuk-link">
-            @messages("phoneHMRCDetails.goBackToGovUK")
-        </a>
+        @Html(messages("phoneHMRCDetails.findOutCallCharges", config.callChargesUrl))
     </p>
 }

@@ -107,21 +107,20 @@ ninoLetterPostedConfirmation.heading = Your National Insurance number will be se
 ninoLetterPostedConfirmation.letterArrival = We’ll post the letter confirming your number. It will arrive within 15 days.
 ninoLetterPostedConfirmation.goBackToGovUK = Exit and go back to GOV.UK
 
-selectAlternativeService.title = What would you like to do?
-selectAlternativeService.heading = What would you like to do?
+selectAlternativeService.title = How would you like to contact HMRC?
+selectAlternativeService.heading = How would you like to contact HMRC?
 selectAlternativeService.printForm = Print and post a form
 selectAlternativeService.printForm.hint = Once we have the completed form, we can send you a letter confirming your National Insurance number.
 selectAlternativeService.phoneHMRC = Phone HMRC
-selectAlternativeService.phoneHMRC.hint = You'll need to answer some questions, then we'll post you a letter with your number on it. We will not tell you your National Insurance number over the phone.
-selectAlternativeService.checkYourAnswersLabel = What would you like to do?
+selectAlternativeService.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it. We will not tell you your National Insurance number over the phone.
+selectAlternativeService.checkYourAnswersLabel = How would you like to contact HMRC?
 selectAlternativeService.error.required = Select what would you like to do
 selectAlternativeService.change.hidden = SelectAlternativeService
 selectAlternativeService.tryAgain = Try again to confirm your identity online
-
-selectAlternativeService.options = These are your options if:
-selectAlternativeService.options.cannotConfirmIdentity = you are not able to confirm your identity online
-selectAlternativeService.options.postToAnotherAddress = you need us to post your National Insurance number to a different address
-selectAlternativeService.options.nameChange = you name has changed, and we have your old one
+selectAlternativeService.requestALetterOnline = Request a letter online
+selectAlternativeService.options = These are your options if you:
+selectAlternativeService.options.l1 = are not able to get your National Insurance number online
+selectAlternativeService.options.l2 = need us to post your number to a different address
 
 phoneHMRCDetails.title = Phone HMRC for a letter with your National Insurance number on it
 phoneHMRCDetails.heading = Phone HMRC for a letter with your National Insurance number on it
@@ -140,7 +139,8 @@ phoneHMRCDetails.outsideUK.number = +44 191 203 7010
 phoneHMRCDetails.openingTimes.label = Opening times:
 phoneHMRCDetails.openingTimes.mondayToFriday = Monday to Friday: 8am to 6pm
 phoneHMRCDetails.openingTimes.weekendAndBankHoliday = Closed on Saturdays, Sundays and bank holidays.
-phoneHMRCDetails.goBackToGovUK = Exit and go back to GOV.UK
+phoneHMRCDetails.hmrcExtraHelp = Get help <a href="{0}" target="_blank">dealing with HMRC if you have additional needs.</a>
+phoneHMRCDetails.findOutCallCharges = <a href="{0}" target="_blank">Find out about call charges.</a>
 
 viewNinoInPTA.title = You can view your National Insurance number in your personal tax account
 viewNinoInPTA.heading = You can view your National Insurance number in your personal tax account
@@ -158,3 +158,16 @@ interruptView.li2.address.line2 = HM Revenue and Customs
 interruptView.li2.address.postcode = BX9 1AN
 interruptView.p1 = If you are filling out a CA5403 form, you may need to prove your identity with certain documents. The online form will tell you which documents you need.
 interruptView.p2 = Your National Insurance number should arrive within 15 days of you contacting us.
+
+ninoHelpView.title = National Insurance number help
+ninoHelpView.heading = National Insurance number help
+ninoHelpView.h2 = HMRC can post your number to you
+ninoHelpView.p1 = You can get your National Insurance number in the post if you need a reminder or a letter confirming it.
+ninoHelpView.p2 = HMRC will not tell you your National Insurance number over the phone. They’ll post it to you and it’ll arrive within 15 working days.
+ninoHelpView.getYourNINOByPost = Get your National Insurance number by post
+ninoHelpView.contactHMRC = <a href="{0}">Contact HMRC to request a letter</a>
+
+ninoHelpOnRLSView.title = National Insurance number help
+ninoHelpOnRLSView.heading = National Insurance number help
+ninoHelpOnRLSView.p1 = You need to contact HMRC to get your National Insurance number in the post if you need a reminder or a letter confirming it.
+ninoHelpOnRLSView.p2 = What would you like to do?

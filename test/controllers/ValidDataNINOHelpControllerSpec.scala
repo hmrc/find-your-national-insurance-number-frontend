@@ -17,28 +17,29 @@
 package controllers
 
 import base.SpecBase
+import models.NormalMode
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.PhoneHMRCDetailsView
+import views.html.ValidDataNINOHelpView
 
-class PhoneHMRCDetailsControllerSpec extends SpecBase {
+class ValidDataNINOHelpControllerSpec extends SpecBase {
 
-  "PhoneHMRCDetails Controller" - {
+  "InvalidDataNINOHelp Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers =  Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.PhoneHMRCDetailsController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.ValidDataNINOHelpController.onPageLoad().url)
 
         val result = route(application, request).value
-
-        val view = application.injector.instanceOf[PhoneHMRCDetailsView]
-
         status(result) mustEqual OK
-        contentAsString(result) contains view()(request, messages(application), config).toString
+        val view = application.injector.instanceOf[ValidDataNINOHelpView]
+        contentAsString(result) mustEqual view(NormalMode)(request, messages(application), config).toString
       }
     }
+
   }
+
 }

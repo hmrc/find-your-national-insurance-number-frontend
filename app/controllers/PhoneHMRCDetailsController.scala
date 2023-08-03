@@ -16,7 +16,9 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
+
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -30,7 +32,7 @@ class PhoneHMRCDetailsController @Inject()(
                                        requireData: DataRequiredAction,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: PhoneHMRCDetailsView
-                                     ) extends FrontendBaseController with I18nSupport {
+                                     )(implicit config: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>

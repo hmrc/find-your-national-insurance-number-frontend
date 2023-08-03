@@ -43,3 +43,64 @@ setUpGGUserIDStart.heading = Creu Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llyw
 setUpGGUserIDStart.p1 = Bydd angen y canlynol arnoch:
 setUpGGUserIDStart.l1.li1 = cyfeiriad e-bost
 setUpGGUserIDStart.l1.li2 = rhif ffôn neu ap dilysu
+
+selectNINOLetterAddress.title = I ble’r hoffech i ni anfon y llythyr?
+selectNINOLetterAddress.heading = I ble’r hoffech i ni anfon y llythyr?
+selectNINOLetterAddress.postCode = I’r cyfeiriad sydd â’r cod post {0}
+selectNINOLetterAddress.notThisAddress = Dim i’r cyfeiriad hwn
+selectNINOLetterAddress.checkYourAnswersLabel = I ble’r hoffech i ni anfon y llythyr?
+selectNINOLetterAddress.error.required = Please select where you would like the letter to be sent
+selectNINOLetterAddress.change.hidden = SelectNINOLetterAddress
+
+ninoLetterPostedConfirmation.title = Bydd eich rhif Yswiriant Gwladol yn cael ei anfon drwy’r post
+ninoLetterPostedConfirmation.heading = Bydd eich rhif Yswiriant Gwladol yn cael ei anfon drwy’r post
+ninoLetterPostedConfirmation.letterArrival = Byddwn yn postio’r llythyr sy’n cadarnhau’ch rhif. Bydd hwn yn cyrraedd cyn pen 15 diwrnod.
+ninoLetterPostedConfirmation.goBackToGovUK = Gadael ac yn ôl i GOV.UK
+
+selectAlternativeService.title = Sut yr hoffech chi gysylltu â CThEF?
+selectAlternativeService.heading = Sut yr hoffech chi gysylltu â CThEF?
+selectAlternativeService.printForm = Argraffu ac anfon ffurflen
+selectAlternativeService.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, gallwn anfon lythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol.
+selectAlternativeService.phoneHMRC = Ffonio CThEF
+selectAlternativeService.phoneHMRC.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno. Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
+selectAlternativeService.checkYourAnswersLabel = Sut yr hoffech chi gysylltu â CThEF?
+selectAlternativeService.error.required = Select what would you like to do
+selectAlternativeService.change.hidden = SelectAlternativeService
+selectAlternativeService.tryAgain = Try again to confirm your identity online
+selectAlternativeService.requestALetterOnline = Gwneud cais am lythyr ar-lein
+selectAlternativeService.options = Dyma’ch opsiynau os:
+selectAlternativeService.options.l1 = ni allwch gael eich rhif Yswiriant Gwladol ar-lein
+selectAlternativeService.options.l2 = oes angen arnoch i ni anfon eich rhif drwy’r post i gyfeiriad arall
+
+phoneHMRCDetails.title = Ffoniwch CThEF i gael llythyr gyda’ch rhif Yswiriant Gwladol arno
+phoneHMRCDetails.heading = Ffoniwch CThEF i gael llythyr gyda’ch rhif Yswiriant Gwladol arno
+phoneHMRCDetails.options = Wrth ffonio, mae angen i chi wybod:
+phoneHMRCDetails.options.notTellNINOViaPhone = ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn
+phoneHMRCDetails.options.answerQuestions = bydd angen i chi ateb ychydig o gwestiynau amdanoch chi’ch hun
+phoneHMRCDetails.options.arrivalTime = gall y llythyr gymryd hyd at 15 diwrnod gwaith i gyrraedd
+
+phoneHMRCDetails.telephone.label = Ffôn:
+phoneHMRCDetails.telephone.number = 0300 200 3500
+phoneHMRCDetails.textphone.label = Textphone:
+phoneHMRCDetails.textphone.number = 0300 200 3519
+phoneHMRCDetails.outsideUK.label = O’r tu allan i’r DU:
+phoneHMRCDetails.outsideUK.number = +44 191 203 7010
+
+phoneHMRCDetails.openingTimes.label = Oriau agor:
+phoneHMRCDetails.openingTimes.mondayToFriday = Dydd Llun i ddydd Gwener: 08:30 tan 17:00
+phoneHMRCDetails.openingTimes.weekendAndBankHoliday = Ar gau ar y penwythnos ac ar wyliau banc.
+phoneHMRCDetails.hmrcExtraHelp =
+phoneHMRCDetails.findOutCallCharges =
+
+ninoHelpView.title = Help gyda Rhif Yswiriant Gwladol
+ninoHelpView.heading = Help gyda Rhif Yswiriant Gwladol
+ninoHelpView.h2 = Gall CThEF anfon eich rhif atoch drwy’r post
+ninoHelpView.p1 = Gallwch gael eich rhif Yswiriant Gwladol drwy’r post os ydych angen nodyn atgoffa neu lythyr yn ei gadarnhau.
+ninoHelpView.p2 = Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn. Byddant yn ei bostio atoch a bydd yn cyrraedd cyn pen 15 diwrnod gwaith.
+ninoHelpView.getYourNINOByPost = Cael eich rhif Yswiriant Gwladol drwy’r post
+ninoHelpView.contactHMRC = <a href="{0}">Cysylltwch â CThEF i wneud cais am lythyr</a>
+
+ninoHelpOnRLSView.title = Help gyda Rhif Yswiriant Gwladol
+ninoHelpOnRLSView.heading = Help gyda Rhif Yswiriant Gwladol
+ninoHelpOnRLSView.p1 = Mae angen i chi gysylltu â CThEF i gael eich rhif Yswiriant Gwladol drwy’r post os ydych angen nodyn atgoffa neu lythyr yn ei gadarnhau.
+ninoHelpOnRLSView.p2 = Beth yr hoffech ei wneud?
