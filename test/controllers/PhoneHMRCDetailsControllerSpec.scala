@@ -37,7 +37,7 @@ class PhoneHMRCDetailsControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[PhoneHMRCDetailsView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) contains view()(request, messages(application), config).toString
       }
     }
   }

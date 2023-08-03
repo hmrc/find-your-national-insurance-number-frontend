@@ -89,7 +89,8 @@ phoneHMRCDetails.outsideUK.number = +44 191 203 7010
 phoneHMRCDetails.openingTimes.label = Oriau agor:
 phoneHMRCDetails.openingTimes.mondayToFriday = Dydd Llun i ddydd Gwener: 08:30 tan 17:00
 phoneHMRCDetails.openingTimes.weekendAndBankHoliday = Ar gau ar y penwythnos ac ar wyliau banc.
-phoneHMRCDetails.goBackToGovUK = Gadael ac yn ôl i GOV.UK
+phoneHMRCDetails.hmrcExtraHelp =
+phoneHMRCDetails.findOutCallCharges =
 
 ninoHelpView.title = Help gyda Rhif Yswiriant Gwladol
 ninoHelpView.heading = Help gyda Rhif Yswiriant Gwladol

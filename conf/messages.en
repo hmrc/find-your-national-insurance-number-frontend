@@ -112,7 +112,7 @@ selectAlternativeService.heading = How would you like to contact HMRC?
 selectAlternativeService.printForm = Print and post a form
 selectAlternativeService.printForm.hint = Once we have the completed form, we can send you a letter confirming your National Insurance number.
 selectAlternativeService.phoneHMRC = Phone HMRC
-selectAlternativeService.phoneHMRC.hint = You'll need to answer some questions, then we'll post you a letter with your number on it. We will not tell you your National Insurance number over the phone.
+selectAlternativeService.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it. We will not tell you your National Insurance number over the phone.
 selectAlternativeService.checkYourAnswersLabel = How would you like to contact HMRC?
 selectAlternativeService.error.required = Select what would you like to do
 selectAlternativeService.change.hidden = SelectAlternativeService
@@ -139,7 +139,8 @@ phoneHMRCDetails.outsideUK.number = +44 191 203 7010
 phoneHMRCDetails.openingTimes.label = Opening times:
 phoneHMRCDetails.openingTimes.mondayToFriday = Monday to Friday: 8am to 6pm
 phoneHMRCDetails.openingTimes.weekendAndBankHoliday = Closed on Saturdays, Sundays and bank holidays.
-phoneHMRCDetails.goBackToGovUK = Exit and go back to GOV.UK
+phoneHMRCDetails.hmrcExtraHelp = Get help <a href="{0}" target="_blank">dealing with HMRC if you have additional needs.</a>
+phoneHMRCDetails.findOutCallCharges = <a href="{0}" target="_blank">Find out about call charges.</a>
 
 viewNinoInPTA.title = You can view your National Insurance number in your personal tax account
 viewNinoInPTA.heading = You can view your National Insurance number in your personal tax account
