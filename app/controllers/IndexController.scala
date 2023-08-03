@@ -17,29 +17,20 @@
 package controllers
 
 import controllers.actions.IdentifierAction
-import play.api.Logging
-
 import javax.inject.Inject
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.PersonalDetailsValidationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.IndexView
-
-import scala.concurrent.ExecutionContext
 
 class IndexController @Inject()(
                                  val controllerComponents: MessagesControllerComponents,
                                  identify: IdentifierAction,
-                                 view: IndexView,
-                                 pdvService: PersonalDetailsValidationService
-                               )(implicit executionContext: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging{
+                                 view: IndexView
+                               ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] =
-    identify.async { implicit request =>
-      val validationId = "" // TODO temporarily put a valid validationID in here. In IndexController temporarily for testing purposes
-      for {
-        details <- pdvService.getPersonalDetailsValidation(validationId)
-      } yield Ok(details.toString)
-  }
+  def onPageLoad: Action[AnyContent] =
+    identify { implicit request =>
+      Ok(view())
+    }
 }

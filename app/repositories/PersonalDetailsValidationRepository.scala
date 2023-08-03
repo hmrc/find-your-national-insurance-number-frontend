@@ -17,74 +17,45 @@
 package repositories
 
 import com.google.inject.{Inject, Singleton}
-import models.PersonalDetails
-import org.joda.time.{DateTime, DateTimeZone}
-import play.api.libs.json.{Format, Json}
+import models.PersonalDetailsValidation
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes}
 import play.api.Logging
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
-import uk.gov.hmrc.mongo.play.json.formats.{MongoBinaryFormats, MongoJodaFormats}
 
-import scala.concurrent.{ExecutionContext, Future}
-
-case class RowPersonalDetailsValidation(validationId: String,
-                                        validationStatus: String,
-                                        personalDetails: String,
-                                        dateCreated: String,
-                                        lastUpdated: String)
-
-object RowPersonalDetailsValidation {
-  def apply(validationId: String,
-            validationStatus: String,
-            personalDetails: String,
-            dateCreated: String): RowPersonalDetailsValidation = {
-    RowPersonalDetailsValidation(validationId, validationStatus, personalDetails, dateCreated, DateTime.now(DateTimeZone.UTC).toLocalDateTime.toString())
-  }
-
-  implicit val dateFormat: Format[DateTime] = MongoJodaFormats.dateTimeFormat
-  implicit val arrayFormat: Format[Array[Byte]] = MongoBinaryFormats.byteArrayFormat
-  implicit val mongoFormat: Format[RowPersonalDetailsValidation] = Json.format[RowPersonalDetailsValidation]
-}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 @Singleton
 class PersonalDetailsValidationRepository @Inject()(mongoComponent: MongoComponent)
-                                                   (implicit ec: ExecutionContext) extends PlayMongoRepository[RowPersonalDetailsValidation](
+                                                   (implicit ec: ExecutionContext) extends PlayMongoRepository[PersonalDetailsValidation](
   collectionName = "personal-details-validation",
   mongoComponent = mongoComponent,
-  domainFormat = RowPersonalDetailsValidation.mongoFormat,
+  domainFormat = PersonalDetailsValidation.format,
   indexes = Seq(
     IndexModel(
-      Indexes.ascending("validationId"),
-      IndexOptions().name("validationId").unique(true)
+      Indexes.ascending("id"),
+      IndexOptions().name("idIdx").unique(true)
     ),
     IndexModel(
-      Indexes.ascending("nino"),
-      IndexOptions().name("nino").unique(true)
+      Indexes.ascending("personalDetails.nino"),
+      IndexOptions().name("ninoIdx").unique(true)
     )
   )
 ) with Logging {
-  def insert(validationId: String,
-             validationStatus: String,
-             personalDetails: String//,
-             //dateCreated: String
-  ) (implicit ec: ExecutionContext): Future[Unit] = {
+  def insert(personalDetailsValidation: PersonalDetailsValidation)
+            (implicit ec: ExecutionContext): Future[Unit] = {
     logger.info(s"Inserted one in $collectionName table")
-    collection.insertOne(RowPersonalDetailsValidation(
-      validationId,
-      validationStatus,
-      personalDetails,
-      //dateCreated, // TODO Findout how to do this.
-      DateTime.now(DateTimeZone.UTC).toLocalDateTime.toString(),
-      DateTime.now(DateTimeZone.UTC).toLocalDateTime.toString())
-    ).toFuture().map(_ => ())
+    collection.insertOne(personalDetailsValidation).toFuture().map(_ => ())
   }
 
-  def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[RowPersonalDetailsValidation]] =
-    collection.find(Filters.equal("validationId", id))
+  def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[PersonalDetailsValidation]] = {
+    val value = Await.result(collection.find(Filters.equal("id", id)).headOption(), Duration.Inf)
+    collection.find(Filters.equal("id", id))
       .headOption()
+  }
 
-  def findByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[RowPersonalDetailsValidation]] =
-    collection.find(Filters.equal("nino", nino))
+  def findByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PersonalDetailsValidation]] =
+    collection.find(Filters.equal("personalDetails.nino", nino))
       .headOption()
 }

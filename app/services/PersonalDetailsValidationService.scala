@@ -17,7 +17,7 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.{PersonalDetailsValidation, PersonalDetailsValidationResponse}
+import models.{PersonalDetailsValidation, PersonalDetailsValidationResponse, PersonalDetailsValidationSuccessResponse}
 import repositories.PersonalDetailsValidationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -28,30 +28,31 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
                                                      personalDetailsValidationRepository: PersonalDetailsValidationRepository
                                          )(implicit val ec: ExecutionContext) {
 
-  // API call to PDV to retrieve personal details
-  def getPersonalDetailsValidation(validationId: String)(implicit hc: HeaderCarrier): Future[PersonalDetailsValidationResponse] =
+   private def fetchPersonalDetailsValidation(validationId: String)(implicit hc: HeaderCarrier): Future[PersonalDetailsValidationResponse] =
     connector.retrieveMatchingDetails(validationId)
 
-  // Store personal details in the mongoDB
-  //def createPersonalDetailsValidation(validationId: String, validationStatus: String, personalDetails: String, dateCreated: String)
-  def createPersonalDetailsValidation(pdValidation: PersonalDetailsValidation)
-                                     (implicit ec: ExecutionContext): Future[Unit] = //{
-                                     //(implicit ec: ExecutionContext): Either[Exception, String] = {
-    // TODO change pdValidation.personalDetails type from sting to something to accomodate all fileds of PersonalDetails
-    //personalDetailsValidationRepository.insert(pdValidation.id, pdValidation.validationStatus, pdValidation.personalDetails)
-    // TODO change .get from `pdValidation.personalDetails.get.firstName`
-    personalDetailsValidationRepository.insert(pdValidation.id, pdValidation.validationStatus, pdValidation.personalDetails.get.firstName)
-    //Right(pdValidation.id)
-  //}
-
-  // Get personal details from db by id
-  def getPersonalDetailsValidationByValidationId(validationId: String)(implicit ec: ExecutionContext): Future[Option[String]] = {
-    personalDetailsValidationRepository.findByValidationId(validationId).map(_.map(_.personalDetails))
+  def createPDVFromValidationId(validationId: String)(implicit hc: HeaderCarrier): Future[String] = {
+    fetchPersonalDetailsValidation(validationId).map {
+      case PersonalDetailsValidationSuccessResponse(pdv) => createPersonalDetailsValidation(pdv) match {
+        case Left(ex) => throw ex
+        case Right(value) => value
+      }
+      case _ => throw new NotImplementedError() // TODO
+    }
   }
 
-  // Get personal details from db by nino
-  def getPersonalDetailsValidationByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[String]] = {
-    personalDetailsValidationRepository.findByNino(nino).map(_.map(_.personalDetails))
+   private def createPersonalDetailsValidation(personalDetailsValidation: PersonalDetailsValidation)
+                                     (implicit ec: ExecutionContext): Either[Exception, String] = {
+    personalDetailsValidationRepository.insert(personalDetailsValidation)
+     Right("Inserted successfully for validationId: " + personalDetailsValidation.id)
+  }
+
+  def getPersonalDetailsValidationByValidationId(validationId: String)(implicit ec: ExecutionContext): Future[Option[PersonalDetailsValidation]] = {
+    personalDetailsValidationRepository.findByValidationId(validationId)
+  }
+
+  def getPersonalDetailsValidationByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PersonalDetailsValidation]] = {
+    personalDetailsValidationRepository.findByNino(nino)
   }
 
 }
