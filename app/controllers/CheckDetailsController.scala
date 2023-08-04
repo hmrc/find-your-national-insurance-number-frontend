@@ -17,33 +17,50 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import models.Mode
+import controllers.actions.IdentifierAction
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.PersonalDetailsValidationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
 class CheckDetailsController @Inject()(
                                         override val messagesApi: MessagesApi,
                                         identify: IdentifierAction,
-                                        getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
+                                        personalDetailsValidationService: PersonalDetailsValidationService,
                                         val controllerComponents: MessagesControllerComponents
-                                      )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
+                                      )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
-  def onPageLoad(validationId: String): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(validationId: String): Action[AnyContent] = identify {
     implicit request =>
       // TODO Step 1:- PDV Validation logic
       // TODO Step 2:- API 1694 integration
 
+      personalDetailsValidationService.createPDVFromValidationId(validationId).onComplete {
+        case Success(value) => {
+          logger.info(value)
+          personalDetailsValidationService.getPersonalDetailsValidationByValidationId(validationId).onComplete {
+            case Success(pdv) => {
+              logger.info("pdv result: " + pdv)
+              val ninoFromPDV = pdv.map(_.personalDetails.map(_.nino).getOrElse("")).getOrElse("")
+              val postCodeFromPDV = pdv.map(_.personalDetails.map(_.postCode).getOrElse("")).getOrElse("")
+            }
+            case Failure(ex) => logger.warn(ex.getMessage)
+          }
+        }
+        case Failure(ex) => logger.warn(ex.getMessage)
+      }
+
       val postCodeMatched = true // TODO expecting flag value after performing these two steps
-      if(postCodeMatched)
+      if(postCodeMatched) {
         Redirect(routes.ValidDataNINOHelpController.onPageLoad())
-      else
+      } else {
         Redirect(routes.InvalidDataNINOHelpController.onPageLoad())
+      }
   }
 
 }

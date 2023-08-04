@@ -17,8 +17,8 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import models.Mode
+import controllers.actions.IdentifierAction
+import models.{Mode, NormalMode}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -30,13 +30,11 @@ import scala.concurrent.ExecutionContext
 class ValidDataNINOHelpController @Inject()(
                                     override val messagesApi: MessagesApi,
                                     identify: IdentifierAction,
-                                    getData: DataRetrievalAction,
-                                    requireData: DataRequiredAction,
                                     view: ValidDataNINOHelpView,
                                     val controllerComponents: MessagesControllerComponents
                                   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = identify {
     implicit request =>
       Ok(view(mode))
   }

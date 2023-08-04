@@ -23,8 +23,7 @@ import play.api.Logging
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PersonalDetailsValidationRepository @Inject()(mongoComponent: MongoComponent)
@@ -39,18 +38,17 @@ class PersonalDetailsValidationRepository @Inject()(mongoComponent: MongoCompone
     ),
     IndexModel(
       Indexes.ascending("personalDetails.nino"),
-      IndexOptions().name("ninoIdx").unique(true)
+      IndexOptions().name("ninoIdx")
     )
   )
 ) with Logging {
   def insert(personalDetailsValidation: PersonalDetailsValidation)
             (implicit ec: ExecutionContext): Future[Unit] = {
-    logger.info(s"Inserted one in $collectionName table")
+    logger.info(s"Inserting one in $collectionName table")
     collection.insertOne(personalDetailsValidation).toFuture().map(_ => ())
   }
 
   def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[PersonalDetailsValidation]] = {
-    val value = Await.result(collection.find(Filters.equal("id", id)).headOption(), Duration.Inf)
     collection.find(Filters.equal("id", id))
       .headOption()
   }
