@@ -51,3 +51,5 @@ GET         /changeSelectAlternativeService                 controllers.SelectAl
 POST        /changeSelectAlternativeService                 controllers.SelectAlternativeServiceController.onSubmit(mode: Mode = CheckMode)
 
 GET         /phoneHMRCDetails                               controllers.PhoneHMRCDetailsController.onPageLoad()
+
+GET         /checkDetails/:validationId                     controllers.CheckDetailsController.onPageLoad(validationId: String)
