@@ -17,17 +17,21 @@
 package repositories
 
 import com.google.inject.{Inject, Singleton}
+import config.FrontendAppConfig
 import models.PersonalDetailsValidation
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes}
 import play.api.Logging
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PersonalDetailsValidationRepository @Inject()(mongoComponent: MongoComponent)
-                                                   (implicit ec: ExecutionContext) extends PlayMongoRepository[PersonalDetailsValidation](
+class PersonalDetailsValidationRepository @Inject()(
+  mongoComponent: MongoComponent,
+  appConfig: FrontendAppConfig
+)(implicit ec: ExecutionContext) extends PlayMongoRepository[PersonalDetailsValidation](
   collectionName = "personal-details-validation",
   mongoComponent = mongoComponent,
   domainFormat = PersonalDetailsValidation.format,
@@ -39,6 +43,12 @@ class PersonalDetailsValidationRepository @Inject()(mongoComponent: MongoCompone
     IndexModel(
       Indexes.ascending("personalDetails.nino"),
       IndexOptions().name("ninoIdx")
+    ),
+    IndexModel(
+      Indexes.ascending("lastUpdated"),
+      IndexOptions()
+        .name("lastUpdatedIdx")
+        .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
     )
   )
 ) with Logging {
