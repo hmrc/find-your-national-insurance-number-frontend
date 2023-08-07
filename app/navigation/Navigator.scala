@@ -72,7 +72,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
   private def navigateSelectAlternativeService(userAnswers: UserAnswers): Call =
     userAnswers.get(SelectAlternativeServicePage) match {
       case Some(SelectAlternativeService.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
-      case Some(SelectAlternativeService.PrintForm) => Call(GET, config.ninoByPostServiceUrl + config.getNinoByPostUrl)
+      case Some(SelectAlternativeService.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
       case _                                        => routes.JourneyRecoveryController.onPageLoad()
     }
 }
