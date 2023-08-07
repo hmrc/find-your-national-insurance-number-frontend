@@ -29,11 +29,11 @@ import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 class CheckDetailsController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        identify: IdentifierAction,
-                                        personalDetailsValidationService: PersonalDetailsValidationService,
-                                        val controllerComponents: MessagesControllerComponents
-                                      )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
+    override val messagesApi: MessagesApi,
+    identify: IdentifierAction,
+    personalDetailsValidationService: PersonalDetailsValidationService,
+    val controllerComponents: MessagesControllerComponents
+  )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(validationId: String): Action[AnyContent] = identify {
     implicit request =>
@@ -46,8 +46,8 @@ class CheckDetailsController @Inject()(
           personalDetailsValidationService.getPersonalDetailsValidationByValidationId(validationId).onComplete {
             case Success(pdv) => {
               logger.info("pdv result: " + pdv)
-              val ninoFromPDV = pdv.map(_.personalDetails.map(_.nino).getOrElse("")).getOrElse("")
-              val postCodeFromPDV = pdv.map(_.personalDetails.map(_.postCode).getOrElse("")).getOrElse("")
+              val ninoFromPDV = pdv.map(_.personalDetails.map(_.nino).getOrElse(""))
+              val postCodeFromPDV = pdv.map(_.personalDetails.map(_.postCode).getOrElse(""))
             }
             case Failure(ex) => logger.warn(ex.getMessage)
           }

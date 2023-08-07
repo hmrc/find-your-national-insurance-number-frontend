@@ -37,7 +37,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
         case Left(ex) => throw ex
         case Right(value) => value
       }
-      case _ => throw new NotImplementedError() // TODO
+      case _ => throw new RuntimeException("Create PDV form validation failed.")
     }
   }
 
