@@ -33,7 +33,7 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers =  Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.InvalidDataNINOHelpController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.InvalidDataNINOHelpController.onPageLoad(mode = NormalMode).url)
 
         val result = route(application, request).value
         status(result) mustEqual OK

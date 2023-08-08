@@ -37,7 +37,7 @@
     <h1 class="govuk-heading-xl">@messages("ninoHelpView.heading")</h1>
     <p class="govuk-body">@messages("ninoHelpOnRLSView.p1")</p>
 
-    @formHelper(action = routes.SelectAlternativeServiceController.onSubmit(mode), 'autoComplete -> "off") {
+    @formHelper(action = routes.InvalidDataNINOHelpController.onSubmit(mode), 'autoComplete -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
