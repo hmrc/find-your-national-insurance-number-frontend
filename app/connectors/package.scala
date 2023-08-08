@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-package models
+import config.DesApiServiceConfig
+import models.CorrelationId
+import uk.gov.hmrc.http.HeaderCarrier
 
-import play.api.libs.json.{Format, Json}
+package object connectors {
+  def desApiHeaders(
+                     config: DesApiServiceConfig
+                   )(implicit hc: HeaderCarrier, correlationId: CorrelationId): HeaderCarrier = {
+    val headers = Seq(
+      "Authorization" -> s"Bearer ${config.token}",
+      "CorrelationId" -> correlationId.value.toString,
+      "Content-Type" -> "application/json",
+      "Environment" -> config.environment,
+      "OriginatorId" -> config.originatorId
+    )
 
-final case class NationalInsuranceNumber(nino: String) extends AnyVal
-
-object NationalInsuranceNumber {
-  implicit val format: Format[IndividualDetailsNino] = Json.valueFormat[IndividualDetailsNino]
+    hc.withExtraHeaders(headers: _*)
+  }
 }

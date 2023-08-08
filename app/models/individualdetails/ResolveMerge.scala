@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-package models
+package models.individualdetails
 
-import play.api.libs.json.{Format, Json}
-
-final case class NationalInsuranceNumber(nino: String) extends AnyVal
-
-object NationalInsuranceNumber {
-  implicit val format: Format[IndividualDetailsNino] = Json.valueFormat[IndividualDetailsNino]
-}
+final case class ResolveMerge(value: Char) extends AnyVal

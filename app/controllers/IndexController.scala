@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{UnauthenticatedIdentifierAction, UnauthenticatedIdentifierActionImpl}
+import controllers.actions.UnauthenticatedIdentifierActionImpl
 
 import javax.inject.Inject
 import play.api.i18n.I18nSupport

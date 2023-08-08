@@ -71,4 +71,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   val ninoByPostServiceUrl: String = configuration.get[Service]("microservice.services.national-insurance-number-by-post").baseUrl
 
+  def individualDetails: DesApiServiceConfig =
+    DesApiServiceConfig(configuration.get[Configuration]("microservice.services.individual-details"))
+
+  def cacheSecretKey:                 String      = configuration.get[String]("cache.secret-key")
+
 }

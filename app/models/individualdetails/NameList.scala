@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package models
+package models.individualdetails
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Json, OFormat}
 
-final case class NationalInsuranceNumber(nino: String) extends AnyVal
+final case class NameList(name: Option[List[Name]])
 
-object NationalInsuranceNumber {
-  implicit val format: Format[IndividualDetailsNino] = Json.valueFormat[IndividualDetailsNino]
+object NameList {
+  implicit val format: OFormat[NameList] = Json.format[NameList]
 }

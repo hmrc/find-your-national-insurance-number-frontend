@@ -16,10 +16,10 @@
 
 package models
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.Json
 
-final case class NationalInsuranceNumber(nino: String) extends AnyVal
+final case class AddressLine(value: String) extends AnyVal
 
-object NationalInsuranceNumber {
-  implicit val format: Format[IndividualDetailsNino] = Json.valueFormat[IndividualDetailsNino]
+object AddressLine {
+  implicit val format = Json.valueFormat[AddressLine]
 }

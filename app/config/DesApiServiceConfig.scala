@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-package models
+package config
 
-import play.api.libs.json.{Format, Json}
+import play.api.Configuration
 
-final case class NationalInsuranceNumber(nino: String) extends AnyVal
+final case class DesApiServiceConfig(
+    url:          String,
+    token:        String,
+    environment:  String,
+    originatorId: String
+)
 
-object NationalInsuranceNumber {
-  implicit val format: Format[IndividualDetailsNino] = Json.valueFormat[IndividualDetailsNino]
+object DesApiServiceConfig {
+  def apply(config: Configuration): DesApiServiceConfig =
+    DesApiServiceConfig(
+      config.get[String]("url"),
+      config.get[String]("auth-token"),
+      config.get[String]("environment"),
+      config.get[String]("originator-id")
+    )
 }
