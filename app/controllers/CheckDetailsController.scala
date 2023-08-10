@@ -34,7 +34,7 @@ class CheckDetailsController @Inject()(
                                         val controllerComponents: MessagesControllerComponents
                                       )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(validationId: String): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode, validationId: String): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       // TODO Step 1:- PDV Validation logic
       // TODO Step 2:- API 1694 integration
@@ -43,7 +43,7 @@ class CheckDetailsController @Inject()(
       if(postCodeMatched)
         Redirect(routes.ValidDataNINOHelpController.onPageLoad())
       else
-        Redirect(routes.InvalidDataNINOHelpController.onPageLoad())
+        Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode))
   }
 
 }
