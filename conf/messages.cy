@@ -104,3 +104,11 @@ ninoHelpOnRLSView.title = Help gyda Rhif Yswiriant Gwladol
 ninoHelpOnRLSView.heading = Help gyda Rhif Yswiriant Gwladol
 ninoHelpOnRLSView.p1 = Mae angen i chi gysylltu â CThEF i gael eich rhif Yswiriant Gwladol drwy’r post os ydych angen nodyn atgoffa neu lythyr yn ei gadarnhau.
 ninoHelpOnRLSView.p2 = Beth yr hoffech ei wneud?
+
+sendLetterError.title = Mae problem wedi codi
+sendLetterError.heading = Mae problem wedi codi
+sendLetterError.p1 = Gall hyn fod oherwydd y rhesymau canlynol:
+sendLetterError.li1 = mae llythyrau sydd wedi’u hanfon i’r cyfeiriad hwn naill ai heb gyrraedd pen eu taith, neu wedi’u dychwelyd atom
+sendLetterError.li2 = mae gan CThEF sawl cyfeiriad ar eich cyfer
+sendLetterError.li3 = mae gormod o geisiadau wedi codi ar-lein am y llythyr hwn
+sendLetterError.p2 = Mae angen i chi gysylltu â ni er mwyn cael eich rhif Yswiriant Gwladol drwy’r post.

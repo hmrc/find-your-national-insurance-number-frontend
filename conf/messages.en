@@ -171,3 +171,11 @@ ninoHelpOnRLSView.title = National Insurance number help
 ninoHelpOnRLSView.heading = National Insurance number help
 ninoHelpOnRLSView.p1 = You need to contact HMRC to get your National Insurance number in the post if you need a reminder or a letter confirming it.
 ninoHelpOnRLSView.p2 = What would you like to do?
+
+sendLetterError.title = There is a problem
+sendLetterError.heading = There is a problem
+sendLetterError.p1 = This might be because:
+sendLetterError.li1 = letters sent to this address have been undelivered or returned
+sendLetterError.li2 = HMRC has multiple addresses for you
+sendLetterError.li3 = the letter has been requested online too many times
+sendLetterError.p2 = You need to contact us to get your National Insurance number in the post.

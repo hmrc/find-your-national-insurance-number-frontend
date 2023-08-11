@@ -58,3 +58,9 @@ GET         /phoneHMRCDetails                               controllers.PhoneHMR
 
 GET         /checkDetails/:validationId                     controllers.CheckDetailsController.onPageLoad(mode: Mode = NormalMode, validationId: String)
 GET         /changeCheckDetails/:validationId               controllers.CheckDetailsController.onPageLoad(mode: Mode = CheckMode, validationId: String)
+
+GET         /sendLetterError                                controllers.SendLetterErrorController.onPageLoad(mode: Mode = NormalMode)
+POST        /sendLetterError                                controllers.SendLetterErrorController.onSubmit(mode: Mode = NormalMode)
+GET         /changeSendLetterError                          controllers.SendLetterErrorController.onPageLoad(mode: Mode = CheckMode)
+POST        /changeSendLetterError                          controllers.SendLetterErrorController.onSubmit(mode: Mode = NormalMode)
+
