@@ -81,7 +81,7 @@ phoneHMRCDetails.options.arrivalTime = gall y llythyr gymryd hyd at 15 diwrnod g
 
 phoneHMRCDetails.telephone.label = Ffôn:
 phoneHMRCDetails.telephone.number = 0300 200 3500
-phoneHMRCDetails.textphone.label = Textphone:
+phoneHMRCDetails.textphone.label = Ffôn testun
 phoneHMRCDetails.textphone.number = 0300 200 3519
 phoneHMRCDetails.outsideUK.label = O’r tu allan i’r DU:
 phoneHMRCDetails.outsideUK.number = +44 191 203 7010
@@ -89,8 +89,8 @@ phoneHMRCDetails.outsideUK.number = +44 191 203 7010
 phoneHMRCDetails.openingTimes.label = Oriau agor:
 phoneHMRCDetails.openingTimes.mondayToFriday = Dydd Llun i ddydd Gwener: 08:30 tan 17:00
 phoneHMRCDetails.openingTimes.weekendAndBankHoliday = Ar gau ar y penwythnos ac ar wyliau banc.
-phoneHMRCDetails.hmrcExtraHelp =
-phoneHMRCDetails.findOutCallCharges =
+phoneHMRCDetails.hmrcExtraHelp = Cael help <a href="{0}" target="_blank"> wrth ddelio â CThEF os oes gennych anghenion ychwanegol</a>
+phoneHMRCDetails.findOutCallCharges = <a href="{0}" target="_blank">Cael gwybod am gostau galwadau.</a>
 
 ninoHelpView.title = Help gyda Rhif Yswiriant Gwladol
 ninoHelpView.heading = Help gyda Rhif Yswiriant Gwladol
