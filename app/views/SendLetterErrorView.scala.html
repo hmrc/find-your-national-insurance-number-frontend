@@ -45,7 +45,7 @@
 
     <p class="govuk-body">@messages("sendLetterError.p2")</p>
 
-    @formHelper(action = routes.InvalidDataNINOHelpController.onSubmit(mode), 'autoComplete -> "off") {
+    @formHelper(action = routes.SendLetterErrorController.onSubmit(), 'autoComplete -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
