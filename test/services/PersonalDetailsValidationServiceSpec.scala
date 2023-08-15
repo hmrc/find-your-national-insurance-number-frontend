@@ -20,9 +20,8 @@ import connectors.PersonalDetailsValidationConnector
 import models.{PersonalDetails, PersonalDetailsValidation, PersonalDetailsValidationSuccessResponse}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
-import org.mockito.Mockito.reset
 import org.mockito.MockitoSugar
-import org.mockito.MockitoSugar.{mock, when}
+import org.mockito.MockitoSugar.mock
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
@@ -31,7 +30,7 @@ import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.Random
 
 class PersonalDetailsValidationServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach{

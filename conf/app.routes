@@ -36,7 +36,11 @@ GET         /changePostNationalInsuranceLetter              controllers.PostNINO
 POST        /changePostNationalInsuranceLetter              controllers.PostNINOLetterController.onSubmit(mode: Mode = CheckMode)
 
 GET         /validDataNINOHelp                              controllers.ValidDataNINOHelpController.onPageLoad(mode: Mode = NormalMode)
+
 GET         /invalidDataNINOHelp                            controllers.InvalidDataNINOHelpController.onPageLoad(mode: Mode = NormalMode)
+POST        /invalidDataNINOHelp                            controllers.InvalidDataNINOHelpController.onSubmit(mode: Mode = NormalMode)
+GET         /changeInvalidDataNINOHelp                      controllers.InvalidDataNINOHelpController.onPageLoad(mode: Mode = CheckMode)
+POST        /changeInvalidDataNINOHelp                      controllers.InvalidDataNINOHelpController.onSubmit(mode: Mode = CheckMode)
 
 GET         /selectNationalInsuranceLetterAddress           controllers.SelectNINOLetterAddressController.onPageLoad(mode: Mode = NormalMode)
 POST        /selectNationalInsuranceLetterAddress           controllers.SelectNINOLetterAddressController.onSubmit(mode: Mode = NormalMode)
@@ -52,4 +56,11 @@ POST        /changeSelectAlternativeService                 controllers.SelectAl
 
 GET         /phoneHMRCDetails                               controllers.PhoneHMRCDetailsController.onPageLoad()
 
-GET         /checkDetails/:validationId                     controllers.CheckDetailsController.onPageLoad(validationId: String)
+GET         /checkDetails/:validationId                     controllers.CheckDetailsController.onPageLoad(mode: Mode = NormalMode, validationId: String)
+GET         /changeCheckDetails/:validationId               controllers.CheckDetailsController.onPageLoad(mode: Mode = CheckMode, validationId: String)
+
+GET         /sendLetterError                                controllers.SendLetterErrorController.onPageLoad(mode: Mode = NormalMode)
+POST        /sendLetterError                                controllers.SendLetterErrorController.onSubmit(mode: Mode = NormalMode)
+GET         /changeSendLetterError                          controllers.SendLetterErrorController.onPageLoad(mode: Mode = CheckMode)
+POST        /changeSendLetterError                          controllers.SendLetterErrorController.onSubmit(mode: Mode = NormalMode)
+

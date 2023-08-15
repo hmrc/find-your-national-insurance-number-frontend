@@ -14,6 +14,9 @@
  * limitations under the License.
  *@
 
+@import config.FrontendAppConfig
+@import play.twirl.api.Html
+
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
@@ -22,23 +25,33 @@
     govukButton: GovukButton
 )
 
-@(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
-@layout(pageTitle = title(form, messages("selectAlternativeService.title"))) {
+@layout(
+    pageTitle = titleNoForm(messages("sendLetterError.title")),
+    timeout   = false,
+    showBackLink = true,
+    showSignOut = true
+) {
 
-    @formHelper(action = routes.SelectAlternativeServiceController.onSubmit(mode), 'autoComplete -> "off") {
+    <h1 class="govuk-heading-xl">@messages("sendLetterError.heading")</h1>
+    <p class="govuk-body">@messages("sendLetterError.p1")</p>
+
+    <ul class="govuk-list govuk-list--bullet">
+        <li> @messages("sendLetterError.li1")</li>
+        <li> @messages("sendLetterError.li2")</li>
+        <li> @messages("sendLetterError.li3")</li>
+    </ul>
+
+    <p class="govuk-body">@messages("sendLetterError.p2")</p>
+
+    @formHelper(action = routes.SendLetterErrorController.onSubmit(), 'autoComplete -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
         }
 
-        <h1 class="govuk-heading-l">@messages("selectAlternativeService.heading")</h1>
-
-        <p class="govuk-body">@messages("selectAlternativeService.options")</p>
-        <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-7">
-            <li>@messages("selectAlternativeService.options.l1")</li>
-            <li>@messages("selectAlternativeService.options.l2")</li>
-        </ul>
+        <h2 class="govuk-heading-m">@messages("ninoHelpOnRLSView.p2")</h2>
 
         @govukRadios(
             RadiosViewModel(
@@ -51,11 +64,6 @@
         @govukButton(
             ButtonViewModel(messages("site.continue"))
         )
-
-        <p class="govuk-body">
-            <a href="@routes.SelectNINOLetterAddressController.onPageLoad(mode)" class="govuk-link">
-                @messages("selectAlternativeService.requestALetterOnline")
-            </a>
-        </p>
     }
+
 }

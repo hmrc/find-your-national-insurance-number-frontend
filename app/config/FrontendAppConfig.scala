@@ -62,7 +62,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   val getNinoUrl: String = configuration.get[String]("external-url.get-nino.CA5403form")
 
-  val getNinoByPostUrl: String = configuration.get[String]("urls.getNinoByPost")
+  val printAndPostServiceUrl: String = configuration.get[String]("external-url.national-insurance-number-letter-frontend.host")
 
   val fmnGuidancePageUrl: String = configuration.get[String]("urls.fmnGuidancePage")
 
@@ -75,5 +75,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
     DesApiServiceConfig(configuration.get[Configuration]("microservice.services.individual-details"))
 
   def cacheSecretKey:                 String      = configuration.get[String]("cache.secret-key")
+
 
 }
