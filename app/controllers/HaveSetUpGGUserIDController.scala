@@ -36,7 +36,7 @@ class HaveSetUpGGUserIDController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        sessionRepository: SessionRepository,
                                        navigator: Navigator,
-                                       identify: IdentifierAction,
+                                       unauthenticatedIdentifierAction: UnauthenticatedIdentifierActionImpl,
                                        getData: DataRetrievalAction,
                                        requireData: DataRequiredAction,
                                        formProvider: HaveSetUpGGUserIDFormProvider,
@@ -47,7 +47,7 @@ class HaveSetUpGGUserIDController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (unauthenticatedIdentifierAction andThen getData) {
     implicit request =>
 
       val preparedForm = request.userAnswers match {
@@ -61,7 +61,7 @@ class HaveSetUpGGUserIDController @Inject()(
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] =
-    (identify andThen getData).async {
+    (unauthenticatedIdentifierAction andThen getData).async {
     implicit request =>
 
       form.bindFromRequest().fold(

@@ -69,4 +69,12 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val hmrcExtraSupportUrl: String = configuration.get[String]("urls.hmrcExtraSupport")
   val callChargesUrl: String = configuration.get[String]("urls.callCharges")
 
+  val ninoByPostServiceUrl: String = configuration.get[Service]("microservice.services.national-insurance-number-by-post").baseUrl
+
+  def individualDetails: DesApiServiceConfig =
+    DesApiServiceConfig(configuration.get[Configuration]("microservice.services.individual-details"))
+
+  def cacheSecretKey:                 String      = configuration.get[String]("cache.secret-key")
+
+
 }

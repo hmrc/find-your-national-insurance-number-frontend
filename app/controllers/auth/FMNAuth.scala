@@ -18,7 +18,7 @@ package controllers.auth
 
 import config.FrontendAppConfig
 import controllers.auth.FMNAuth.toContinueUrl
-import models.NationalInsuranceNumber
+import models.IndividualDetailsNino
 import play.api.Logging
 import play.api.mvc.{ActionBuilder, AnyContent, BodyParser, Call, ControllerComponents, Request, RequestHeader, Result}
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
@@ -33,7 +33,7 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class AuthContext[A](
-                                 nino: NationalInsuranceNumber,
+                                 nino: IndividualDetailsNino,
                                  isUser: Boolean,
                                  internalId: String,
                                  confidenceLevel: ConfidenceLevel,
@@ -91,7 +91,7 @@ trait FMNAuth extends AuthorisedFunctions with AuthRedirects with Logging {
       .retrieve(FMNRetrievals) {
         case Some(nino) ~ Some(User) ~ Some(internalId) ~ confidenceLevel ~ Some(affinityGroup) ~ allEnrolments ~ Some(name) =>
           //logger.debug("user is authorised: executing action block")
-          block(AuthContext(NationalInsuranceNumber(nino), isUser = true, internalId, confidenceLevel, affinityGroup, allEnrolments, name, request))
+          block(AuthContext(IndividualDetailsNino(nino), isUser = true, internalId, confidenceLevel, affinityGroup, allEnrolments, name, request))
         case _ =>
           //logger.warn("user could not be authorised: redirecting")
           Future successful Redirect(

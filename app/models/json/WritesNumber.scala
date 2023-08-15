@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package models
+package models.json
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{JsNumber, Writes}
 
-final case class NationalInsuranceNumber(nino: String) extends AnyVal
-
-object NationalInsuranceNumber {
-  implicit val format: Format[IndividualDetailsNino] = Json.valueFormat[IndividualDetailsNino]
+object WritesNumber {
+  def apply[T](f: T => Int): Writes[T] = {
+    Writes(f.andThen(JsNumber(_)))
+  }
 }

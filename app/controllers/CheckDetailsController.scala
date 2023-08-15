@@ -17,13 +17,25 @@
 package controllers
 
 import config.FrontendAppConfig
+import connectors.IndividualDetailsConnector
+
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+
+import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
+import models.{IndividualDetailsResponseEnvelope, CorrelationId, IndividualDetailsNino}
+import models.individualdetails.{IndividualDetails, ResolveMerge}
 import models.Mode
+
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+
+import uk.gov.hmrc.crypto.SymmetricCryptoFactory
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import java.util.UUID
 import javax.inject.Inject
+
 import scala.concurrent.ExecutionContext
 
 class CheckDetailsController @Inject()(
@@ -31,6 +43,7 @@ class CheckDetailsController @Inject()(
                                         identify: IdentifierAction,
                                         getData: DataRetrievalAction,
                                         requireData: DataRequiredAction,
+                                        individualDetailsConnector:         IndividualDetailsConnector,
                                         val controllerComponents: MessagesControllerComponents
                                       )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
 
@@ -39,6 +52,10 @@ class CheckDetailsController @Inject()(
       // TODO Step 1:- PDV Validation logic
       // TODO Step 2:- API 1694 integration
 
+
+      val t: IndividualDetailsResponseEnvelope[IndividualDetails] = getIndividualDetails(IndividualDetailsNino("AB123456C"))
+
+
       val postCodeMatched = true // TODO expecting flag value after performing these two steps
       if(postCodeMatched)
         Redirect(routes.ValidDataNINOHelpController.onPageLoad())
@@ -46,4 +63,15 @@ class CheckDetailsController @Inject()(
         Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode))
   }
 
+
+  def getIndividualDetails(nino: IndividualDetailsNino
+                          )(implicit ec: ExecutionContext, hc: HeaderCarrier): IndividualDetailsResponseEnvelope[IndividualDetails]     = {
+    implicit val crypto = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
+    implicit val correlationId = CorrelationId(UUID.randomUUID())
+    for {
+      individualDetails <- individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y'))
+      dd <- IndividualDetailsResponseEnvelope(Option(individualDetails).get)
+    } yield dd
+
+    }
 }
