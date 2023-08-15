@@ -89,5 +89,9 @@ object UserAnswers {
     ) (unlift(UserAnswers.unapply))
   }
 
+  def empty: UserAnswers = {
+    UserAnswers("")
+  }
+
   implicit val format: OFormat[UserAnswers] = OFormat(reads, writes)
 }
