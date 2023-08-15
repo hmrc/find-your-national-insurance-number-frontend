@@ -18,18 +18,24 @@ package controllers
 
 import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
+
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
 import models.{IndividualDetailsResponseEnvelope, CorrelationId, IndividualDetailsNino}
 import models.individualdetails.{IndividualDetails, ResolveMerge}
+import models.Mode
+
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+
 import uk.gov.hmrc.crypto.SymmetricCryptoFactory
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import java.util.UUID
 import javax.inject.Inject
+
 import scala.concurrent.ExecutionContext
 
 class CheckDetailsController @Inject()(
