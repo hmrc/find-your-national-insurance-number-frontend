@@ -32,21 +32,21 @@ object NinoSuffix {
 sealed trait AccountStatusType
 
 object AccountStatusType {
-  object FullLive                 extends AccountStatusType
-  object PseudoIomPre86           extends AccountStatusType
-  object FullIomPost86            extends AccountStatusType
-  object FullCancelled            extends AccountStatusType
-  object FullAmalgamated          extends AccountStatusType
-  object FullAdministrative       extends AccountStatusType
-  object PseudoWeeded             extends AccountStatusType
-  object PseudoAmalgamated        extends AccountStatusType
-  object PseudoOther              extends AccountStatusType
-  object Redundant                extends AccountStatusType
-  object ConversionRejection      extends AccountStatusType
-  object Redirected               extends AccountStatusType
-  object PayeTemporary            extends AccountStatusType
-  object AmalgamatedPayeTemporary extends AccountStatusType
-  object NotKnown                 extends AccountStatusType
+  case object FullLive                 extends AccountStatusType
+  case object PseudoIomPre86           extends AccountStatusType
+  case object FullIomPost86            extends AccountStatusType
+  case object FullCancelled            extends AccountStatusType
+  case object FullAmalgamated          extends AccountStatusType
+  case object FullAdministrative       extends AccountStatusType
+  case object PseudoWeeded             extends AccountStatusType
+  case object PseudoAmalgamated        extends AccountStatusType
+  case object PseudoOther              extends AccountStatusType
+  case object Redundant                extends AccountStatusType
+  case object ConversionRejection      extends AccountStatusType
+  case object Redirected               extends AccountStatusType
+  case object PayeTemporary            extends AccountStatusType
+  case object AmalgamatedPayeTemporary extends AccountStatusType
+  case object NotKnown                 extends AccountStatusType
 
   implicit val reads: Reads[AccountStatusType] = JsPath
     .read[Int]
@@ -156,7 +156,7 @@ object CrnIndicator {
 }
 
 final case class IndividualDetails(
-    ninoWithoutSuffix:  Nino,
+    ninoWithoutSuffix:  String,
     ninoSuffix:         Option[NinoSuffix],
     accountStatusType:  Option[AccountStatusType],
     dateOfEntry:        Option[LocalDate],
@@ -169,21 +169,22 @@ final case class IndividualDetails(
     nameList:           NameList,
     addressList:        AddressList
 ) {
-  def fullIdentifier: String = s"""${ninoWithoutSuffix.value}${ninoSuffix.map(_.value).getOrElse("")}"""
+  def fullIdentifier: String = s"""${ninoWithoutSuffix}${ninoSuffix.map(_.value).getOrElse("")}"""
 }
 
 object IndividualDetails {
 
-  implicit val reads: Format[IndividualDetails] = ((JsPath \ "nino").format[Nino] ~
-    (__ \ "ninoSuffix").formatNullable[NinoSuffix].inmap(_.filter(_ != NinoSuffix(" ")), identity[Option[NinoSuffix]]) ~
-    (__ \ "accountStatusType").formatNullable[AccountStatusType] ~
-    (__ \ "dateOfEntry").formatNullable[LocalDate] ~
-    (__ \ "dateOfBirth").format[LocalDate] ~
-    (__ \ "dateOfBirthStatus").formatNullable[DateOfBirthStatus] ~
-    (__ \ "dateOfDeath").formatNullable[LocalDate] ~
-    (__ \ "dateOfDeathStatus").formatNullable[DateOfDeathStatus] ~
-    (__ \ "dateOfRegistration").formatNullable[LocalDate] ~
-    (__ \ "crnIndicator").format[CrnIndicator] ~
+  implicit val reads: Format[IndividualDetails] =
+    ((JsPath \ "details" \ "nino").format[String] ~
+    (__ \ "details" \ "ninoSuffix").formatNullable[NinoSuffix].inmap(_.filter(_ != NinoSuffix(" ")), identity[Option[NinoSuffix]]) ~
+    (__ \ "details" \ "accountStatusType").formatNullable[AccountStatusType] ~
+    (__ \ "details" \ "dateOfEntry").formatNullable[LocalDate] ~
+    (__ \ "details" \ "dateOfBirth").format[LocalDate] ~
+    (__ \ "details" \ "dateOfBirthStatus").formatNullable[DateOfBirthStatus] ~
+    (__ \ "details" \ "dateOfDeath").formatNullable[LocalDate] ~
+    (__ \ "details" \ "dateOfDeathStatus").formatNullable[DateOfDeathStatus] ~
+    (__ \ "details" \ "dateOfRegistration").formatNullable[LocalDate] ~
+    (__ \ "details" \ "crnIndicator").format[CrnIndicator] ~
     (__ \ "nameList").format[NameList] ~
     (__ \ "addressList").format[AddressList])(IndividualDetails.apply _, unlift(IndividualDetails.unapply))
 

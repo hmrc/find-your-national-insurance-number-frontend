@@ -52,11 +52,11 @@ class CheckDetailsController @Inject()(
   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
 
-  def onPageLoad(mode: Mode, validationId: String): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      // TODO Step 1:- PDV Validation logic
-      // TODO Step 2:- API 1694 integration
+  def onPageLoad(mode: Mode, validationId: String): Action[AnyContent] = (identify andThen getData andThen requireData) async {
+    implicit request => {
 
+
+      // TODO Step 1:- PDV Validation logic
       personalDetailsValidationService.createPDVFromValidationId(validationId).onComplete {
         case Success(value) => {
           logger.info(value)
@@ -73,13 +73,27 @@ class CheckDetailsController @Inject()(
       }
 
 
-      val postCodeMatched = true // TODO expecting flag value after performing these two steps
-      if(postCodeMatched) {
-        Redirect(routes.ValidDataNINOHelpController.onPageLoad())
-      } else {
-        Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode))
-      }
+      // TODO Step 2:- API 1694 integration
+      val nino = "AB049513"
+      for {
+        id <- getIndividualDetails(IndividualDetailsNino(nino)).value
+      } yield id.fold(
+        error => Ok(error.errorMessage),
+        success => {
+          Ok(success.ninoWithoutSuffix + " " +
+            success.ninoSuffix.get.value + "\n" +
+            success.accountStatusType.get + "\n" +
+            success.addressList.address.get(0).addressStatus.get)
+        })
 
+//      val postCodeMatched = true // TODO expecting flag value after performing these two steps
+//      if(postCodeMatched) {
+//        Redirect(routes.ValidDataNINOHelpController.onPageLoad())
+//      } else {
+//        Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode))
+//      }
+
+    }
   }
 
 

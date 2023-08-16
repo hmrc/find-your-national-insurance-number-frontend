@@ -95,9 +95,9 @@ object AddressType {
 sealed trait AddressStatus
 
 object AddressStatus {
-  object NotDlo extends AddressStatus
-  object Dlo    extends AddressStatus
-  object Nfa    extends AddressStatus
+  case object NotDlo extends AddressStatus
+  case object Dlo    extends AddressStatus
+  case object Nfa    extends AddressStatus
 
   implicit val reads: Reads[AddressStatus] = JsPath
     .read[Int]
