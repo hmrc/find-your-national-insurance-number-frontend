@@ -14,23 +14,8 @@
  * limitations under the License.
  *@
 
-@this(
-    layout: templates.Layout,
-    govukButton: GovukButton
-)
+@this()
+@()(implicit request: RequestHeader)
 
-@(continueUrl: String)(implicit request: Request[_], messages: Messages)
-
-@layout(pageTitle = titleNoForm(messages("journeyRecovery.continue.title")), fullWidth = false) {
-
-    <h1 class="govuk-heading-xl">@messages("journeyRecovery.continue.heading")</h1>
-
-    <p class="govuk-body">@messages("journeyRecovery.continue.guidance")</p>
-
-    <p class="govuk-body">
-        @govukButton(
-            ButtonViewModel(messages("site.continue"))
-                .asLink(continueUrl)
-        )
-    </p>
-}
+<script src='@controllers.routes.Assets.versioned("javascripts/app.js")'></script>
+<script src="https://cdn.optimizely.com/js/8461600066.js"></script>

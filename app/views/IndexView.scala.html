@@ -24,7 +24,8 @@
 @layout(
     pageTitle    = titleNoForm(messages("index.title")),
     showBackLink = true,
-    backLinkUrlOverride = Some("https://www.gov.uk/lost-national-insurance-number")
+    backLinkUrl = "https://www.gov.uk/lost-national-insurance-number",
+    fullWidth = false
 ) {
 
     <h1 class="govuk-heading-l">@messages("index.heading")</h1>
