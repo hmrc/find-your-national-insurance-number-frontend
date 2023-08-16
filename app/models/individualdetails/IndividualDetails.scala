@@ -141,8 +141,8 @@ object DateOfDeathStatus {
 sealed trait CrnIndicator
 
 object CrnIndicator {
-  object False extends CrnIndicator
-  object True  extends CrnIndicator
+  case object False extends CrnIndicator
+  case object True  extends CrnIndicator
   implicit val reads: Reads[CrnIndicator] = JsPath
     .read[Int]
     .map {

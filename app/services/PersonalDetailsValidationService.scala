@@ -44,7 +44,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
    private def createPersonalDetailsValidation(personalDetailsValidation: PersonalDetailsValidation)
                                      (implicit ec: ExecutionContext): Either[Exception, String] = {
     personalDetailsValidationRepository.insert(personalDetailsValidation)
-     Right("Inserted successfully for validationId: " + personalDetailsValidation.id)
+     Right(personalDetailsValidation.id)
   }
 
   def getPersonalDetailsValidationByValidationId(validationId: String)(implicit ec: ExecutionContext): Future[Option[PersonalDetailsValidation]] = {

@@ -77,8 +77,8 @@ object CountryCode {
 sealed trait AddressType
 
 object AddressType {
-  object ResidentialAddress    extends AddressType
-  object CorrespondenceAddress extends AddressType
+  case object ResidentialAddress    extends AddressType
+  case object CorrespondenceAddress extends AddressType
 
   implicit val reads: Reads[AddressType] = JsPath
     .read[Int]
