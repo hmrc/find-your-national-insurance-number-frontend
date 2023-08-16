@@ -17,7 +17,6 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions.IdentifierAction
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -30,9 +29,6 @@ import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelop
 import models.{IndividualDetailsResponseEnvelope, CorrelationId, IndividualDetailsNino}
 import models.individualdetails.{IndividualDetails, ResolveMerge}
 import models.Mode
-
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 
 import uk.gov.hmrc.crypto.SymmetricCryptoFactory
 import uk.gov.hmrc.http.HeaderCarrier
@@ -48,11 +44,13 @@ import scala.util.{Failure, Success}
 class CheckDetailsController @Inject()(
     override val messagesApi: MessagesApi,
     identify: IdentifierAction,
+    getData: DataRetrievalAction,
+    requireData: DataRequiredAction,
     personalDetailsValidationService: PersonalDetailsValidationService,
+    individualDetailsConnector: IndividualDetailsConnector,
     val controllerComponents: MessagesControllerComponents
   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
-  
 
   def onPageLoad(mode: Mode, validationId: String): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -79,7 +77,7 @@ class CheckDetailsController @Inject()(
       if(postCodeMatched) {
         Redirect(routes.ValidDataNINOHelpController.onPageLoad())
       } else {
-        Redirect(routes.InvalidDataNINOHelpController.onPageLoad())
+        Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode))
       }
 
   }

@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import models.NormalMode
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -49,7 +50,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         .thenReturn(Future.successful(validationId))
 
       running(application) {
-        val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(validationId).url)
+        val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode, validationId).url)
 
         val result = route(application, request).value
 
