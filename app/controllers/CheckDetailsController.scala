@@ -20,8 +20,10 @@ import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
+import models.individualdetails.AccountStatusType.FullLive
 import models.individualdetails.AddressStatus.NotDlo
 import models.individualdetails.AddressType.ResidentialAddress
+import models.individualdetails.CrnIndicator.False
 import models.individualdetails.{AddressList, IndividualDetails, ResolveMerge}
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, PersonalDetailsValidation}
 import play.api.Logging
@@ -60,11 +62,11 @@ class CheckDetailsController @Inject()(
         idData <- getIndividualDetails(IndividualDetailsNino(pdvData.get.personalDetails.get.nino.nino)).value
       } yield idData.fold(
         error => Ok(error.errorMessage),
-        success => {
+        individualDetailsData => {
           val pdvPostCode: String = pdvData.get.personalDetails.get.postCode.get
-          val check = checkConditions(success, pdvPostCode)
+          val check = checkConditions(individualDetailsData, pdvPostCode)
 
-          logData(success, pdvData.get)
+          logData(individualDetailsData, pdvData.get)
 
           if (check == true) {
             Redirect(routes.ValidDataNINOHelpController.onPageLoad())
@@ -81,12 +83,11 @@ class CheckDetailsController @Inject()(
   }
 
 
-  def checkConditions(success: IndividualDetails, pdvPostCode: String): Boolean = {
-    success.accountStatusType.get.toString.equals("FullLive") &&
-      success.crnIndicator.toString.equals("False") &&
-      getAddressTypeResidential(success.addressList).addressStatus.get.equals(NotDlo) &&
-      getAddressTypeResidential(success.addressList).addressPostcode.get.value.equals(pdvPostCode)
-
+  def checkConditions(idData: IndividualDetails, pdvPostCode: String): Boolean = {
+    idData.accountStatusType.get.equals(FullLive) &&
+    idData.crnIndicator.equals(False) &&
+    getAddressTypeResidential(idData.addressList).addressStatus.get.equals(NotDlo) &&
+    getAddressTypeResidential(idData.addressList).addressPostcode.get.value.equals(pdvPostCode)
   }
 
 
