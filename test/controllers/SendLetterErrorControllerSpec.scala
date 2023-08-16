@@ -29,30 +29,33 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
-import views.html.InvalidDataNINOHelpView
+import views.html.{InvalidDataNINOHelpView, SendLetterErrorView}
 
 import scala.concurrent.Future
 
-class InvalidDataNINOHelpControllerSpec extends SpecBase {
+class SendLetterErrorControllerSpec extends SpecBase {
 
   def onwardRoute = Call("GET", "/foo")
 
-  lazy val invalidDataNINOHelpRoute = routes.InvalidDataNINOHelpController.onPageLoad(mode = NormalMode).url
+  lazy val sendLetterErrorRoute = routes.SendLetterErrorController.onPageLoad(mode = NormalMode).url
 
   val formProvider = new SelectAlternativeServiceFormProvider()
   val form = formProvider()
 
-  "InvalidDataNINOHelp Controller" - {
+  "SendLetterError Controller" - {
 
     "must return OK and the correct view for a GET" in {
-      val application = applicationBuilder(userAnswers =  Some(emptyUserAnswers)).build()
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, invalidDataNINOHelpRoute)
+        val request = FakeRequest(GET, sendLetterErrorRoute)
 
         val result = route(application, request).value
+
+        val view = application.injector.instanceOf[SendLetterErrorView]
+
         status(result) mustEqual OK
-        val view = application.injector.instanceOf[InvalidDataNINOHelpView]
         contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application), config).toString
       }
     }
@@ -64,7 +67,7 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, invalidDataNINOHelpRoute)
+        val request = FakeRequest(GET, sendLetterErrorRoute)
 
         val view = application.injector.instanceOf[InvalidDataNINOHelpView]
 
@@ -91,7 +94,7 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, invalidDataNINOHelpRoute)
+          FakeRequest(POST, sendLetterErrorRoute)
             .withFormUrlEncodedBody(("value", SelectAlternativeService.values.head.toString))
 
         val result = route(application, request).value
@@ -107,7 +110,7 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, invalidDataNINOHelpRoute)
+          FakeRequest(POST, sendLetterErrorRoute)
             .withFormUrlEncodedBody(("value", "invalid value"))
 
         val boundForm = form.bind(Map("value" -> "invalid value"))
@@ -126,7 +129,7 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(GET, invalidDataNINOHelpRoute)
+        val request = FakeRequest(GET, sendLetterErrorRoute)
 
         val result = route(application, request).value
 
@@ -141,7 +144,7 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, invalidDataNINOHelpRoute)
+          FakeRequest(POST, sendLetterErrorRoute)
             .withFormUrlEncodedBody(("value", SelectAlternativeService.values.head.toString))
 
         val result = route(application, request).value
@@ -152,5 +155,4 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
       }
     }
   }
-
 }

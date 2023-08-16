@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
-package models
+package connectors
 
-import play.api.libs.json.{Format, Json}
+import com.codahale.metrics.MetricRegistry
 
-final case class NationalInsuranceNumber(nino: String) extends AnyVal
+trait MetricsSupport {
 
-object NationalInsuranceNumber {
-  implicit val format: Format[IndividualDetailsNino] = Json.valueFormat[IndividualDetailsNino]
+  def measure[T](name: String, registry: MetricRegistry)(
+      block:           => T
+  ): T = {
+    val t = registry.timer(s"$name.timer").time()
+
+    val b = block
+
+    t.stop()
+
+    b
+  }
+
+  def count[T](name: String, label: String, registry: MetricRegistry): Unit =
+    registry.meter(s"$name.$label").mark()
 }

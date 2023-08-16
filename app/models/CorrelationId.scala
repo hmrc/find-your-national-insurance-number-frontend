@@ -16,10 +16,10 @@
 
 package models
 
-import play.api.libs.json.{Format, Json}
+import java.util.UUID
 
-final case class NationalInsuranceNumber(nino: String) extends AnyVal
+final case class CorrelationId(value: UUID) extends AnyVal
 
-object NationalInsuranceNumber {
-  implicit val format: Format[IndividualDetailsNino] = Json.valueFormat[IndividualDetailsNino]
+object CorrelationId {
+  def random: CorrelationId = CorrelationId(UUID.randomUUID())
 }

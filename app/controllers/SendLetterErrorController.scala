@@ -17,7 +17,7 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import controllers.actions._
 import forms.SelectAlternativeServiceFormProvider
 import models.Mode
 import navigation.Navigator
@@ -26,22 +26,22 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.InvalidDataNINOHelpView
+import views.html.SendLetterErrorView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class InvalidDataNINOHelpController @Inject()(
-                                               override val messagesApi: MessagesApi,
-                                               sessionRepository: SessionRepository,
-                                               navigator: Navigator,
-                                               identify: IdentifierAction,
-                                               getData: DataRetrievalAction,
-                                               requireData: DataRequiredAction,
-                                               view: InvalidDataNINOHelpView,
-                                               formProvider: SelectAlternativeServiceFormProvider,
-                                               val controllerComponents: MessagesControllerComponents
-                                  )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
+class SendLetterErrorController @Inject()(
+                                           override val messagesApi: MessagesApi,
+                                           sessionRepository: SessionRepository,
+                                           navigator: Navigator,
+                                           identify: IdentifierAction,
+                                           getData: DataRetrievalAction,
+                                           requireData: DataRequiredAction,
+                                           view: SendLetterErrorView,
+                                           formProvider: SelectAlternativeServiceFormProvider,
+                                           val controllerComponents: MessagesControllerComponents
+                                         )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
 
