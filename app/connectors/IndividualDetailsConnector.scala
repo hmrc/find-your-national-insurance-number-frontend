@@ -49,13 +49,10 @@ class DefaultIndividualDetailsConnector @Inject() (
     with HttpReadsWrapper[UpstreamFailures, Failure]
     with MetricsSupport {
 
-  def getIndividualDetails(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge)(implicit
-                                                                                                ec:                              ExecutionContext,
-                                                                                                hc:                              HeaderCarrier,
-                                                                                                correlationId:                   CorrelationId
+  def getIndividualDetails(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge
+                          )(implicit ec: ExecutionContext,hc: HeaderCarrier, correlationId: CorrelationId
   ): IndividualDetailsResponseEnvelope[IndividualDetails] = {
-    val url =
-      s"${appConfig.individualDetails.url}${identifier.value}/${resolveMerge.value}"
+    val url = s"${appConfig.individualDetailsServiceUrl}/individuals/details/NINO/${identifier.value}/${resolveMerge.value}"
     val connectorName     = "individual-details-connector"
     val additionalLogInfo = Some(AdditionalLogInfo(Map("correlation-id" -> correlationId.value.toString)))
     withHttpReads(
