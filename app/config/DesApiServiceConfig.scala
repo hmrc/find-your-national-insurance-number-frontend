@@ -19,7 +19,6 @@ package config
 import play.api.Configuration
 
 final case class DesApiServiceConfig(
-    url:          String,
     token:        String,
     environment:  String,
     originatorId: String
@@ -28,7 +27,6 @@ final case class DesApiServiceConfig(
 object DesApiServiceConfig {
   def apply(config: Configuration): DesApiServiceConfig =
     DesApiServiceConfig(
-      config.get[String]("url"),
       config.get[String]("auth-token"),
       config.get[String]("environment"),
       config.get[String]("originator-id")
