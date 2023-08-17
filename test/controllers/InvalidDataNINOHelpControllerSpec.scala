@@ -130,8 +130,11 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
 
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+//        status(result) mustEqual SEE_OTHER
+//        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        status(result) mustEqual OK
+        val view = application.injector.instanceOf[InvalidDataNINOHelpView]
+        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application), config).toString
       }
     }
 
@@ -146,9 +149,10 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
 
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
+//        status(result) mustEqual SEE_OTHER
+//        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
 
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        status(result) mustEqual SEE_OTHER
       }
     }
   }

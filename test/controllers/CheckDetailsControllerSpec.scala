@@ -25,6 +25,7 @@ import play.api.inject
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.PersonalDetailsValidationService
+import services.PersonalDetailsValidationServiceSpec.personalDetailsValidation
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
 
@@ -49,6 +50,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       when(mockPersonalDetailsValidationService.createPDVFromValidationId(any())(any()))
         .thenReturn(Future.successful(validationId))
 
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByValidationId(any())(any()))
+        .thenReturn(Future.successful(Some(personalDetailsValidation)))
+
       running(application) {
         val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode, validationId).url)
 
@@ -57,7 +61,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         val view = application.injector.instanceOf[CheckYourAnswersView]
         val list = SummaryListViewModel(Seq.empty)
 
-        status(result) mustEqual SEE_OTHER
+        status(result) mustEqual OK
         contentAsString(result) contains view(list)(request, messages(application)).toString
       }
     }
