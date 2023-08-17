@@ -53,7 +53,7 @@ class CheckDetailsController @Inject()(
     implicit request => {
 
 
-      val validationId = "68c0fcdf-05fc-474a-baee-4f653e5b026b"
+      //val validationId = "68c0fcdf-05fc-474a-baee-4f653e5b026b"
 
 
       for {

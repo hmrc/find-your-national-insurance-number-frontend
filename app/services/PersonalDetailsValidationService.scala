@@ -25,11 +25,8 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValidationConnector,
-                                                     personalDetailsValidationRepository: PersonalDetailsValidationRepository
-                                         )(implicit val ec: ExecutionContext) {
-
-   private def fetchPersonalDetailsValidation(validationId: String)(implicit hc: HeaderCarrier): Future[PersonalDetailsValidationResponse] =
-    connector.retrieveMatchingDetails(validationId)
+                                                 personalDetailsValidationRepository: PersonalDetailsValidationRepository
+                                                )(implicit val ec: ExecutionContext) {
 
   def createPDVFromValidationId(validationId: String)(implicit hc: HeaderCarrier): Future[String] = {
     fetchPersonalDetailsValidation(validationId).map {
@@ -41,10 +38,13 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     }
   }
 
-   private def createPersonalDetailsValidation(personalDetailsValidation: PersonalDetailsValidation)
-                                     (implicit ec: ExecutionContext): Either[Exception, String] = {
+  private def fetchPersonalDetailsValidation(validationId: String)(implicit hc: HeaderCarrier): Future[PersonalDetailsValidationResponse] =
+    connector.retrieveMatchingDetails(validationId)
+
+  private def createPersonalDetailsValidation(personalDetailsValidation: PersonalDetailsValidation)
+                                             (implicit ec: ExecutionContext): Either[Exception, String] = {
     personalDetailsValidationRepository.insert(personalDetailsValidation)
-     Right(personalDetailsValidation.id)
+    Right(personalDetailsValidation.id)
   }
 
   def getPersonalDetailsValidationByValidationId(validationId: String)(implicit ec: ExecutionContext): Future[Option[PersonalDetailsValidation]] = {
