@@ -26,19 +26,19 @@ import views.html.SetUpGGUserIDStartView
 
 class SetUpGGUserIDStartController @Inject()(
                                        override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
+                                       unauthenticatedIdentifierAction: UnauthenticatedIdentifierActionImpl,
                                        getData: DataRetrievalAction,
                                        requireData: DataRequiredAction,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: SetUpGGUserIDStartView
                                      )(implicit frontendAppConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad: Action[AnyContent] = (unauthenticatedIdentifierAction andThen getData andThen requireData) {
     implicit request =>
       Ok(view())
   }
 
-  def onContinue: Action[AnyContent] = (identify andThen getData) { _ =>
+  def onContinue: Action[AnyContent] = (unauthenticatedIdentifierAction andThen getData) { _ =>
       Redirect(controllers.auth.routes.AuthController.redirectToRegister(frontendAppConfig.storeMyNinoUrl))
   }
 }

@@ -70,5 +70,14 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val callChargesUrl: String = configuration.get[String]("urls.callCharges")
 
   lazy val SCAWrapperEnabled = configuration.getOptional[Boolean]("features.sca-wrapper-enabled").getOrElse(false)
+  
+  val ninoByPostServiceUrl: String = configuration.get[Service]("microservice.services.national-insurance-number-by-post").baseUrl
+
+  def individualDetails: DesApiServiceConfig =
+    DesApiServiceConfig(configuration.get[Configuration]("microservice.services.individual-details"))
+
+  val individualDetailsServiceUrl: String = configuration.get[String]("external-url.individual-details.host")
+
+  def cacheSecretKey:                 String      = configuration.get[String]("cache.secret-key")
 
 }

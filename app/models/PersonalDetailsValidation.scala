@@ -21,7 +21,20 @@ import java.time.LocalDate
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.domain.Nino
 
-case class PersonalDetails(firstName: String, lastName: String, nino: Nino, postCode: Option[String], dateOfBirth: LocalDate)
+case class PDVData(
+                  id: String,
+                  validationStatus: String,
+                  personalDetails: Option[PersonalDetails],
+                  createdAt: String,
+                  deceased: Option[Boolean]
+                  )
+
+case class PersonalDetails(
+                            firstName: String,
+                            lastName: String,
+                            nino: Nino,
+                            postCode: Option[String],
+                            dateOfBirth: LocalDate)
 
 case class PersonalDetailsValidation(id: String, validationStatus: String, personalDetails: Option[PersonalDetails])
 
@@ -31,4 +44,8 @@ object PersonalDetails {
 
 object PersonalDetailsValidation {
   implicit val format: Format[PersonalDetailsValidation] = Json.format[PersonalDetailsValidation]
+}
+
+object PDVData {
+  implicit val format: Format[PDVData] = Json.format[PDVData]
 }

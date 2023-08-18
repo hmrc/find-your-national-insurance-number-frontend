@@ -23,3 +23,5 @@ case class PersonalDetailsValidationSuccessResponse(personalDetailsValidation: P
 case object PersonalDetailsValidationNotFoundResponse extends PersonalDetailsValidationResponse
 case class PersonalDetailsValidationUnexpectedResponse(r: HttpResponse) extends PersonalDetailsValidationResponse
 case class PersonalDetailsValidationErrorResponse(cause: Exception) extends PersonalDetailsValidationResponse
+
+

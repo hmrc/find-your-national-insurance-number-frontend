@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package models
+package models.upstreamfailure
 
 import play.api.libs.json.{Format, Json}
 
-final case class NationalInsuranceNumber(nino: String) extends AnyVal
+final case class Failure(code: String, reason: String)
 
-object NationalInsuranceNumber {
-  implicit val format: Format[IndividualDetailsNino] = Json.valueFormat[IndividualDetailsNino]
+object Failure {
+  implicit val format: Format[Failure] = Json.format[Failure]
 }

@@ -17,12 +17,24 @@
 package controllers
 
 import config.FrontendAppConfig
+import connectors.IndividualDetailsConnector
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import models.Mode
+import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
+import models.individualdetails.AccountStatusType.FullLive
+import models.individualdetails.AddressStatus.NotDlo
+import models.individualdetails.AddressType.ResidentialAddress
+import models.individualdetails.CrnIndicator.False
+import models.individualdetails.{AddressList, IndividualDetails, ResolveMerge}
+import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, PersonalDetailsValidation}
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.PersonalDetailsValidationService
+import uk.gov.hmrc.crypto.SymmetricCryptoFactory
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
@@ -31,19 +43,68 @@ class CheckDetailsController @Inject()(
                                         identify: IdentifierAction,
                                         getData: DataRetrievalAction,
                                         requireData: DataRequiredAction,
+                                        personalDetailsValidationService: PersonalDetailsValidationService,
+                                        individualDetailsConnector: IndividualDetailsConnector,
                                         val controllerComponents: MessagesControllerComponents
-                                      )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
+                                      )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
-  def onPageLoad(mode: Mode, validationId: String): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      // TODO Step 1:- PDV Validation logic
-      // TODO Step 2:- API 1694 integration
 
-      val postCodeMatched = true // TODO expecting flag value after performing these two steps
-      if(postCodeMatched)
-        Redirect(routes.ValidDataNINOHelpController.onPageLoad())
-      else
-        Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode))
+  def onPageLoad(mode: Mode, validationId: String): Action[AnyContent] = (identify andThen getData andThen requireData) async {
+    implicit request => {
+
+
+      //val validationId = "68c0fcdf-05fc-474a-baee-4f653e5b026b"
+
+
+      for {
+        pdvDataId <- personalDetailsValidationService.createPDVFromValidationId(validationId)
+        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvDataId)
+        idData <- getIndividualDetails(IndividualDetailsNino(pdvData.get.personalDetails.get.nino.nino)).value
+      } yield idData.fold(
+        error => Ok(error.errorMessage),
+        individualDetailsData => {
+          val pdvPostCode: String = pdvData.get.personalDetails.get.postCode.get
+          val check = checkConditions(individualDetailsData, pdvPostCode)
+
+          logData(individualDetailsData, pdvData.get)
+
+          if (check == true) {
+            Redirect(routes.ValidDataNINOHelpController.onPageLoad())
+          } else {
+            Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+          }
+        })
+    }
   }
 
+  def logData(r: IndividualDetails, p: PersonalDetailsValidation): Unit = {
+    logger.info("*****************" + r.toString)
+    logger.info("*****************" + p.toString)
+  }
+
+
+  def checkConditions(idData: IndividualDetails, pdvPostCode: String): Boolean = {
+    idData.accountStatusType.get.equals(FullLive) &&
+    idData.crnIndicator.equals(False) &&
+    getAddressTypeResidential(idData.addressList).addressStatus.get.equals(NotDlo) &&
+    getAddressTypeResidential(idData.addressList).addressPostcode.get.value.equals(pdvPostCode)
+  }
+
+
+  def getAddressTypeResidential(addressList: AddressList) = {
+    val residentialAddress = addressList.address.get.filter(_.addressType.equals(ResidentialAddress))
+    residentialAddress(0)
+  }
+
+
+  def getIndividualDetails(nino: IndividualDetailsNino
+                          )(implicit ec: ExecutionContext, hc: HeaderCarrier): IndividualDetailsResponseEnvelope[IndividualDetails] = {
+    implicit val crypto = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
+    implicit val correlationId = CorrelationId(UUID.randomUUID())
+    for {
+      individualDetails <- individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y'))
+      dd <- IndividualDetailsResponseEnvelope(Option(individualDetails).get)
+    } yield dd
+
+  }
 }
