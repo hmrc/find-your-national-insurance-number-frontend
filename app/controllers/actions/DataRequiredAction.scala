@@ -20,8 +20,8 @@ import javax.inject.Inject
 import models.UserAnswers
 import models.requests.{DataRequest, OptionalDataRequest}
 import play.api.mvc.{ActionRefiner, Result}
-import play.api.mvc.Results.Redirect
-import controllers.routes
+//import play.api.mvc.Results.Redirect
+//import controllers.routes
 import scala.concurrent.{ExecutionContext, Future}
 
 class DataRequiredActionImpl @Inject()(implicit val executionContext: ExecutionContext) extends DataRequiredAction {
