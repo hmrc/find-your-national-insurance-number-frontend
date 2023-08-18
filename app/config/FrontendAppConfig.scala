@@ -74,7 +74,13 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   def individualDetails: DesApiServiceConfig =
     DesApiServiceConfig(configuration.get[Configuration]("microservice.services.individual-details"))
 
-  val individualDetailsServiceUrl: String = configuration.get[String]("external-url.individual-details.host")
+  lazy val individualDetailsProtocol: String = configuration.get[String]("external-url.individual-details.protocol")
+  lazy val individualDetailsHost: String = configuration.get[String]("external-url.individual-details.host")
+  lazy val individualDetailsBaseUrl: String = configuration.get[String]("external-url.individual-details.base-url")
+  lazy val individualDetailsPort: String = configuration.get[String]("external-url.individual-details.port")
+
+  val individualDetailsServiceUrl: String = s"$individualDetailsProtocol://$individualDetailsHost:$individualDetailsPort$individualDetailsBaseUrl"
+
 
   def cacheSecretKey:                 String      = configuration.get[String]("cache.secret-key")
 
