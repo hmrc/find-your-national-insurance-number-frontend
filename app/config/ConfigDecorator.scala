@@ -65,9 +65,6 @@ class ConfigDecorator @Inject()(configuration: Configuration, servicesConfig: Se
   def getBasGatewayFrontendSignOutUrl(continueUrl: String): String =
     basGatewayFrontendHost + s"/bas-gateway/sign-out-without-state?continue=$continueUrl"
 
-  //val exitSurveyUrl: String             = s"$feedbackSurveyFrontendHost/feedback/$serviceName"
-  //val exitSurveyUrl: String             = s"${servicesConfig.baseUrl("feedback-frontend")}/feedback/$serviceName"
-
   val languageTranslationEnabled: Boolean =
     configuration.get[Boolean]("features.welsh-translation")
 
