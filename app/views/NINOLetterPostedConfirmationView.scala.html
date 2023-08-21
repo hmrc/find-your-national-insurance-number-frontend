@@ -17,10 +17,10 @@
 @import config.FrontendAppConfig
 
 @this(
-        layout: templates.Layout,
-        govukPanel: GovukPanel,
-        govukButton: GovukButton,
-        appConfig: FrontendAppConfig
+    layout: templates.LayoutProvider,
+    govukPanel: GovukPanel,
+    govukButton: GovukButton,
+    appConfig: FrontendAppConfig
 )
 
 @()(implicit request: Request[_], messages: Messages)

@@ -78,6 +78,12 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   val individualDetailsServiceUrl: String = configuration.get[String]("external-url.individual-details.host")
 
-  def cacheSecretKey:                 String      = configuration.get[String]("cache.secret-key")
+  def cacheSecretKey:String = configuration.get[String]("cache.secret-key")
+
+  // banners
+  val showAlphaBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-alpha")
+  val showBetaBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-beta")
+  val showHelpImproveBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-help-improve")
+  val showChildBenefitBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-child-benefit")
 
 }

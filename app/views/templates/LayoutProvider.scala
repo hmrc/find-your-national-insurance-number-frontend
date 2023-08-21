@@ -16,17 +16,26 @@
 
 package views.html.templates
 
+import config.FrontendAppConfig
 import play.api.Logging
 import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import uk.gov.hmrc.sca.models.BannerConfig
 import uk.gov.hmrc.sca.services.WrapperService
 import views.html.components.{AdditionalScript, HeadBlock}
 
 import javax.inject.Inject
 
 trait LayoutProvider {
+
+  lazy val defaultBannerConfig: BannerConfig = BannerConfig(
+    showChildBenefitBanner = false,
+    showAlphaBanner = false,
+    showBetaBanner = false,
+    showHelpImproveBanner = true
+  )
   //noinspection ScalaStyle
   def apply(
              pageTitle: String,
@@ -42,7 +51,9 @@ trait LayoutProvider {
              backLinkUrl: String = "#",
              disableSessionExpired: Boolean = false,
              sidebarContent: Option[Html] = None,
-             messagesActive: Boolean = false
+             messagesActive: Boolean = false,
+             showSignOutInHeader: Boolean = true,
+             bannerConfig: BannerConfig = defaultBannerConfig
            )(contentBlock: Html)(
              implicit request: Request[_]
              , messages: Messages
@@ -55,7 +66,8 @@ class OldLayoutProvider @Inject()(layout: views.html.templates.Layout) extends L
   override def apply(pageTitle: String, showBackLink: Boolean, timeout: Boolean, showSignOut: Boolean,
                      stylesheets: Option[Html], fullWidth: Boolean, accountHome: Boolean, yourProfileActive: Boolean,
                      hideAccountMenu: Boolean, backLinkID: Boolean, backLinkUrl: String,
-                     disableSessionExpired: Boolean, sidebarContent: Option[Html], messagesActive: Boolean)(contentBlock: Html)
+                     disableSessionExpired: Boolean, sidebarContent: Option[Html], messagesActive: Boolean,
+                     showSignOutInHeader: Boolean, bannerConfig: BannerConfig)(contentBlock: Html)
                     (implicit request: Request[_], messages: Messages): HtmlFormat.Appendable = {
     layout(pageTitle, showBackLink, timeout, showSignOut, stylesheets, fullWidth, accountHome, yourProfileActive,
       hideAccountMenu, backLinkID, backLinkUrl, disableSessionExpired, sidebarContent, messagesActive)(contentBlock)
@@ -63,13 +75,21 @@ class OldLayoutProvider @Inject()(layout: views.html.templates.Layout) extends L
 }
 
 class NewLayoutProvider @Inject()(wrapperService: WrapperService, additionalScript: AdditionalScript,
-                                  headBlock: HeadBlock) extends LayoutProvider with Logging {
+                                  headBlock: HeadBlock, appConfig: FrontendAppConfig) extends LayoutProvider with Logging {
+
+  lazy val newLayoutBannerConfig: BannerConfig = BannerConfig(
+    showChildBenefitBanner = appConfig.showChildBenefitBanner,
+    showAlphaBanner = appConfig.showAlphaBanner,
+    showBetaBanner = appConfig.showBetaBanner,
+    showHelpImproveBanner = appConfig.showHelpImproveBanner
+  )
 
   //noinspection ScalaStyle
   override def apply(pageTitle: String, showBackLink: Boolean, timeout: Boolean, showSignOut: Boolean,
                      stylesheets: Option[Html], fullWidth: Boolean, accountHome: Boolean, yourProfileActive: Boolean,
                      hideAccountMenu: Boolean, backLinkID: Boolean, backLinkUrl: String,
-                     disableSessionExpired: Boolean, sidebarContent: Option[Html], messagesActive: Boolean)(contentBlock: Html)
+                     disableSessionExpired: Boolean, sidebarContent: Option[Html], messagesActive: Boolean,
+                     showSignOutInHeader: Boolean, bannerConfig: BannerConfig)(contentBlock: Html)
                     (implicit request: Request[_], messages: Messages): HtmlFormat.Appendable = {
     wrapperService.layout(
       disableSessionExpired = !timeout,
@@ -79,7 +99,10 @@ class NewLayoutProvider @Inject()(wrapperService: WrapperService, additionalScri
       serviceNameUrl = None,
       scripts = Seq(additionalScript()),
       styleSheets = stylesheets.toSeq :+ headBlock(),
-      fullWidth = fullWidth
+      fullWidth = fullWidth,
+      showSignOutInHeader = showSignOutInHeader,
+      hideMenuBar = true,
+      bannerConfig = newLayoutBannerConfig
     )(messages, HeaderCarrierConverter.fromRequest(request), request)
   }
 }
