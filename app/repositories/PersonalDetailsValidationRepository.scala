@@ -19,6 +19,7 @@ package repositories
 import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
 import models.PersonalDetailsValidation
+import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes}
 import play.api.Logging
 import uk.gov.hmrc.mongo.MongoComponent
@@ -53,9 +54,15 @@ class PersonalDetailsValidationRepository @Inject()(
   )
 ) with Logging {
   def insert(personalDetailsValidation: PersonalDetailsValidation)
-            (implicit ec: ExecutionContext): Future[Unit] = {
+            (implicit ec: ExecutionContext) = {
     logger.info(s"Inserting one in $collectionName table")
-    collection.insertOne(personalDetailsValidation).toFuture().map(_ => ())
+    collection.insertOne(personalDetailsValidation)
+      .toFuture()
+      .map(_ => Right(personalDetailsValidation.id))
+      .recover {
+        case exc: MongoWriteException =>
+          Left(exc.getError.getMessage)
+      }
   }
 
   def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[PersonalDetailsValidation]] = {
