@@ -16,6 +16,8 @@
 
 package controllers
 
+import cats.data.EitherT
+import cats.implicits.toFoldableOps
 import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
@@ -52,28 +54,24 @@ class CheckDetailsController @Inject()(
   def onPageLoad(mode: Mode, validationId: String): Action[AnyContent] = (identify andThen getData andThen requireData) async {
     implicit request => {
 
+    for {
+      pdvDataId <- personalDetailsValidationService.createPDVFromValidationId(validationId)
+      pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvDataId)
+      idData <- getIndividualDetails(IndividualDetailsNino(pdvData.get.personalDetails.get.nino.nino)).value
+    } yield idData.fold(
+      error => Ok(error.errorMessage),
+      individualDetailsData => {
+        val pdvPostCode: String = pdvData.get.personalDetails.get.postCode.get
+        val check = checkConditions(individualDetailsData, pdvPostCode)
 
-      //val validationId = "68c0fcdf-05fc-474a-baee-4f653e5b026b"
+        logData(individualDetailsData, pdvData.get)
 
-
-      for {
-        pdvDataId <- personalDetailsValidationService.createPDVFromValidationId(validationId)
-        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvDataId)
-        idData <- getIndividualDetails(IndividualDetailsNino(pdvData.get.personalDetails.get.nino.nino)).value
-      } yield idData.fold(
-        error => Ok(error.errorMessage),
-        individualDetailsData => {
-          val pdvPostCode: String = pdvData.get.personalDetails.get.postCode.get
-          val check = checkConditions(individualDetailsData, pdvPostCode)
-
-          logData(individualDetailsData, pdvData.get)
-
-          if (check == true) {
-            Redirect(routes.ValidDataNINOHelpController.onPageLoad())
-          } else {
-            Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-          }
-        })
+        if (check == true) {
+          Redirect(routes.ValidDataNINOHelpController.onPageLoad())
+        } else {
+          Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+        }
+      })
     }
   }
 
@@ -98,13 +96,9 @@ class CheckDetailsController @Inject()(
 
 
   def getIndividualDetails(nino: IndividualDetailsNino
-                          )(implicit ec: ExecutionContext, hc: HeaderCarrier): IndividualDetailsResponseEnvelope[IndividualDetails] = {
+                          )(implicit ec: ExecutionContext, hc: HeaderCarrier)  = {
     implicit val crypto = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
     implicit val correlationId = CorrelationId(UUID.randomUUID())
-    for {
-      individualDetails <- individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y'))
-      dd <- IndividualDetailsResponseEnvelope(Option(individualDetails).get)
-    } yield dd
-
-  }
+    IndividualDetailsResponseEnvelope.fromEitherF(individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y')).value)
+    }
 }

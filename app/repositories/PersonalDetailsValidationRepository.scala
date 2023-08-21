@@ -67,10 +67,20 @@ class PersonalDetailsValidationRepository @Inject()(
 
   def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[PersonalDetailsValidation]] = {
     collection.find(Filters.equal("id", id))
-      .headOption()
+      .toFuture()
+      .recoverWith { case e: Throwable => {
+        Left(e);
+        Future.failed(e)
+      }}
+      .map(_.headOption)
   }
 
   def findByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PersonalDetailsValidation]] =
     collection.find(Filters.equal("personalDetails.nino", nino))
-      .headOption()
+      .toFuture()
+      .recoverWith { case e: Throwable => {
+        Left(e);
+        Future.failed(e)
+      }}
+      .map(_.headOption)
 }
