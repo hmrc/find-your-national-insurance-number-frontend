@@ -76,7 +76,7 @@ class NewLayoutProvider @Inject()(wrapperService: WrapperService, additionalScri
       content = contentBlock,
       pageTitle = Some(pageTitle),
       showBackLinkJS = showBackLink,
-      serviceNameUrl = Some("/personal-account"),
+      serviceNameUrl = None,
       scripts = Seq(additionalScript()),
       styleSheets = stylesheets.toSeq :+ headBlock(),
       fullWidth = fullWidth

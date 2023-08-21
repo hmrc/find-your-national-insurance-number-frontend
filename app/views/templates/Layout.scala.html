@@ -58,8 +58,6 @@
     messagesActive: Boolean = false,
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
-
-
 @headBlock = {
 <meta name="format-detection" content="telephone=no" />
 <link href='@routes.Assets.versioned("stylesheets/application.css")'
@@ -85,17 +83,7 @@
     <script src='@controllers.routes.Assets.versioned("javascripts/app.js")'></script>
 }
 
-@accountMenu = @{
-    hmrcAccountMenu(
-        AccountMenu(
-            signOut = SignOut(href = controllers.auth.routes.AuthController.signout(Some(RedirectUrl(configDecorator.getFeedbackSurveyUrl(configDecorator.defaultOrigin))), Some(configDecorator.defaultOrigin)).url),
-            language = if(messages.lang.code == "cy") Cy else En,
-            accountHome = AccountHome(active = accountHome),
-            messages = AccountMessages(active = messagesActive, messageCount = Some(0)),
-            yourProfile = YourProfile(active = yourProfileActive)
-        ).withUrlsFromConfig()
-    )
-}
+@accountMenu = @{ None }
 
 @beforeContent = {
     @if(!hideAccountMenu) { @accountMenu }
@@ -123,7 +111,7 @@
 @hmrcLayout(
     pageTitle = Some(pageTitle),
     serviceName = Some(Messages("service.name")),
-    serviceUrl = Some("/personal-account"),
+    serviceUrl = Some("/find-your-national-insurance-number/how-to-find-online"),
     isWelshTranslationAvailable = true,
     accessibilityStatementUrl = Some(configDecorator.accessibilityStatementUrl(request.uri)),
     displayHmrcBanner = false,
