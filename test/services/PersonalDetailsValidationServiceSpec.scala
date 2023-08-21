@@ -84,7 +84,7 @@ class PersonalDetailsValidationServiceSpec extends AsyncWordSpec with Matchers w
         .thenReturn(Future(PersonalDetailsValidationSuccessResponse(personalDetailsValidation))(ec))
 
       when(mockPersonalDetailsValidationRepository.insert(any())(any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(Right(validationId)))
 
       personalDetailsValidationService.createPDVFromValidationId(validationId)(hc).map { result =>
         result mustBe validationId
