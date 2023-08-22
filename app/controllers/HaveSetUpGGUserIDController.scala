@@ -38,7 +38,6 @@ class HaveSetUpGGUserIDController @Inject()(
                                        navigator: Navigator,
                                        unauthenticatedIdentifierAction: UnauthenticatedIdentifierActionImpl,
                                        getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
                                        formProvider: HaveSetUpGGUserIDFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: HaveSetUpGGUserIDView,
