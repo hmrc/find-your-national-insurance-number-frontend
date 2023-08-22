@@ -15,13 +15,13 @@
  *@
 
 @this(
-    layout: templates.Layout,
+    layout: templates.LayoutProvider,
     govukButton: GovukButton
 )
 
 @()(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("journeyRecovery.startAgain.title"))) {
+@layout(pageTitle = titleNoForm(messages("journeyRecovery.startAgain.title")), fullWidth = false) {
 
     <h1 class="govuk-heading-xl">@messages("journeyRecovery.startAgain.heading")</h1>
 

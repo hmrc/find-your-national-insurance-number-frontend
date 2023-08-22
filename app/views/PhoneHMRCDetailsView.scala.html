@@ -18,13 +18,13 @@
 @import config.FrontendAppConfig
 
 @this(
-    layout: templates.Layout,
+    layout: templates.LayoutProvider,
     govukButton: GovukButton
 )
 
 @()(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
-@layout(pageTitle = titleNoForm(messages("phoneHMRCDetails.title"))) {
+@layout(pageTitle = titleNoForm(messages("phoneHMRCDetails.title")), fullWidth = false) {
 
     <h1 class="govuk-heading-l">@messages("phoneHMRCDetails.heading")</h1>
 

@@ -14,16 +14,15 @@
  * limitations under the License.
  *@
 
-@this(
-    layout: templates.LayoutProvider,
-    govukSummaryList: GovukSummaryList
-)
+@this()
 
-@(list: SummaryList)(implicit request: Request[_], messages: Messages)
+@(href: String = "#", backLinkID: Boolean = true, attrs: Map[String, String] = Map.empty)(implicit messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("checkYourAnswers.title")), fullWidth = false) {
-
-    <h1 class="govuk-heading-xl">@messages("checkYourAnswers.heading")</h1>
-
-    @govukSummaryList(list)
+@attrValues = @{
+  attrs.map{
+    case(key, value) => key + "=" + value
+  }
 }
+    <a @if(backLinkID){id="back-link"} href="@href" class="govuk-back-link print-hidden" @attrValues>@messages("site.back")</a>
+
+

@@ -16,23 +16,37 @@
 
 package controllers.auth
 
-import config.FrontendAppConfig
+import config.{ConfigDecorator, FrontendAppConfig}
 import controllers.actions.IdentifierAction
+import controllers.bindable.Origin
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import uk.gov.hmrc.sca.services.WrapperService
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
-
 
 class AuthController @Inject()(
                                 val controllerComponents: MessagesControllerComponents,
                                 config: FrontendAppConfig,
                                 sessionRepository: SessionRepository,
-                                identify: IdentifierAction
+                                identify: IdentifierAction,
+                                configDecorator: ConfigDecorator,
+                                wrapperService: WrapperService
                               )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+
+  def signout(continueUrl: Option[RedirectUrl], origin: Option[Origin]): Action[AnyContent] =
+    Action { implicit request =>
+      val safeUrl = wrapperService.safeSignoutUrl()
+      safeUrl
+        .orElse(origin.map(configDecorator.getFeedbackSurveyUrl))
+        .fold(BadRequest("Missing origin")) { url: String =>
+          Redirect(configDecorator.getBasGatewayFrontendSignOutUrl(url))
+        }
+    }
 
   def signOut(): Action[AnyContent] = identify.async {
     implicit request =>

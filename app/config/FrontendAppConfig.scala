@@ -69,6 +69,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val hmrcExtraSupportUrl: String = configuration.get[String]("urls.hmrcExtraSupport")
   val callChargesUrl: String = configuration.get[String]("urls.callCharges")
 
+  lazy val SCAWrapperEnabled = configuration.getOptional[Boolean]("features.sca-wrapper-enabled").getOrElse(false)
+  
   val ninoByPostServiceUrl: String = configuration.get[Service]("microservice.services.national-insurance-number-by-post").baseUrl
 
   def individualDetails: DesApiServiceConfig =
@@ -82,7 +84,12 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val individualDetailsServiceUrl: String = s"$individualDetailsProtocol://$individualDetailsHost:$individualDetailsPort$individualDetailsBaseUrl"
 
 
-  def cacheSecretKey:                 String      = configuration.get[String]("cache.secret-key")
+  def cacheSecretKey:String = configuration.get[String]("cache.secret-key")
 
+  // banners
+  val showAlphaBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-alpha")
+  val showBetaBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-beta")
+  val showHelpImproveBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-help-improve")
+  val showChildBenefitBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-child-benefit")
 
 }

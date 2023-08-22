@@ -17,7 +17,7 @@
 @import config.FrontendAppConfig
 @import play.twirl.api.Html
 
-@this(layout: templates.Layout, govukButton: GovukButton)
+@this(layout: templates.LayoutProvider, govukButton: GovukButton)
 
 @(mode: Mode)(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
@@ -25,7 +25,8 @@
     pageTitle = titleNoForm(messages("ninoHelpView.title")),
     timeout   = false,
     showBackLink = true,
-    showSignOut = true
+    showSignOut = true,
+    fullWidth = false
 ) {
 
     <h1 class="govuk-heading-xl">@messages("ninoHelpView.heading")</h1>

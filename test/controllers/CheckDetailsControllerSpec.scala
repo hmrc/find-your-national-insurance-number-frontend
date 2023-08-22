@@ -30,7 +30,6 @@ import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 

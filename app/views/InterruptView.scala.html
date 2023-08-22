@@ -17,7 +17,7 @@
 @import config.FrontendAppConfig
 @import play.twirl.api.Html
 
-@this(layout: templates.Layout)
+@this(layout: templates.LayoutProvider)
 
 @()(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
@@ -25,7 +25,8 @@
     pageTitle = titleNoForm(messages("interruptView.title")),
     timeout   = false,
     showBackLink = false,
-    showSignOut = false
+    showSignOut = false,
+    fullWidth = false
 ) {
 
     <h1 class="govuk-heading-xl">@messages("interruptView.heading")</h1>

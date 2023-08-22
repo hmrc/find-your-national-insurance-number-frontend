@@ -17,7 +17,7 @@
 @import viewmodels.LegendSize
 
 @this(
-    layout: templates.Layout,
+    layout: templates.LayoutProvider,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukRadios: GovukRadios,
@@ -26,7 +26,7 @@
 
 @(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("haveSetUpGGUserID.title"))) {
+@layout(pageTitle = title(form, messages("haveSetUpGGUserID.title")), fullWidth = false) {
 
     @formHelper(action = routes.HaveSetUpGGUserIDController.onSubmit(mode), 'autoComplete -> "off") {
 

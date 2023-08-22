@@ -18,7 +18,7 @@
 @import play.twirl.api.Html
 
 @this(
-    layout: templates.Layout,
+    layout: templates.LayoutProvider,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukRadios: GovukRadios,
@@ -31,7 +31,8 @@
     pageTitle = titleNoForm(messages("ninoHelpView.title")),
     timeout   = false,
     showBackLink = true,
-    showSignOut = true
+    showSignOut = true,
+    fullWidth = false
 ) {
 
     <h1 class="govuk-heading-xl">@messages("ninoHelpView.heading")</h1>

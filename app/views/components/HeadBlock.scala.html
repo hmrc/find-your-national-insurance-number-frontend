@@ -14,16 +14,8 @@
  * limitations under the License.
  *@
 
-@this(
-    layout: templates.LayoutProvider,
-    govukSummaryList: GovukSummaryList
-)
-
-@(list: SummaryList)(implicit request: Request[_], messages: Messages)
-
-@layout(pageTitle = titleNoForm(messages("checkYourAnswers.title")), fullWidth = false) {
-
-    <h1 class="govuk-heading-xl">@messages("checkYourAnswers.heading")</h1>
-
-    @govukSummaryList(list)
-}
+@this()
+<link href='@routes.Assets.versioned("stylesheets/application.css")'
+      media="all"
+      rel="stylesheet"
+      type="text/css" />
