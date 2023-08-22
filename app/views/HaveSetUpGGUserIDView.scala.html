@@ -21,12 +21,12 @@
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukRadios: GovukRadios,
-    govukButton: GovukButton,
+    govukButton: GovukButton
 )
 
 @(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("haveSetUpGGUserID.title")), fullWidth = false) {
+@layout(pageTitle = title(form, messages("haveSetUpGGUserID.title")), fullWidth = false, showSignOutInHeader = false) {
 
     @formHelper(action = routes.HaveSetUpGGUserIDController.onSubmit(mode), 'autoComplete -> "off") {
 
