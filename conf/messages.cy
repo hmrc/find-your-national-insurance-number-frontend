@@ -49,7 +49,7 @@ selectNINOLetterAddress.heading = I ble’r hoffech i ni anfon y llythyr?
 selectNINOLetterAddress.postCode = I’r cyfeiriad sydd â’r cod post {0}
 selectNINOLetterAddress.notThisAddress = Dim i’r cyfeiriad hwn
 selectNINOLetterAddress.checkYourAnswersLabel = I ble’r hoffech i ni anfon y llythyr?
-selectNINOLetterAddress.error.required = Tell us where you would like the letter sent
+selectNINOLetterAddress.error.required = Rhowch wybod i ni i ble yr hoffech i’r llythyr gael ei anfon
 selectNINOLetterAddress.change.hidden = SelectNINOLetterAddress
 
 ninoLetterPostedConfirmation.title = Bydd eich rhif Yswiriant Gwladol yn cael ei anfon drwy’r post
@@ -64,7 +64,7 @@ selectAlternativeService.printForm.hint = Unwaith bod gennym y ffurflen wedi’i
 selectAlternativeService.phoneHMRC = Ffonio CThEF
 selectAlternativeService.phoneHMRC.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno. Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
 selectAlternativeService.checkYourAnswersLabel = Sut yr hoffech chi gysylltu â CThEF?
-selectAlternativeService.error.required = Tell us what you would like to do
+selectAlternativeService.error.required = Rhowch wybod i ni beth yr hoffech ei wneud
 selectAlternativeService.change.hidden = SelectAlternativeService
 selectAlternativeService.tryAgain = Try again to confirm your identity online
 selectAlternativeService.requestALetterOnline = Gwneud cais am lythyr ar-lein
