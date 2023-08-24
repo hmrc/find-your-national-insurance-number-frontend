@@ -187,3 +187,4 @@ sendLetterError.li1 = letters sent to this address have been undelivered or retu
 sendLetterError.li2 = HMRC has multiple addresses for you
 sendLetterError.li3 = the letter has been requested online too many times
 sendLetterError.p2 = You need to contact us to get your National Insurance number in the post.
+sendLetterError.h2 = What would you like to do?
