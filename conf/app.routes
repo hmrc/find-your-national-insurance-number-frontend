@@ -10,7 +10,7 @@ GET         /language/:lang                                 controllers.Language
 
 GET         /refresh-session                                controllers.KeepAliveController.keepAlive
 
-GET         /there-is-a-problem                             controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
+GET         /service-issue                                  controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
 GET         /check-your-answers                             controllers.CheckYourAnswersController.onPageLoad
 
@@ -37,32 +37,32 @@ POST        /postNationalInsuranceLetter                    controllers.PostNINO
 GET         /changePostNationalInsuranceLetter              controllers.PostNINOLetterController.onPageLoad(mode: Mode = CheckMode)
 POST        /changePostNationalInsuranceLetter              controllers.PostNINOLetterController.onSubmit(mode: Mode = CheckMode)
 
-GET         /validDataNINOHelp                              controllers.ValidDataNINOHelpController.onPageLoad(mode: Mode = NormalMode)
+GET         /help                                           controllers.ValidDataNINOHelpController.onPageLoad(mode: Mode = NormalMode)
 
-GET         /invalidDataNINOHelp                            controllers.InvalidDataNINOHelpController.onPageLoad(mode: Mode = NormalMode)
-POST        /invalidDataNINOHelp                            controllers.InvalidDataNINOHelpController.onSubmit(mode: Mode = NormalMode)
+GET         /help-contact-hmrc                              controllers.InvalidDataNINOHelpController.onPageLoad(mode: Mode = NormalMode)
+POST        /help-contact-hmrc                              controllers.InvalidDataNINOHelpController.onSubmit(mode: Mode = NormalMode)
 GET         /changeInvalidDataNINOHelp                      controllers.InvalidDataNINOHelpController.onPageLoad(mode: Mode = CheckMode)
 POST        /changeInvalidDataNINOHelp                      controllers.InvalidDataNINOHelpController.onSubmit(mode: Mode = CheckMode)
 
-GET         /selectNationalInsuranceLetterAddress           controllers.SelectNINOLetterAddressController.onPageLoad(mode: Mode = NormalMode)
-POST        /selectNationalInsuranceLetterAddress           controllers.SelectNINOLetterAddressController.onSubmit(mode: Mode = NormalMode)
+GET         /postcode                                       controllers.SelectNINOLetterAddressController.onPageLoad(mode: Mode = NormalMode)
+POST        /postcode                                       controllers.SelectNINOLetterAddressController.onSubmit(mode: Mode = NormalMode)
 GET         /changeSelectNationalInsuranceLetterAddress     controllers.SelectNINOLetterAddressController.onPageLoad(mode: Mode = CheckMode)
 POST        /changeSelectNationalInsuranceLetterAddress     controllers.SelectNINOLetterAddressController.onSubmit(mode: Mode = CheckMode)
 
-GET         /NationalInsuranceLetterPosted                  controllers.NINOLetterPostedConfirmationController.onPageLoad()
+GET         /letter-confirmed                               controllers.NINOLetterPostedConfirmationController.onPageLoad()
 
-GET         /selectAlternativeService                       controllers.SelectAlternativeServiceController.onPageLoad(mode: Mode = NormalMode)
-POST        /selectAlternativeService                       controllers.SelectAlternativeServiceController.onSubmit(mode: Mode = NormalMode)
+GET         /contact-hmrc                                   controllers.SelectAlternativeServiceController.onPageLoad(mode: Mode = NormalMode)
+POST        /contact-hmrc                                   controllers.SelectAlternativeServiceController.onSubmit(mode: Mode = NormalMode)
 GET         /changeSelectAlternativeService                 controllers.SelectAlternativeServiceController.onPageLoad(mode: Mode = CheckMode)
 POST        /changeSelectAlternativeService                 controllers.SelectAlternativeServiceController.onSubmit(mode: Mode = CheckMode)
 
-GET         /phoneHMRCDetails                               controllers.PhoneHMRCDetailsController.onPageLoad()
+GET         /phone-hmrc                                     controllers.PhoneHMRCDetailsController.onPageLoad()
 
 GET         /checkDetails/:validationId                     controllers.CheckDetailsController.onPageLoad(mode: Mode = NormalMode, validationId: String)
 GET         /changeCheckDetails/:validationId               controllers.CheckDetailsController.onPageLoad(mode: Mode = CheckMode, validationId: String)
 
-GET         /sendLetterError                                controllers.SendLetterErrorController.onPageLoad(mode: Mode = NormalMode)
-POST        /sendLetterError                                controllers.SendLetterErrorController.onSubmit(mode: Mode = NormalMode)
+GET         /issue                                          controllers.SendLetterErrorController.onPageLoad(mode: Mode = NormalMode)
+POST        /issue                                          controllers.SendLetterErrorController.onSubmit(mode: Mode = NormalMode)
 GET         /changeSendLetterError                          controllers.SendLetterErrorController.onPageLoad(mode: Mode = CheckMode)
 POST        /changeSendLetterError                          controllers.SendLetterErrorController.onSubmit(mode: Mode = NormalMode)
 
