@@ -16,12 +16,12 @@
 
 package pages
 
-import models.NINOHelpline
+import models.ValidDataNINOHelp
 import play.api.libs.json.JsPath
 
-case object NINOHelplinePage extends QuestionPage[NINOHelpline] {
+case object ValidDataNINOHelpPage extends QuestionPage[ValidDataNINOHelp] {
 
   override def path: JsPath = JsPath \ toString
 
-  override def toString: String = "ninoHelpline"
+  override def toString: String = "validDataNINOHelp"
 }

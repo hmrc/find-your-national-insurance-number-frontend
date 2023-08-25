@@ -97,6 +97,7 @@ ninoHelpView.heading = Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy�
 ninoHelpView.inset = Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
 ninoHelpView.p1 = Gallwch ofyn am gael llythyr sy’n dangos eich rhif. Bydd hwnnw yn cyrraedd cyn pen 15 diwrnod gwaith.
 ninoHelpView.h2 = Sut hoffech chi ofyn i CThEF bostio’ch rhif atoch?
+ninoHelpView.error.required = Tell us what you would like to do
 ninoHelpView.onlineService = Defnyddio’r gwasanaeth ar-lein hwn nawr
 ninoHelpView.onlineService.hint = Y cyfan y bydd angen i chi ei wneud yw cadarnhau’ch cod post, ac yna byddwn yn postio’r llythyr atoch.
 ninoHelpView.printForm = Argraffu ac anfon ffurflen

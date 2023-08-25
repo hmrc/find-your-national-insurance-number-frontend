@@ -18,10 +18,10 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import forms.NINOHelplineFormProvider
+import forms.ValidDataNINOHelpFormProvider
 import models.{Mode, NormalMode}
 import navigation.Navigator
-import pages.NINOHelplinePage
+import pages.ValidDataNINOHelpPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -38,7 +38,7 @@ class ValidDataNINOHelpController @Inject()(
                                              identify: IdentifierAction,
                                              getData: DataRetrievalAction,
                                              requireData: DataRequiredAction,
-                                             formProvider: NINOHelplineFormProvider,
+                                             formProvider: ValidDataNINOHelpFormProvider,
                                              view: ValidDataNINOHelpView,
                                              val controllerComponents: MessagesControllerComponents
                                   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
@@ -48,7 +48,7 @@ class ValidDataNINOHelpController @Inject()(
   def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
 
-      val preparedForm = request.userAnswers.get(NINOHelplinePage) match {
+      val preparedForm = request.userAnswers.get(ValidDataNINOHelpPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
@@ -65,9 +65,9 @@ class ValidDataNINOHelpController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(NINOHelplinePage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(ValidDataNINOHelpPage, value))
             _ <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(NINOHelplinePage, mode, updatedAnswers))
+          } yield Redirect(navigator.nextPage(ValidDataNINOHelpPage, mode, updatedAnswers))
       )
   }
 

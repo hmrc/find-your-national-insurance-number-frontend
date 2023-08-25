@@ -34,8 +34,12 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     case PostNINOLetterPage           => userAnswers => navigatePostNINOLetter(userAnswers)
     case SelectNINOLetterAddressPage  => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
     case SelectAlternativeServicePage => userAnswers => navigateSelectAlternativeService(userAnswers)
+<<<<<<< HEAD
     case InvalidDataNINOHelpPage      => userAnswers => navigateInvalidDataNINOHelp(userAnswers)
     case NINOHelplinePage             => userAnswers => navigateValidDataNINOHelp(userAnswers)
+=======
+    case ValidDataNINOHelpPage             => userAnswers => navigateNINOHelpline(userAnswers)
+>>>>>>> ba62ada (ITS-2914 | Updated tests for ValidDataNINOHelp and now are all passing. Updated messages files to refer to its own error messages.)
     case _                            => _           => routes.IndexController.onPageLoad
   }
 
@@ -78,6 +82,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
       case _                                        => routes.JourneyRecoveryController.onPageLoad()
     }
 
+<<<<<<< HEAD
   private def navigateInvalidDataNINOHelp(userAnswers: UserAnswers): Call =
     userAnswers.get(InvalidDataNINOHelpPage) match {
       case Some(InvalidDataNINOHelp.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
@@ -92,5 +97,13 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
       case Some(NINOHelpline.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
       case Some(NINOHelpline.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
       case _                            => routes.JourneyRecoveryController.onPageLoad()
+=======
+  private def navigateNINOHelpline(userAnswers: UserAnswers): Call =
+    userAnswers.get(ValidDataNINOHelpPage) match {
+      case Some(ValidDataNINOHelp.OnlineService) => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
+      case Some(ValidDataNINOHelp.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
+      case Some(ValidDataNINOHelp.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
+      case _ => routes.JourneyRecoveryController.onPageLoad()
+>>>>>>> ba62ada (ITS-2914 | Updated tests for ValidDataNINOHelp and now are all passing. Updated messages files to refer to its own error messages.)
     }
 }
