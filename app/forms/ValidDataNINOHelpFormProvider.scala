@@ -17,15 +17,15 @@
 package forms
 
 import forms.mappings.Mappings
-import models.NINOHelpline
+import models.ValidDataNINOHelp
 import play.api.data.Form
 
 import javax.inject.Inject
 
-class NINOHelplineFormProvider @Inject() extends Mappings {
+class ValidDataNINOHelpFormProvider @Inject() extends Mappings {
 
-  def apply(): Form[NINOHelpline] =
+  def apply(): Form[ValidDataNINOHelp] =
     Form(
-      "value" -> enumerable[NINOHelpline]("selectAlternativeService.error.required")
+      "value" -> enumerable[ValidDataNINOHelp]("ninoHelpView.error.required")
     )
 }

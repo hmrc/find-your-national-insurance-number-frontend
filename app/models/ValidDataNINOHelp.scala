@@ -21,15 +21,15 @@ import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
 import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 
-sealed trait NINOHelpline
+sealed trait ValidDataNINOHelp
 
-object NINOHelpline extends Enumerable.Implicits {
+object ValidDataNINOHelp extends Enumerable.Implicits {
 
-  case object OnlineService extends WithName("onlineService") with NINOHelpline
-  case object PrintForm extends WithName("printForm") with NINOHelpline
-  case object PhoneHmrc extends WithName("phoneHMRC") with NINOHelpline
+  case object OnlineService extends WithName("onlineService") with ValidDataNINOHelp
+  case object PrintForm extends WithName("printForm") with ValidDataNINOHelp
+  case object PhoneHmrc extends WithName("phoneHMRC") with ValidDataNINOHelp
 
-  val values: Seq[NINOHelpline] = Seq(
+  val values: Seq[ValidDataNINOHelp] = Seq(
     OnlineService, PrintForm, PhoneHmrc
   )
 
@@ -45,6 +45,6 @@ object NINOHelpline extends Enumerable.Implicits {
       )
   }
 
-  implicit val enumerable: Enumerable[NINOHelpline] =
+  implicit val enumerable: Enumerable[ValidDataNINOHelp] =
     Enumerable(values.map(v => v.toString -> v): _*)
 }

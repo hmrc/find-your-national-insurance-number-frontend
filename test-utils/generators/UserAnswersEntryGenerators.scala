@@ -47,4 +47,12 @@ trait UserAnswersEntryGenerators extends PageGenerators with ModelGenerators {
         value <- Arbitrary.arbitrary[SelectNINOLetterAddress].map(Json.toJson(_))
       } yield (page, value)
     }
+
+  implicit lazy val arbitraryValidDataNINOHelpUserAnswersEntry: Arbitrary[(ValidDataNINOHelpPage.type, JsValue)] =
+    Arbitrary {
+      for {
+        page <- Arbitrary.arbitrary[ValidDataNINOHelpPage.type]
+        value <- Arbitrary.arbitrary[ValidDataNINOHelp].map(Json.toJson(_))
+      } yield (page, value)
+    }
 }

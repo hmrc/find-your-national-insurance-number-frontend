@@ -34,7 +34,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     case PostNINOLetterPage           => userAnswers => navigatePostNINOLetter(userAnswers)
     case SelectNINOLetterAddressPage  => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
     case SelectAlternativeServicePage => userAnswers => navigateSelectAlternativeService(userAnswers)
-    case NINOHelplinePage             => userAnswers => navigateNINOHelpline(userAnswers)
+    case ValidDataNINOHelpPage             => userAnswers => navigateNINOHelpline(userAnswers)
     case _                            => _           => routes.IndexController.onPageLoad
   }
 
@@ -78,10 +78,10 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     }
 
   private def navigateNINOHelpline(userAnswers: UserAnswers): Call =
-    userAnswers.get(NINOHelplinePage) match {
-      case Some(NINOHelpline.OnlineService) => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
-      case Some(NINOHelpline.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
-      case Some(NINOHelpline.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
+    userAnswers.get(ValidDataNINOHelpPage) match {
+      case Some(ValidDataNINOHelp.OnlineService) => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
+      case Some(ValidDataNINOHelp.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
+      case Some(ValidDataNINOHelp.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
       case _ => routes.JourneyRecoveryController.onPageLoad()
     }
 }
