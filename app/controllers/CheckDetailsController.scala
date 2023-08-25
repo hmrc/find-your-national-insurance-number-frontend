@@ -16,12 +16,9 @@
 
 package controllers
 
-import cats.data.EitherT
-import cats.implicits.toFoldableOps
 import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
 import models.individualdetails.AccountStatusType.FullLive
 import models.individualdetails.AddressStatus.NotDlo
 import models.individualdetails.AddressType.ResidentialAddress
@@ -67,7 +64,7 @@ class CheckDetailsController @Inject()(
         logData(individualDetailsData, pdvData.get)
 
         if (check == true) {
-          Redirect(routes.ValidDataNINOHelpController.onPageLoad())
+          Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
         } else {
           Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
         }

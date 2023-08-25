@@ -38,6 +38,9 @@ GET         /changePostNationalInsuranceLetter              controllers.PostNINO
 POST        /changePostNationalInsuranceLetter              controllers.PostNINOLetterController.onSubmit(mode: Mode = CheckMode)
 
 GET         /validDataNINOHelp                              controllers.ValidDataNINOHelpController.onPageLoad(mode: Mode = NormalMode)
+POST        /validDataNINOHelp                              controllers.ValidDataNINOHelpController.onSubmit(mode: Mode = NormalMode)
+GET         /changeValidDataNINOHelp                        controllers.ValidDataNINOHelpController.onPageLoad(mode: Mode = CheckMode)
+POST        /changeValidDataNINOHelp                        controllers.ValidDataNINOHelpController.onSubmit(mode: Mode = CheckMode)
 
 GET         /invalidDataNINOHelp                            controllers.InvalidDataNINOHelpController.onPageLoad(mode: Mode = NormalMode)
 POST        /invalidDataNINOHelp                            controllers.InvalidDataNINOHelpController.onSubmit(mode: Mode = NormalMode)
