@@ -16,6 +16,7 @@
 
 @import config.FrontendAppConfig
 @import play.twirl.api.Html
+@import viewmodels.LegendSize
 
 @this(
     layout: templates.LayoutProvider,
@@ -28,15 +29,12 @@
 @(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
 @layout(
-    pageTitle = titleNoForm(messages("ninoHelpView.title")),
-    timeout   = false,
+    pageTitle = titleNoForm(messages("invalidDataNinoHelp.title")),
+    timeout = false,
     showBackLink = true,
     showSignOut = true,
     fullWidth = false
 ) {
-
-    <h1 class="govuk-heading-xl">@messages("ninoHelpView.heading")</h1>
-    <p class="govuk-body">@messages("ninoHelpOnRLSView.p1")</p>
 
     @formHelper(action = routes.InvalidDataNINOHelpController.onSubmit(mode), 'autoComplete -> "off") {
 
@@ -44,13 +42,15 @@
             @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
         }
 
-        <h2 class="govuk-heading-m">@messages("ninoHelpOnRLSView.p2")</h2>
+        <h1 class="govuk-heading-xl">@messages("invalidDataNinoHelp.heading")</h1>
+        <div class="govuk-inset-text">@messages("invalidDataNinoHelp.inset")</div>
+        <p class="govuk-body">@messages("invalidDataNinoHelp.p1")</p>
 
         @govukRadios(
             RadiosViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(""),
-                items  = SelectAlternativeService.options
+                legend = LegendViewModel(messages("invalidDataNinoHelp.h2")).asPageHeading(LegendSize.Large),
+                items  = InvalidDataNINOHelp.options
             )
         )
 

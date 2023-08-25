@@ -167,10 +167,18 @@ ninoHelpView.p2 = HMRC will not tell you your National Insurance number over the
 ninoHelpView.getYourNINOByPost = Get your National Insurance number by post
 ninoHelpView.contactHMRC = <a href="{0}">Contact HMRC to request a letter</a>
 
-ninoHelpOnRLSView.title = National Insurance number help
-ninoHelpOnRLSView.heading = National Insurance number help
-ninoHelpOnRLSView.p1 = You need to contact HMRC to get your National Insurance number in the post if you need a reminder or a letter confirming it.
-ninoHelpOnRLSView.p2 = What would you like to do?
+invalidDataNinoHelp.title = HMRC can post your National Insurance number to you
+invalidDataNinoHelp.heading = HMRC can post your National Insurance number to you
+invalidDataNinoHelp.inset = HMRC will not tell you your National Insurance number over the phone.
+invalidDataNinoHelp.p1 = You can request a letter with your number on it. It’ll then arrive within 15 working days.
+invalidDataNinoHelp.h2 = How would you like to ask HMRC to post your number to you?
+invalidDataNinoHelp.printForm = Print and post a form
+invalidDataNinoHelp.printForm.hint = Once we have received the completed form, we can send you a letter confirming your National Insurance number.
+invalidDataNinoHelp.phoneHMRC = Phone HMRC
+invalidDataNinoHelp.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it.
+invalidDataNinoHelp.checkYourAnswersLabel = How would you like to contact HMRC?
+invalidDataNinoHelp.error.required = Tell us what you would like to do
+
 
 sendLetterError.title = There is a problem
 sendLetterError.heading = There is a problem
@@ -179,3 +187,4 @@ sendLetterError.li1 = letters sent to this address have been undelivered or retu
 sendLetterError.li2 = HMRC has multiple addresses for you
 sendLetterError.li3 = the letter has been requested online too many times
 sendLetterError.p2 = You need to contact us to get your National Insurance number in the post.
+sendLetterError.h2 = What would you like to do?

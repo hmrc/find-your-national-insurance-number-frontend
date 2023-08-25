@@ -60,7 +60,7 @@ ninoLetterPostedConfirmation.goBackToGovUK = Gadael ac yn ôl i GOV.UK
 selectAlternativeService.title = Sut yr hoffech chi gysylltu â CThEF?
 selectAlternativeService.heading = Sut yr hoffech chi gysylltu â CThEF?
 selectAlternativeService.printForm = Argraffu ac anfon ffurflen
-selectAlternativeService.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, gallwn anfon lythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol.
+selectAlternativeService.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol.
 selectAlternativeService.phoneHMRC = Ffonio CThEF
 selectAlternativeService.phoneHMRC.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno. Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
 selectAlternativeService.checkYourAnswersLabel = Sut yr hoffech chi gysylltu â CThEF?
@@ -100,10 +100,17 @@ ninoHelpView.p2 = Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y
 ninoHelpView.getYourNINOByPost = Cael eich rhif Yswiriant Gwladol drwy’r post
 ninoHelpView.contactHMRC = <a href="{0}">Cysylltwch â CThEF i wneud cais am lythyr</a>
 
-ninoHelpOnRLSView.title = Help gyda Rhif Yswiriant Gwladol
-ninoHelpOnRLSView.heading = Help gyda Rhif Yswiriant Gwladol
-ninoHelpOnRLSView.p1 = Mae angen i chi gysylltu â CThEF i gael eich rhif Yswiriant Gwladol drwy’r post os ydych angen nodyn atgoffa neu lythyr yn ei gadarnhau.
-ninoHelpOnRLSView.p2 = Beth yr hoffech ei wneud?
+invalidDataNinoHelp.title = Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
+invalidDataNinoHelp.heading = Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
+invalidDataNinoHelp.inset = Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
+invalidDataNinoHelp.p1 = Gallwch ofyn am gael llythyr sy’n dangos eich rhif. Bydd hwnnw yn cyrraedd cyn pen 15 diwrnod gwaith.
+invalidDataNinoHelp.h2 = Sut hoffech chi ofyn i CThEF bostio’ch rhif atoch?
+invalidDataNinoHelp.printForm = Argraffu ac anfon ffurflen
+invalidDataNinoHelp.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol.
+invalidDataNinoHelp.phoneHMRC = Ffonio CThEF
+invalidDataNinoHelp.phoneHMRC.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno.
+invalidDataNinoHelp.checkYourAnswersLabel = Sut yr hoffech chi gysylltu â CThEF?
+invalidDataNinoHelp.error.required = Rhowch wybod i ni beth yr hoffech ei wneud
 
 sendLetterError.title = Mae problem wedi codi
 sendLetterError.heading = Mae problem wedi codi
@@ -112,3 +119,4 @@ sendLetterError.li1 = mae llythyrau sydd wedi’u hanfon i’r cyfeiriad hwn nai
 sendLetterError.li2 = mae gan CThEF sawl cyfeiriad ar eich cyfer
 sendLetterError.li3 = mae gormod o geisiadau wedi codi ar-lein am y llythyr hwn
 sendLetterError.p2 = Mae angen i chi gysylltu â ni er mwyn cael eich rhif Yswiriant Gwladol drwy’r post.
+sendLetterError.h2 = Beth yr hoffech ei wneud?

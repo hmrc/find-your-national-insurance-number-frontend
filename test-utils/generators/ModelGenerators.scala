@@ -26,6 +26,11 @@ trait ModelGenerators {
       Gen.oneOf(SelectAlternativeService.values.toSeq)
     }
 
+  implicit lazy val arbitraryInvalidDataNINOHelp: Arbitrary[InvalidDataNINOHelp] =
+    Arbitrary {
+      Gen.oneOf(InvalidDataNINOHelp.values.toSeq)
+    }
+
   implicit lazy val arbitrarySelectNINOLetterAddress: Arbitrary[SelectNINOLetterAddress] =
     Arbitrary {
       Gen.oneOf(SelectNINOLetterAddress.values.toSeq)

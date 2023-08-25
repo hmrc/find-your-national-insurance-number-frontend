@@ -18,10 +18,10 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import forms.SelectAlternativeServiceFormProvider
+import forms.InvalidDataNINOHelpFormProvider
 import models.Mode
 import navigation.Navigator
-import pages.SelectAlternativeServicePage
+import pages.InvalidDataNINOHelpPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -39,7 +39,7 @@ class InvalidDataNINOHelpController @Inject()(
                                                getData: DataRetrievalAction,
                                                requireData: DataRequiredAction,
                                                view: InvalidDataNINOHelpView,
-                                               formProvider: SelectAlternativeServiceFormProvider,
+                                               formProvider: InvalidDataNINOHelpFormProvider,
                                                val controllerComponents: MessagesControllerComponents
                                   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
 
@@ -47,7 +47,7 @@ class InvalidDataNINOHelpController @Inject()(
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      val preparedForm = request.userAnswers.get(SelectAlternativeServicePage) match {
+      val preparedForm = request.userAnswers.get(InvalidDataNINOHelpPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
@@ -64,9 +64,9 @@ class InvalidDataNINOHelpController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectAlternativeServicePage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(InvalidDataNINOHelpPage, value))
             _ <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(SelectAlternativeServicePage, mode, updatedAnswers))
+          } yield Redirect(navigator.nextPage(InvalidDataNINOHelpPage, mode, updatedAnswers))
       )
   }
 
