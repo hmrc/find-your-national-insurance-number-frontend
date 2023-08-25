@@ -34,7 +34,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     case PostNINOLetterPage           => userAnswers => navigatePostNINOLetter(userAnswers)
     case SelectNINOLetterAddressPage  => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
     case SelectAlternativeServicePage => userAnswers => navigateSelectAlternativeService(userAnswers)
-    case ValidDataNINOHelpPage             => userAnswers => navigateNINOHelpline(userAnswers)
+    case ValidDataNINOHelpPage        => userAnswers => navigateValidDataNINOHelp(userAnswers)
     case _                            => _           => routes.IndexController.onPageLoad
   }
 
@@ -77,7 +77,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
       case _                                        => routes.JourneyRecoveryController.onPageLoad()
     }
 
-  private def navigateNINOHelpline(userAnswers: UserAnswers): Call =
+  private def navigateValidDataNINOHelp(userAnswers: UserAnswers): Call =
     userAnswers.get(ValidDataNINOHelpPage) match {
       case Some(ValidDataNINOHelp.OnlineService) => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
       case Some(ValidDataNINOHelp.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
