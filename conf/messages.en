@@ -159,13 +159,17 @@ interruptView.li2.address.postcode = BX9 1AN
 interruptView.p1 = If you are filling out a CA5403 form, you may need to prove your identity with certain documents. The online form will tell you which documents you need.
 interruptView.p2 = Your National Insurance number should arrive within 15 days of you contacting us.
 
-ninoHelpView.title = National Insurance number help
-ninoHelpView.heading = National Insurance number help
-ninoHelpView.h2 = HMRC can post your number to you
-ninoHelpView.p1 = You can get your National Insurance number in the post if you need a reminder or a letter confirming it.
-ninoHelpView.p2 = HMRC will not tell you your National Insurance number over the phone. They’ll post it to you and it’ll arrive within 15 working days.
-ninoHelpView.getYourNINOByPost = Get your National Insurance number by post
-ninoHelpView.contactHMRC = <a href="{0}">Contact HMRC to request a letter</a>
+ninoHelpView.title = Find your National Insurance number
+ninoHelpView.heading = HMRC can post your National Insurance number to you
+ninoHelpView.inset = HMRC will not tell you your National Insurance number over the phone.
+ninoHelpView.p1 = You can request a letter with your number on it. It'll then arrive within 15 working days.
+ninoHelpView.h2 = How would you like to ask HMRC to post your number to you?
+ninoHelpView.onlineService = Use this online service now
+ninoHelpView.onlineService.hint = You only need to confirm your postcode and then we'll post the letter to you.
+ninoHelpView.printForm = Print and post a form
+ninoHelpView.printForm.hint = Once we have received the completed form, we can send you a letter confirming your National Insurance number.
+ninoHelpView.phoneHMRC = Phone HMRC
+ninoHelpView.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it. We will not tell you your National Insurance number over the phone.
 
 invalidDataNinoHelp.title = HMRC can post your National Insurance number to you
 invalidDataNinoHelp.heading = HMRC can post your National Insurance number to you
