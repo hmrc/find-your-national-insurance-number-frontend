@@ -110,7 +110,7 @@ invalidDataNinoHelp.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llen
 invalidDataNinoHelp.phoneHMRC = Ffonio CThEF
 invalidDataNinoHelp.phoneHMRC.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno.
 invalidDataNinoHelp.checkYourAnswersLabel = Sut yr hoffech chi gysylltu â CThEF?
-invalidDataNinoHelp.error.required = Rhowch wybod i ni beth yr hoffech ei wneud
+invalidDataNinoHelp.error.required = Dewiswch opsiwn i fynd yn eich blaen
 
 sendLetterError.title = Mae problem wedi codi
 sendLetterError.heading = Mae problem wedi codi
