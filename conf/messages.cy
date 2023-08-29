@@ -120,3 +120,14 @@ sendLetterError.li2 = mae gan CThEF sawl cyfeiriad ar eich cyfer
 sendLetterError.li3 = mae gormod o geisiadau wedi codi ar-lein am y llythyr hwn
 sendLetterError.p2 = Mae angen i chi gysylltu â ni er mwyn cael eich rhif Yswiriant Gwladol drwy’r post.
 sendLetterError.h2 = Beth yr hoffech ei wneud?
+
+technicalError.title = Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
+technicalError.heading = Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
+technicalError.p1 = Gallwch roi cynnig arall arni yn nes ymlaen neu gallwch gysylltu â CThEF er mwyn cael eich rhif Yswiriant Gwladol drwy’r post.
+technicalError.p2 = Beth yr hoffech ei wneud?
+technicalError.tryAgainForm = Rhowch gynnig arall arni
+technicalError.tryAgainForm.hint =
+technicalError.printForm = Argraffu ac anfon ffurflen
+technicalError.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol.
+technicalError.phoneHMRC = Ffonio CThEF
+technicalError.phoneHMRC.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno. Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
