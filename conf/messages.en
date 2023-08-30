@@ -170,7 +170,7 @@ ninoHelpView.onlineService.hint = You only need to confirm your postcode and the
 ninoHelpView.printForm = Print and post a form
 ninoHelpView.printForm.hint = Once we have received the completed form, we can send you a letter confirming your National Insurance number.
 ninoHelpView.phoneHMRC = Phone HMRC
-ninoHelpView.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it. We will not tell you your National Insurance number over the phone.
+ninoHelpView.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it.
 
 invalidDataNinoHelp.title = HMRC can post your National Insurance number to you
 invalidDataNinoHelp.heading = HMRC can post your National Insurance number to you

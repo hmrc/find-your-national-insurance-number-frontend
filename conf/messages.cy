@@ -103,7 +103,7 @@ ninoHelpView.onlineService.hint = Y cyfan y bydd angen i chi ei wneud yw cadarnh
 ninoHelpView.printForm = Argraffu ac anfon ffurflen
 ninoHelpView.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol.
 ninoHelpView.phoneHMRC = Ffonio CThEF
-ninoHelpView.phoneHMRC.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno. Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
+ninoHelpView.phoneHMRC.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno.
 
 invalidDataNinoHelp.title = Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
 invalidDataNinoHelp.heading = Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
