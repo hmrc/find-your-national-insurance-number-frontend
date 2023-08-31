@@ -177,7 +177,7 @@ invalidDataNinoHelp.printForm.hint = Once we have received the completed form, w
 invalidDataNinoHelp.phoneHMRC = Phone HMRC
 invalidDataNinoHelp.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it.
 invalidDataNinoHelp.checkYourAnswersLabel = How would you like to contact HMRC?
-invalidDataNinoHelp.error.required = Tell us what you would like to do
+invalidDataNinoHelp.error.required = Select an option to continue
 
 
 sendLetterError.title = There is a problem
