@@ -182,8 +182,7 @@ invalidDataNinoHelp.printForm.hint = Once we have received the completed form, w
 invalidDataNinoHelp.phoneHMRC = Phone HMRC
 invalidDataNinoHelp.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it.
 invalidDataNinoHelp.checkYourAnswersLabel = How would you like to contact HMRC?
-invalidDataNinoHelp.error.required = Tell us what you would like to do
-
+invalidDataNinoHelp.error.required = Select an option to continue
 
 sendLetterError.title = There is a problem
 sendLetterError.heading = There is a problem
@@ -193,3 +192,15 @@ sendLetterError.li2 = HMRC has multiple addresses for you
 sendLetterError.li3 = the letter has been requested online too many times
 sendLetterError.p2 = You need to contact us to get your National Insurance number in the post.
 sendLetterError.h2 = What would you like to do?
+
+technicalError.title = Sorry, there is a problem with the service
+technicalError.heading = Sorry, there is a problem with the service
+technicalError.p1 = You can try again later or contact HMRC to get your National Insurance number in the post.
+technicalError.p2 = What would you like to do?
+technicalError.tryAgainForm = Try again
+technicalError.tryAgainForm.hint = If we can confirm your postcode online now, then we’ll post your National Insurance number to you.
+technicalError.printForm = Print and post a form
+technicalError.printForm.hint = Once we have received the completed form, we can send you a letter confirming your National Insurance number.
+technicalError.phoneHMRC = Phone HMRC
+technicalError.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it. We will not tell you your National Insurance number over the phone.
+technicalError.error.required = Tell us what you would like to do

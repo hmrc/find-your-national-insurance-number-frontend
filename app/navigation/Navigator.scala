@@ -29,11 +29,14 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class Navigator @Inject()(implicit config: FrontendAppConfig) {
 
+  val getNINOByPost = "/fill-online/get-your-national-insurance-number-by-post"
+
   private val normalRoutes: Page => UserAnswers => Call = {
     case HaveSetUpGGUserIDPage        => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
     case PostNINOLetterPage           => userAnswers => navigatePostNINOLetter(userAnswers)
     case SelectNINOLetterAddressPage  => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
     case SelectAlternativeServicePage => userAnswers => navigateSelectAlternativeService(userAnswers)
+    case TechnicalErrorPage           => userAnswers => navigateTechnicalErrorService(userAnswers)
     case InvalidDataNINOHelpPage      => userAnswers => navigateInvalidDataNINOHelp(userAnswers)
     case ValidDataNINOHelpPage        => userAnswers => navigateValidDataNINOHelp(userAnswers)
     case _                            => _           => routes.IndexController.onPageLoad
@@ -74,8 +77,16 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
   private def navigateSelectAlternativeService(userAnswers: UserAnswers): Call =
     userAnswers.get(SelectAlternativeServicePage) match {
       case Some(SelectAlternativeService.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
-      case Some(SelectAlternativeService.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
+      case Some(SelectAlternativeService.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}${getNINOByPost}")
       case _                                        => routes.JourneyRecoveryController.onPageLoad()
+    }
+
+  private def navigateTechnicalErrorService(userAnswers: UserAnswers): Call =
+    userAnswers.get(TechnicalErrorPage) match {
+      case Some(TechnicalErrorService.TryAgain)  => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
+      case Some(TechnicalErrorService.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
+      case Some(TechnicalErrorService.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}${getNINOByPost}")
+      case _                                     => routes.JourneyRecoveryController.onPageLoad()
     }
 
   private def navigateInvalidDataNINOHelp(userAnswers: UserAnswers): Call =
@@ -93,4 +104,5 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
       case Some(ValidDataNINOHelp.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
       case _                                 => routes.JourneyRecoveryController.onPageLoad()
     }
+
 }
