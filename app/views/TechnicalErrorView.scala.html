@@ -35,8 +35,11 @@
         <h1 class="govuk-heading-l">@messages("technicalError.heading")</h1>
 
         <p class="govuk-body">@messages("technicalError.p1")</p>
-        <p class="govuk-body">@messages("technicalError.p2")</p>
-
+        <p class="govuk-body">
+            <strong class="govuk-!-font-weight-bold">
+                @messages("technicalError.p2")
+            </strong>
+        </p>
         @govukRadios(
             RadiosViewModel(
                 field  = form("value"),
