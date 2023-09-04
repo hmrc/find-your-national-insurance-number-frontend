@@ -64,7 +64,7 @@ class CheckDetailsController @Inject()(
         logData(individualDetailsData, pdvData.get)
 
         if (check == true) {
-          Redirect(routes.ValidDataNINOHelpController.onPageLoad())
+          Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
         } else {
           Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
         }

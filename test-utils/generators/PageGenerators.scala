@@ -30,4 +30,7 @@ trait PageGenerators {
   implicit lazy val arbitrarySelectNINOLetterAddressPage: Arbitrary[SelectNINOLetterAddressPage.type] =
     Arbitrary(SelectNINOLetterAddressPage)
 
+  implicit lazy val arbitraryValidDataNINOHelpPage: Arbitrary[ValidDataNINOHelpPage.type] =
+    Arbitrary(ValidDataNINOHelpPage)
+
 }

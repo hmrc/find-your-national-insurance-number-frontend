@@ -92,13 +92,18 @@ phoneHMRCDetails.openingTimes.weekendAndBankHoliday = Ar gau ar y penwythnos ac 
 phoneHMRCDetails.hmrcExtraHelp = Cael help <a href="{0}" target="_blank"> wrth ddelio â CThEF os oes gennych anghenion ychwanegol</a>
 phoneHMRCDetails.findOutCallCharges = <a href="{0}" target="_blank">Cael gwybod am gostau galwadau.</a>
 
-ninoHelpView.title = Help gyda Rhif Yswiriant Gwladol
-ninoHelpView.heading = Help gyda Rhif Yswiriant Gwladol
-ninoHelpView.h2 = Gall CThEF anfon eich rhif atoch drwy’r post
-ninoHelpView.p1 = Gallwch gael eich rhif Yswiriant Gwladol drwy’r post os ydych angen nodyn atgoffa neu lythyr yn ei gadarnhau.
-ninoHelpView.p2 = Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn. Byddant yn ei bostio atoch a bydd yn cyrraedd cyn pen 15 diwrnod gwaith.
-ninoHelpView.getYourNINOByPost = Cael eich rhif Yswiriant Gwladol drwy’r post
-ninoHelpView.contactHMRC = <a href="{0}">Cysylltwch â CThEF i wneud cais am lythyr</a>
+ninoHelpView.title = Dod o hyd i’ch rhif Yswiriant Gwladol
+ninoHelpView.heading = Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
+ninoHelpView.inset = Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
+ninoHelpView.p1 = Gallwch ofyn am gael llythyr sy’n dangos eich rhif. Bydd hwnnw yn cyrraedd cyn pen 15 diwrnod gwaith.
+ninoHelpView.h2 = Sut hoffech chi ofyn i CThEF bostio’ch rhif atoch?
+ninoHelpView.error.required = Tell us what you would like to do
+ninoHelpView.onlineService = Defnyddio’r gwasanaeth ar-lein hwn nawr
+ninoHelpView.onlineService.hint = Y cyfan y bydd angen i chi ei wneud yw cadarnhau’ch cod post, ac yna byddwn yn postio’r llythyr atoch.
+ninoHelpView.printForm = Argraffu ac anfon ffurflen
+ninoHelpView.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol.
+ninoHelpView.phoneHMRC = Ffonio CThEF
+ninoHelpView.phoneHMRC.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno.
 
 invalidDataNinoHelp.title = Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
 invalidDataNinoHelp.heading = Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post

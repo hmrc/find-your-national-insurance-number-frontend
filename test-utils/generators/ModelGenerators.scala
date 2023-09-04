@@ -40,4 +40,9 @@ trait ModelGenerators {
     Arbitrary {
       Gen.oneOf(HaveSetUpGGUserID.values.toSeq)
     }
+
+  implicit lazy val arbitraryValidDataNINOHelp: Arbitrary[ValidDataNINOHelp] =
+    Arbitrary {
+      Gen.oneOf(ValidDataNINOHelp.values.toSeq)
+    }
 }

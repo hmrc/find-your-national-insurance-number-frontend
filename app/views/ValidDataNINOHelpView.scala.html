@@ -17,9 +17,15 @@
 @import config.FrontendAppConfig
 @import play.twirl.api.Html
 
-@this(layout: templates.LayoutProvider, govukButton: GovukButton)
+@this(
+    layout: templates.LayoutProvider,
+    formHelper: FormWithCSRF,
+    govukErrorSummary: GovukErrorSummary,
+    govukRadios: GovukRadios,
+    govukButton: GovukButton,
+    )
 
-@(mode: Mode)(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
+@(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
 @layout(
     pageTitle = titleNoForm(messages("ninoHelpView.title")),
@@ -29,25 +35,31 @@
     fullWidth = false
 ) {
 
+    @if(form.errors.nonEmpty) {
+        @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
+    }
+
     <h1 class="govuk-heading-xl">@messages("ninoHelpView.heading")</h1>
-    <h2 class="govuk-heading-m">@messages("ninoHelpView.h2")</h2>
-
-    <p class="govuk-body">@messages("ninoHelpView.p1")</p>
     <div class="govuk-inset-text">
-        <p class="govuk-body">@messages("ninoHelpView.p2")</p>
+        <p class="govuk-body">@messages("ninoHelpView.inset")</p>
     </div>
+    <p class="govuk-body">@messages("ninoHelpView.p1")</p>
+    <h2 class="govuk-heading-l">@messages("ninoHelpView.h2")</h2>
 
-    <p class="govuk-body">
+    @formHelper(action = routes.ValidDataNINOHelpController.onSubmit(mode), 'autoComplete -> "off") {
+
+        @govukRadios(
+                    RadiosViewModel(
+                        field  = form("value"),
+                        legend = LegendViewModel(""),
+                        items  = ValidDataNINOHelp.options
+                    )
+            )
+
         @govukButton(
-            ButtonViewModel(messages("ninoHelpView.getYourNINOByPost"))
-                .asLink(routes.SelectNINOLetterAddressController.onPageLoad(mode).url)
+            ButtonViewModel(messages("site.continue"))
         )
-    </p>
 
-    <p class="govuk-body">
-        @Html(messages(
-            "ninoHelpView.contactHMRC",
-            routes.SelectAlternativeServiceController.onPageLoad(mode).url
-        ))
-    </p>
+    }
+
 }
