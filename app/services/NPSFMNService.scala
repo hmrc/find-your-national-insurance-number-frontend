@@ -16,27 +16,29 @@
 
 package services
 
-import connectors.CitizenDetailsConnector
-import models.{PersonDetailsResponse, PersonDetailsSuccessResponse}
+import com.google.inject.ImplementedBy
+import connectors.NPSFMNConnector
+import models.nps.NPSFMNRequest
 import play.api.Logging
-import play.api.mvc.RequestHeader
-import uk.gov.hmrc.domain.Nino
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
-import com.google.inject.ImplementedBy
-
 import scala.concurrent.{ExecutionContext, Future}
 
-@ImplementedBy(classOf[CitizenDetailsServiceImpl])
-trait CitizenDetailsService {
-  def getPersonalDetails(nino: String)(implicit request: RequestHeader, hc: HeaderCarrier): Future[PersonDetailsResponse]
+@ImplementedBy(classOf[NPSFMNServiceImpl])
+trait NPSFMNService {
+  def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
+                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[JsValue]
 }
 
-class CitizenDetailsServiceImpl @Inject()(connector: CitizenDetailsConnector
-  )(implicit val ec: ExecutionContext) extends CitizenDetailsService with Logging {
+class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector)(implicit val ec: ExecutionContext)
+  extends NPSFMNService with Logging {
 
-  def getPersonalDetails(nino: String)(implicit request: RequestHeader, hc: HeaderCarrier): Future[PersonDetailsResponse] =
-    connector.personDetails(Nino(nino))
+  def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
+                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[JsValue] = {
+    val identifier = nino.substring(0, nino.length-1)
+    connector.updateDetails(identifier, npsFMNRequest)
+  }
 
 }

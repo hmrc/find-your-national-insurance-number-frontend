@@ -42,6 +42,7 @@ final case class AdditionalLogInfo(infoKeyValue: Map[String, String]) {
       .mkString(", ")
   }
 }
+
 trait HttpReadsWrapper[E, EE] { self: MetricsSupport =>
   val logger: Logger = Logger(this.getClass)
   def withHttpReads[T](name: String, registry: MetricRegistry, additionalLogInfo: Option[AdditionalLogInfo] = None)(

@@ -18,13 +18,14 @@ package controllers
 
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
-import models.Mode
+import models.nps.NPSFMNRequest
+import models.{Mode, PersonDetailsResponse, PersonDetailsSuccessResponse}
 import navigation.Navigator
-import pages.{SelectNINOLetterAddressPage}
+import pages.SelectNINOLetterAddressPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.CitizenDetailsService
+import services.{CitizenDetailsService, NPSFMNService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SelectNINOLetterAddressView
 
@@ -41,9 +42,11 @@ class SelectNINOLetterAddressController @Inject()(
                                        formProvider: SelectNINOLetterAddressFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: SelectNINOLetterAddressView,
-                                       citizenDetailsService: CitizenDetailsService
+                                       citizenDetailsService: CitizenDetailsService,
+                                       npsFMNService: NPSFMNService
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
+  private val emptyString: String = ""
   val form = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -54,24 +57,50 @@ class SelectNINOLetterAddressController @Inject()(
         }
 
       for {
-        postCode <- citizenDetailsService.getPostcode(request.nino.getOrElse(""))
+        personalDetails <- citizenDetailsService.getPersonalDetails(request.nino.getOrElse(emptyString))
+        postCode = getPostCode(personalDetails)
       } yield Ok(view(preparedForm, mode, postCode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
+      val nino = request.nino.getOrElse(emptyString)
 
       form.bindFromRequest().fold(
         formWithErrors =>
           for {
-            postCode <- citizenDetailsService.getPostcode(request.nino.getOrElse(""))
+            personalDetails <- citizenDetailsService.getPersonalDetails(nino)
+            postCode = getPostCode(personalDetails)
           } yield BadRequest(view(formWithErrors, mode, postCode)),
 
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectNINOLetterAddressPage, value))
             _ <- sessionRepository.set(updatedAnswers)
+            personalDetails <- citizenDetailsService.getPersonalDetails(nino)
+            // TODO NPS FMN integration
+            _ <- npsFMNService.updateDetails(nino, getNPSFMNRequest(personalDetails))
           } yield Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
       )
   }
+
+  private def getPostCode(personDetailsResponse: PersonDetailsResponse): String =
+    personDetailsResponse match {
+      case PersonDetailsSuccessResponse(pd) => pd.address.map(_.postcode.get).getOrElse(emptyString)
+      case _                   => emptyString
+    }
+
+  private def getNPSFMNRequest(personDetailsResponse: PersonDetailsResponse): NPSFMNRequest =
+    personDetailsResponse match {
+      case PersonDetailsSuccessResponse(pd) =>
+        NPSFMNRequest(
+          pd.person.firstName.getOrElse(emptyString),
+          pd.person.lastName.getOrElse(emptyString),
+          pd.person.dateOfBirth.map(_.toString).getOrElse(emptyString),
+          pd.address.map(_.postcode.get).getOrElse(emptyString)
+        )
+      case _                   => NPSFMNRequest(emptyString, emptyString, emptyString, emptyString)
+    }
+
+
 }
