@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
-import models.nps.NPSFMNRequest
+import models.nps.{LetterIssuedResponse, NPSFMNRequest, TechnicalIssueResponse}
 import models.{Mode, PersonDetailsResponse, PersonDetailsSuccessResponse}
 import navigation.Navigator
 import pages.SelectNINOLetterAddressPage
@@ -79,8 +79,14 @@ class SelectNINOLetterAddressController @Inject()(
             _ <- sessionRepository.set(updatedAnswers)
             personalDetails <- citizenDetailsService.getPersonalDetails(nino)
             // TODO NPS FMN integration
-            _ <- npsFMNService.updateDetails(nino, getNPSFMNRequest(personalDetails))
-          } yield Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
+            status <- npsFMNService.updateDetails(nino, getNPSFMNRequest(personalDetails))
+          } yield {
+            if (status == LetterIssuedResponse)
+              Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
+            else if (status ==  TechnicalIssueResponse)
+              Redirect(routes.SendLetterErrorController.onPageLoad(mode))
+            else Redirect(routes.TechnicalErrorController.onPageLoad())
+          }
       )
   }
 
@@ -101,6 +107,5 @@ class SelectNINOLetterAddressController @Inject()(
         )
       case _                   => NPSFMNRequest(emptyString, emptyString, emptyString, emptyString)
     }
-
 
 }

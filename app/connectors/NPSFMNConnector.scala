@@ -21,26 +21,25 @@ import com.google.inject.ImplementedBy
 import com.kenshoo.play.metrics.Metrics
 import config.FrontendAppConfig
 import models.errors.{ConnectorError, IndividualDetailsError}
-import models.nps.{NPSFMNRequest, NPSFMNResponse}
+import models.nps.{TechnicalIssueResponse, LetterIssuedResponse, NPSFMNRequest, NPSFMNResponse, RLSDLONFAResponse}
 import models.upstreamfailure.{Failure, UpstreamFailures}
-import play.api.http.Status.{ACCEPTED, BAD_REQUEST, CONFLICT, INTERNAL_SERVER_ERROR, METHOD_NOT_ALLOWED,
-  NOT_FOUND, NOT_IMPLEMENTED, UNAUTHORIZED, UNSUPPORTED_MEDIA_TYPE}
+
+import scala.concurrent.duration.DurationInt
+//import play.api.http.Status.{ACCEPTED, BAD_REQUEST, CONFLICT, INTERNAL_SERVER_ERROR, METHOD_NOT_ALLOWED, NOT_FOUND,
+//  NOT_IMPLEMENTED, UNAUTHORIZED, UNSUPPORTED_MEDIA_TYPE}
+import play.api.http.Status.ACCEPTED
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpException, HttpResponse}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-//case class NPSFMNResponse()
-//final case object LetterIssuedResponse extends NPSFMNResponse
-//final case object RLSDLONFAResponse extends NPSFMNResponse
-//final case object TechnicalIssueResponse extends NPSFMNResponse
 
 @ImplementedBy(classOf[DefaultNPSFMNConnector])
 trait NPSFMNConnector {
 
   def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
-                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[JsValue]
+                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNResponse]
 
 }
 
@@ -51,22 +50,23 @@ class DefaultNPSFMNConnector@Inject() (httpClient: HttpClient,
   with MetricsSupport {
 
   def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
-                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[JsValue] = {
+                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNResponse] = {
     val url = s"${appConfig.individualDetailsServiceUrl}/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/$nino"
 
     println(s"\n\n\n  url = $url  \n\n\n")
 
-    val r = httpClient.POST[JsValue, HttpResponse](url, Json.toJson(npsFMNRequest))(implicitly, implicitly, hc, implicitly)
+    val r = scala.concurrent.Await.ready(httpClient.POST[JsValue, HttpResponse](url, Json.toJson(npsFMNRequest))(implicitly, implicitly, hc, implicitly), 100.seconds)
 
     println(s"\n\n\n  r = ${r}  \n\n\n")
 
       r.map { response =>
 
-        println(s"\n\n\n  response = $response  \n\n\n")
+        println(s"\n\n\n  $$$$$$$$$$$$$$$$$$$$$$$$ response = $response body = ${response.body} \n\n\n")
+
 
         response.status match {
-          case ACCEPTED => //LetterIssuedResponse
-            Json.toJson(response.body)
+          case ACCEPTED => LetterIssuedResponse
+            //Json.toJson(response.body)
 //          case BAD_REQUEST | UNAUTHORIZED | NOT_FOUND | METHOD_NOT_ALLOWED
 //               | CONFLICT | UNSUPPORTED_MEDIA_TYPE |
 //               INTERNAL_SERVER_ERROR | NOT_IMPLEMENTED =>
@@ -83,21 +83,24 @@ class DefaultNPSFMNConnector@Inject() (httpClient: HttpClient,
             case Some(t) =>
               t match {
                 case Failure(f) =>
+
                   if(f.toString.contains("63471") | f.toString.contains("63472") | f.toString.contains("63473")) {
                     println("RLSDLONFAResponse")
-                    //RLSDLONFAResponse
-                  }
-                  Json.toJson("{}")
+                    RLSDLONFAResponse
+                  } else TechnicalIssueResponse
+                  //Json.toJson("{}")
                 case Success(s)=>
                   println(s"\n\n\n  Success response body = ${s.body}  status = ${s.status} \n\n\n")
-                  Json.toJson("{}")
+                  //Json.toJson("{}")
+                  TechnicalIssueResponse
               }
 
             case None => throw new HttpException("......... error ........", 500)
           }
-          Json.toJson("{}")
+          //Json.toJson("{}")
         case _ =>
-          Json.toJson("{}")
+          //Json.toJson("{}")
+          TechnicalIssueResponse
       }
   }
 

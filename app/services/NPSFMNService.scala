@@ -18,7 +18,7 @@ package services
 
 import com.google.inject.ImplementedBy
 import connectors.NPSFMNConnector
-import models.nps.NPSFMNRequest
+import models.nps.{NPSFMNRequest, NPSFMNResponse}
 import play.api.Logging
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
@@ -29,14 +29,14 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[NPSFMNServiceImpl])
 trait NPSFMNService {
   def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
-                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[JsValue]
+                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNResponse]
 }
 
 class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector)(implicit val ec: ExecutionContext)
   extends NPSFMNService with Logging {
 
   def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
-                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[JsValue] = {
+                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNResponse] = {
     val identifier = nino.substring(0, nino.length-1)
     connector.updateDetails(identifier, npsFMNRequest)
   }

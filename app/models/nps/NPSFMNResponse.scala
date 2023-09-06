@@ -18,17 +18,24 @@ package models.nps
 
 import play.api.libs.json.{Format, Json}
 
-case class AppStatusMessageList(appStatusMessage: List[String] = List.empty)
-case class JsonServiceError(
-                             requestURL: Option[String] = None,
-                             message: Option[String] = None,
-                             appStatusMessageCount: Option[String] = None,
-                             appStatusMessageList: Option[AppStatusMessageList] = None
-                           )
-case class NPSFMNResponse(jsonServiceError: Option[JsonServiceError])
+//case class AppStatusMessageList(appStatusMessage: List[String] = List.empty)
+//case class JsonServiceError(
+//                             requestURL: Option[String] = None,
+//                             message: Option[String] = None,
+//                             appStatusMessageCount: Option[String] = None,
+//                             appStatusMessageList: Option[AppStatusMessageList] = None
+//                           )
+//case class NPSFMNResponse(jsonServiceError: Option[JsonServiceError])
+//
+//object NPSFMNResponse {
+//  implicit val appStatusMessageListformat: Format[AppStatusMessageList] = Json.format[AppStatusMessageList]
+//  implicit val jsonServiceErrorformat: Format[JsonServiceError] = Json.format[JsonServiceError]
+//  implicit val npsFMNResponseformat: Format[NPSFMNResponse] = Json.format[NPSFMNResponse]
+//}
 
-object NPSFMNResponse {
-  implicit val appStatusMessageListformat: Format[AppStatusMessageList] = Json.format[AppStatusMessageList]
-  implicit val jsonServiceErrorformat: Format[JsonServiceError] = Json.format[JsonServiceError]
-  implicit val npsFMNResponseformat: Format[NPSFMNResponse] = Json.format[NPSFMNResponse]
-}
+
+sealed trait NPSFMNResponse
+final case object LetterIssuedResponse extends NPSFMNResponse
+final case object RLSDLONFAResponse extends NPSFMNResponse
+final case object TechnicalIssueResponse extends NPSFMNResponse
+
