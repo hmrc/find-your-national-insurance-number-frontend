@@ -139,8 +139,8 @@ phoneHMRCDetails.outsideUK.number = +44 191 203 7010
 phoneHMRCDetails.openingTimes.label = Opening times:
 phoneHMRCDetails.openingTimes.mondayToFriday = Monday to Friday: 8am to 6pm
 phoneHMRCDetails.openingTimes.weekendAndBankHoliday = Closed on Saturdays, Sundays and bank holidays.
-phoneHMRCDetails.hmrcExtraHelp = Get help <a href="{0}" target="_blank">dealing with HMRC if you have additional needs.</a>
-phoneHMRCDetails.findOutCallCharges = <a href="{0}" target="_blank">Find out about call charges.</a>
+phoneHMRCDetails.hmrcExtraHelp = Get help <a href="{0}" class="govuk-link" target="_blank">dealing with HMRC if you have additional needs.</a>
+phoneHMRCDetails.findOutCallCharges = <a href="{0}" class="govuk-link" target="_blank">Find out about call charges.</a>
 
 viewNinoInPTA.title = You can view your National Insurance number in your personal tax account
 viewNinoInPTA.heading = You can view your National Insurance number in your personal tax account
