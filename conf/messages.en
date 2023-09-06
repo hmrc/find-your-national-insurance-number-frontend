@@ -96,7 +96,7 @@ postNINOLetter.change.hidden = postNINOLetter
 
 selectNINOLetterAddress.title = Where would you like the letter sent?
 selectNINOLetterAddress.heading = Where would you like the letter sent?
-selectNINOLetterAddress.postCode = To the address with the postcode {0}
+selectNINOLetterAddress.postCode = To the address with the postcode
 selectNINOLetterAddress.notThisAddress = Not to this address
 selectNINOLetterAddress.checkYourAnswersLabel = Where would you like the letter sent?
 selectNINOLetterAddress.error.required = Tell us where you would like the letter sent

@@ -17,7 +17,7 @@
 package models
 
 import play.api.i18n.Messages
-import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+import uk.gov.hmrc.govukfrontend.views.Aliases.{HtmlContent, Text}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 
 sealed trait SelectNINOLetterAddress
@@ -33,11 +33,20 @@ object SelectNINOLetterAddress extends Enumerable.Implicits {
 
   def options(implicit messages: Messages, postcode: String): Seq[RadioItem] = values.zipWithIndex.map {
     case (value, index) =>
-      RadioItem(
-        content = Text(messages(s"selectNINOLetterAddress.${value.toString}", postcode)),
-        value   = Some(value.toString),
-        id      = Some(s"value_$index")
-      )
+      if (value.toString.equals("postCode")) {
+        RadioItem(
+          content = HtmlContent(messages(s"selectNINOLetterAddress.${value.toString}") + s" <span class='govuk-!-font-weight-bold'>$postcode</span>"),
+          value = Some(value.toString),
+          id = Some(s"value_$index")
+        )
+      }
+      else {
+        RadioItem(
+          content = Text(messages(s"selectNINOLetterAddress.${value.toString}")),
+          value = Some(value.toString),
+          id = Some(s"value_$index")
+        )
+      }
   }
 
   implicit val enumerable: Enumerable[SelectNINOLetterAddress] =

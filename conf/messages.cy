@@ -46,7 +46,7 @@ setUpGGUserIDStart.l1.li2 = rhif ffôn neu ap dilysu
 
 selectNINOLetterAddress.title = I ble’r hoffech i ni anfon y llythyr?
 selectNINOLetterAddress.heading = I ble’r hoffech i ni anfon y llythyr?
-selectNINOLetterAddress.postCode = I’r cyfeiriad sydd â’r cod post {0}
+selectNINOLetterAddress.postCode = I’r cyfeiriad sydd â’r cod post
 selectNINOLetterAddress.notThisAddress = Dim i’r cyfeiriad hwn
 selectNINOLetterAddress.checkYourAnswersLabel = I ble’r hoffech i ni anfon y llythyr?
 selectNINOLetterAddress.error.required = Rhowch wybod i ni i ble yr hoffech i’r llythyr gael ei anfon
