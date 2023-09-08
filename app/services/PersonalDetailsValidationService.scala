@@ -17,7 +17,8 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.{PersonalDetailsValidation, PersonalDetailsValidationResponse, PersonalDetailsValidationSuccessResponse}
+import models.{PDVResponse, PDVResponseData, PDVSuccessResponse}
+import org.mongodb.scala.MongoException
 import repositories.PersonalDetailsValidationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -28,30 +29,36 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
                                                  personalDetailsValidationRepository: PersonalDetailsValidationRepository
                                                 )(implicit val ec: ExecutionContext) {
 
-  def createPDVFromValidationId(validationId: String)(implicit hc: HeaderCarrier): Future[String] = {
-    fetchPersonalDetailsValidation(validationId).map {
-      case PersonalDetailsValidationSuccessResponse(pdv) => createPersonalDetailsValidation(pdv) match {
-        case Left(ex) => throw ex
-        case Right(value) => value
-      }
-      case _ => throw new RuntimeException("Create PDV form validation failed.")
+  def createPDVDataFromPDVMatch(validationId: String)(implicit hc:HeaderCarrier): Future[String] = {
+    for {
+      pdvResponse <- getPDVMatchResult(validationId)
+      pdvDataRowId <-  createPDVDataRow(pdvResponse.asInstanceOf[PDVSuccessResponse].pdvResponseData)
+   } yield pdvDataRowId match {
+      case "" => throw new RuntimeException(s"Failed Creating PDV data for validation id: $validationId")
+      case _ => pdvDataRowId
     }
   }
 
-  private def fetchPersonalDetailsValidation(validationId: String)(implicit hc: HeaderCarrier): Future[PersonalDetailsValidationResponse] =
-    connector.retrieveMatchingDetails(validationId)
+  private def getPDVMatchResult(validationId: String)(implicit hc:HeaderCarrier): Future[PDVResponse] =
+    connector.retrieveMatchingDetails(validationId) map {
+      case pdvResponse: PDVSuccessResponse => pdvResponse
+      case _ => throw new RuntimeException(s"Failed getting PDV data for validation id: $validationId")
+    }
 
-  private def createPersonalDetailsValidation(personalDetailsValidation: PersonalDetailsValidation)
-                                             (implicit ec: ExecutionContext): Either[Exception, String] = {
-    personalDetailsValidationRepository.insert(personalDetailsValidation)
-    Right(personalDetailsValidation.id)
+  private def createPDVDataRow(personalDetailsValidation: PDVResponseData): Future[String] = {
+    personalDetailsValidationRepository.insert(personalDetailsValidation) map { _ =>
+      personalDetailsValidation.id } recover {
+      case e: MongoException =>
+        //val errorCode = e.getCode
+        ""
+    }
   }
 
-  def getPersonalDetailsValidationByValidationId(validationId: String)(implicit ec: ExecutionContext): Future[Option[PersonalDetailsValidation]] = {
+  def getPersonalDetailsValidationByValidationId(validationId: String): Future[Option[PDVResponseData]] = {
     personalDetailsValidationRepository.findByValidationId(validationId)
   }
 
-  def getPersonalDetailsValidationByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PersonalDetailsValidation]] = {
+  def getPersonalDetailsValidationByNino(nino: String): Future[Option[PDVResponseData]] = {
     personalDetailsValidationRepository.findByNino(nino)
   }
 

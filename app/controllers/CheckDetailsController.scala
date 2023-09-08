@@ -19,12 +19,13 @@ package controllers
 import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import models.errors.IndividualDetailsError
 import models.individualdetails.AccountStatusType.FullLive
 import models.individualdetails.AddressStatus.NotDlo
 import models.individualdetails.AddressType.ResidentialAddress
 import models.individualdetails.CrnIndicator.False
 import models.individualdetails.{AddressList, IndividualDetails, ResolveMerge}
-import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, PersonalDetailsValidation}
+import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, PDVResponseData, PersonDetails}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -35,7 +36,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import java.util.UUID
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class CheckDetailsController @Inject()(
                                         override val messagesApi: MessagesApi,
@@ -51,30 +52,37 @@ class CheckDetailsController @Inject()(
   def onPageLoad(mode: Mode, validationId: String): Action[AnyContent] = (identify andThen getData andThen requireData) async {
     implicit request => {
 
-    for {
-      pdvDataId <- personalDetailsValidationService.createPDVFromValidationId(validationId)
-      pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvDataId)
-      idData <- getIndividualDetails(IndividualDetailsNino(pdvData.get.personalDetails.get.nino.nino)).value
-    } yield idData.fold(
-      error => Ok(error.errorMessage),
-      individualDetailsData => {
-        val pdvPostCode: String = pdvData.get.personalDetails.get.postCode.get
-        val check = checkConditions(individualDetailsData, pdvPostCode)
-
-        logData(individualDetailsData, pdvData.get)
-
-        if (check == true) {
-          Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
-        } else {
-          Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-        }
-      })
+      for {
+        pdvData <- getPDVData(validationId)
+        idData <- getIdData(pdvData)
+      } yield idData.fold(
+        _ => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)),
+        individualDetailsData =>
+          checkConditions(individualDetailsData, pdvData.personalDetails.get.postCode.get) match {
+            case true => Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
+            case false => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+          }
+        )
     }
   }
 
-  def logData(r: IndividualDetails, p: PersonalDetailsValidation): Unit = {
-    logger.info("*****************" + r.toString)
-    logger.info("*****************" + p.toString)
+  def getIdData(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
+    getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
+      case Some(data) => data.nino.nino
+      case None =>
+        logger.debug("No Personal Details found in PDV data, likely validation failed")
+        ""
+    })).value
+  }
+
+  def getPDVData(validationId: String)(implicit hc: HeaderCarrier): Future[PDVResponseData] = {
+    for {
+      pdvDataId <- personalDetailsValidationService.createPDVDataFromPDVMatch(validationId)
+      pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvDataId)
+    } yield pdvData match {
+      case Some(data) => data
+      case None => throw new Exception("No PDV data found")
+    }
   }
 
 
