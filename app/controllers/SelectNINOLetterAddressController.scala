@@ -78,14 +78,13 @@ class SelectNINOLetterAddressController @Inject()(
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectNINOLetterAddressPage, value))
             _ <- sessionRepository.set(updatedAnswers)
             personalDetails <- citizenDetailsService.getPersonalDetails(nino)
-            // TODO NPS FMN integration
             status <- npsFMNService.updateDetails(nino, getNPSFMNRequest(personalDetails))
           } yield {
-            if (status == LetterIssuedResponse)
-              Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
-            else if (status ==  TechnicalIssueResponse)
-              Redirect(routes.SendLetterErrorController.onPageLoad(mode))
-            else Redirect(routes.TechnicalErrorController.onPageLoad())
+            status match {
+              case LetterIssuedResponse =>  Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
+              case TechnicalIssueResponse => Redirect(routes.SendLetterErrorController.onPageLoad(mode))
+              case _ => Redirect(routes.TechnicalErrorController.onPageLoad())
+            }
           }
       )
   }
