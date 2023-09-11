@@ -123,7 +123,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
 
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
       when(mockNPSFMNService.updateDetails(any(), any())(any(), any()))
-        .thenReturn(Future.successful(TechnicalIssueResponse))
+        .thenReturn(Future.successful(RLSDLONFAResponse))
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -196,7 +196,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
 
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
       when(mockNPSFMNService.updateDetails(any(), any())(any(), any()))
-        .thenReturn(Future.successful(RLSDLONFAResponse))
+        .thenReturn(Future.successful(TechnicalIssueResponse))
 
       running(application) {
         val request =

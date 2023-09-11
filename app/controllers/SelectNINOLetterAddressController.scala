@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
-import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
+import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse}
 import models.{Mode, PersonDetailsResponse, PersonDetailsSuccessResponse}
 import navigation.Navigator
 import pages.SelectNINOLetterAddressPage
