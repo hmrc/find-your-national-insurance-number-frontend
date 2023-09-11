@@ -17,14 +17,14 @@
 package navigation
 
 import config.FrontendAppConfig
-
-import javax.inject.{Inject, Singleton}
-import play.api.mvc.Call
 import controllers.routes
 import models.HaveSetUpGGUserID.{No, Yes}
-import pages._
 import models._
+import pages._
+import play.api.mvc.Call
 import uk.gov.hmrc.http.HttpVerbs.GET
+
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class Navigator @Inject()(implicit config: FrontendAppConfig) {
@@ -38,6 +38,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     case SelectAlternativeServicePage => userAnswers => navigateSelectAlternativeService(userAnswers)
     case TechnicalErrorPage           => userAnswers => navigateTechnicalErrorService(userAnswers)
     case InvalidDataNINOHelpPage      => userAnswers => navigateInvalidDataNINOHelp(userAnswers)
+    case ValidDataNINOHelpPage        => userAnswers => navigateValidDataNINOHelp(userAnswers)
     case _                            => _           => routes.IndexController.onPageLoad
   }
 
@@ -91,8 +92,17 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
   private def navigateInvalidDataNINOHelp(userAnswers: UserAnswers): Call =
     userAnswers.get(InvalidDataNINOHelpPage) match {
       case Some(InvalidDataNINOHelp.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
-      case Some(InvalidDataNINOHelp.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}${getNINOByPost}")
-      case _ => routes.JourneyRecoveryController.onPageLoad()
+      case Some(InvalidDataNINOHelp.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
+      case _                                   => routes.JourneyRecoveryController.onPageLoad()
+    }
+
+
+  private def navigateValidDataNINOHelp(userAnswers: UserAnswers): Call =
+    userAnswers.get(ValidDataNINOHelpPage) match {
+      case Some(ValidDataNINOHelp.OnlineService) => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
+      case Some(ValidDataNINOHelp.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
+      case Some(ValidDataNINOHelp.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
+      case _                                 => routes.JourneyRecoveryController.onPageLoad()
     }
 
 }

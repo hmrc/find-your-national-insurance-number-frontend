@@ -86,10 +86,16 @@ class SessionIdentifierAction @Inject()(
         throw new UnauthorizedException("Unable to retrieve internal Id and nino")
     } recover {
       case _: NoActiveSession =>
-        Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
+        Redirect(config.loginUrl, Map("continue" -> Seq(resolveCorrectUrl(request))))
       case _: AuthorisationException =>
         Redirect(routes.UnauthorisedController.onPageLoad)
     }
    }
+
+  private def resolveCorrectUrl[A](request: Request[A]): String = {
+    val root =
+      if (request.host.contains("localhost")) s"http${if (request.secure) "s" else ""}://${request.host}" else ""
+    s"$root${request.uri}"
+  }
 
 }
