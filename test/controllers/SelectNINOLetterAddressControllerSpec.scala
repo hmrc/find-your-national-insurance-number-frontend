@@ -17,31 +17,36 @@
 package controllers
 
 import base.SpecBase
+import connectors.NPSFMNConnector
 import forms.SelectNINOLetterAddressFormProvider
+import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.{NormalMode, SelectNINOLetterAddress, UserAnswers}
-import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.SelectNINOLetterAddressPage
 import play.api.inject.bind
-import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
+import services.NPSFMNService
+import uk.gov.hmrc.http.HeaderCarrier
 import views.html.SelectNINOLetterAddressView
 
 import scala.concurrent.Future
 
 class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute = Call("GET", "/foo")
+  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   lazy val selectNINOLetterAddressRoute: String = routes.SelectNINOLetterAddressController.onPageLoad(NormalMode).url
 
   val formProvider = new SelectNINOLetterAddressFormProvider()
   val form = formProvider()
-  val generatedPostcode = "FX97 4TU" //for testing purposes this is hard coded - postcode will not be displayed in future iterations
+
+  //for testing purposes this is hard coded - postcode will not be displayed in future iterations
+  val generatedPostcode = "FX97 4TU"
 
   "SelectNINOLetterAddress Controller" - {
 
@@ -79,17 +84,22 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the next page when valid data is submitted" in {
+    "must redirect to the confirmation page when valid data is submitted to NPS FMN API" in {
 
       val mockSessionRepository = mock[SessionRepository]
+      val mockNPSFMNConnector = mock[NPSFMNConnector]
+      val mockNPSFMNService = mock[NPSFMNService]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockNPSFMNService.updateDetails(any(), any())(any(), any()))
+        .thenReturn(Future.successful(LetterIssuedResponse))
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[SessionRepository].toInstance(mockSessionRepository)
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NPSFMNService].toInstance(mockNPSFMNService),
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector)
           )
           .build()
 
@@ -101,7 +111,38 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.TechnicalErrorController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.NINOLetterPostedConfirmationController.onPageLoad().url
+      }
+    }
+
+    "must redirect to the send letter error page when invalid data is submitted to NPS FMN API" in {
+
+      val mockSessionRepository = mock[SessionRepository]
+      val mockNPSFMNConnector = mock[NPSFMNConnector]
+      val mockNPSFMNService = mock[NPSFMNService]
+
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockNPSFMNService.updateDetails(any(), any())(any(), any()))
+        .thenReturn(Future.successful(TechnicalIssueResponse))
+
+      val application =
+        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NPSFMNService].toInstance(mockNPSFMNService),
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, selectNINOLetterAddressRoute)
+            .withFormUrlEncodedBody(("value", SelectNINOLetterAddress.values.head.toString))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.SendLetterErrorController.onPageLoad(NormalMode).url
       }
     }
 
@@ -139,9 +180,23 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "redirect to Journey Recovery for a POST if no existing data is found" in {
+    "redirect to Technical error page for a POST when NPS FMN API returns error status other than 202 and 400" in {
+      val mockSessionRepository = mock[SessionRepository]
+      val mockNPSFMNConnector = mock[NPSFMNConnector]
+      val mockNPSFMNService = mock[NPSFMNService]
 
-      val application = applicationBuilder(userAnswers = None).build()
+      val application =
+        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NPSFMNService].toInstance(mockNPSFMNService),
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector)
+          )
+          .build()
+
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockNPSFMNService.updateDetails(any(), any())(any(), any()))
+        .thenReturn(Future.successful(RLSDLONFAResponse))
 
       running(application) {
         val request =
@@ -151,9 +206,9 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-
-//        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.TechnicalErrorController.onPageLoad().url
       }
     }
+
   }
 }
