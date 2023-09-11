@@ -19,6 +19,7 @@ package services
 import connectors.PersonalDetailsValidationConnector
 import models.{PDVResponse, PDVResponseData, PDVSuccessResponse}
 import org.mongodb.scala.MongoException
+import play.api.Logging
 import repositories.PersonalDetailsValidationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -27,39 +28,64 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValidationConnector,
                                                  personalDetailsValidationRepository: PersonalDetailsValidationRepository
-                                                )(implicit val ec: ExecutionContext) {
+                                                )(implicit val ec: ExecutionContext) extends Logging{
 
   def createPDVDataFromPDVMatch(validationId: String)(implicit hc:HeaderCarrier): Future[String] = {
     for {
+      // get PDV match results
       pdvResponse <- getPDVMatchResult(validationId)
+      // add them to mongo and return UUID
       pdvDataRowId <-  createPDVDataRow(pdvResponse.asInstanceOf[PDVSuccessResponse].pdvResponseData)
    } yield pdvDataRowId match {
+      //throw exception if we failed to create the PDV data
       case "" => throw new RuntimeException(s"Failed Creating PDV data for validation id: $validationId")
-      case _ => pdvDataRowId
+      //return the UUID
+      case _ => pdvDataRowId // we can possible validate that its a UUID
     }
   }
 
+  //get a PDV match result
   private def getPDVMatchResult(validationId: String)(implicit hc:HeaderCarrier): Future[PDVResponse] =
     connector.retrieveMatchingDetails(validationId) map {
+      //this can be a failed or successful match result
       case pdvResponse: PDVSuccessResponse => pdvResponse
-      case _ => throw new RuntimeException(s"Failed getting PDV data for validation id: $validationId")
+      case _ => {
+        throw new RuntimeException(s"Failed getting PDV data for validation id: $validationId")
+      }
     }
 
+  //create a PDV data row
   private def createPDVDataRow(personalDetailsValidation: PDVResponseData): Future[String] = {
-    personalDetailsValidationRepository.insert(personalDetailsValidation) map { _ =>
-      personalDetailsValidation.id } recover {
-      case e: MongoException =>
-        //val errorCode = e.getCode
-        ""
+    personalDetailsValidationRepository.insert(personalDetailsValidation) map {
+      case id => id
+    } recover {
+        case e: MongoException => {
+          logger.warn(s"Failed creating PDV data row for validation id: ${personalDetailsValidation.id}, ${e.getMessage}")
+          ""
+        }
     }
   }
 
   def getPersonalDetailsValidationByValidationId(validationId: String): Future[Option[PDVResponseData]] = {
-    personalDetailsValidationRepository.findByValidationId(validationId)
+    personalDetailsValidationRepository.findByValidationId(validationId) map {
+      case Some(pdvResponseData) => Some(pdvResponseData)
+      case _ => None
+    } recover({
+      case e: MongoException =>
+        logger.warn(s"Failed finding PDV data by validationid: $validationId, ${e.getMessage}")//val errorCode = e.getCode
+        None
+    })
   }
 
   def getPersonalDetailsValidationByNino(nino: String): Future[Option[PDVResponseData]] = {
-    personalDetailsValidationRepository.findByNino(nino)
+    personalDetailsValidationRepository.findByNino(nino) map {
+      case Some(pdvResponseData) => Some(pdvResponseData)
+      case _ => None
+    } recover({
+      case e: MongoException =>
+        logger.warn(s"Failed finding PDV data by NINO: $nino, ${e.getMessage}")
+        None
+    })
   }
 
 }

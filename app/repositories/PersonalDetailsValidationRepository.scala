@@ -58,29 +58,25 @@ class PersonalDetailsValidationRepository @Inject()(
     logger.info(s"Inserting one in $collectionName table")
     collection.insertOne(personalDetailsValidation)
       .toFuture()
-      .map(_ => Right(personalDetailsValidation.id))
-      .recover {
-        case exc: MongoWriteException =>
-          Left(exc.getError.getMessage)
-      }
+      .map(_ => personalDetailsValidation.id) recover {
+      case e: MongoWriteException if e.getCode == 11000 =>
+        logger.warn(s"Duplicate key error inserting into $collectionName table")
+        ""
+    }
   }
 
   def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] = {
     collection.find(Filters.equal("id", id))
       .toFuture()
-      .recoverWith { case e: Throwable => {
-        Left(e);
-        Future.failed(e)
-      }}
-      .map(_.headOption)
+      .recoverWith {
+        case e: Throwable => Future.failed(e)
+      }.map(_.headOption)
   }
 
   def findByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] =
     collection.find(Filters.equal("personalDetails.nino", nino))
       .toFuture()
-      .recoverWith { case e: Throwable => {
-        Left(e);
-        Future.failed(e)
-      }}
-      .map(_.headOption)
+      .recoverWith {
+        case e: Throwable => Future.failed(e)
+      }.map(_.headOption)
 }
