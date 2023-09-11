@@ -19,7 +19,7 @@ package controllers
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
 import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse}
-import models.{Mode, PersonDetailsResponse, PersonDetailsSuccessResponse}
+import models.{Mode, PersonDetailsResponse, PersonDetailsSuccessResponse, SelectNINOLetterAddress}
 import navigation.Navigator
 import pages.SelectNINOLetterAddressPage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -80,10 +80,15 @@ class SelectNINOLetterAddressController @Inject()(
             personalDetails <- citizenDetailsService.getPersonalDetails(nino)
             status <- npsFMNService.updateDetails(nino, getNPSFMNRequest(personalDetails))
           } yield {
-            status match {
-              case LetterIssuedResponse =>  Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
-              case RLSDLONFAResponse => Redirect(routes.SendLetterErrorController.onPageLoad(mode))
-              case _ => Redirect(routes.TechnicalErrorController.onPageLoad())
+            updatedAnswers.get(SelectNINOLetterAddressPage) match {
+              case Some(SelectNINOLetterAddress.NotThisAddress) =>
+                Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
+              case Some(SelectNINOLetterAddress.Postcode) =>
+                status match {
+                  case LetterIssuedResponse => Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
+                  case RLSDLONFAResponse => Redirect(routes.SendLetterErrorController.onPageLoad(mode))
+                  case _ => Redirect(routes.TechnicalErrorController.onPageLoad())
+                }
             }
           }
       )
