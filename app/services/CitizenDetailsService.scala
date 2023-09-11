@@ -17,7 +17,7 @@
 package services
 
 import connectors.CitizenDetailsConnector
-import models.{PersonDetailsResponse, PersonDetailsSuccessResponse}
+import models.PersonDetailsResponse
 import play.api.Logging
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.domain.Nino

@@ -21,9 +21,8 @@ import com.google.inject.ImplementedBy
 import com.kenshoo.play.metrics.Metrics
 import config.FrontendAppConfig
 import models.errors.{ConnectorError, IndividualDetailsError}
-import models.nps.{JsonServiceError, NPSFMNRequest, NPSFMNResponse}
+import models.nps.NPSFMNRequest
 import models.upstreamfailure.{Failure, UpstreamFailures}
-import play.api.libs.json.Json
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -34,10 +33,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[DefaultNPSFMNConnector])
 trait NPSFMNConnector {
-//
-//  def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
-//                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNResponse]
-
 
   def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
                    )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]

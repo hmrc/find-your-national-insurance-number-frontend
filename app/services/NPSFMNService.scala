@@ -20,7 +20,7 @@ import com.google.inject.ImplementedBy
 import connectors.NPSFMNConnector
 import models.nps.{LetterIssuedResponse, NPSFMNRequest, NPSFMNResponse, NPSFMNServiceResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import play.api.Logging
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject

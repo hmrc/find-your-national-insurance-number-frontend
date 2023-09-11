@@ -16,13 +16,12 @@
 
 package models.nps
 
-import play.api.libs.json.{Format, JsValue, Json, Writes}
+import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.libs.ws.BodyWritable
 
 case class NPSFMNRequest(firstForename: String, surname: String, dateOfBirth: String, postCode: String)
 
 object NPSFMNRequest {
-  //implicit val format: Format[NPSFMNRequest] = Json.format[NPSFMNRequest]
   implicit val writes: Writes[NPSFMNRequest] = Json.writes[NPSFMNRequest]
   implicit def jsonBodyWritable[T](implicit writes: Writes[T],
        jsValueBodyWritable: BodyWritable[JsValue]
