@@ -17,7 +17,7 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.{PersonalDetails, PersonalDetailsValidation, PersonalDetailsValidationSuccessResponse}
+import models.{PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.MockitoSugar
@@ -33,9 +33,9 @@ import java.time.LocalDate
 import scala.concurrent.Future
 import scala.util.Random
 
-class PersonalDetailsValidationServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach{
+class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach{
 
-  import PersonalDetailsValidationServiceSpec._
+  import PDVResponseDataServiceSpec._
 
   override def beforeEach(): Unit = {
     reset(mockConnector, mockPersonalDetailsValidationRepository)
@@ -46,7 +46,7 @@ class PersonalDetailsValidationServiceSpec extends AsyncWordSpec with Matchers w
 
       when(mockPersonalDetailsValidationRepository.findByValidationId(eqTo(validationId))(any()))
         .thenReturn(Future.successful(Option(personalDetailsValidation)))
-      personalDetailsValidationService.getPersonalDetailsValidationByValidationId(validationId)(ec).map { result =>
+      personalDetailsValidationService.getPersonalDetailsValidationByValidationId(validationId).map { result =>
         result mustBe Some(personalDetailsValidation)
       }(ec)
     }
@@ -54,7 +54,7 @@ class PersonalDetailsValidationServiceSpec extends AsyncWordSpec with Matchers w
       when(mockPersonalDetailsValidationRepository.findByValidationId(eqTo("test2"))(any()))
         .thenReturn(Future.successful(None))
 
-      personalDetailsValidationService.getPersonalDetailsValidationByValidationId("test2")(ec).map { result =>
+      personalDetailsValidationService.getPersonalDetailsValidationByValidationId("test2").map { result =>
         result mustBe None
       }(ec)
     }
@@ -64,7 +64,7 @@ class PersonalDetailsValidationServiceSpec extends AsyncWordSpec with Matchers w
     "return the details when nino exists" in {
       when(mockPersonalDetailsValidationRepository.findByNino(eqTo(fakeNino.nino))(any()))
         .thenReturn(Future.successful(Option(personalDetailsValidation)))
-      personalDetailsValidationService.getPersonalDetailsValidationByNino(fakeNino.nino)(ec).map { result =>
+      personalDetailsValidationService.getPersonalDetailsValidationByNino(fakeNino.nino).map { result =>
         result mustBe Some(personalDetailsValidation)
       }(ec)
     }
@@ -72,7 +72,7 @@ class PersonalDetailsValidationServiceSpec extends AsyncWordSpec with Matchers w
       when(mockPersonalDetailsValidationRepository.findByNino(eqTo("test2"))(any()))
         .thenReturn(Future.successful(None))
 
-      personalDetailsValidationService.getPersonalDetailsValidationByNino("test2")(ec).map { result =>
+      personalDetailsValidationService.getPersonalDetailsValidationByNino("test2").map { result =>
         result mustBe None
       }(ec)
     }
@@ -81,12 +81,12 @@ class PersonalDetailsValidationServiceSpec extends AsyncWordSpec with Matchers w
   "createPDVFromValidationId" must {
     "return success string when passed a valid validationId" in {
       when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
-        .thenReturn(Future(PersonalDetailsValidationSuccessResponse(personalDetailsValidation))(ec))
+        .thenReturn(Future(PDVSuccessResponse(personalDetailsValidation))(ec))
 
       when(mockPersonalDetailsValidationRepository.insert(any())(any()))
-        .thenReturn(Future.successful(Right(validationId)))
+        .thenReturn(Future.successful(validationId))
 
-      personalDetailsValidationService.createPDVFromValidationId(validationId)(hc).map { result =>
+      personalDetailsValidationService.createPDVDataFromPDVMatch(validationId)(hc).map { result =>
         result mustBe validationId
       }(ec)
     }
@@ -94,7 +94,7 @@ class PersonalDetailsValidationServiceSpec extends AsyncWordSpec with Matchers w
 
 }
 
-object PersonalDetailsValidationServiceSpec {
+object PDVResponseDataServiceSpec {
   private val mockConnector = mock[PersonalDetailsValidationConnector]
   private val mockPersonalDetailsValidationRepository = mock[PersonalDetailsValidationRepository]
 
@@ -114,8 +114,8 @@ object PersonalDetailsValidationServiceSpec {
       Some("AA1 1AA"),
       LocalDate.parse("1945-03-18")
     )
-  val personalDetailsValidation: PersonalDetailsValidation =
-    PersonalDetailsValidation(
+  val personalDetailsValidation: PDVResponseData =
+    PDVResponseData(
       validationId,
       "success",
       Some(personalDetails)
