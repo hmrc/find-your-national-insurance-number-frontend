@@ -17,19 +17,21 @@
 package connectors
 
 import config.FrontendAppConfig
-import models.{PersonalDetails, PersonalDetailsValidation, PersonalDetailsValidationNotFoundResponse, PersonalDetailsValidationSuccessResponse}
+import models.{PDVNotFoundResponse, PDVNotFoundResponse$, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
+import org.mockito.ArgumentMatchers.any
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.libs.json.Json
 import play.api.test.{DefaultAwaitTimeout, Injecting}
 import services.http.SimpleHttp
 import uk.gov.hmrc.domain.{Generator, Nino}
+import uk.gov.hmrc.http.HttpResponse
 import util.WireMockHelper
 
 import java.time.LocalDate
 import scala.util.Random
 
-class PersonalDetailsValidationConnectorSpec
+class PDVResponseDataConnectorSpec
   extends ConnectorSpec
     with WireMockHelper
     with MockitoSugar
@@ -54,8 +56,8 @@ class PersonalDetailsValidationConnectorSpec
         Some("AA1 1AA"),
         LocalDate.parse("1945-03-18")
       )
-    val personalDetailsValidation: PersonalDetailsValidation =
-      PersonalDetailsValidation(
+    val personalDetailsValidation: PDVResponseData =
+      PDVResponseData(
         validationId,
         "success",
         Some(personalDetails)
@@ -76,13 +78,13 @@ class PersonalDetailsValidationConnectorSpec
     "return OK when called with an existing validationId" in new LocalSetup {
       stubGet(url, OK, Some(Json.toJson(personalDetailsValidation).toString()))
       val result = connector.retrieveMatchingDetails(validationId).futureValue.leftSideValue
-      result.asInstanceOf[PersonalDetailsValidationSuccessResponse].personalDetailsValidation mustBe personalDetailsValidation
+      result.asInstanceOf[PDVSuccessResponse].pdvResponseData mustBe personalDetailsValidation
     }
 
     "return NOT_FOUND when called with an unknown validationId" in new LocalSetup {
       stubGet(url, NOT_FOUND, None)
-      val result = connector.retrieveMatchingDetails(validationId).futureValue
-      result mustBe PersonalDetailsValidationNotFoundResponse
+      val result = connector.retrieveMatchingDetails(validationId).futureValue.leftSideValue
+      result.asInstanceOf[PDVNotFoundResponse].r.status mustBe NOT_FOUND
     }
   }
 

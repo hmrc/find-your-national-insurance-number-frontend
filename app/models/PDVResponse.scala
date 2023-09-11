@@ -18,10 +18,10 @@ package models
 
 import uk.gov.hmrc.http.HttpResponse
 
-sealed trait PersonalDetailsValidationResponse
-case class PersonalDetailsValidationSuccessResponse(personalDetailsValidation: PersonalDetailsValidation) extends PersonalDetailsValidationResponse
-case object PersonalDetailsValidationNotFoundResponse extends PersonalDetailsValidationResponse
-case class PersonalDetailsValidationUnexpectedResponse(r: HttpResponse) extends PersonalDetailsValidationResponse
-case class PersonalDetailsValidationErrorResponse(cause: Exception) extends PersonalDetailsValidationResponse
+sealed trait PDVResponse
+case class PDVSuccessResponse(pdvResponseData: PDVResponseData) extends PDVResponse
+case class PDVNotFoundResponse(r: HttpResponse) extends PDVResponse
+case class PDVUnexpectedResponse(r: HttpResponse) extends PDVResponse
+case class PDVErrorResponse(cause: Exception) extends PDVResponse
 
 
