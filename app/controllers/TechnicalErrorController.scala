@@ -18,12 +18,13 @@ package controllers
 
 import controllers.actions._
 import forms.TechnicalErrorServiceFormProvider
-import models.Mode
+import models.{Mode, TechnicalErrorService}
+import models.requests.DataRequest
 import navigation.Navigator
-import pages.TechnicalErrorPage
+import pages.{TechnicalErrorPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import repositories.SessionRepository
+import repositories.{SessionRepository, TryAgainCountRepository}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.TechnicalErrorView
 
@@ -33,6 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class TechnicalErrorController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        sessionRepository: SessionRepository,
+                                       tryAgainCountRepository: TryAgainCountRepository,
                                        navigator: Navigator,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
@@ -66,6 +68,7 @@ class TechnicalErrorController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(TechnicalErrorPage, value))
             _              <- sessionRepository.set(updatedAnswers)
+            _ = if(value.toString == "tryAgainForm") tryAgainCountRepository.insertOrIncrement(request.userId)
           } yield Redirect(navigator.nextPage(TechnicalErrorPage, mode, updatedAnswers))
       )
   }
