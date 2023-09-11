@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
-import models.nps.{LetterIssuedResponse, NPSFMNRequest, TechnicalIssueResponse}
+import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.{Mode, PersonDetailsResponse, PersonDetailsSuccessResponse}
 import navigation.Navigator
 import pages.SelectNINOLetterAddressPage
@@ -82,7 +82,7 @@ class SelectNINOLetterAddressController @Inject()(
           } yield {
             status match {
               case LetterIssuedResponse =>  Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
-              case TechnicalIssueResponse => Redirect(routes.SendLetterErrorController.onPageLoad(mode))
+              case RLSDLONFAResponse => Redirect(routes.SendLetterErrorController.onPageLoad(mode))
               case _ => Redirect(routes.TechnicalErrorController.onPageLoad())
             }
           }
