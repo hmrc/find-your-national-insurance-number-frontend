@@ -18,24 +18,23 @@ package models.nps
 
 import play.api.libs.json.{Format, Json}
 
-//case class AppStatusMessageList(appStatusMessage: List[String] = List.empty)
-//case class JsonServiceError(
-//                             requestURL: Option[String] = None,
-//                             message: Option[String] = None,
-//                             appStatusMessageCount: Option[String] = None,
-//                             appStatusMessageList: Option[AppStatusMessageList] = None
-//                           )
-//case class NPSFMNResponse(jsonServiceError: Option[JsonServiceError])
-//
-//object NPSFMNResponse {
-//  implicit val appStatusMessageListformat: Format[AppStatusMessageList] = Json.format[AppStatusMessageList]
-//  implicit val jsonServiceErrorformat: Format[JsonServiceError] = Json.format[JsonServiceError]
-//  implicit val npsFMNResponseformat: Format[NPSFMNResponse] = Json.format[NPSFMNResponse]
-//}
+case class AppStatusMessageList(appStatusMessage: List[String] = List.empty)
+case class JsonServiceError(
+                             requestURL: String,
+                             message: String,
+                             appStatusMessageCount: Int,
+                             appStatusMessageList: AppStatusMessageList
+                           )
+case class NPSFMNResponse(jsonServiceError: JsonServiceError)
 
+object NPSFMNResponse {
+  implicit val appStatusMessageListformat: Format[AppStatusMessageList] = Json.format[AppStatusMessageList]
+  implicit val jsonServiceErrorformat: Format[JsonServiceError] = Json.format[JsonServiceError]
+  implicit val npsFMNResponseformat: Format[NPSFMNResponse] = Json.format[NPSFMNResponse]
+}
 
-sealed trait NPSFMNResponse
-final case object LetterIssuedResponse extends NPSFMNResponse
-final case object RLSDLONFAResponse extends NPSFMNResponse
-final case object TechnicalIssueResponse extends NPSFMNResponse
+sealed trait NPSFMNServiceResponse
+final case object LetterIssuedResponse extends NPSFMNServiceResponse
+final case object RLSDLONFAResponse extends NPSFMNServiceResponse
+final case object TechnicalIssueResponse extends NPSFMNServiceResponse
 

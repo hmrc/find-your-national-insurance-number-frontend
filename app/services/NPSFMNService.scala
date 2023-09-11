@@ -18,9 +18,9 @@ package services
 
 import com.google.inject.ImplementedBy
 import connectors.NPSFMNConnector
-import models.nps.{NPSFMNRequest, NPSFMNResponse}
+import models.nps.{LetterIssuedResponse, NPSFMNRequest, NPSFMNResponse, NPSFMNServiceResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import play.api.Logging
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
@@ -29,16 +29,33 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[NPSFMNServiceImpl])
 trait NPSFMNService {
   def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
-                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNResponse]
+                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNServiceResponse]
 }
 
 class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector)(implicit val ec: ExecutionContext)
   extends NPSFMNService with Logging {
 
   def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
-                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNResponse] = {
+                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNServiceResponse] = {
     val identifier = nino.substring(0, nino.length-1)
     connector.updateDetails(identifier, npsFMNRequest)
+      .map{ response =>
+        response.status match {
+          case 202 => LetterIssuedResponse
+          case 400 if check(response.body) =>
+            RLSDLONFAResponse
+          case _ => TechnicalIssueResponse
+        }
+    }
+  }
+
+  private def check(responseBody: String):Boolean = {
+    val appStatusMessageList = List("63471", "63472", "63473")
+    val response = Json.parse(responseBody).as[NPSFMNResponse]
+    response.jsonServiceError.appStatusMessageList.appStatusMessage match {
+      case message :: Nil => appStatusMessageList.contains(message)
+      case _ => false
+    }
   }
 
 }

@@ -21,86 +21,46 @@ import com.google.inject.ImplementedBy
 import com.kenshoo.play.metrics.Metrics
 import config.FrontendAppConfig
 import models.errors.{ConnectorError, IndividualDetailsError}
-import models.nps.{TechnicalIssueResponse, LetterIssuedResponse, NPSFMNRequest, NPSFMNResponse, RLSDLONFAResponse}
+import models.nps.{JsonServiceError, NPSFMNRequest, NPSFMNResponse}
 import models.upstreamfailure.{Failure, UpstreamFailures}
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-import scala.concurrent.duration.DurationInt
-//import play.api.http.Status.{ACCEPTED, BAD_REQUEST, CONFLICT, INTERNAL_SERVER_ERROR, METHOD_NOT_ALLOWED, NOT_FOUND,
-//  NOT_IMPLEMENTED, UNAUTHORIZED, UNSUPPORTED_MEDIA_TYPE}
-import play.api.http.Status.ACCEPTED
-import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpException, HttpResponse}
-
+import java.net.URL
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-
 @ImplementedBy(classOf[DefaultNPSFMNConnector])
 trait NPSFMNConnector {
+//
+//  def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
+//                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNResponse]
+
 
   def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
-                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNResponse]
-
+                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
 }
 
 @Singleton
-class DefaultNPSFMNConnector@Inject() (httpClient: HttpClient,
+class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2,
   appConfig:  FrontendAppConfig, metrics: Metrics) extends  NPSFMNConnector
   with HttpReadsWrapper[UpstreamFailures, Failure]
   with MetricsSupport {
 
-  def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
-                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNResponse] = {
+  def updateDetails(nino: String, body: NPSFMNRequest
+                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
     val url = s"${appConfig.individualDetailsServiceUrl}/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/$nino"
+    val headers = ("Content-Type" -> "application/json")
 
-    println(s"\n\n\n  url = $url  \n\n\n")
-
-    val r = scala.concurrent.Await.ready(httpClient.POST[JsValue, HttpResponse](url, Json.toJson(npsFMNRequest))(implicitly, implicitly, hc, implicitly), 100.seconds)
-
-    println(s"\n\n\n  r = ${r}  \n\n\n")
-
-      r.map { response =>
-
-        println(s"\n\n\n  $$$$$$$$$$$$$$$$$$$$$$$$ response = $response body = ${response.body} \n\n\n")
-
-
-        response.status match {
-          case ACCEPTED => LetterIssuedResponse
-            //Json.toJson(response.body)
-//          case BAD_REQUEST | UNAUTHORIZED | NOT_FOUND | METHOD_NOT_ALLOWED
-//               | CONFLICT | UNSUPPORTED_MEDIA_TYPE |
-//               INTERNAL_SERVER_ERROR | NOT_IMPLEMENTED =>
-//            Json.toJson(response.body)
-          case _ => throw new HttpException(response.body, response.status)
-        }
-      }.recover {
-        case e: Exception =>
-
-          import scala.util.{Success, Failure}
-
-          println(s"\n\n\n ################ From recover: response = ${e.getMessage}  \n\n\n")
-          r.value match {
-            case Some(t) =>
-              t match {
-                case Failure(f) =>
-
-                  if(f.toString.contains("63471") | f.toString.contains("63472") | f.toString.contains("63473")) {
-                    println("RLSDLONFAResponse")
-                    RLSDLONFAResponse
-                  } else TechnicalIssueResponse
-                  //Json.toJson("{}")
-                case Success(s)=>
-                  println(s"\n\n\n  Success response body = ${s.body}  status = ${s.status} \n\n\n")
-                  //Json.toJson("{}")
-                  TechnicalIssueResponse
-              }
-
-            case None => throw new HttpException("......... error ........", 500)
-          }
-          //Json.toJson("{}")
-        case _ =>
-          //Json.toJson("{}")
-          TechnicalIssueResponse
+    httpClientV2
+      .post(new URL(url))
+      .withBody(body)
+      .setHeader(headers)
+      .execute[HttpResponse]
+      .flatMap{ response =>
+        Future.successful(response)
       }
   }
 
