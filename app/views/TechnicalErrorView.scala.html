@@ -22,7 +22,7 @@
     govukButton: GovukButton
 )
 
-@(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, retryAllowed: Boolean)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("technicalError.title")), fullWidth = false) {
 
@@ -34,19 +34,33 @@
 
         <h1 class="govuk-heading-l">@messages("technicalError.heading")</h1>
 
-        <p class="govuk-body">@messages("technicalError.p1")</p>
+        @if(!retryAllowed) {
+            <p class="govuk-body">@messages("technicalError.p1")</p>
+        }
+
         <p class="govuk-body">
             <strong class="govuk-!-font-weight-bold">
                 @messages("technicalError.p2")
             </strong>
         </p>
-        @govukRadios(
-            RadiosViewModel(
-                field  = form("value"),
-                legend = LegendViewModel(""),
-                items  = TechnicalErrorService.options
+
+        @if(retryAllowed) {
+            @govukRadios(
+                RadiosViewModel(
+                    field = form("value"),
+                    legend = LegendViewModel(""),
+                    items = TechnicalErrorService.options
+                )
             )
-        )
+        } else {
+            @govukRadios(
+                RadiosViewModel(
+                    field = form("value"),
+                    legend = LegendViewModel(""),
+                    items = NoRetryTechnicalErrorService.options
+                )
+            )
+        }
 
         @govukButton(
             ButtonViewModel(messages("site.continue"))

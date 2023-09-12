@@ -66,11 +66,9 @@ class TryAgainCountRepository @Inject()(
 
   def set(tryAgainCount: TryAgainCount)
          (implicit ec: ExecutionContext) = {
-    logger.info(s"Setting one in $collectionName table")
+    logger.info(s"Updating one in $collectionName table")
 
     val updatedCount = tryAgainCount copy (count = tryAgainCount.count + 1, lastUpdated = Instant.now(clock))
-
-    logger.info(s"updated count is $updatedCount")
 
     collection
       .replaceOne(

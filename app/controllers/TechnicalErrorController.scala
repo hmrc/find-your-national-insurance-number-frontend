@@ -18,10 +18,9 @@ package controllers
 
 import controllers.actions._
 import forms.TechnicalErrorServiceFormProvider
-import models.{Mode, TechnicalErrorService}
-import models.requests.DataRequest
+import models.Mode
 import navigation.Navigator
-import pages.{TechnicalErrorPage}
+import pages.TechnicalErrorPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.{SessionRepository, TryAgainCountRepository}
@@ -46,7 +45,7 @@ class TechnicalErrorController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) async {
     implicit request =>
 
       val preparedForm = request.userAnswers.get(TechnicalErrorPage) match {
@@ -54,7 +53,12 @@ class TechnicalErrorController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode))
+      for {
+        retryAllowed <- tryAgainCountRepository.findById(request.userId).map {
+          case Some (value) => if (value.count >= 5) {false} else {true}
+          case None => true
+        }
+      } yield Ok(view(preparedForm, mode, retryAllowed))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -62,7 +66,7 @@ class TechnicalErrorController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
+          Future.successful(BadRequest(view(formWithErrors, mode, retryAllowed = true))),
 
         value =>
           for {
