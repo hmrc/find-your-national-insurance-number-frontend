@@ -18,8 +18,8 @@ package connectors
 
 import cats.syntax.all._
 import com.google.inject.ImplementedBy
-import com.kenshoo.play.metrics.Metrics
 import config.FrontendAppConfig
+import models.CorrelationId
 import models.errors.{ConnectorError, IndividualDetailsError}
 import models.nps.NPSFMNRequest
 import models.upstreamfailure.{Failure, UpstreamFailures}
@@ -35,24 +35,25 @@ import scala.concurrent.{ExecutionContext, Future}
 trait NPSFMNConnector {
 
   def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
-                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
+                   )(implicit hc: HeaderCarrier,correlationId: CorrelationId, ec: ExecutionContext): Future[HttpResponse]
 }
 
 @Singleton
-class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2,
-  appConfig:  FrontendAppConfig, metrics: Metrics) extends  NPSFMNConnector
+class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2, appConfig: FrontendAppConfig)
+  extends  NPSFMNConnector
   with HttpReadsWrapper[UpstreamFailures, Failure]
   with MetricsSupport {
 
   def updateDetails(nino: String, body: NPSFMNRequest
-                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+                   )(implicit hc: HeaderCarrier,correlationId: CorrelationId, ec: ExecutionContext): Future[HttpResponse] = {
     val url = s"${appConfig.individualDetailsServiceUrl}/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/$nino"
-    val headers = ("Content-Type" -> "application/json")
+    val headers = Seq("correlationId" -> correlationId.value.toString,
+      "gov-uk-originator-id" -> "FIND_MY_NINO")
 
     httpClientV2
       .post(new URL(url))
       .withBody(body)
-      .setHeader(headers)
+      .setHeader(headers:_*)
       .execute[HttpResponse]
       .flatMap{ response =>
         Future.successful(response)

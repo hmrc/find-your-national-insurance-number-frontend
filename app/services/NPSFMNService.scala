@@ -18,11 +18,13 @@ package services
 
 import com.google.inject.ImplementedBy
 import connectors.NPSFMNConnector
+import models.CorrelationId
 import models.nps.{LetterIssuedResponse, NPSFMNRequest, NPSFMNResponse, NPSFMNServiceResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import play.api.Logging
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,6 +39,7 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector)(implicit val ec: E
 
   def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
                    )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNServiceResponse] = {
+    implicit val correlationId = CorrelationId(UUID.randomUUID())
     val identifier = nino.substring(0, nino.length-1)
     connector.updateDetails(identifier, npsFMNRequest)
       .map{ response =>
