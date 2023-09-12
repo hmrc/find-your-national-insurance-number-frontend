@@ -56,19 +56,19 @@ class TryAgainCountRepository @Inject()(
   private def byId(id: String): Bson = Filters.equal("id", id)
 
   def insertOrIncrement(id: String)
-            (implicit ec: ExecutionContext) = {
+            (implicit ec: ExecutionContext): Future[Boolean] = {
 
-        findById(id).map {
+        findById(id).flatMap {
           case Some(value: TryAgainCount) => set(value)
           case None => insert(TryAgainCount(id, 1))
         }
   }
 
   def set(tryAgainCount: TryAgainCount)
-         (implicit ec: ExecutionContext) = {
+         (implicit ec: ExecutionContext): Future[Boolean] = {
     logger.info(s"Updating one in $collectionName table")
 
-    val updatedCount = tryAgainCount copy (count = tryAgainCount.count + 1, lastUpdated = Instant.now(clock))
+    val updatedCount = tryAgainCount copy(count = tryAgainCount.count + 1, lastUpdated = Instant.now(clock))
 
     collection
       .replaceOne(
@@ -78,22 +78,14 @@ class TryAgainCountRepository @Inject()(
       )
       .toFuture
       .map(_ => true)
-      .recover {
-        case exc: MongoWriteException =>
-          Left(exc.getError.getMessage)
-      }
   }
 
   def insert(tryAgainCount: TryAgainCount)
-            (implicit ec: ExecutionContext) = {
+            (implicit ec: ExecutionContext): Future[Boolean] = {
     logger.info(s"Inserting one in $collectionName table")
     collection.insertOne(tryAgainCount)
       .toFuture()
-      .map(_ => Right(tryAgainCount.id))
-      .recover {
-        case exc: MongoWriteException =>
-          Left(exc.getError.getMessage)
-      }
+      .map(_ => true)
   }
 
   def findById(id: String)(implicit ec: ExecutionContext): Future[Option[TryAgainCount]] = {
