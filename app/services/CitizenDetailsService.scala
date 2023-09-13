@@ -17,7 +17,7 @@
 package services
 
 import connectors.CitizenDetailsConnector
-import models.{PersonDetailsResponse, PersonDetailsSuccessResponse}
+import models.PersonDetailsResponse
 import play.api.Logging
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.domain.Nino
@@ -30,28 +30,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[CitizenDetailsServiceImpl])
 trait CitizenDetailsService {
-
   def getPersonalDetails(nino: String)(implicit request: RequestHeader, hc: HeaderCarrier): Future[PersonDetailsResponse]
-
-  def getPostcode(nino: String)(implicit request: RequestHeader, hc: HeaderCarrier): Future[String]
-
 }
 
 class CitizenDetailsServiceImpl @Inject()(connector: CitizenDetailsConnector
   )(implicit val ec: ExecutionContext) extends CitizenDetailsService with Logging {
 
-  private val emptyString: String = ""
-
   def getPersonalDetails(nino: String)(implicit request: RequestHeader, hc: HeaderCarrier): Future[PersonDetailsResponse] =
     connector.personDetails(Nino(nino))
-
-  def getPostcode(nino: String)(implicit request: RequestHeader, hc: HeaderCarrier): Future[String] =
-    for {
-      personDetails <- getPersonalDetails(nino)
-      postCode   =   personDetails match {
-              case PersonDetailsSuccessResponse(pd) => pd.address.map(_.postcode.get).getOrElse(emptyString)
-              case _                   => emptyString
-            }
-    } yield postCode
 
 }
