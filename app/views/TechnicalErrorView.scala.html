@@ -24,27 +24,23 @@
 
 @(form: Form[_], mode: Mode, retryAllowed: Boolean)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("technicalError.title")), fullWidth = false) {
+@if(retryAllowed) {
+    @layout(pageTitle = title(form, messages("technicalError.title")), fullWidth = false) {
 
-    @formHelper(action = routes.TechnicalErrorController.onSubmit(), 'autoComplete -> "off") {
+        @formHelper(action = routes.TechnicalErrorController.onSubmit(), 'autoComplete -> "off") {
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
-        }
+            @if(form.errors.nonEmpty) {
+                @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
+            }
 
-        <h1 class="govuk-heading-l">@messages("technicalError.heading")</h1>
+            <h1 class="govuk-heading-l">@messages("technicalError.heading")</h1>
 
-        @if(!retryAllowed) {
-            <p class="govuk-body">@messages("technicalError.p1")</p>
-        }
-
-        <p class="govuk-body">
-            <strong class="govuk-!-font-weight-bold">
+            <p class="govuk-body">
+                <strong class="govuk-!-font-weight-bold">
                 @messages("technicalError.p2")
-            </strong>
-        </p>
+                </strong>
+            </p>
 
-        @if(retryAllowed) {
             @govukRadios(
                 RadiosViewModel(
                     field = form("value"),
@@ -52,7 +48,32 @@
                     items = TechnicalErrorService.options
                 )
             )
-        } else {
+
+            @govukButton(
+                ButtonViewModel(messages("site.continue"))
+            )
+
+        }
+    }
+} else {
+    @layout(pageTitle = title(form, messages("technicalError.title")), fullWidth = false, showBackLink = false) {
+
+        @formHelper(action = routes.TechnicalErrorController.onSubmit(), 'autoComplete -> "off") {
+
+            @if(form.errors.nonEmpty) {
+                @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
+            }
+
+            <h1 class="govuk-heading-l">@messages("technicalError.heading")</h1>
+
+            <p class="govuk-body">@messages("technicalError.p1")</p>
+
+            <p class="govuk-body">
+                <strong class="govuk-!-font-weight-bold">
+                @messages("technicalError.p2")
+                </strong>
+            </p>
+
             @govukRadios(
                 RadiosViewModel(
                     field = form("value"),
@@ -60,11 +81,11 @@
                     items = NoRetryTechnicalErrorService.options
                 )
             )
+
+            @govukButton(
+                ButtonViewModel(messages("site.continue"))
+            )
+
         }
-
-        @govukButton(
-            ButtonViewModel(messages("site.continue"))
-        )
-
     }
 }
