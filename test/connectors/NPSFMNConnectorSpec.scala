@@ -38,15 +38,14 @@ class NPSFMNConnectorSpec
     with Injecting {
 
   override implicit lazy val app: Application = app(
-    Map("microservice.services.personal-details-validation.port" -> server.port())
+    Map("external-url.individual-details.port" -> server.port(),
+    )
   )
 
-  val nino: Nino = Nino(new Generator(new Random()).nextNino.nino)
-
-  val json = s"""
+  val jsonOk = s"""
                 |{
                 |  "jsonServiceError": {
-                |    "requestURL": "/itmp/find-my-nino/api/v1/individual/$nino",
+                |    "requestURL": "/itmp/find-my-nino/api/v1/individual/AA000003",
                 |    "message": "BAD_REQUEST",
                 |    "appStatusMessageCount": 1,
                 |    "appStatusMessageList": {
@@ -57,11 +56,27 @@ class NPSFMNConnectorSpec
                 |  }
                 |}
                 |""".stripMargin
-  val npsFMNResponse = Json.parse(json).as[NPSFMNResponse]
+
+  val jsonNotFound = s"""
+                |{
+                |  "jsonServiceError": {
+                |    "requestURL": "/itmp/find-my-nino/api/v1/individual/AA000021",
+                |    "message": "BAD_REQUEST",
+                |    "appStatusMessageCount": 1,
+                |    "appStatusMessageList": {
+                |      "appStatusMessage": [
+                |        "63471"
+                |      ]
+                |    }
+                |  }
+                |}
+                |""".stripMargin
+
+  val npsFMNResponse = Json.parse(jsonOk).as[NPSFMNResponse]
 
   trait SpecSetup {
 
-    def url: String
+    def url(nino: String): String
 
     val fakeNino = Nino(new Generator(new Random()).nextNino.nino)
 
@@ -72,19 +87,32 @@ class NPSFMNConnectorSpec
     }
   }
 
+  val nino: Nino = Nino("AA000003B")
+
   "NPS FMN Connector" must {
 
     trait LocalSetup extends SpecSetup {
-      def url = s"/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/$nino"
+      def url(nino: String) = s"/sca-nino-stubs/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/${nino}"
+    }
+
+    "return Ok (200) when called with an invalid nino" in new LocalSetup {
+      val nino: Nino = Nino("AA000003B")
+      implicit val correlationId = CorrelationId(UUID.randomUUID())
+      val body = mock[NPSFMNRequest]
+      stubPost(url(nino.nino), OK, Some(Json.toJson(body).toString()), Some(jsonOk))
+      val result = connector.updateDetails(nino.nino, body).futureValue.leftSideValue
+      result.status mustBe OK
+      result.body mustBe jsonOk
     }
 
     "return NOT_FOUND (400) when called with an invalid nino" in new LocalSetup {
+      val nino: Nino = Nino("AA000021B")
       implicit val correlationId = CorrelationId(UUID.randomUUID())
       val body = mock[NPSFMNRequest]
-      stubPost(url, OK, Some(Json.toJson(body).toString()), Some(json))
+      stubPost(url(nino.nino), OK, Some(Json.toJson(body).toString()), Some(jsonNotFound))
       val result = connector.updateDetails(nino.nino, body).futureValue.leftSideValue
-      result.status mustBe NOT_FOUND
-      result.body mustBe ""
+      result.status mustBe OK
+      result.body mustBe jsonNotFound
     }
 
   }
