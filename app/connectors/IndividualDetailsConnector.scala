@@ -31,21 +31,18 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
+
 @ImplementedBy(classOf[DefaultIndividualDetailsConnector])
 trait IndividualDetailsConnector {
-  def getIndividualDetails(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge)(implicit
-                                                                                                ec:                              ExecutionContext,
-                                                                                                hc:                              HeaderCarrier,
-                                                                                                correlationId:                   CorrelationId
-  ): IndividualDetailsResponseEnvelope[IndividualDetails]
+  def getIndividualDetails(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge
+                          )(implicit ec: ExecutionContext,
+                            hc: HeaderCarrier,
+                            correlationId: CorrelationId): IndividualDetailsResponseEnvelope[IndividualDetails]
 }
 
 @Singleton
-class DefaultIndividualDetailsConnector @Inject() (
-                                                    httpClient: HttpClient,
-                                                    appConfig:  FrontendAppConfig,
-                                                    metrics:    Metrics
-) extends IndividualDetailsConnector
+class DefaultIndividualDetailsConnector @Inject() (httpClient: HttpClient,
+    appConfig:  FrontendAppConfig, metrics: Metrics) extends IndividualDetailsConnector
     with HttpReadsWrapper[UpstreamFailures, Failure]
     with MetricsSupport {
 
