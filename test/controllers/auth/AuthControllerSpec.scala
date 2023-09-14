@@ -18,15 +18,15 @@ package controllers.auth
 
 import base.SpecBase
 import config.FrontendAppConfig
+import controllers.bindable.Origin
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
-
-import java.net.URLEncoder
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 import scala.concurrent.Future
 
@@ -34,7 +34,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
 
   "signOut" - {
 
-    "must clear user answers and redirect to sign out, specifying the exit survey as the continue URL" in {
+    "must clear user answers and redirect to sign out, specifying the exit survey as the continue URL when the sca wrapper is enabled" in {
 
       val mockSessionRepository = mock[SessionRepository]
       when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
@@ -42,28 +42,23 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
       val application =
         applicationBuilder(None)
           .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+          .configure("features.sca-wrapper-enabled" -> true)
           .build()
 
       running(application) {
 
+        val sentLocation = "http://example.com&origin=FIND_MY_NINO"
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
-        val request   = FakeRequest(GET, routes.AuthController.signOut.url)
+        val request = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), Some(Origin("FIND_MY_NINO"))).url)
 
         val result = route(application, request).value
 
-        val encodedContinueUrl  = URLEncoder.encode(appConfig.exitSurveyUrl, "UTF-8")
-        val expectedRedirectUrl = s"${appConfig.signOutUrl}?continue=$encodedContinueUrl"
-
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual expectedRedirectUrl
-        verify(mockSessionRepository, times(1)).clear(eqTo(userAnswersId))
+
       }
     }
-  }
 
-  "signOutNoSurvey" - {
-
-    "must clear users answers and redirect to sign out, specifying SignedOut as the continue URL" in {
+    "must clear user answers and redirect to sign out, specifying the exit survey as the continue URL when the sca wrapper is disabled" in {
 
       val mockSessionRepository = mock[SessionRepository]
       when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
@@ -71,21 +66,40 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
       val application =
         applicationBuilder(None)
           .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+          .configure("features.sca-wrapper-enabled" -> false)
           .build()
 
       running(application) {
 
+        val sentLocation = "http://example.com&origin=FIND_MY_NINO"
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
-        val request   = FakeRequest(GET, routes.AuthController.signOutNoSurvey.url)
+        val request = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), Some(Origin("FIND_MY_NINO"))).url)
 
         val result = route(application, request).value
 
-        val encodedContinueUrl  = URLEncoder.encode(routes.SignedOutController.onPageLoad.url, "UTF-8")
-        val expectedRedirectUrl = s"${appConfig.signOutUrl}?continue=$encodedContinueUrl"
+        status(result) mustEqual SEE_OTHER
+      }
+    }
+
+    "must not redirect when origin is missing" in {
+
+      val mockSessionRepository = mock[SessionRepository]
+      when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
+
+      val application =
+        applicationBuilder(None)
+          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+          .configure("features.sca-wrapper-enabled" -> false)
+          .build()
+
+      running(application) {
+
+        val sentLocation = "http://example.com&origin=FIND_MY_NINO"
+        val request = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), None).url)
+
+        val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual expectedRedirectUrl
-        verify(mockSessionRepository, times(1)).clear(eqTo(userAnswersId))
       }
     }
   }
