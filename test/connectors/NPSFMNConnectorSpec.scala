@@ -89,6 +89,7 @@ class NPSFMNConnectorSpec
                 |}
                 |""".stripMargin
 
+
   trait SpecSetup {
 
     def url(nino: String): String
@@ -141,7 +142,6 @@ class NPSFMNConnectorSpec
       result.status mustBe INTERNAL_SERVER_ERROR
       result.body mustBe jsonInternalServerError
     }
-
   }
 
 }
