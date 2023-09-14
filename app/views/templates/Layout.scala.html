@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.hmrcfrontend.config.AccountMenuConfig
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits.RichAccountMenu
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.accountmenu.{AccountMenu, SignOut, AccountHome, AccountMessages, CheckProgress, _}
-@import config.ConfigDecorator
+@import config.FrontendAppConfig
 @import uk.gov.hmrc.hmrcfrontend.views.config.StandardAlphaBanner
 @import views.html.helper.CSPNonce
 @import components.{FullWidthMainContent, backLink}
@@ -33,7 +33,7 @@
     fullWidthMainContent: FullWidthMainContent,
     twoThirdsOneThirdMainContent: TwoThirdsOneThirdMainContent,
     hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
-    configDecorator: ConfigDecorator,
+    config: FrontendAppConfig,
     hmrcAccountMenu: HmrcAccountMenu,
     hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet,
     backLink: backLink,
@@ -68,10 +68,10 @@
 
 @if(!disableSessionExpired){
     @hmrcTimeoutDialogHelper(
-        signOutUrl = controllers.auth.routes.AuthController.signout(Some(RedirectUrl(configDecorator.getFeedbackSurveyUrl(configDecorator.defaultOrigin))), Some(configDecorator.defaultOrigin)).url,
+        signOutUrl = controllers.auth.routes.AuthController.signout(Some(RedirectUrl(config.getFeedbackSurveyUrl(config.defaultOrigin))), Some(config.defaultOrigin)).url,
         keepAliveUrl = Some(controllers.routes.KeepAliveController.keepAlive.url),
-        timeout = Some(configDecorator.timeout),
-        countdown = Some(configDecorator.countdown)
+        timeout = Some(config.timeout),
+        countdown = Some(config.countdown)
     )
 }
 
@@ -113,7 +113,7 @@
     serviceName = Some(Messages("service.name")),
     serviceUrl = Some("/find-your-national-insurance-number/how-to-find-online"),
     isWelshTranslationAvailable = true,
-    accessibilityStatementUrl = Some(configDecorator.accessibilityStatementUrl(request.uri)),
+    accessibilityStatementUrl = Some(config.accessibilityStatementUrl(request.uri)),
     displayHmrcBanner = false,
     additionalHeadBlock = Some(headBlock),
     beforeContentBlock = Some(beforeContent),
