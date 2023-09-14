@@ -64,9 +64,18 @@ class TechnicalErrorController @Inject()(
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
 
-      form.bindFromRequest().fold(
+    form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, retryAllowed = true))),
+          for {
+            retryAllowed <- tryAgainCountRepository.findById(request.userId).map {
+              case Some(value) => if (value.count >= 5) {
+                false
+              } else {
+                true
+              }
+              case None => true
+            }
+          } yield BadRequest(view(formWithErrors, mode, retryAllowed)),
 
         value =>
           for {
