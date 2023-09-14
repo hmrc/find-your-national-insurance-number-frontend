@@ -38,7 +38,7 @@ class NPSFMNConnectorSpec
     with Injecting {
 
   override implicit lazy val app: Application = app(
-    Map("external-url.individual-details.port" -> server.port(),
+    Map("external-url.nps-fmn-api.port" -> server.port(),
     )
   )
 
