@@ -17,6 +17,7 @@
 package services
 
 import com.google.inject.ImplementedBy
+import config.FrontendAppConfig
 import connectors.NPSFMNConnector
 import models.CorrelationId
 import models.nps.{LetterIssuedResponse, NPSFMNRequest, NPSFMNResponse, NPSFMNServiceResponse, RLSDLONFAResponse, TechnicalIssueResponse}
@@ -34,7 +35,8 @@ trait NPSFMNService {
                    )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNServiceResponse]
 }
 
-class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector)(implicit val ec: ExecutionContext)
+class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
+  config: FrontendAppConfig)(implicit val ec: ExecutionContext)
   extends NPSFMNService with Logging {
 
   def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
@@ -53,7 +55,7 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector)(implicit val ec: E
   }
 
   private def check(responseBody: String):Boolean = {
-    val appStatusMessageList = List("63471", "63472", "63473")
+    val appStatusMessageList = config.npsFMNAppStatusMessageList.split(",").toList
     val response = Json.parse(responseBody).as[NPSFMNResponse]
     response.jsonServiceError.appStatusMessageList.appStatusMessage match {
       case message :: Nil => appStatusMessageList.contains(message)
