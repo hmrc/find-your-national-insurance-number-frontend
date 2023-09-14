@@ -83,6 +83,12 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   val individualDetailsServiceUrl: String = s"$individualDetailsProtocol://$individualDetailsHost:$individualDetailsPort$individualDetailsBaseUrl"
 
+  lazy val npsFMNAPIProtocol: String = configuration.get[String]("external-url.nps-fmn-api.protocol")
+  lazy val npsFMNAPIHost: String = configuration.get[String]("external-url.nps-fmn-api.host")
+  lazy val npsFMNAPIBaseUrl: String = configuration.get[String]("external-url.nps-fmn-api.base-url")
+  lazy val npsFMNAPIPort: String = configuration.get[String]("external-url.nps-fmn-api.port")
+
+  val npsFMNAPIUrl: String = s"$npsFMNAPIProtocol://$npsFMNAPIHost:$npsFMNAPIPort$npsFMNAPIBaseUrl"
 
   def cacheSecretKey:String = configuration.get[String]("cache.secret-key")
 
@@ -91,5 +97,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val showBetaBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-beta")
   val showHelpImproveBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-help-improve")
   val showChildBenefitBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-child-benefit")
+
+  val npsFMNAppStatusMessageList:String = configuration.get[String]("npsfmn.app-status-message-list")
 
 }
