@@ -17,7 +17,7 @@
 package connectors
 
 import config.FrontendAppConfig
-import models.{PersonalDetailsValidation, PersonalDetailsValidationErrorResponse, PersonalDetailsValidationNotFoundResponse, PersonalDetailsValidationResponse, PersonalDetailsValidationSuccessResponse, PersonalDetailsValidationUnexpectedResponse}
+import models.{PDVErrorResponse, PDVNotFoundResponse, PDVResponse, PDVResponseData, PDVSuccessResponse, PDVUnexpectedResponse}
 import uk.gov.hmrc.http.HeaderCarrier
 import com.google.inject.{Inject, Singleton}
 import play.api.Logging
@@ -31,27 +31,25 @@ class PersonalDetailsValidationConnector @Inject()(val simpleHttp: SimpleHttp, c
 
   private lazy val personalDetailsValidationBaseUrl: String = config.pdvBaseUrl
 
-  def retrieveMatchingDetails(validationId: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[PersonalDetailsValidationResponse] = {
-    simpleHttp.get[PersonalDetailsValidationResponse](s"$personalDetailsValidationBaseUrl/personal-details-validation/$validationId")(
+  def retrieveMatchingDetails(validationId: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[PDVResponse] = {
+    simpleHttp.get[PDVResponse](s"$personalDetailsValidationBaseUrl/personal-details-validation/$validationId")(
       onComplete = {
         case response if response.status >= 200 && response.status < 300 =>
-          PersonalDetailsValidationSuccessResponse(response.json.as[PersonalDetailsValidation])
+          PDVSuccessResponse(response.json.as[PDVResponseData])
 
-        case response if response.status == NOT_FOUND =>
+        case response if response.status == NOT_FOUND => {
           logger.warn("Unable to find personal details record in personal-details-validation")
-          PersonalDetailsValidationNotFoundResponse
+          PDVNotFoundResponse(response)
+        }
 
         case response =>
-          if (response.status >= INTERNAL_SERVER_ERROR) {
-            logger.warn(
-              s"Unexpected ${response.status} response getting personal details record from personal-details-validation"
-            )
-          }
-          PersonalDetailsValidationUnexpectedResponse(response)
+          if (response.status >= INTERNAL_SERVER_ERROR)
+            logger.warn(s"Unexpected ${response.status} response getting personal details record from PDV")
+          PDVUnexpectedResponse(response)
       },
       onError = { e =>
         logger.warn("Error getting personal details record from personal-details-validation", e)
-        PersonalDetailsValidationErrorResponse(e)
+        PDVErrorResponse(e)
       }
     )
   }

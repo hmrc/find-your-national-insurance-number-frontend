@@ -18,7 +18,7 @@ package repositories
 
 import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
-import models.PersonalDetailsValidation
+import models.PDVResponseData
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes}
 import play.api.Logging
@@ -30,12 +30,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PersonalDetailsValidationRepository @Inject()(
-  mongoComponent: MongoComponent,
-  appConfig: FrontendAppConfig
-)(implicit ec: ExecutionContext) extends PlayMongoRepository[PersonalDetailsValidation](
+                                                     mongoComponent: MongoComponent,
+                                                     appConfig: FrontendAppConfig
+                                                   )(implicit ec: ExecutionContext) extends PlayMongoRepository[PDVResponseData](
   collectionName = "personal-details-validation",
   mongoComponent = mongoComponent,
-  domainFormat = PersonalDetailsValidation.format,
+  domainFormat = PDVResponseData.format,
   indexes = Seq(
     IndexModel(
       Indexes.ascending("id"),
@@ -53,34 +53,30 @@ class PersonalDetailsValidationRepository @Inject()(
     )
   )
 ) with Logging {
-  def insert(personalDetailsValidation: PersonalDetailsValidation)
+  def insert(personalDetailsValidation: PDVResponseData)
             (implicit ec: ExecutionContext) = {
     logger.info(s"Inserting one in $collectionName table")
     collection.insertOne(personalDetailsValidation)
       .toFuture()
-      .map(_ => Right(personalDetailsValidation.id))
-      .recover {
-        case exc: MongoWriteException =>
-          Left(exc.getError.getMessage)
-      }
+      .map(_ => personalDetailsValidation.id) recover {
+      case e: MongoWriteException if e.getCode == 11000 =>
+        logger.warn(s"Duplicate key error inserting into $collectionName table")
+        ""
+    }
   }
 
-  def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[PersonalDetailsValidation]] = {
+  def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] = {
     collection.find(Filters.equal("id", id))
       .toFuture()
-      .recoverWith { case e: Throwable => {
-        Left(e);
-        Future.failed(e)
-      }}
-      .map(_.headOption)
+      .recoverWith {
+        case e: Throwable => Future.failed(e)
+      }.map(_.headOption)
   }
 
-  def findByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PersonalDetailsValidation]] =
+  def findByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] =
     collection.find(Filters.equal("personalDetails.nino", nino))
       .toFuture()
-      .recoverWith { case e: Throwable => {
-        Left(e);
-        Future.failed(e)
-      }}
-      .map(_.headOption)
+      .recoverWith {
+        case e: Throwable => Future.failed(e)
+      }.map(_.headOption)
 }

@@ -25,7 +25,7 @@ import play.api.inject
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.PersonalDetailsValidationService
-import services.PersonalDetailsValidationServiceSpec.personalDetailsValidation
+import services.PDVResponseDataServiceSpec.personalDetailsValidation
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
 
@@ -46,10 +46,10 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         )
         .build()
 
-      when(mockPersonalDetailsValidationService.createPDVFromValidationId(any())(any()))
+      when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
         .thenReturn(Future.successful(validationId))
 
-      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByValidationId(any())(any()))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByValidationId(any()))
         .thenReturn(Future.successful(Some(personalDetailsValidation)))
 
       running(application) {
@@ -60,7 +60,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         val view = application.injector.instanceOf[CheckYourAnswersView]
         val list = SummaryListViewModel(Seq.empty)
 
-        status(result) mustEqual OK
+        status(result) mustEqual 303
         contentAsString(result) contains view(list)(request, messages(application)).toString
       }
     }
