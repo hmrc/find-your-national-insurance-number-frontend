@@ -17,19 +17,27 @@
 package config
 
 import com.google.inject.{Inject, Singleton}
+import controllers.bindable.Origin
 import play.api.Configuration
 import play.api.i18n.Lang
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import java.net.URLEncoder
 
 @Singleton
-class FrontendAppConfig @Inject() (configuration: Configuration) {
+class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig: ServicesConfig) {
 
   val host: String    = configuration.get[String]("host")
   val appName: String = configuration.get[String]("appName")
 
   private val contactHost = configuration.get[String]("contact-frontend.host")
   private val contactFormServiceIdentifier = "find-your-national-insurance-number"
+
+  val gtmContainer: String = configuration.get[String]("tracking-consent-frontend.gtm.container")
+  lazy val trackingHost: String = getExternalUrl(s"tracking-frontend.host").getOrElse("")
+  lazy val trackingServiceUrl = s"$trackingHost/track"
+  val enc = URLEncoder.encode(_: String, "UTF-8")
 
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${SafeRedirectUrl(host + request.uri).encodedUrl}"
@@ -42,6 +50,18 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
   val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/find-your-national-insurance-number"
+
+  lazy val feedbackSurveyFrontendHost = getExternalUrl(s"feedback-survey-frontend.host").getOrElse("")
+  lazy val basGatewayFrontendHost = getExternalUrl(s"bas-gateway-frontend.host").getOrElse("")
+
+  val defaultOrigin: Origin = Origin("FIND_MY_NINO")
+  private def getExternalUrl(key: String): Option[String] =
+    configuration.getOptional[String](s"external-url.$key")
+  def getFeedbackSurveyUrl(origin: Origin): String =
+    feedbackSurveyFrontendHost + "/feedback/" + enc(origin.origin) + "/nino"
+
+  def getBasGatewayFrontendSignOutUrl(continueUrl: String): String =
+    basGatewayFrontendHost + s"/bas-gateway/sign-out-without-state?continue=$continueUrl"
 
   val languageTranslationEnabled: Boolean =
     configuration.get[Boolean]("features.welsh-translation")
@@ -72,6 +92,16 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   lazy val SCAWrapperEnabled = configuration.getOptional[Boolean]("features.sca-wrapper-enabled").getOrElse(false)
   
   val ninoByPostServiceUrl: String = configuration.get[Service]("microservice.services.national-insurance-number-by-post").baseUrl
+
+  lazy val accessibilityStatementToggle: Boolean =
+    configuration.getOptional[Boolean](s"accessibility-statement.toggle").getOrElse(false)
+  lazy val accessibilityBaseUrl: String = servicesConfig.getString("accessibility-statement.baseUrl")
+  lazy private val accessibilityRedirectUrl =
+    servicesConfig.getString("accessibility-statement.redirectUrl")
+
+  def accessibilityStatementUrl(referrer: String) =
+    s"$accessibilityBaseUrl/accessibility-statement$accessibilityRedirectUrl?referrerUrl=${SafeRedirectUrl(accessibilityBaseUrl + referrer).encodedUrl}"
+
 
   def individualDetails: DesApiServiceConfig =
     DesApiServiceConfig(configuration.get[Configuration]("microservice.services.individual-details"))
