@@ -10,7 +10,7 @@ GET         /language/:lang                                 controllers.Language
 
 GET         /refresh-session                                controllers.KeepAliveController.keepAlive
 
-GET         /service-issue                                  controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
+GET         /there-is-a-problem                             controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
 GET         /check-your-answers                             controllers.CheckYourAnswersController.onPageLoad
 
@@ -68,5 +68,5 @@ POST        /issue                                          controllers.SendLett
 GET         /changeSendLetterError                          controllers.SendLetterErrorController.onPageLoad(mode: Mode = CheckMode)
 POST        /changeSendLetterError                          controllers.SendLetterErrorController.onSubmit(mode: Mode = NormalMode)
 
-GET         /technicalError                                 controllers.TechnicalErrorController.onPageLoad(mode: Mode = NormalMode)
-POST        /technicalError                                 controllers.TechnicalErrorController.onSubmit(mode: Mode = NormalMode)
+GET         /service-issue                                  controllers.TechnicalErrorController.onPageLoad(mode: Mode = NormalMode)
+POST        /service-issue                                  controllers.TechnicalErrorController.onSubmit(mode: Mode = NormalMode)

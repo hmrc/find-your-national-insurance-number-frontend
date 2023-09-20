@@ -25,6 +25,11 @@ index.confirmYourIdentity.p1 = I brofi pwy ydych chi, gallwch ddewis defnyddio:
 index.confirmYourIdentity.l1.li1 = dogfennau adnabod gan gynnwys pasbort a thrwydded yrru cerdyn-llun y DU
 index.confirmYourIdentity.l1.li2 = manylion o’ch P60, Hunanasesiad neu gofnod credyd
 
+journeyRecovery.continue.title=Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
+journeyRecovery.continue.heading=Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
+journeyRecovery.startAgain.title=Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
+journeyRecovery.startAgain.heading=Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
+
 haveSetUpGGUserID.title = A ydych wedi sefydlu Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth o’r blaen?
 haveSetUpGGUserID.heading = A ydych wedi sefydlu Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth o’r blaen?
 haveSetUpGGUserID.p1 = I wirio a ydych wedi gwneud hyn, chwiliwch eich e-bost am ’Government Gateway ID’. Gall eich Dynodydd Defnyddiwr (ID) fod wedi’i nodi mewn e-bost yr ydym wedi’i anfon atoch.
