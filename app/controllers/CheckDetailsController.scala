@@ -87,14 +87,14 @@ class CheckDetailsController @Inject()(
   }
 
   def checkConditions(idData: IndividualDetails, pdvPostCode: String): Boolean = {
-    idData.accountStatusType.get.equals(FullLive) &&
+    idData.accountStatusType.exists(_.equals(FullLive)) &&
       idData.crnIndicator.equals(False) &&
-      getAddressTypeResidential(idData.addressList).addressStatus.get.equals(NotDlo) &&
-      getAddressTypeResidential(idData.addressList).addressPostcode.get.value.equals(pdvPostCode)
+      getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo)) &&
+      getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode))
   }
 
   def getAddressTypeResidential(addressList: AddressList): Address = {
-    val residentialAddress = addressList.address.get.filter(_.addressType.equals(ResidentialAddress))
+    val residentialAddress = addressList.getAddress.filter(_.addressType.equals(ResidentialAddress))
     residentialAddress.head
   }
 
