@@ -19,7 +19,7 @@ package models
 import play.api.Logging
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-
+import org.apache.commons.lang3.StringUtils
 import java.time.LocalDate
 
 case class Address(
@@ -48,18 +48,24 @@ case class Address(
   )
 
   def internationalAddressCountry(country: Option[String]): Option[String] =
-    excludedCountries.contains(Country(country.getOrElse(""))) match {
+    excludedCountries.contains(Country(country.getOrElse(StringUtils.EMPTY))) match {
       case false => country
       case _     => None
     }
 
   def isWelshLanguageUnit: Boolean = {
     val welshLanguageUnitPostcodes = Set("CF145SH", "CF145TS", "LL499BF", "BX55AB", "LL499AB")
-    welshLanguageUnitPostcodes.contains(postcode.getOrElse("").toUpperCase.trim.replace(" ", ""))
+    welshLanguageUnitPostcodes.contains(postcode.getOrElse(StringUtils.EMPTY)
+      .toUpperCase.trim.replace(" ", StringUtils.EMPTY))
   }
+
 }
 
 object Address extends Logging {
+
+  implicit class AddressOps(private val address: Address) extends AnyVal {
+    def getPostCode: String = address.postcode.getOrElse(StringUtils.EMPTY)
+  }
 
   implicit val writes: Writes[Address] = new Writes[Address] {
     override def writes(o: Address): JsValue =
@@ -116,4 +122,5 @@ object Address extends Logging {
             false
         }
     }
+
 }

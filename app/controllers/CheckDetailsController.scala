@@ -19,18 +19,19 @@ package controllers
 import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
 import models.errors.IndividualDetailsError
 import models.individualdetails.AccountStatusType.FullLive
 import models.individualdetails.AddressStatus.NotDlo
 import models.individualdetails.AddressType.ResidentialAddress
 import models.individualdetails.CrnIndicator.False
-import models.individualdetails.{AddressList, IndividualDetails, ResolveMerge}
-import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, PDVResponseData, PersonDetails}
+import models.individualdetails.{Address, AddressList, IndividualDetails, ResolveMerge}
+import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, PDVResponseData}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.PersonalDetailsValidationService
-import uk.gov.hmrc.crypto.SymmetricCryptoFactory
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
@@ -46,8 +47,8 @@ class CheckDetailsController @Inject()(
                                         personalDetailsValidationService: PersonalDetailsValidationService,
                                         individualDetailsConnector: IndividualDetailsConnector,
                                         val controllerComponents: MessagesControllerComponents
-                                      )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
-
+                                      )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
+  extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(mode: Mode, validationId: String): Action[AnyContent] = (identify andThen getData andThen requireData) async {
     implicit request => {
@@ -58,8 +59,8 @@ class CheckDetailsController @Inject()(
       } yield idData.fold(
         _ => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)),
         individualDetailsData =>
-          checkConditions(individualDetailsData, pdvData.personalDetails.get.postCode.get) match {
-            case true => Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
+          checkConditions(individualDetailsData, pdvData.getPostCode) match {
+            case true  => Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
             case false => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
           }
       )
@@ -85,7 +86,6 @@ class CheckDetailsController @Inject()(
     }
   }
 
-
   def checkConditions(idData: IndividualDetails, pdvPostCode: String): Boolean = {
     idData.accountStatusType.get.equals(FullLive) &&
       idData.crnIndicator.equals(False) &&
@@ -93,17 +93,16 @@ class CheckDetailsController @Inject()(
       getAddressTypeResidential(idData.addressList).addressPostcode.get.value.equals(pdvPostCode)
   }
 
-
-  def getAddressTypeResidential(addressList: AddressList) = {
+  def getAddressTypeResidential(addressList: AddressList): Address = {
     val residentialAddress = addressList.address.get.filter(_.addressType.equals(ResidentialAddress))
-    residentialAddress(0)
+    residentialAddress.head
   }
-
 
   def getIndividualDetails(nino: IndividualDetailsNino
-                          )(implicit ec: ExecutionContext, hc: HeaderCarrier)  = {
-    implicit val crypto = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
-    implicit val correlationId = CorrelationId(UUID.randomUUID())
+                          )(implicit ec: ExecutionContext, hc: HeaderCarrier): IndividualDetailsResponseEnvelope[IndividualDetails] = {
+    implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
+    implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
     IndividualDetailsResponseEnvelope.fromEitherF(individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y')).value)
   }
+
 }

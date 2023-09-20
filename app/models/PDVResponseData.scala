@@ -16,6 +16,7 @@
 
 package models
 
+import org.apache.commons.lang3.StringUtils
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.domain.Nino
 
@@ -27,5 +28,14 @@ object PersonalDetails {
 }
 case class PDVResponseData(id: String, validationStatus: String, personalDetails: Option[PersonalDetails])
 object PDVResponseData {
+
+  implicit class PDVResponseDataOps(private val pdvResponseData:PDVResponseData) extends AnyVal {
+    def getPostCode: String = pdvResponseData.personalDetails match {
+      case Some(pd) => pd.postCode.getOrElse(StringUtils.EMPTY)
+      case _ => StringUtils.EMPTY
+    }
+
+  }
+
   implicit val format: Format[PDVResponseData] = Json.format[PDVResponseData]
 }
