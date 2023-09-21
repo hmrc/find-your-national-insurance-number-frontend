@@ -96,7 +96,6 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
       case _                                   => routes.JourneyRecoveryController.onPageLoad()
     }
 
-
   private def navigateValidDataNINOHelp(userAnswers: UserAnswers): Call =
     userAnswers.get(ValidDataNINOHelpPage) match {
       case Some(ValidDataNINOHelp.OnlineService) => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
