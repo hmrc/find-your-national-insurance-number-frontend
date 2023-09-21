@@ -18,8 +18,6 @@ package models
 
 import org.apache.commons.lang3.StringUtils
 import play.api.libs.json._
-//import uk.gov.hmrc.auth.core.Nino
-
 import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 
