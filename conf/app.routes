@@ -10,19 +10,18 @@ GET         /language/:lang                                 controllers.Language
 
 GET         /refresh-session                                controllers.KeepAliveController.keepAlive
 
-GET         /service-issue                                  controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
+GET         /there-is-a-problem                             controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
 GET         /check-your-answers                             controllers.CheckYourAnswersController.onPageLoad
 
-GET         /account/signout                                controllers.auth.AuthController.signout(continueUrl: Option[RedirectUrl], origin: Option[controllers.bindable.Origin])
-
-GET         /account/sign-out-survey                        controllers.auth.AuthController.signOut
-GET         /account/sign-out                               controllers.auth.AuthController.signOutNoSurvey
-GET         /account/signed-out                             controllers.auth.SignedOutController.onPageLoad
 GET         /account/register                               controllers.auth.AuthController.redirectToRegister(continueUrl: String)
 GET         /redirect-to-save                               controllers.auth.AuthController.redirectToSMN
 
+GET         /account/signout                                controllers.auth.AuthController.signout(continueUrl: Option[RedirectUrl], origin: Option[controllers.bindable.Origin])
+
 GET         /unauthorised                                   controllers.UnauthorisedController.onPageLoad
+
+GET         /timeout                                        controllers.auth.SignedOutController.onPageLoad
 
 GET         /set-up-government-gateway                      controllers.SetUpGGUserIDStartController.onPageLoad()
 GET         /set-up-government-gateway/register             controllers.SetUpGGUserIDStartController.onContinue
@@ -69,5 +68,5 @@ POST        /issue                                          controllers.SendLett
 GET         /changeSendLetterError                          controllers.SendLetterErrorController.onPageLoad(mode: Mode = CheckMode)
 POST        /changeSendLetterError                          controllers.SendLetterErrorController.onSubmit(mode: Mode = NormalMode)
 
-GET         /technicalError                                 controllers.TechnicalErrorController.onPageLoad(mode: Mode = NormalMode)
-POST        /technicalError                                 controllers.TechnicalErrorController.onSubmit(mode: Mode = NormalMode)
+GET         /service-issue                                  controllers.TechnicalErrorController.onPageLoad(mode: Mode = NormalMode)
+POST        /service-issue                                  controllers.TechnicalErrorController.onSubmit(mode: Mode = NormalMode)

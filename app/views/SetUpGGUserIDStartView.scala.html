@@ -21,7 +21,12 @@
 
 @()(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("setUpGGUserIDStart.title")), fullWidth = false, showSignOutInHeader = false) {
+@layout(
+    pageTitle = titleNoForm(messages("setUpGGUserIDStart.title")),
+    fullWidth = false,
+    showSignOutInHeader = false,
+    timeout = false
+) {
 
     <h1 class="govuk-heading-l">@messages("setUpGGUserIDStart.heading")</h1>
     <p class="govuk-body">@messages("setUpGGUserIDStart.p1")</p>
