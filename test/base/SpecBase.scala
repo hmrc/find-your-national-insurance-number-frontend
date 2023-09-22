@@ -28,18 +28,46 @@ import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
+
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.HeaderCarrier
 import util.WireMockSupport
 
-trait SpecBase
-  extends AnyFreeSpec
-    with Matchers
-    with TryValues
-    with OptionValues
-    with ScalaFutures
-    with IntegrationPatience
-    with WireMockSupport {
+import scala.reflect.ClassTag
 
+import controllers.actions._
+import models.UserAnswers
+import org.jsoup.Jsoup
+import org.scalactic.source.Position
+import org.scalatest.Assertion
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.i18n.{Messages, MessagesApi}
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.typedmap.TypedMap
+import play.api.mvc.request.{Cell, RequestAttrKey}
+import play.api.mvc.{Cookie, Cookies, MessagesControllerComponents, RequestHeader}
+import play.api.test.FakeRequest
+import play.api.{Application, Configuration, Environment}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import uk.gov.hmrc.sca.connectors.ScaWrapperDataConnector
+import uk.gov.hmrc.sca.models.{MenuItemConfig, PtaMinMenuConfig, WrapperDataResponse}
+import uk.gov.hmrc.sca.utils.Keys
+import util.WireMockSupport
+
+
+
+
+class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuite {
+
+  implicit lazy val application: Application = applicationBuilder().build()
+  implicit lazy val applicationWithConfig: Application = applicationBuilderWithConfig().build()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
   val userAnswersId: String = "id"
 
   implicit val config = mock[FrontendAppConfig]
@@ -71,4 +99,11 @@ trait SpecBase
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
       )
+
+  def injected[T](c: Class[T]): T = app.injector.instanceOf(c)
+
+  def injected[T](implicit evidence: ClassTag[T]): T = app.injector.instanceOf[T]
+
+  implicit lazy val cc = app.injector.instanceOf[MessagesControllerComponents]
+
 }

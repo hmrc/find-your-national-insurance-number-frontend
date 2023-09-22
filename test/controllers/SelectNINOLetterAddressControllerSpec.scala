@@ -38,7 +38,7 @@ import scala.concurrent.Future
 class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  override val hc: HeaderCarrier = HeaderCarrier()
 
   lazy val selectNINOLetterAddressRoute: String = routes.SelectNINOLetterAddressController.onPageLoad(NormalMode).url
 
