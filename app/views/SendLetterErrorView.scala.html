@@ -28,7 +28,7 @@
 @(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
 @layout(
-    pageTitle = messages("sendLetterError.title"),
+    pageTitle = title(form, messages("sendLetterError.title")),
     showBackLink = true,
     showSignOut = true,
     fullWidth = false
@@ -51,14 +51,10 @@
 
     @formHelper(action = routes.SendLetterErrorController.onSubmit(), 'autoComplete -> "off") {
 
-
-
-        <h2 class="govuk-heading-m">@messages("sendLetterError.h2")</h2>
-
         @govukRadios(
             RadiosViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(""),
+                legend = LegendViewModel(messages("sendLetterError.h2")).asPageSubHeading(),
                 items  = SelectAlternativeService.options
             )
         )

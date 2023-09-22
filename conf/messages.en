@@ -157,7 +157,7 @@ interruptView.li2.address.postcode = BX9 1AN
 interruptView.p1 = If you are filling out a CA5403 form, you may need to prove your identity with certain documents. The online form will tell you which documents you need.
 interruptView.p2 = Your National Insurance number should arrive within 15 days of you contacting us.
 
-ninoHelpView.title = Find your National Insurance number
+ninoHelpView.title = HMRC can post your National Insurance number to you
 ninoHelpView.heading = HMRC can post your National Insurance number to you
 ninoHelpView.inset = HMRC will not tell you your National Insurance number over the phone.
 ninoHelpView.p1 = You can request a letter with your number on it. It’ll then arrive within 15 working days.
