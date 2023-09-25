@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import viewmodels.LegendSize
+
 @this(
     layout: templates.LayoutProvider,
     formHelper: FormWithCSRF,
@@ -33,18 +35,12 @@
                 @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
             }
 
-            <h1 class="govuk-heading-l">@messages("technicalError.heading")</h1>
-
-            <p class="govuk-body">
-                <strong class="govuk-!-font-weight-bold">
-                @messages("technicalError.p2")
-                </strong>
-            </p>
+            <h1 class="govuk-heading-xl">@messages("technicalError.heading")</h1>
 
             @govukRadios(
                 RadiosViewModel(
                     field = form("value"),
-                    legend = LegendViewModel(""),
+                    legend = LegendViewModel(messages("technicalError.p2")).asPageSubHeading(LegendSize.Medium),
                     items = TechnicalErrorService.options
                 )
             )
@@ -64,20 +60,14 @@
                 @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
             }
 
-            <h1 class="govuk-heading-l">@messages("technicalError.heading")</h1>
+            <h1 class="govuk-heading-xl">@messages("technicalError.heading")</h1>
 
             <p class="govuk-body">@messages("technicalError.p1")</p>
-
-            <p class="govuk-body">
-                <strong class="govuk-!-font-weight-bold">
-                @messages("technicalError.p2")
-                </strong>
-            </p>
 
             @govukRadios(
                 RadiosViewModel(
                     field = form("value"),
-                    legend = LegendViewModel(""),
+                    legend = LegendViewModel(messages("technicalError.p2")).asPageSubHeading(LegendSize.Medium),
                     items = NoRetryTechnicalErrorService.options
                 )
             )

@@ -44,7 +44,7 @@
                 field  = form("value"),
                 legend = LegendViewModel(messages("haveSetUpGGUserID.heading")).asPageHeading(LegendSize.Large),
                 items  = HaveSetUpGGUserID.options
-            ).withHint(HintViewModel(HtmlContent(hintText)))
+            ).withHint(HintViewModel(HtmlContent(hintText)).withCssClass("govuk-!-padding-top-5"))
         )
 
         @govukButton(

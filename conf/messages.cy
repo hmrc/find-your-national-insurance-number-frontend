@@ -97,7 +97,7 @@ phoneHMRCDetails.openingTimes.weekendAndBankHoliday = Ar gau ar y penwythnos ac 
 phoneHMRCDetails.hmrcExtraHelp = Cael help <a href="{0}" class="govuk-link" target="_blank"> wrth ddelio â CThEF os oes gennych anghenion ychwanegol</a>
 phoneHMRCDetails.findOutCallCharges = <a href="{0}" class="govuk-link" target="_blank">Cael gwybod am gostau galwadau.</a>
 
-ninoHelpView.title = Dod o hyd i’ch rhif Yswiriant Gwladol
+ninoHelpView.title = Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
 ninoHelpView.heading = Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
 ninoHelpView.inset = Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
 ninoHelpView.p1 = Gallwch ofyn am gael llythyr sy’n dangos eich rhif. Bydd hwnnw yn cyrraedd cyn pen 15 diwrnod gwaith.

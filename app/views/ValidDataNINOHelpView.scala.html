@@ -16,6 +16,7 @@
 
 @import config.FrontendAppConfig
 @import play.twirl.api.Html
+@import viewmodels.LegendSize
 
 @this(
     layout: templates.LayoutProvider,
@@ -43,14 +44,13 @@
         <p class="govuk-body">@messages("ninoHelpView.inset")</p>
     </div>
     <p class="govuk-body">@messages("ninoHelpView.p1")</p>
-    <h2 class="govuk-heading-l">@messages("ninoHelpView.h2")</h2>
 
     @formHelper(action = routes.ValidDataNINOHelpController.onSubmit(mode), 'autoComplete -> "off") {
 
         @govukRadios(
                     RadiosViewModel(
                         field  = form("value"),
-                        legend = LegendViewModel(""),
+                        legend = LegendViewModel(messages("ninoHelpView.h2")).asPageSubHeading(LegendSize.Large),
                         items  = ValidDataNINOHelp.options
                     )
             )
