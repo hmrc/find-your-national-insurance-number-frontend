@@ -28,6 +28,8 @@ import repositories.SessionRepository
 import services.{CitizenDetailsService, NPSFMNService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SelectNINOLetterAddressView
+import org.apache.commons.lang3.StringUtils
+import play.api.data.Form
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -46,8 +48,7 @@ class SelectNINOLetterAddressController @Inject()(
                                        npsFMNService: NPSFMNService
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  private val emptyString: String = ""
-  val form = formProvider()
+  val form: Form[SelectNINOLetterAddress] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
@@ -57,14 +58,14 @@ class SelectNINOLetterAddressController @Inject()(
         }
 
       for {
-        personalDetails <- citizenDetailsService.getPersonalDetails(request.nino.getOrElse(emptyString))
+        personalDetails <- citizenDetailsService.getPersonalDetails(request.nino.getOrElse(StringUtils.EMPTY))
         postCode = getPostCode(personalDetails)
       } yield Ok(view(preparedForm, mode, postCode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val nino = request.nino.getOrElse(emptyString)
+      val nino = request.nino.getOrElse(StringUtils.EMPTY)
 
       form.bindFromRequest().fold(
         formWithErrors =>
@@ -96,20 +97,20 @@ class SelectNINOLetterAddressController @Inject()(
 
   private def getPostCode(personDetailsResponse: PersonDetailsResponse): String =
     personDetailsResponse match {
-      case PersonDetailsSuccessResponse(pd) => pd.address.map(_.postcode.get).getOrElse(emptyString)
-      case _                   => emptyString
+      case PersonDetailsSuccessResponse(pd) => pd.getPostCode
+      case _                   => StringUtils.EMPTY
     }
 
   private def getNPSFMNRequest(personDetailsResponse: PersonDetailsResponse): NPSFMNRequest =
     personDetailsResponse match {
       case PersonDetailsSuccessResponse(pd) =>
         NPSFMNRequest(
-          pd.person.firstName.getOrElse(emptyString),
-          pd.person.lastName.getOrElse(emptyString),
-          pd.person.dateOfBirth.map(_.toString).getOrElse(emptyString),
-          pd.address.map(_.postcode.get).getOrElse(emptyString)
+          pd.person.getFirstName,
+          pd.person.getLastName,
+          pd.person.getDateOfBirth,
+          pd.getPostCode
         )
-      case _                   => NPSFMNRequest(emptyString, emptyString, emptyString, emptyString)
+      case _                   => NPSFMNRequest.empty
     }
 
 }

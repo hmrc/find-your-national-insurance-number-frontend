@@ -17,15 +17,13 @@
 package connectors
 
 import config.FrontendAppConfig
-import models.{PDVNotFoundResponse, PDVNotFoundResponse$, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
-import org.mockito.ArgumentMatchers.any
+import models.{PDVNotFoundResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.libs.json.Json
 import play.api.test.{DefaultAwaitTimeout, Injecting}
 import services.http.SimpleHttp
 import uk.gov.hmrc.domain.{Generator, Nino}
-import uk.gov.hmrc.http.HttpResponse
 import util.WireMockHelper
 
 import java.time.LocalDate

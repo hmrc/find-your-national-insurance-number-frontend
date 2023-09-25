@@ -16,10 +16,8 @@
 
 package models
 
-//import play.api.libs.json.Json
-
-
-import play.api.libs.json._
+import org.apache.commons.lang3.StringUtils
+import play.api.libs.json.Json
 
 case class PersonDetails(
                           person: Person,
@@ -28,47 +26,8 @@ case class PersonDetails(
                         )
 
 object PersonDetails {
+  implicit class PersonDetailsOps(private val pd: PersonDetails) extends AnyVal {
+    def getPostCode: String = pd.address.map(_.getPostCode).getOrElse(StringUtils.EMPTY)
+  }
   implicit val formats = Json.format[PersonDetails]
-
 }
-
-/*
-val designatoryDetails =
-          """|
-             |{
-             |  "etag" : "115",
-             |  "person" : {
-             |    "firstName" : "HIPPY",
-             |    "middleName" : "T",
-             |    "lastName" : "NEWYEAR",
-             |    "title" : "Mr",
-             |    "honours": "BSC",
-             |    "sex" : "M",
-             |    "dateOfBirth" : "1952-04-01",
-             |    "nino" : "TW189213B",
-             |    "deceased" : false
-             |  },
-             |  "address" : {
-             |    "line1" : "26 FARADAY DRIVE",
-             |    "line2" : "PO BOX 45",
-             |    "line3" : "LONDON",
-             |    "postcode" : "CT1 1RQ",
-             |    "startDate": "2009-08-29",
-             |    "country" : "GREAT BRITAIN",
-             |    "type" : "Residential",
-             |    "status": 1
-             |  },
-             |  "correspondenceAddress" : {
-             |    "line1" : "26 FARADAY DRIVE",
-             |    "line2" : "PO BOX 45",
-             |    "line3" : "LONDON",
-             |    "postcode" : "CT1 1RQ",
-             |    "startDate": "2009-08-29",
-             |    "country" : "GREAT BRITAIN",
-             |    "type" : "Correspondence",
-             |    "status": 1
-             |  }
-             |}
-             |""".stripMargin
- */
-

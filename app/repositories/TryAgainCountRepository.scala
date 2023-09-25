@@ -19,9 +19,8 @@ package repositories
 import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
 import models.TryAgainCount
-import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes, ReplaceOptions, Updates}
+import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes, ReplaceOptions}
 import play.api.Logging
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -32,10 +31,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TryAgainCountRepository @Inject()(
-                                                     mongoComponent: MongoComponent,
-                                                     appConfig: FrontendAppConfig,
-                                                     clock: Clock
-                                                   )(implicit ec: ExecutionContext) extends PlayMongoRepository[TryAgainCount](
+       mongoComponent: MongoComponent,
+       appConfig: FrontendAppConfig,
+       clock: Clock
+     )(implicit ec: ExecutionContext) extends PlayMongoRepository[TryAgainCount](
   collectionName = "try-again-count",
   mongoComponent = mongoComponent,
   domainFormat = TryAgainCount.format,

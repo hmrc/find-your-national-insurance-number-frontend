@@ -16,9 +16,8 @@
 
 package models
 
+import org.apache.commons.lang3.StringUtils
 import play.api.libs.json._
-//import uk.gov.hmrc.auth.core.Nino
-
 import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 
@@ -35,14 +34,22 @@ case class Person(
                  ) {
   lazy val initialsName =
     initials.getOrElse(List(title, firstName.map(_.take(1)), middleName.map(_.take(1)), lastName).flatten.mkString(" "))
+
   lazy val shortName    = for {
     f <- firstName
     l <- lastName
   } yield List(f, l).mkString(" ")
+
   lazy val fullName     = List(title, firstName, middleName, lastName, honours).flatten.mkString(" ")
 }
 
 object Person {
+
+  implicit class PersonOps(private val person: Person) extends AnyVal {
+    def getFirstName: String = person.firstName.getOrElse(StringUtils.EMPTY)
+    def getLastName: String = person.lastName.getOrElse(StringUtils.EMPTY)
+    def getDateOfBirth: String = person.dateOfBirth.map(_.toString).getOrElse(StringUtils.EMPTY)
+  }
 
   implicit val formats = Json.format[Person]
 
