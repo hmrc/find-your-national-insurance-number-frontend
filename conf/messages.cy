@@ -30,6 +30,10 @@ journeyRecovery.continue.heading=Mae’n ddrwg gennym – mae problem gyda’r g
 journeyRecovery.startAgain.title=Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
 journeyRecovery.startAgain.heading=Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
 
+signedOut.title = Er eich diogelwch, gwnaethom eich allgofnodi
+signedOut.heading = Er eich diogelwch, gwnaethom eich allgofnodi
+signedOut.guidance = Ni wnaethom gadw’ch atebion.
+
 haveSetUpGGUserID.title = A ydych wedi sefydlu Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth o’r blaen?
 haveSetUpGGUserID.heading = A ydych wedi sefydlu Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth o’r blaen?
 haveSetUpGGUserID.p1 = I wirio a ydych wedi gwneud hyn, chwiliwch eich e-bost am ’Government Gateway ID’. Gall eich Dynodydd Defnyddiwr (ID) fod wedi’i nodi mewn e-bost yr ydym wedi’i anfon atoch.
