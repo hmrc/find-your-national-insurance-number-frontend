@@ -45,7 +45,8 @@
     pageTitle: String,
     showBackLink: Boolean = true,
     timeout: Boolean = true,
-    showSignOut: Boolean = true,
+    showSignOut: Boolean = false,
+    showSignOutInHeader: Boolean = true,
     stylesheets: Option[Html] = None,
     fullWidth: Boolean = false,
     accountHome: Boolean = true,
@@ -66,10 +67,11 @@
       type="text/css" />
 <script src="https://cdn.optimizely.com/js/8461600066.js"></script>
 
-@if(!disableSessionExpired){
+@if(timeout){
     @hmrcTimeoutDialogHelper(
         signOutUrl = controllers.auth.routes.AuthController.signout(Some(RedirectUrl(config.getFeedbackSurveyUrl(config.defaultOrigin))), Some(config.defaultOrigin)).url,
         keepAliveUrl = Some(controllers.routes.KeepAliveController.keepAlive.url),
+        timeoutUrl = Some(controllers.auth.routes.AuthController.timeOut.url),
         timeout = Some(config.timeout),
         countdown = Some(config.countdown)
     )
@@ -112,6 +114,7 @@
     pageTitle = Some(pageTitle),
     serviceName = Some(Messages("service.name")),
     serviceUrl = Some("/find-your-national-insurance-number/how-to-find-online"),
+    signOutUrl = if (showSignOutInHeader) Some(controllers.auth.routes.AuthController.signout(Some(RedirectUrl(config.getFeedbackSurveyUrl(config.defaultOrigin))), Some(config.defaultOrigin)).url) else None,
     isWelshTranslationAvailable = true,
     accessibilityStatementUrl = Some(config.accessibilityStatementUrl(request.uri)),
     displayHmrcBanner = false,
