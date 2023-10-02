@@ -16,12 +16,12 @@ GET         /check-your-answers                             controllers.CheckYou
 
 GET         /account/register                               controllers.auth.AuthController.redirectToRegister(continueUrl: String)
 GET         /redirect-to-save                               controllers.auth.AuthController.redirectToSMN
-
+GET         /account/signin                                 controllers.auth.SignedOutController.onPageLoad
 GET         /account/signout                                controllers.auth.AuthController.signout(continueUrl: Option[RedirectUrl], origin: Option[controllers.bindable.Origin])
 
 GET         /unauthorised                                   controllers.UnauthorisedController.onPageLoad
 
-GET         /timeout                                        controllers.auth.SignedOutController.onPageLoad
+GET         /timeout                                        controllers.auth.AuthController.timeOut
 
 GET         /set-up-government-gateway                      controllers.SetUpGGUserIDStartController.onPageLoad()
 GET         /set-up-government-gateway/register             controllers.SetUpGGUserIDStartController.onContinue
