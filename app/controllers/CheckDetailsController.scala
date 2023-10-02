@@ -30,10 +30,11 @@ import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEn
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.PersonalDetailsValidationService
+import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import util.AuditUtils
 
 import java.util.UUID
 import javax.inject.Inject
@@ -45,6 +46,7 @@ class CheckDetailsController @Inject()(
                                         getData: DataRetrievalAction,
                                         requireData: DataRequiredAction,
                                         personalDetailsValidationService: PersonalDetailsValidationService,
+                                        auditService: AuditService,
                                         individualDetailsConnector: IndividualDetailsConnector,
                                         val controllerComponents: MessagesControllerComponents
                                       )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
@@ -60,7 +62,10 @@ class CheckDetailsController @Inject()(
         _ => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)),
         individualDetailsData =>
           checkConditions(individualDetailsData, pdvData.getPostCode) match {
-            case true  => Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
+            case true  =>
+              auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
+                pdvData.validationStatus, individualDetailsData.crnIndicator.asBool, pdvData.id, None, None, None, None))
+              Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
             case false => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
           }
       )
