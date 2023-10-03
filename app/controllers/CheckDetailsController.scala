@@ -64,9 +64,12 @@ class CheckDetailsController @Inject()(
           checkConditions(individualDetailsData, pdvData.getPostCode) match {
             case true  =>
               auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
-                pdvData.validationStatus, individualDetailsData.crnIndicator.asBool, pdvData.id, None, None, None, None))
+                pdvData.validationStatus, individualDetailsData.crnIndicator.asString, pdvData.id, None, None, None, None))
               Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
-            case false => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+            case false =>
+              auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
+                pdvData.validationStatus, individualDetailsData.crnIndicator.asString, pdvData.id, None, None, None, None))
+              Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
           }
       )
     }
@@ -76,6 +79,8 @@ class CheckDetailsController @Inject()(
     getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
       case Some(data) => data.nino.nino
       case None =>
+        auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
+          pdvData.validationStatus, "Empty", pdvData.id, None, Some("/checkDetails"), None, Some("No Personal Details found in PDV data, likely validation failed")))
         logger.debug("No Personal Details found in PDV data, likely validation failed")
         ""
     })).value
@@ -87,7 +92,10 @@ class CheckDetailsController @Inject()(
       pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvDataId)
     } yield pdvData match {
       case Some(data) => data
-      case None => throw new Exception("No PDV data found")
+      case None =>
+        auditService.audit(AuditUtils.buildAuditEvent(None, "StartFindYourNino",
+          "failure", "Empty", "", None, Some("/checkDetails"), None, Some("No PDV data found")))
+        throw new Exception("No PDV data found")
     }
   }
 

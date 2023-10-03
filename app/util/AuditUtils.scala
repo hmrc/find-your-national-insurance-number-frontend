@@ -76,10 +76,11 @@ object AuditUtils {
     )
   }
 
-  def checkCRN(crnIndicator: Boolean): String = {
+  def checkCRN(crnIndicator: String): String = {
     crnIndicator match {
-      case true => "CRN"
-      case false => "Nino"
+      case "true" => "CRN"
+      case "false" => "Nino"
+      case _ => ""
     }
   }
 
@@ -95,7 +96,7 @@ object AuditUtils {
   def buildAuditEvent(personDetails: Option[PersonalDetails],
                       auditType: String,
                       validationOutcome: String,
-                      identifierType: Boolean,
+                      identifierType: String,
                       pdvId: String,
                       findMyNinoOption: Option[String],
                       pageErrorGeneratedFrom: Option[String],

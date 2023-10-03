@@ -138,15 +138,15 @@ object DateOfDeathStatus {
 }
 
 sealed trait CrnIndicator {
-  val asBool: Boolean
+  val asString: String
 }
 
 object CrnIndicator {
   object False extends CrnIndicator {
-    override val asBool: Boolean = false
+    override val asString: String = "false"
   }
   object True  extends CrnIndicator {
-    override val asBool: Boolean = true
+    override val asString: String = "true"
   }
 
   implicit val reads: Reads[CrnIndicator] = JsPath
