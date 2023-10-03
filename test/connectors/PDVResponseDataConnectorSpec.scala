@@ -76,7 +76,7 @@ class PDVResponseDataConnectorSpec
     "return OK when called with an existing validationId" in new LocalSetup {
       stubGet(url, OK, Some(Json.toJson(personalDetailsValidation).toString()))
       val result = connector.retrieveMatchingDetails(validationId).futureValue.leftSideValue
-      result.asInstanceOf[PDVSuccessResponse].pdvResponseData mustBe personalDetailsValidation
+      result.asInstanceOf[PDVSuccessResponse].pdvResponseData.personalDetails mustBe personalDetailsValidation.personalDetails
     }
 
     "return NOT_FOUND when called with an unknown validationId" in new LocalSetup {
