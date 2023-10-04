@@ -44,6 +44,9 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     }
   }
 
+
+
+
   //get a PDV match result
   private def getPDVMatchResult(validationId: String)(implicit hc:HeaderCarrier): Future[PDVResponse] =
     connector.retrieveMatchingDetails(validationId) map {
@@ -62,6 +65,19 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
       case e: MongoException => {
         logger.warn(s"Failed creating PDV data row for validation id: ${personalDetailsValidation.id}, ${e.getMessage}")
         ""
+      }
+    }
+  }
+
+  //add a function to update the PDV data row with the a validationStatus which is boolean value
+  def updatePDVDataRowWithValidationStatus(validationId: String, validationStatus: Boolean): Future[Boolean] = {
+    personalDetailsValidationRepository.updateValidCustomer(validationId, validationStatus) map {
+      case str:String =>if(str.length > 8) true else false
+      case _ => false
+    } recover {
+      case e: MongoException => {
+        logger.warn(s"Failed updating PDV data row for validation id: $validationId, ${e.getMessage}")
+        false
       }
     }
   }

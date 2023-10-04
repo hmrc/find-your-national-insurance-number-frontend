@@ -37,6 +37,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import java.util.UUID
 import javax.inject.Inject
+import scala.Option
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckDetailsController @Inject()(
@@ -52,21 +53,48 @@ class CheckDetailsController @Inject()(
 
   def onPageLoad(mode: Mode, validationId: String): Action[AnyContent] = (identify andThen getData andThen requireData) async {
     implicit request => {
-
       for {
         pdvData <- getPDVData(validationId)
-        idData <- getIdData(pdvData)
-      } yield idData.fold(
-        _ => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)),
-        individualDetailsData =>
-          checkConditions(individualDetailsData, pdvData.getPostCode) match {
-            case true  => Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
-            case false => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+        idData <- getIdData(pdvData._2)
+      } yield (pdvData, idData) match {
+        case ((rowId, pdvData:PDVResponseData), Right(idData)) => {
+          idData match {
+            case individualDetailsData => {
+              if(pdvData.getPostCode.length > 0) {
+                checkConditions(individualDetailsData, pdvData.getPostCode) match {
+                  case true => {
+                    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(rowId, true)
+                    Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
+                  }
+                  case false => {
+                    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(rowId, false)
+                    Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+                  }
+                }
+              } else {
+                Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+              }
+            }
+            case _ => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
           }
-      )
+        }
+      }
     }
   }
 
+
+
+  /*
+  idData.fold(
+    _ => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)),
+    individualDetailsData => {
+      checkConditions(individualDetailsData, postCode) match {
+        case true => Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
+        case false => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+      }
+    }
+  )
+   */
   def getIdData(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
     getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
       case Some(data) => data.nino.nino
@@ -76,13 +104,13 @@ class CheckDetailsController @Inject()(
     })).value
   }
 
-  def getPDVData(validationId: String)(implicit hc: HeaderCarrier): Future[PDVResponseData] = {
+  def getPDVData(validationId: String)(implicit hc: HeaderCarrier): Future[(String, PDVResponseData)] = {
     for {
       pdvDataId <- personalDetailsValidationService.createPDVDataFromPDVMatch(validationId)
       pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvDataId)
-    } yield pdvData match {
-      case Some(data) => data
-      case None => throw new Exception("No PDV data found")
+    } yield (pdvDataId, pdvData) match {
+      case (rowid:String,Some(data)) => (rowid,data) //returning a tuple of rowId and PDV data
+      case (_, None) => throw new Exception("No PDV data found")
     }
   }
 

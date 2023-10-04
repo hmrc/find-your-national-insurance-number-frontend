@@ -17,6 +17,7 @@
 package repositories
 
 import com.google.inject.{Inject, Singleton}
+import com.mongodb.client.model.Updates
 import config.FrontendAppConfig
 import models.PDVResponseData
 import org.mongodb.scala.MongoWriteException
@@ -61,6 +62,18 @@ class PersonalDetailsValidationRepository @Inject()(
       .map(_ => personalDetailsValidation.id) recover {
       case e: MongoWriteException if e.getCode == 11000 =>
         logger.warn(s"Duplicate key error inserting into $collectionName table")
+        ""
+    }
+  }
+
+  def updateValidCustomer(id:String, validCustomer:Boolean)(implicit ec:ExecutionContext) = {
+    logger.info(s"Updating one in $collectionName table")
+    collection.updateOne(Filters.equal("id", id),
+        Updates.set("ValidCustomer", validCustomer))
+      .toFuture()
+      .map(_ => id) recover {
+      case e: MongoWriteException if e.getCode == 11000 =>
+        logger.warn(s"error updating $collectionName table")
         ""
     }
   }
