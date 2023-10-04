@@ -32,19 +32,13 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
 
   def createPDVDataFromPDVMatch(validationId: String)(implicit hc:HeaderCarrier): Future[String] = {
     for {
-      // get PDV match results
       pdvResponse <- getPDVMatchResult(validationId)
-      // add them to mongo and return UUID
       pdvDataRowId <-  createPDVDataRow(pdvResponse.asInstanceOf[PDVSuccessResponse].pdvResponseData)
     } yield pdvDataRowId match {
-      //throw exception if we failed to create the PDV data
       case "" => throw new RuntimeException(s"Failed Creating PDV data for validation id: $validationId")
-      //return the UUID
       case _ => pdvDataRowId // we can possible validate that its a UUID
     }
   }
-
-
 
 
   //get a PDV match result
@@ -70,8 +64,8 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
   }
 
   //add a function to update the PDV data row with the a validationStatus which is boolean value
-  def updatePDVDataRowWithValidationStatus(validationId: String, validationStatus: Boolean): Future[Boolean] = {
-    personalDetailsValidationRepository.updateValidCustomer(validationId, validationStatus) map {
+  def updatePDVDataRowWithValidationStatus(validationId: String, validationStatus: Boolean, reason:String): Future[Boolean] = {
+    personalDetailsValidationRepository.updateCustomerValidityWithReason(validationId, validationStatus, reason) map {
       case str:String =>if(str.length > 8) true else false
       case _ => false
     } recover {

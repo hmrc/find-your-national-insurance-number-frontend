@@ -78,6 +78,20 @@ class PersonalDetailsValidationRepository @Inject()(
     }
   }
 
+  def updateCustomerValidityWithReason(id: String, validCustomer: Boolean, reason: String)(implicit ec: ExecutionContext) = {
+    logger.info(s"Updating one in $collectionName table")
+    collection.updateMany(Filters.equal("id", id),
+        Updates.combine(Updates.set("ValidCustomer", validCustomer), Updates.set("Reason", reason)))
+      .toFuture()
+      .map(_ => id) recover {
+      case e: MongoWriteException if e.getCode == 11000 =>
+        logger.warn(s"error updating $collectionName table")
+        ""
+    }
+ }
+
+
+
   def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] = {
     collection.find(Filters.equal("id", id))
       .toFuture()

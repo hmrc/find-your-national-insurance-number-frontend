@@ -62,12 +62,12 @@ class CheckDetailsController @Inject()(
             case individualDetailsData => {
               if(pdvData.getPostCode.length > 0) {
                 checkConditions(individualDetailsData, pdvData.getPostCode) match {
-                  case true => {
-                    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(rowId, true)
+                  case (true, reason) => {
+                    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(rowId, true, reason)
                     Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
                   }
-                  case false => {
-                    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(rowId, false)
+                  case (false, reason) => {
+                    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(rowId, false, reason)
                     Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
                   }
                 }
@@ -114,11 +114,31 @@ class CheckDetailsController @Inject()(
     }
   }
 
-  def checkConditions(idData: IndividualDetails, pdvPostCode: String): Boolean = {
-    idData.accountStatusType.exists(_.equals(FullLive)) &&
+  def checkConditions(idData: IndividualDetails, pdvPostCode: String): (Boolean, String) = {
+    var reason = ""
+
+    if(!(idData.accountStatusType.exists(_.equals(FullLive)))) {
+      reason += "AccountStatusType is not FullLive;"
+    }
+    if(!(idData.crnIndicator.equals(False))) {
+      reason += "CRNIndicator is not False;"
+    }
+    if(!(getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo)))) {
+      reason += "AddressStatus is not NotDlo;"
+    }
+    if(!(getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode)))) {
+      reason += "AddressPostcode is not equal to PDV Postcode;"
+    }
+
+    val status = {
+      idData.accountStatusType.exists(_.equals(FullLive)) &&
       idData.crnIndicator.equals(False) &&
       getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo)) &&
       getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode))
+    }
+
+    (status, reason)
+
   }
 
   def getAddressTypeResidential(addressList: AddressList): Address = {
