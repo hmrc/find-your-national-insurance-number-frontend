@@ -101,20 +101,13 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     })
   }
 
-  def getPDVDataValidationStatus(nino: String) = {
+  def getPDVDataValidationStatus(nino: String): Future[String] = {
     getPersonalDetailsValidationByNino(nino) map {
-      case Some(pdvData) => {
-        pdvData.validationStatus
-      }
-      case None => {
-        "false"
-      }
+      case Some(pdvData) => pdvData.validationStatus
+      case None => "false"
     } recover {
-      case e: Exception => {
-        "false"
-      }
+      case e: Exception => "false"
     }
   }
-
 
 }
