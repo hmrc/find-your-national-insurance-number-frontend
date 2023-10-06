@@ -25,6 +25,7 @@ import pages.InvalidDataNINOHelpPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.PersonalDetailsValidationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.InvalidDataNINOHelpView
 
@@ -35,6 +36,7 @@ class InvalidDataNINOHelpController @Inject()(
                                                override val messagesApi: MessagesApi,
                                                sessionRepository: SessionRepository,
                                                navigator: Navigator,
+                                               personalDetailsValidationService: PersonalDetailsValidationService,
                                                identify: IdentifierAction,
                                                getData: DataRetrievalAction,
                                                requireData: DataRequiredAction,
@@ -45,15 +47,26 @@ class InvalidDataNINOHelpController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) async{
     implicit request =>
+      val resp = personalDetailsValidationService.getPDVDataValidationStatus(request.nino.getOrElse("")).map(
+        validationStatus =>
+        if (validationStatus == "false") {
 
-      val preparedForm = request.userAnswers.get(InvalidDataNINOHelpPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
+          val preparedForm = request.userAnswers.get(InvalidDataNINOHelpPage) match {
+            case None => form
+            case Some(value) => form.fill(value)
+          }
+
+          Ok(view(preparedForm, mode))
+        } else {
+          Redirect(controllers.routes.UnauthorisedController.onPageLoad)
+        }
+      )
+      request.nino match {
+        case Some(nino) => resp
+        case None => Future.successful(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
       }
-
-      Ok(view(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -70,5 +83,6 @@ class InvalidDataNINOHelpController @Inject()(
           } yield Redirect(navigator.nextPage(InvalidDataNINOHelpPage, mode, updatedAnswers))
       )
   }
+
 
 }
