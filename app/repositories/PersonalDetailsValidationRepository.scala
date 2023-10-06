@@ -21,7 +21,7 @@ import com.mongodb.client.model.Updates
 import config.FrontendAppConfig
 import models.PDVResponseData
 import org.mongodb.scala.MongoWriteException
-import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes}
+import org.mongodb.scala.model._
 import play.api.Logging
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -54,26 +54,16 @@ class PersonalDetailsValidationRepository @Inject()(
     )
   )
 ) with Logging {
-  def insert(personalDetailsValidation: PDVResponseData)
-            (implicit ec: ExecutionContext) = {
-    logger.info(s"Inserting one in $collectionName table")
-    collection.insertOne(personalDetailsValidation)
+  def insertOrReplacePDVResultData(personalDetailsValidation: PDVResponseData)
+                                  (implicit ec: ExecutionContext): Future[String] = {
+    logger.info(s"insert or update one in $collectionName table")
+    val filter = Filters.equal("id", personalDetailsValidation.id)
+    val options = ReplaceOptions().upsert(true)
+    collection.replaceOne(filter, personalDetailsValidation, options)
       .toFuture()
       .map(_ => personalDetailsValidation.id) recover {
       case e: MongoWriteException if e.getCode == 11000 =>
-        logger.warn(s"Duplicate key error inserting into $collectionName table")
-        ""
-    }
-  }
-
-  def updateValidCustomer(id:String, validCustomer:Boolean)(implicit ec:ExecutionContext) = {
-    logger.info(s"Updating one in $collectionName table")
-    collection.updateOne(Filters.equal("id", id),
-        Updates.set("ValidCustomer", validCustomer))
-      .toFuture()
-      .map(_ => id) recover {
-      case e: MongoWriteException if e.getCode == 11000 =>
-        logger.warn(s"error updating $collectionName table")
+        logger.warn(s"Error replacing or updating into $collectionName table")
         ""
     }
   }
@@ -88,8 +78,7 @@ class PersonalDetailsValidationRepository @Inject()(
         logger.warn(s"error updating $collectionName table")
         ""
     }
- }
-
+  }
 
 
   def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] = {

@@ -37,7 +37,6 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import java.util.UUID
 import javax.inject.Inject
-import scala.Option
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckDetailsController @Inject()(
@@ -55,19 +54,19 @@ class CheckDetailsController @Inject()(
     implicit request => {
       for {
         pdvData <- getPDVData(validationId)
-        idData <- getIdData(pdvData._2)
+        idData <- getIdData(pdvData)
       } yield (pdvData, idData) match {
-        case ((rowId, pdvData:PDVResponseData), Right(idData)) => {
+        case (pdvData: PDVResponseData, Right(idData)) => {
           idData match {
             case individualDetailsData => {
-              if(pdvData.getPostCode.length > 0) {
+              if (pdvData.getPostCode.length > 0) {
                 checkConditions(individualDetailsData, pdvData.getPostCode) match {
                   case (true, reason) => {
-                    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(rowId, true, reason)
+                    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, true, reason)
                     Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
                   }
                   case (false, reason) => {
-                    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(rowId, false, reason)
+                    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, false, reason)
                     Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
                   }
                 }
@@ -83,18 +82,6 @@ class CheckDetailsController @Inject()(
   }
 
 
-
-  /*
-  idData.fold(
-    _ => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)),
-    individualDetailsData => {
-      checkConditions(individualDetailsData, postCode) match {
-        case true => Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
-        case false => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-      }
-    }
-  )
-   */
   def getIdData(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
     getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
       case Some(data) => data.nino.nino
@@ -104,37 +91,51 @@ class CheckDetailsController @Inject()(
     })).value
   }
 
-  def getPDVData(validationId: String)(implicit hc: HeaderCarrier): Future[(String, PDVResponseData)] = {
+  def getIndividualDetails(nino: IndividualDetailsNino
+                          )(implicit ec: ExecutionContext, hc: HeaderCarrier): IndividualDetailsResponseEnvelope[IndividualDetails] = {
+    implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
+    implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
+    IndividualDetailsResponseEnvelope.fromEitherF(individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y')).value)
+  }
+
+  /**
+   * This method will create a PDV data row from the PDV Match data and return the rowId and PDV data
+   *
+   * @param validationId
+   * @param hc
+   * @returns Future (rowdId and PDV data)
+   */
+  def getPDVData(validationId: String)(implicit hc: HeaderCarrier): Future[PDVResponseData] = {
     for {
-      pdvDataId <- personalDetailsValidationService.createPDVDataFromPDVMatch(validationId)
-      pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvDataId)
-    } yield (pdvDataId, pdvData) match {
-      case (rowid:String,Some(data)) => (rowid,data) //returning a tuple of rowId and PDV data
-      case (_, None) => throw new Exception("No PDV data found")
+      pdvValidationId <- personalDetailsValidationService.createPDVDataFromPDVMatch(validationId)
+      pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvValidationId)
+    } yield (pdvData) match {
+      case Some(data) => data //returning a tuple of rowId and PDV data
+      case None => throw new Exception("No PDV data found")
     }
   }
 
   def checkConditions(idData: IndividualDetails, pdvPostCode: String): (Boolean, String) = {
     var reason = ""
 
-    if(!(idData.accountStatusType.exists(_.equals(FullLive)))) {
+    if (!(idData.accountStatusType.exists(_.equals(FullLive)))) {
       reason += "AccountStatusType is not FullLive;"
     }
-    if(!(idData.crnIndicator.equals(False))) {
+    if (!(idData.crnIndicator.equals(False))) {
       reason += "CRNIndicator is not False;"
     }
-    if(!(getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo)))) {
+    if (!(getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo)))) {
       reason += "AddressStatus is not NotDlo;"
     }
-    if(!(getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode)))) {
+    if (!(getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode)))) {
       reason += "AddressPostcode is not equal to PDV Postcode;"
     }
 
     val status = {
       idData.accountStatusType.exists(_.equals(FullLive)) &&
-      idData.crnIndicator.equals(False) &&
-      getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo)) &&
-      getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode))
+        idData.crnIndicator.equals(False) &&
+        getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo)) &&
+        getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode))
     }
 
     (status, reason)
@@ -144,13 +145,6 @@ class CheckDetailsController @Inject()(
   def getAddressTypeResidential(addressList: AddressList): Address = {
     val residentialAddress = addressList.getAddress.filter(_.addressType.equals(ResidentialAddress))
     residentialAddress.head
-  }
-
-  def getIndividualDetails(nino: IndividualDetailsNino
-                          )(implicit ec: ExecutionContext, hc: HeaderCarrier): IndividualDetailsResponseEnvelope[IndividualDetails] = {
-    implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
-    implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
-    IndividualDetailsResponseEnvelope.fromEitherF(individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y')).value)
   }
 
 }

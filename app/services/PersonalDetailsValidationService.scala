@@ -33,10 +33,13 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
   def createPDVDataFromPDVMatch(validationId: String)(implicit hc:HeaderCarrier): Future[String] = {
     for {
       pdvResponse <- getPDVMatchResult(validationId)
-      pdvDataRowId <-  createPDVDataRow(pdvResponse.asInstanceOf[PDVSuccessResponse].pdvResponseData)
-    } yield pdvDataRowId match {
+      pdvValidationId <-  createPDVDataRow(pdvResponse.asInstanceOf[PDVSuccessResponse].pdvResponseData)
+    } yield pdvValidationId match {
       case "" => throw new RuntimeException(s"Failed Creating PDV data for validation id: $validationId")
-      case _ => pdvDataRowId // we can possible validate that its a UUID
+      case v => {
+        logger.debug(s"Successfully created PDV data for validation id: $v")
+        pdvValidationId
+      } // we can possible validate that its a UUID
     }
   }
 
@@ -53,8 +56,8 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
 
   //create a PDV data row
   private def createPDVDataRow(personalDetailsValidation: PDVResponseData): Future[String] = {
-    personalDetailsValidationRepository.insert(personalDetailsValidation) map {
-      case id => id
+    personalDetailsValidationRepository.insertOrReplacePDVResultData(personalDetailsValidation) map {
+      case id => id //this is validation id
     } recover {
       case e: MongoException => {
         logger.warn(s"Failed creating PDV data row for validation id: ${personalDetailsValidation.id}, ${e.getMessage}")
