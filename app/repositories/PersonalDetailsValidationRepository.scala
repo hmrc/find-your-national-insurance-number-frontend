@@ -71,7 +71,7 @@ class PersonalDetailsValidationRepository @Inject()(
   def updateCustomerValidityWithReason(id: String, validCustomer: Boolean, reason: String)(implicit ec: ExecutionContext) = {
     logger.info(s"Updating one in $collectionName table")
     collection.updateMany(Filters.equal("id", id),
-        Updates.combine(Updates.set("ValidCustomer", validCustomer), Updates.set("Reason", reason)))
+        Updates.combine(Updates.set("validCustomer", validCustomer.toString), Updates.set("reason", reason)))
       .toFuture()
       .map(_ => id) recover {
       case e: MongoWriteException if e.getCode == 11000 =>
@@ -85,7 +85,10 @@ class PersonalDetailsValidationRepository @Inject()(
     collection.find(Filters.equal("id", id))
       .toFuture()
       .recoverWith {
-        case e: Throwable => Future.failed(e)
+        case e: Throwable => {
+          logger.info(s"Failed finding PDV data by validation id: $id")
+          Future.failed(e)
+        }
       }.map(_.headOption)
   }
 
@@ -93,6 +96,9 @@ class PersonalDetailsValidationRepository @Inject()(
     collection.find(Filters.equal("personalDetails.nino", nino))
       .toFuture()
       .recoverWith {
-        case e: Throwable => Future.failed(e)
+        case e: Throwable => {
+          logger.info(s"Failed finding PDV data by NINO: $nino, ${e.getMessage}")
+          Future.failed(e)
+        }
       }.map(_.headOption)
 }

@@ -26,7 +26,13 @@ case class PersonalDetails(firstName: String, lastName: String, nino: Nino, post
 object PersonalDetails {
   implicit val format: Format[PersonalDetails] = Json.format[PersonalDetails]
 }
-case class PDVResponseData(id: String, validationStatus: String, personalDetails: Option[PersonalDetails])
+case class PDVResponseData(
+                            id: String,
+                            validationStatus: String,
+                            personalDetails: Option[PersonalDetails],
+                            reason: Option[String],
+                            validCustomer: Option[String]
+                          )
 object PDVResponseData {
 
   implicit class PDVResponseDataOps(private val pdvResponseData:PDVResponseData) extends AnyVal {

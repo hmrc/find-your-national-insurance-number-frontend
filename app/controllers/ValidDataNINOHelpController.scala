@@ -49,9 +49,9 @@ class ValidDataNINOHelpController @Inject()(
 
   def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireData) async {
     implicit request =>
-      val resp = personalDetailsValidationService.getPDVDataValidationStatus(request.nino.getOrElse("")).map(
-        validationStatus =>
-          if (validationStatus == "true") {
+      val resp = personalDetailsValidationService.getValidCustomerStatus(request.nino.getOrElse("")).map(
+        validCustomer =>
+          if (validCustomer == "true") {
             val preparedForm = request.userAnswers.get(ValidDataNINOHelpPage) match {
               case None => form
               case Some(value) => form.fill(value)
