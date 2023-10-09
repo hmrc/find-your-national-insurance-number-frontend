@@ -31,7 +31,8 @@ case class PDVResponseData(
                             validationStatus: String,
                             personalDetails: Option[PersonalDetails],
                             reason: Option[String],
-                            validCustomer: Option[String]
+                            validCustomer: Option[String],
+                            CRN: Option[String]
                           )
 object PDVResponseData {
 
