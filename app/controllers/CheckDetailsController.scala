@@ -21,10 +21,11 @@ import connectors.IndividualDetailsConnector
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
 import models.errors.IndividualDetailsError
-import models.individualdetails.AccountStatusType.FullLive
-import models.individualdetails.AddressStatus.NotDlo
-import models.individualdetails.AddressType.ResidentialAddress
-import models.individualdetails.CrnIndicator.False
+import models.individualdetails.AccountStatusType._
+import models.individualdetails.AddressStatus._
+import models.individualdetails.CrnIndicator._
+import models.individualdetails.AddressType._
+
 import models.individualdetails.{Address, AddressList, IndividualDetails, ResolveMerge}
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, PDVResponseData}
 import play.api.Logging
@@ -118,17 +119,17 @@ class CheckDetailsController @Inject()(
   def checkConditions(idData: IndividualDetails, pdvPostCode: String): (Boolean, String) = {
     var reason = ""
 
-    if (!(idData.accountStatusType.exists(_.equals(FullLive)))) {
+    if (!idData.accountStatusType.exists(_.equals(FullLive))) {
       reason += "AccountStatusType is not FullLive;"
     }
-    if (!(idData.crnIndicator.equals(False))) {
-      reason += "CRNIndicator is not False;"
+    if (idData.crnIndicator.equals(True)) {
+      reason += "CRN;"
     }
-    if (!(getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo)))) {
-      reason += "AddressStatus is not NotDlo;"
+    if (!getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo))) {
+      reason += "ResidentialAddressStatus is Dlo or Nfa;"
     }
     if (!(getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode)))) {
-      reason += "AddressPostcode is not equal to PDV Postcode;"
+      reason += "ResidentialPostcode is not equal to PDVPostcode;"
     }
 
     val status = {

@@ -71,7 +71,10 @@ class PersonalDetailsValidationRepository @Inject()(
   def updateCustomerValidityWithReason(id: String, validCustomer: Boolean, reason: String)(implicit ec: ExecutionContext) = {
     logger.info(s"Updating one in $collectionName table")
     collection.updateMany(Filters.equal("id", id),
-        Updates.combine(Updates.set("validCustomer", validCustomer.toString), Updates.set("reason", reason)))
+        Updates.combine(
+          Updates.set("validCustomer", validCustomer.toString),
+          Updates.set("reason", reason),
+          Updates.set("CRN", if(reason.contains("CRN;")) "true" else "false")))
       .toFuture()
       .map(_ => id) recover {
       case e: MongoWriteException if e.getCode == 11000 =>
