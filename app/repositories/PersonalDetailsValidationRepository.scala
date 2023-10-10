@@ -44,7 +44,7 @@ class PersonalDetailsValidationRepository @Inject()(
     ),
     IndexModel(
       Indexes.ascending("personalDetails.nino"),
-      IndexOptions().name("ninoIdx")
+      IndexOptions().name("ninoIdx").unique(true)
     ),
     IndexModel(
       Indexes.ascending("lastUpdated"),
@@ -52,7 +52,8 @@ class PersonalDetailsValidationRepository @Inject()(
         .name("lastUpdatedIdx")
         .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
     )
-  )
+  ),
+  replaceIndexes = true
 ) with Logging {
   def insertOrReplacePDVResultData(personalDetailsValidation: PDVResponseData)
                                   (implicit ec: ExecutionContext): Future[String] = {
