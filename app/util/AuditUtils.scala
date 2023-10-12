@@ -26,7 +26,8 @@ object AuditUtils {
   val auditSource = "find-your-national-insurance-number-frontend"
 
   case class YourDetailsAuditEvent(
-                                    postcodeChecked: String,
+                                    postcodeChecked: Option[String],
+                                    ninoChecked: Option[String],
                                     personalDetailsValidationOutcome: String,
                                     personalDetailsValidationIdentifierType: String,
                                     identifierFromPersonalDetailsValidation: String,
@@ -60,12 +61,13 @@ object AuditUtils {
     )
   }
 
-  private def buildDetails(postcode: String, validationOutcome: String, identifierType: String,
+  private def buildDetails(postcode: Option[String], nino: Option[String], validationOutcome: String, identifierType: String,
                            pdvId: String, findMyNinoOption: Option[String], pageErrorGeneratedFrom: Option[String],
                            errorStatus: Option[String], errorReason: Option[String]): YourDetailsAuditEvent = {
 
     YourDetailsAuditEvent(
       postcode,
+      nino,
       validationOutcome,
       identifierType,
       pdvId,
@@ -92,6 +94,17 @@ object AuditUtils {
     }
   }
 
+  def getFindMyNinoOption(findMyNinoOption: Option[String]): Option[String] = {
+    findMyNinoOption match {
+      case Some("onlineService") => Some("Online")
+      case Some("printForm") => Some("Print and Post")
+      case Some("phoneHMRC") => Some("Phone HMRC")
+      case Some("postCode") => Some("Matched address")
+      case Some("notThisAddress") => Some("Other address")
+      case _ => None
+    }
+  }
+
 
   def buildAuditEvent(personDetails: Option[PersonalDetails],
                       auditType: String,
@@ -105,29 +118,28 @@ object AuditUtils {
                      )(implicit hc: HeaderCarrier): ExtendedDataEvent = {
     personDetails match {
       case Some(pd) =>
+        val usePostcode = pd.postCode.isDefined
         buildDataEvent(auditType, s"$auditType",
-          Json.toJson(buildDetails(pd.postCode.getOrElse(""),
+          Json.toJson(buildDetails(if (usePostcode) Some(pd.postCode.getOrElse("")) else None,
+            if (!usePostcode) Some(pd.nino.nino) else None,
             getValidationOutcome(validationOutcome),
             checkCRN(identifierType),
             pdvId,
-            findMyNinoOption,
+            getFindMyNinoOption(findMyNinoOption),
             pageErrorGeneratedFrom,
             errorStatus,
             errorReason)))
       case None =>
         buildDataEvent(auditType, s"$auditType",
-          Json.toJson(buildDetails("",
+          Json.toJson(buildDetails(None,
+            None,
             getValidationOutcome(validationOutcome),
             checkCRN(identifierType),
             pdvId,
-            findMyNinoOption,
+            getFindMyNinoOption(findMyNinoOption),
             pageErrorGeneratedFrom,
             errorStatus,
             errorReason)))
     }
-
-
-
   }
-
 }

@@ -54,7 +54,6 @@ class CheckDetailsController @Inject()(
 
   def onPageLoad(mode: Mode, validationId: String): Action[AnyContent] = (identify andThen getData andThen requireData) async {
     implicit request => {
-
       for {
         pdvData <- getPDVData(validationId)
         idData <- getIdData(pdvData)
@@ -79,7 +78,7 @@ class CheckDetailsController @Inject()(
     getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
       case Some(data) => data.nino.nino
       case None =>
-        auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
+        auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "FindYourNinoError",
           pdvData.validationStatus, "Empty", pdvData.id, None, Some("/checkDetails"), None, Some("No Personal Details found in PDV data, likely validation failed")))
         logger.debug("No Personal Details found in PDV data, likely validation failed")
         ""
@@ -93,7 +92,7 @@ class CheckDetailsController @Inject()(
     } yield pdvData match {
       case Some(data) => data
       case None =>
-        auditService.audit(AuditUtils.buildAuditEvent(None, "StartFindYourNino",
+        auditService.audit(AuditUtils.buildAuditEvent(None, "FindYourNinoError",
           "failure", "Empty", "", None, Some("/checkDetails"), None, Some("No PDV data found")))
         throw new Exception("No PDV data found")
     }

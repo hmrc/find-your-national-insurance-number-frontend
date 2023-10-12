@@ -25,14 +25,17 @@ import pages.SelectNINOLetterAddressPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.{CitizenDetailsService, NPSFMNService}
+import services.{AuditService, CitizenDetailsService, NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SelectNINOLetterAddressView
 import org.apache.commons.lang3.StringUtils
+import play.api.Logging
 import play.api.data.Form
+import util.AuditUtils
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class SelectNINOLetterAddressController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -45,8 +48,10 @@ class SelectNINOLetterAddressController @Inject()(
                                        val controllerComponents: MessagesControllerComponents,
                                        view: SelectNINOLetterAddressView,
                                        citizenDetailsService: CitizenDetailsService,
+                                       personalDetailsValidationService: PersonalDetailsValidationService,
+                                       auditService: AuditService,
                                        npsFMNService: NPSFMNService
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[SelectNINOLetterAddress] = formProvider()
 
@@ -74,7 +79,21 @@ class SelectNINOLetterAddressController @Inject()(
             postCode = getPostCode(personalDetails)
           } yield BadRequest(view(formWithErrors, mode, postCode)),
 
-        value =>
+        value => {
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+            case Success(pdv) =>
+              auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+                "FindYourNinoOnlineLetterOption",
+                pdv.map(_.validationStatus).getOrElse(""),
+                "TODO",
+                pdv.map(_.id).getOrElse(""),
+                Some(value.toString),
+                None,
+                None,
+                None
+              ))
+            case Failure(ex) => logger.warn(ex.getMessage)
+          }
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectNINOLetterAddressPage, value))
             _ <- sessionRepository.set(updatedAnswers)
@@ -92,6 +111,7 @@ class SelectNINOLetterAddressController @Inject()(
                 }
             }
           }
+        }
       )
   }
 
