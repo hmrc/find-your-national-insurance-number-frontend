@@ -22,13 +22,23 @@ import uk.gov.hmrc.domain.Nino
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.{Instant, LocalDate}
+import java.time.{Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
 
 case class PersonalDetails(firstName: String, lastName: String, nino: Nino, postCode: Option[String], dateOfBirth: LocalDate)
 object PersonalDetails {
   implicit val format: Format[PersonalDetails] = Json.format[PersonalDetails]
 }
-case class PDVResponseData(id: String, validationStatus: String, personalDetails: Option[PersonalDetails], lastUpdated: Instant = Instant.now)
+
+case class PDVResponseData(
+                            id: String,
+                            validationStatus: String,
+                            personalDetails: Option[PersonalDetails],
+                            lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC),
+                            reason: Option[String],
+                            validCustomer: Option[String],
+                            CRN: Option[String]
+                          )
+
 object PDVResponseData {
 
   implicit class PDVResponseDataOps(private val pdvResponseData:PDVResponseData) extends AnyVal {
@@ -47,7 +57,10 @@ object PDVResponseData {
       (__ \ "id").read[String] and
         (__ \ "validationStatus").read[String] and
         (__ \ "personalDetails").readNullable[PersonalDetails] and
-          Reads.pure(Instant.now)
+          Reads.pure(Instant.now) and
+        (__ \ "reason").readNullable[String] and
+        (__ \ "validCustomer").readNullable[String] and
+        (__ \ "CRN").readNullable[String]
       )(PDVResponseData.apply _)
   }
 
@@ -59,7 +72,10 @@ object PDVResponseData {
       (__ \ "id").write[String] and
         (__ \ "validationStatus").write[String] and
         (__ \ "personalDetails").writeNullable[PersonalDetails] and
-        (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat)
+        (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat) and
+        (__ \ "reason").writeNullable[String] and
+        (__ \ "validCustomer").writeNullable[String] and
+        (__ \ "CRN").writeNullable[String]
       )(unlift(PDVResponseData.unapply))
   }
 

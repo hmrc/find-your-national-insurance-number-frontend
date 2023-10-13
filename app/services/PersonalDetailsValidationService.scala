@@ -32,17 +32,17 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
 
   def createPDVDataFromPDVMatch(validationId: String)(implicit hc:HeaderCarrier): Future[String] = {
     for {
-      // get PDV match results
       pdvResponse <- getPDVMatchResult(validationId)
-      // add them to mongo and return UUID
-      pdvDataRowId <-  createPDVDataRow(pdvResponse.asInstanceOf[PDVSuccessResponse].pdvResponseData)
-    } yield pdvDataRowId match {
-      //throw exception if we failed to create the PDV data
+      pdvValidationId <-  createPDVDataRow(pdvResponse.asInstanceOf[PDVSuccessResponse].pdvResponseData)
+    } yield pdvValidationId match {
       case "" => throw new RuntimeException(s"Failed Creating PDV data for validation id: $validationId")
-      //return the UUID
-      case _ => pdvDataRowId // we can possible validate that its a UUID
+      case v => {
+        logger.debug(s"Successfully created PDV data for validation id: $v")
+        pdvValidationId
+      } // we can possible validate that its a UUID
     }
   }
+
 
   //get a PDV match result
   private def getPDVMatchResult(validationId: String)(implicit hc:HeaderCarrier): Future[PDVResponse] =
@@ -56,12 +56,25 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
 
   //create a PDV data row
   private def createPDVDataRow(personalDetailsValidation: PDVResponseData): Future[String] = {
-    personalDetailsValidationRepository.insert(personalDetailsValidation) map {
-      case id => id
+    personalDetailsValidationRepository.insertOrReplacePDVResultData(personalDetailsValidation) map {
+      case id => id //this is validation id
     } recover {
       case e: MongoException => {
         logger.warn(s"Failed creating PDV data row for validation id: ${personalDetailsValidation.id}, ${e.getMessage}")
         ""
+      }
+    }
+  }
+
+  //add a function to update the PDV data row with the a validationStatus which is boolean value
+  def updatePDVDataRowWithValidationStatus(validationId: String, validationStatus: Boolean, reason:String): Future[Boolean] = {
+    personalDetailsValidationRepository.updateCustomerValidityWithReason(validationId, validationStatus, reason) map {
+      case str:String =>if(str.length > 8) true else false
+      case _ => false
+    } recover {
+      case e: MongoException => {
+        logger.warn(s"Failed updating PDV data row for validation id: $validationId, ${e.getMessage}")
+        false
       }
     }
   }
@@ -86,6 +99,15 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
         logger.warn(s"Failed finding PDV data by NINO: $nino, ${e.getMessage}")
         None
     })
+  }
+
+  def getValidCustomerStatus(nino: String): Future[String] = {
+    getPersonalDetailsValidationByNino(nino) map {
+      case Some(pdvData) => pdvData.validCustomer.getOrElse("false")
+      case None => "false"
+    } recover {
+      case e: Exception => "false"
+    }
   }
 
 }
