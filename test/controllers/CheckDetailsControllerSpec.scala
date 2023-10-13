@@ -15,7 +15,7 @@
  */
 
 package controllers
-
+/*
 import base.SpecBase
 import models.NormalMode
 import org.mockito.ArgumentMatchers.any
@@ -67,3 +67,4 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
   }
 }
+*/

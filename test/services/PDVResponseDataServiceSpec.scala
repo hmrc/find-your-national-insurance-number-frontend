@@ -118,7 +118,11 @@ object PDVResponseDataServiceSpec {
     PDVResponseData(
       validationId,
       "success",
-      Some(personalDetails)
+      Some(personalDetails),
+      reason = None,
+      validCustomer = None,
+      CRN = None
+
     )
 
 }
