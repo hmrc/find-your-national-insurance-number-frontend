@@ -17,10 +17,33 @@
 package models
 
 import java.time.Instant
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json._
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 case class TryAgainCount(id: String, count: Int, lastUpdated: Instant = Instant.now)
 
 object TryAgainCount {
-  implicit val format: Format[TryAgainCount] = Json.format[TryAgainCount]
+  val reads: Reads[TryAgainCount] = {
+
+    import play.api.libs.functional.syntax._
+
+    (
+      (__ \ "_id").read[String] and
+        (__ \ "count").read[Int] and
+        (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
+      )(TryAgainCount.apply _)
+  }
+
+  val writes: OWrites[TryAgainCount] = {
+
+    import play.api.libs.functional.syntax._
+
+    (
+      (__ \ "_id").write[String] and
+        (__ \ "count").write[Int] and
+        (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat)
+      )(unlift(TryAgainCount.unapply))
+  }
+
+  implicit val format: OFormat[TryAgainCount] = OFormat(reads, writes)
 }

@@ -40,10 +40,6 @@ class TryAgainCountRepository @Inject()(
   domainFormat = TryAgainCount.format,
   indexes = Seq(
     IndexModel(
-      Indexes.ascending("id"),
-      IndexOptions().name("idIdx").unique(true)
-    ),
-    IndexModel(
       Indexes.ascending("lastUpdated"),
       IndexOptions()
         .name("lastUpdatedIdx")
@@ -52,7 +48,7 @@ class TryAgainCountRepository @Inject()(
   )
 ) with Logging {
 
-  private def byId(id: String): Bson = Filters.equal("id", id)
+  private def byId(id: String): Bson = Filters.equal("_id", id)
 
   def insertOrIncrement(id: String)
             (implicit ec: ExecutionContext): Future[Boolean] = {
@@ -88,7 +84,7 @@ class TryAgainCountRepository @Inject()(
   }
 
   def findById(id: String)(implicit ec: ExecutionContext): Future[Option[TryAgainCount]] = {
-    collection.find(Filters.equal("id", id))
+    collection.find(Filters.equal("_id", id))
       .toFuture()
       .recoverWith { case e: Throwable => {
         Left(e);
