@@ -60,7 +60,7 @@ class SendLetterErrorControllerISpec extends IntegrationSpecBase {
     def buildUserRequest[A](
                              nino: Option[Nino] = None,
                              userName: Option[UserName] = Some(UserName(Name(Some("Firstname"), Some("Lastname")))),
-                             confidenceLevel: ConfidenceLevel = ConfidenceLevel.L200,
+                             confidenceLevel: ConfidenceLevel = ConfidenceLevel.L50,
                              personDetails: Option[PersonDetails] = Some(fakePersonDetails),
                              request: Request[A] = FakeRequest().asInstanceOf[Request[A]]
                            ): UserRequest[A] =
