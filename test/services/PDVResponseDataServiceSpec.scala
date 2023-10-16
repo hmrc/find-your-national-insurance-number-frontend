@@ -83,7 +83,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
       when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
         .thenReturn(Future(PDVSuccessResponse(personalDetailsValidation))(ec))
 
-      when(mockPersonalDetailsValidationRepository.insert(any())(any()))
+      when(mockPersonalDetailsValidationRepository.insertOrReplacePDVResultData(any())(any()))
         .thenReturn(Future.successful(validationId))
 
       personalDetailsValidationService.createPDVDataFromPDVMatch(validationId)(hc).map { result =>
@@ -118,7 +118,11 @@ object PDVResponseDataServiceSpec {
     PDVResponseData(
       validationId,
       "success",
-      Some(personalDetails)
+      Some(personalDetails),
+      reason = None,
+      validCustomer = None,
+      CRN = None
+
     )
 
 }

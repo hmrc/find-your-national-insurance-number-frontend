@@ -69,7 +69,7 @@ class OldLayoutProvider @Inject()(layout: views.html.templates.Layout) extends L
                      disableSessionExpired: Boolean, sidebarContent: Option[Html], messagesActive: Boolean,
                      showSignOutInHeader: Boolean, bannerConfig: BannerConfig)(contentBlock: Html)
                     (implicit request: Request[_], messages: Messages): HtmlFormat.Appendable = {
-    layout(pageTitle, showBackLink, timeout, showSignOut, stylesheets, fullWidth, accountHome, yourProfileActive,
+    layout(pageTitle, showBackLink, timeout, showSignOut, showSignOutInHeader, stylesheets, fullWidth, accountHome, yourProfileActive,
       hideAccountMenu, backLinkID, backLinkUrl, disableSessionExpired, sidebarContent, messagesActive)(contentBlock)
   }
 }

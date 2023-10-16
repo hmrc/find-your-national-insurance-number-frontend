@@ -47,6 +47,10 @@ class AuthController @Inject()(
         }
     }
 
+  def timeOut: Action[AnyContent] = Action {
+    Redirect(controllers.auth.routes.SignedOutController.onPageLoad).withNewSession
+  }
+
   def redirectToSMN(): Action[AnyContent] = identify {
     Redirect(config.storeMyNinoUrl)
   }

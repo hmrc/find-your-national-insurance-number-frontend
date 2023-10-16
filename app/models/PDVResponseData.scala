@@ -19,14 +19,26 @@ package models
 import org.apache.commons.lang3.StringUtils
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.domain.Nino
+import play.api.libs.json._
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
 
 case class PersonalDetails(firstName: String, lastName: String, nino: Nino, postCode: Option[String], dateOfBirth: LocalDate)
 object PersonalDetails {
   implicit val format: Format[PersonalDetails] = Json.format[PersonalDetails]
 }
-case class PDVResponseData(id: String, validationStatus: String, personalDetails: Option[PersonalDetails])
+
+case class PDVResponseData(
+                            id: String,
+                            validationStatus: String,
+                            personalDetails: Option[PersonalDetails],
+                            lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC),
+                            reason: Option[String],
+                            validCustomer: Option[String],
+                            CRN: Option[String]
+                          )
+
 object PDVResponseData {
 
   implicit class PDVResponseDataOps(private val pdvResponseData:PDVResponseData) extends AnyVal {
@@ -37,5 +49,35 @@ object PDVResponseData {
 
   }
 
-  implicit val format: Format[PDVResponseData] = Json.format[PDVResponseData]
+  val reads: Reads[PDVResponseData] = {
+
+    import play.api.libs.functional.syntax._
+
+    (
+      (__ \ "id").read[String] and
+        (__ \ "validationStatus").read[String] and
+        (__ \ "personalDetails").readNullable[PersonalDetails] and
+          Reads.pure(Instant.now) and
+        (__ \ "reason").readNullable[String] and
+        (__ \ "validCustomer").readNullable[String] and
+        (__ \ "CRN").readNullable[String]
+      )(PDVResponseData.apply _)
+  }
+
+  val writes: OWrites[PDVResponseData] = {
+
+    import play.api.libs.functional.syntax._
+
+    (
+      (__ \ "id").write[String] and
+        (__ \ "validationStatus").write[String] and
+        (__ \ "personalDetails").writeNullable[PersonalDetails] and
+        (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat) and
+        (__ \ "reason").writeNullable[String] and
+        (__ \ "validCustomer").writeNullable[String] and
+        (__ \ "CRN").writeNullable[String]
+      )(unlift(PDVResponseData.unapply))
+  }
+
+  implicit val format: OFormat[PDVResponseData] = OFormat(reads, writes)
 }

@@ -53,6 +53,7 @@ class InvalidDataNINOHelpController @Inject()(
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
+
       val preparedForm = request.userAnswers.get(InvalidDataNINOHelpPage) match {
         case None => form
         case Some(value) => form.fill(value)

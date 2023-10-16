@@ -36,7 +36,7 @@ class CitizenDetailsServiceSpec extends SpecBase {
 
   val mockConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
   val fakeNino = Nino(new Generator(new Random()).nextNino.nino)
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  override val hc: HeaderCarrier = HeaderCarrier()
   implicit val request: RequestHeader = mock[RequestHeader]
   val cds: CitizenDetailsService = new CitizenDetailsServiceImpl(mockConnector)
 
@@ -77,7 +77,7 @@ class CitizenDetailsServiceSpec extends SpecBase {
         when(mockConnector.personDetails(any())(any())).thenReturn(
           Future.successful(PersonDetailsSuccessResponse(buildPersonDetails))
         )
-        val result = cds.getPersonalDetails(fakeNino.nino).value
+        val result = cds.getPersonalDetails(fakeNino.nino)(request,hc).value
 
         result.getOrElse(buildPersonDetails.copy(correspondenceAddress = None)) mustBe Success(PersonDetailsSuccessResponse(buildPersonDetails))
       }
@@ -94,7 +94,7 @@ class CitizenDetailsServiceSpec extends SpecBase {
         s"return an UpstreamErrorResponse containing $errorResponse when connector returns the same" in {
           when(mockConnector.personDetails(any())(any()))thenReturn(Future.successful(PersonDetailsNotFoundResponse))
 
-          val result = cds.getPersonalDetails(fakeNino.nino).value
+          val result = cds.getPersonalDetails(fakeNino.nino)(request,hc).value
           result mustBe Some(Success(PersonDetailsNotFoundResponse))
         }
       }

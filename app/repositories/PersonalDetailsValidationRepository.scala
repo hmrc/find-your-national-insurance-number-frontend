@@ -17,10 +17,11 @@
 package repositories
 
 import com.google.inject.{Inject, Singleton}
+import com.mongodb.client.model.Updates
 import config.FrontendAppConfig
 import models.PDVResponseData
 import org.mongodb.scala.MongoWriteException
-import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes}
+import org.mongodb.scala.model._
 import play.api.Logging
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -43,7 +44,7 @@ class PersonalDetailsValidationRepository @Inject()(
     ),
     IndexModel(
       Indexes.ascending("personalDetails.nino"),
-      IndexOptions().name("ninoIdx")
+      IndexOptions().name("ninoIdx").unique(true)
     ),
     IndexModel(
       Indexes.ascending("lastUpdated"),
@@ -51,25 +52,47 @@ class PersonalDetailsValidationRepository @Inject()(
         .name("lastUpdatedIdx")
         .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
     )
-  )
+  ),
+  replaceIndexes = true
 ) with Logging {
-  def insert(personalDetailsValidation: PDVResponseData)
-            (implicit ec: ExecutionContext) = {
-    logger.info(s"Inserting one in $collectionName table")
-    collection.insertOne(personalDetailsValidation)
+  def insertOrReplacePDVResultData(personalDetailsValidation: PDVResponseData)
+                                  (implicit ec: ExecutionContext): Future[String] = {
+    logger.info(s"insert or update one in $collectionName table")
+    val filter = Filters.equal("id", personalDetailsValidation.id)
+    val options = ReplaceOptions().upsert(true)
+    collection.replaceOne(filter, personalDetailsValidation, options)
       .toFuture()
       .map(_ => personalDetailsValidation.id) recover {
       case e: MongoWriteException if e.getCode == 11000 =>
-        logger.warn(s"Duplicate key error inserting into $collectionName table")
+        logger.warn(s"Error replacing or updating into $collectionName table")
         ""
     }
   }
+
+  def updateCustomerValidityWithReason(id: String, validCustomer: Boolean, reason: String)(implicit ec: ExecutionContext) = {
+    logger.info(s"Updating one in $collectionName table")
+    collection.updateMany(Filters.equal("id", id),
+        Updates.combine(
+          Updates.set("validCustomer", validCustomer.toString),
+          Updates.set("reason", reason),
+          Updates.set("CRN", if(reason.contains("CRN;")) "true" else "false")))
+      .toFuture()
+      .map(_ => id) recover {
+      case e: MongoWriteException if e.getCode == 11000 =>
+        logger.warn(s"error updating $collectionName table")
+        ""
+    }
+  }
+
 
   def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] = {
     collection.find(Filters.equal("id", id))
       .toFuture()
       .recoverWith {
-        case e: Throwable => Future.failed(e)
+        case e: Throwable => {
+          logger.info(s"Failed finding PDV data by validation id: $id")
+          Future.failed(e)
+        }
       }.map(_.headOption)
   }
 
@@ -77,6 +100,9 @@ class PersonalDetailsValidationRepository @Inject()(
     collection.find(Filters.equal("personalDetails.nino", nino))
       .toFuture()
       .recoverWith {
-        case e: Throwable => Future.failed(e)
+        case e: Throwable => {
+          logger.info(s"Failed finding PDV data by NINO: $nino, ${e.getMessage}")
+          Future.failed(e)
+        }
       }.map(_.headOption)
 }

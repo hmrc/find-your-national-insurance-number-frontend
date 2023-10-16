@@ -103,4 +103,33 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
       }
     }
   }
+
+  trait LocalSetup {
+    val controller = app.injector.instanceOf[AuthController]
+  }
+
+  "AuthController.timeOut" - {
+
+    "return 303" in new LocalSetup {
+
+      val result = controller.timeOut()(FakeRequest("GET", ""))
+
+      status(result) mustBe SEE_OTHER
+
+    }
+
+    "redirect to the session timeout page" in new LocalSetup {
+
+      val result = controller.timeOut()(FakeRequest("GET", ""))
+
+      redirectLocation(result).getOrElse("Unable to complete") mustBe controllers.auth.routes.SignedOutController.onPageLoad.url
+    }
+
+    "clear the session upon redirect" in new LocalSetup {
+
+      val result = controller.timeOut()(FakeRequest("GET", "").withSession("test" -> "session"))
+
+      session(result) mustBe empty
+    }
+  }
 }
