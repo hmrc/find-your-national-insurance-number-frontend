@@ -27,7 +27,7 @@
 @(form: Form[_], mode: Mode, retryAllowed: Boolean)(implicit request: Request[_], messages: Messages)
 
 @if(retryAllowed) {
-    @layout(pageTitle = title(form, messages("technicalError.title")), fullWidth = false) {
+    @layout(pageTitle = title(form, messages("technicalError.title")), showBackLinkJS = true, fullWidth = false) {
 
         @formHelper(action = routes.TechnicalErrorController.onSubmit(), 'autoComplete -> "off") {
 
@@ -52,7 +52,7 @@
         }
     }
 } else {
-    @layout(pageTitle = title(form, messages("technicalError.title")), fullWidth = false, showBackLink = false) {
+    @layout(pageTitle = title(form, messages("technicalError.title")), fullWidth = false, showBackLinkJS = false) {
 
         @formHelper(action = routes.TechnicalErrorController.onSubmit(), 'autoComplete -> "off") {
 
