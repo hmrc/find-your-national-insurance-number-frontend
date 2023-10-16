@@ -26,6 +26,7 @@ import play.api.Logging
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
+import java.time.{LocalDateTime, ZoneId, ZoneOffset}
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,11 +41,14 @@ class PersonalDetailsValidationRepository @Inject()(
   indexes = Seq(
     IndexModel(
       Indexes.ascending("id"),
-      IndexOptions().name("idIdx").unique(true)
+      IndexOptions()
+        .name("pdvIdIdx")
+        .unique(true)
     ),
     IndexModel(
       Indexes.ascending("personalDetails.nino"),
-      IndexOptions().name("ninoIdx").unique(true)
+      IndexOptions()
+        .name("ninoIdx")
     ),
     IndexModel(
       Indexes.ascending("lastUpdated"),
@@ -71,11 +75,16 @@ class PersonalDetailsValidationRepository @Inject()(
 
   def updateCustomerValidityWithReason(id: String, validCustomer: Boolean, reason: String)(implicit ec: ExecutionContext) = {
     logger.info(s"Updating one in $collectionName table")
+
     collection.updateMany(Filters.equal("id", id),
         Updates.combine(
           Updates.set("validCustomer", validCustomer.toString),
           Updates.set("reason", reason),
-          Updates.set("CRN", if(reason.contains("CRN;")) "true" else "false")))
+          Updates.set("CRN", if(reason.contains("CRN;")) "true" else "false"),
+          Updates.set("lastUpdated", LocalDateTime.now(ZoneId.of( "Europe/London" )).toInstant(ZoneOffset.UTC))
+        )
+
+      )
       .toFuture()
       .map(_ => id) recover {
       case e: MongoWriteException if e.getCode == 11000 =>
