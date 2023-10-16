@@ -74,7 +74,7 @@ class InvalidDataNINOHelpController @Inject()(
               auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                 "FindYourNinoOptionChosen",
                 pdv.map(_.validationStatus).getOrElse(""),
-                "TODO",
+                pdv.map(_.CRN.getOrElse("")).getOrElse(""),
                 pdv.map(_.id).getOrElse(""),
                 Some(value.toString),
                 None,

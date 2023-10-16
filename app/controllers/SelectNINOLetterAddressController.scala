@@ -85,7 +85,7 @@ class SelectNINOLetterAddressController @Inject()(
               auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                 "FindYourNinoOnlineLetterOption",
                 pdv.map(_.validationStatus).getOrElse(""),
-                "TODO",
+                pdv.map(_.CRN.getOrElse("")).getOrElse(""),
                 pdv.map(_.id).getOrElse(""),
                 Some(value.toString),
                 None,
@@ -106,7 +106,8 @@ class SelectNINOLetterAddressController @Inject()(
               case Some(SelectNINOLetterAddress.Postcode) =>
                 status match {
                   case LetterIssuedResponse => Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
-                  case RLSDLONFAResponse => Redirect(routes.SendLetterErrorController.onPageLoad(mode))
+                  case RLSDLONFAResponse =>
+                    Redirect(routes.SendLetterErrorController.onPageLoad(mode))
                   case _ => Redirect(routes.TechnicalErrorController.onPageLoad())
                 }
             }

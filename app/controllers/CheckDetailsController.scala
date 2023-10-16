@@ -62,29 +62,24 @@ class CheckDetailsController @Inject()(
         case (pdvData: PDVResponseData, Right(idData)) => {
           idData match {
             case individualDetailsData => {
+              auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
+                pdvData.validationStatus, individualDetailsData.crnIndicator.asString, pdvData.id, None, None, None, None))
               if (pdvData.getPostCode.length > 0) {
                 checkConditions(individualDetailsData, pdvData.getPostCode) match {
                   case (true, reason) => {
-                    auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
-                      pdvData.validationStatus, individualDetailsData.crnIndicator.asString, pdvData.id, None, None, None, None))
                     personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, true, reason)
                     Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
                   }
                   case (false, reason) => {
-                    auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
-                      pdvData.validationStatus, individualDetailsData.crnIndicator.asString, pdvData.id, None, None, None, None))
                     personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, false, reason)
                     Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
                   }
                 }
               } else {
-                auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
-                  pdvData.validationStatus, individualDetailsData.crnIndicator.asString, pdvData.id, None, None, None, None))
                 Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
               }
             }
             case _ => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-
           }
         }
       }
