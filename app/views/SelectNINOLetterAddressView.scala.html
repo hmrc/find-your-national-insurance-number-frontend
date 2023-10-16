@@ -26,7 +26,7 @@
 
 @(form: Form[_], mode: Mode, postcode: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("selectNINOLetterAddress.title")), fullWidth = false) {
+@layout(pageTitle = title(form, messages("selectNINOLetterAddress.title")), showBackLinkJS = true, fullWidth = false) {
 
     @formHelper(action = routes.SelectNINOLetterAddressController.onSubmit(mode), 'autoComplete -> "off") {
 
