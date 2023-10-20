@@ -39,7 +39,7 @@ trait LayoutProvider {
   //noinspection ScalaStyle
   def apply(
              pageTitle: String,
-             showBackLink: Boolean = true,
+             showBackLinkJS: Boolean = true,
              timeout: Boolean = true,
              showSignOut: Boolean = false,
              stylesheets: Option[Html] = None,
@@ -47,8 +47,7 @@ trait LayoutProvider {
              accountHome: Boolean = false,
              yourProfileActive: Boolean = false,
              hideAccountMenu: Boolean = false,
-             backLinkID: Boolean = true,
-             backLinkUrl: String = "#",
+             backLinkUrl: Option[String] = None,
              disableSessionExpired: Boolean = false,
              sidebarContent: Option[Html] = None,
              messagesActive: Boolean = false,
@@ -63,14 +62,14 @@ trait LayoutProvider {
 class OldLayoutProvider @Inject()(layout: views.html.templates.Layout) extends LayoutProvider {
 
   //noinspection ScalaStyle
-  override def apply(pageTitle: String, showBackLink: Boolean, timeout: Boolean, showSignOut: Boolean,
+  override def apply(pageTitle: String, showBackLinkJS: Boolean, timeout: Boolean, showSignOut: Boolean,
                      stylesheets: Option[Html], fullWidth: Boolean, accountHome: Boolean, yourProfileActive: Boolean,
-                     hideAccountMenu: Boolean, backLinkID: Boolean, backLinkUrl: String,
+                     hideAccountMenu: Boolean, backLinkUrl: Option[String],
                      disableSessionExpired: Boolean, sidebarContent: Option[Html], messagesActive: Boolean,
                      showSignOutInHeader: Boolean, bannerConfig: BannerConfig)(contentBlock: Html)
                     (implicit request: Request[_], messages: Messages): HtmlFormat.Appendable = {
-    layout(pageTitle, showBackLink, timeout, showSignOut, showSignOutInHeader, stylesheets, fullWidth, accountHome, yourProfileActive,
-      hideAccountMenu, backLinkID, backLinkUrl, disableSessionExpired, sidebarContent, messagesActive)(contentBlock)
+    layout(pageTitle, showBackLinkJS, timeout, showSignOut, showSignOutInHeader, stylesheets, fullWidth, accountHome, yourProfileActive,
+      hideAccountMenu, backLinkUrl, disableSessionExpired, sidebarContent, messagesActive)(contentBlock)
   }
 }
 
@@ -85,9 +84,9 @@ class NewLayoutProvider @Inject()(wrapperService: WrapperService, additionalScri
   )
 
   //noinspection ScalaStyle
-  override def apply(pageTitle: String, showBackLink: Boolean, timeout: Boolean, showSignOut: Boolean,
+  override def apply(pageTitle: String, showBackLinkJS: Boolean, timeout: Boolean, showSignOut: Boolean,
                      stylesheets: Option[Html], fullWidth: Boolean, accountHome: Boolean, yourProfileActive: Boolean,
-                     hideAccountMenu: Boolean, backLinkID: Boolean, backLinkUrl: String,
+                     hideAccountMenu: Boolean, backLinkUrl: Option[String],
                      disableSessionExpired: Boolean, sidebarContent: Option[Html], messagesActive: Boolean,
                      showSignOutInHeader: Boolean, bannerConfig: BannerConfig)(contentBlock: Html)
                     (implicit request: Request[_], messages: Messages): HtmlFormat.Appendable = {
@@ -95,7 +94,8 @@ class NewLayoutProvider @Inject()(wrapperService: WrapperService, additionalScri
       disableSessionExpired = !timeout,
       content = contentBlock,
       pageTitle = Some(pageTitle),
-      showBackLinkJS = showBackLink,
+      showBackLinkJS = showBackLinkJS,
+      backLinkUrl =backLinkUrl,
       serviceNameUrl = Some("/find-your-national-insurance-number/how-to-find-online"),
       scripts = Seq(additionalScript()),
       styleSheets = stylesheets.toSeq :+ headBlock(),

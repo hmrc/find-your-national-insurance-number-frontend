@@ -23,7 +23,7 @@
 @import config.FrontendAppConfig
 @import uk.gov.hmrc.hmrcfrontend.views.config.StandardAlphaBanner
 @import views.html.helper.CSPNonce
-@import components.{FullWidthMainContent, backLink}
+@import components.FullWidthMainContent
 
 @this(
     hmrcLayout: HmrcLayout,
@@ -36,14 +36,14 @@
     config: FrontendAppConfig,
     hmrcAccountMenu: HmrcAccountMenu,
     hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet,
-    backLink: backLink,
+    govukBackLink: GovukBackLink,
     hmrcScripts: HmrcScripts,
     alphaBanner: StandardAlphaBanner
 )(implicit accountMenuConfig: AccountMenuConfig)
 
 @(
     pageTitle: String,
-    showBackLink: Boolean = true,
+    showBackLinkJS: Boolean = true,
     timeout: Boolean = true,
     showSignOut: Boolean = false,
     showSignOutInHeader: Boolean = true,
@@ -52,8 +52,7 @@
     accountHome: Boolean = true,
     yourProfileActive: Boolean = false,
     hideAccountMenu: Boolean = false,
-    backLinkID: Boolean = true,
-    backLinkUrl: String = "#",
+    backLinkUrl: Option[String] = None,
     disableSessionExpired: Boolean = false,
     sidebarContent: Option[Html] = None,
     messagesActive: Boolean = false,
@@ -89,10 +88,14 @@
 
 @beforeContent = {
     @if(!hideAccountMenu) { @accountMenu }
-    @if(showBackLink){
+    @if(showBackLinkJS || backLinkUrl.isDefined){
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-one-half">
-                @backLink(backLinkUrl, backLinkID)
+                @if(showBackLinkJS) {
+                    @govukBackLink(BackLink.mimicsBrowserBackButtonViaJavaScript)
+                }else {
+                    @govukBackLink(BackLink.withDefaultText(backLinkUrl.getOrElse("#")))
+                }
             </div>
             <div class="govuk-grid-column-one-half">
                 @hmrcLanguageSelectHelper()

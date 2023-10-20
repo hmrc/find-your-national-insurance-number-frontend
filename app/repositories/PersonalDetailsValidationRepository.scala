@@ -44,7 +44,7 @@ class PersonalDetailsValidationRepository @Inject()(
     ),
     IndexModel(
       Indexes.ascending("personalDetails.nino"),
-      IndexOptions().name("ninoIdx").unique(true)
+      IndexOptions().name("ninoIdx")
     ),
     IndexModel(
       Indexes.ascending("lastUpdated"),

@@ -25,7 +25,7 @@
 
 @()(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("ninoLetterPostedConfirmation.title")), showBackLink = false, fullWidth = false) {
+@layout(pageTitle = titleNoForm(messages("ninoLetterPostedConfirmation.title")), showBackLinkJS = false, fullWidth = false) {
 
     @govukPanel(Panel(title = messages("ninoLetterPostedConfirmation.heading")))
 
