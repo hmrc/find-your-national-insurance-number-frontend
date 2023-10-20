@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
-import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse}
+import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.{Mode, PersonDetailsResponse, PersonDetailsSuccessResponse, SelectNINOLetterAddress}
 import navigation.Navigator
 import pages.SelectNINOLetterAddressPage
@@ -105,10 +105,42 @@ class SelectNINOLetterAddressController @Inject()(
                 Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
               case Some(SelectNINOLetterAddress.Postcode) =>
                 status match {
-                  case LetterIssuedResponse => Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
-                  case RLSDLONFAResponse =>
+                  case LetterIssuedResponse() => Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
+                  case RLSDLONFAResponse(responseStatus, responseMessage) =>
+                    personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+                      case Success(pdv) =>
+                        auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+                          "FindYourNinoError",
+                          pdv.map(_.validationStatus).getOrElse(""),
+                          pdv.map(_.CRN.getOrElse("")).getOrElse(""),
+                          pdv.map(_.id).getOrElse(""),
+                          None,
+                          Some("/postcode"),
+                          Some(responseStatus.toString),
+                          Some(responseMessage)
+                        ))
+                      case Failure(ex) => logger.warn(ex.getMessage)
+                    }
                     Redirect(routes.SendLetterErrorController.onPageLoad(mode))
-                  case _ => Redirect(routes.TechnicalErrorController.onPageLoad())
+                  case TechnicalIssueResponse(responseStatus, responseMessage) =>
+                    personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+                      case Success(pdv) =>
+                        auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+                          "FindYourNinoError",
+                          pdv.map(_.validationStatus).getOrElse(""),
+                          pdv.map(_.CRN.getOrElse("")).getOrElse(""),
+                          pdv.map(_.id).getOrElse(""),
+                          None,
+                          Some("/postcode"),
+                          Some(responseStatus.toString),
+                          Some(responseMessage)
+                        ))
+                      case Failure(ex) => logger.warn(ex.getMessage)
+                    }
+                    Redirect(routes.TechnicalErrorController.onPageLoad())
+                  case _ =>
+                    logger.warn("Unknown NPS FMN API response")
+                    Redirect(routes.TechnicalErrorController.onPageLoad())
                 }
             }
           }
