@@ -21,14 +21,18 @@ import forms.SelectAlternativeServiceFormProvider
 import models.Mode
 import navigation.Navigator
 import pages.SelectAlternativeServicePage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import util.AuditUtils
 import views.html.SelectAlternativeServiceView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class SelectAlternativeServiceController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -38,9 +42,11 @@ class SelectAlternativeServiceController @Inject()(
                                        getData: DataRetrievalAction,
                                        requireData: DataRequiredAction,
                                        formProvider: SelectAlternativeServiceFormProvider,
+                                       personalDetailsValidationService: PersonalDetailsValidationService,
+                                       auditService: AuditService,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: SelectAlternativeServiceView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging{
 
   val form = formProvider()
 
@@ -57,16 +63,30 @@ class SelectAlternativeServiceController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-
       form.bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
-        value =>
+        value => {
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+            case Success(pdv) =>
+              auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+                "FindYourNinoOptionChosen",
+                pdv.map(_.validationStatus).getOrElse(""),
+                pdv.map(_.CRN.getOrElse("")).getOrElse(""),
+                pdv.map(_.id).getOrElse(""),
+                Some(value.toString),
+                None,
+                None,
+                None
+              ))
+            case Failure(ex) => logger.warn(ex.getMessage)
+          }
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectAlternativeServicePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
+            _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(SelectAlternativeServicePage, mode, updatedAnswers))
+        }
       )
   }
 }

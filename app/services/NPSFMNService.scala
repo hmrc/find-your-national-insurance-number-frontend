@@ -46,10 +46,12 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
     connector.updateDetails(identifier, npsFMNRequest)
       .map{ response =>
         response.status match {
-          case 202 => LetterIssuedResponse
+          case 202 =>
+            LetterIssuedResponse()
           case 400 if check(response.body) =>
-            RLSDLONFAResponse
-          case _ => TechnicalIssueResponse
+            RLSDLONFAResponse(response.status, (Json.parse(response.body) \ "jsonServiceError" \ "message").as[String])
+          case _ =>
+            TechnicalIssueResponse(response.status, (Json.parse(response.body) \ "jsonServiceError" \ "message").as[String])
         }
     }
   }

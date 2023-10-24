@@ -34,7 +34,7 @@ object NPSFMNResponse {
 }
 
 sealed trait NPSFMNServiceResponse
-final case object LetterIssuedResponse extends NPSFMNServiceResponse
-final case object RLSDLONFAResponse extends NPSFMNServiceResponse
-final case object TechnicalIssueResponse extends NPSFMNServiceResponse
+final case class LetterIssuedResponse() extends NPSFMNServiceResponse
+final case class RLSDLONFAResponse(status: Int, message: String) extends NPSFMNServiceResponse
+final case class TechnicalIssueResponse(status: Int, message: String) extends NPSFMNServiceResponse
 

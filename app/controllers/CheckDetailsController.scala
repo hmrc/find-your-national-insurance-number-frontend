@@ -31,10 +31,11 @@ import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEn
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.PersonalDetailsValidationService
+import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import util.AuditUtils
 
 import java.util.UUID
 import javax.inject.Inject
@@ -46,6 +47,7 @@ class CheckDetailsController @Inject()(
                                         getData: DataRetrievalAction,
                                         requireData: DataRequiredAction,
                                         personalDetailsValidationService: PersonalDetailsValidationService,
+                                        auditService: AuditService,
                                         individualDetailsConnector: IndividualDetailsConnector,
                                         val controllerComponents: MessagesControllerComponents
                                       )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
@@ -60,6 +62,8 @@ class CheckDetailsController @Inject()(
         case (pdvData: PDVResponseData, Right(idData)) => {
           idData match {
             case individualDetailsData => {
+              auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
+                pdvData.validationStatus, individualDetailsData.crnIndicator.asString, pdvData.id, None, None, None, None))
               if (pdvData.getPostCode.length > 0) {
                 checkConditions(individualDetailsData, pdvData.getPostCode) match {
                   case (true, reason) => {
@@ -87,6 +91,8 @@ class CheckDetailsController @Inject()(
     getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
       case Some(data) => data.nino.nino
       case None =>
+        auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "FindYourNinoError",
+          pdvData.validationStatus, "Empty", pdvData.id, None, Some("/checkDetails"), None, Some("No Personal Details found in PDV data, likely validation failed")))
         logger.debug("No Personal Details found in PDV data, likely validation failed")
         ""
     })).value
@@ -112,7 +118,11 @@ class CheckDetailsController @Inject()(
       pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvValidationId)
     } yield (pdvData) match {
       case Some(data) => data //returning a tuple of rowId and PDV data
-      case None => throw new Exception("No PDV data found")
+      case None => {
+        auditService.audit(AuditUtils.buildAuditEvent(None, "FindYourNinoError",
+          "failure", "Empty", "", None, Some("/checkDetails"), None, Some("No PDV data found")))
+        throw new Exception("No PDV data found")
+      }
     }
   }
 

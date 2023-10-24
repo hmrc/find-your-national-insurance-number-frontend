@@ -137,11 +137,18 @@ object DateOfDeathStatus {
   }
 }
 
-sealed trait CrnIndicator
+sealed trait CrnIndicator {
+  val asString: String
+}
 
 object CrnIndicator {
-  object False extends CrnIndicator
-  object True  extends CrnIndicator
+  object False extends CrnIndicator {
+    override val asString: String = "false"
+  }
+  object True  extends CrnIndicator {
+    override val asString: String = "true"
+  }
+
   implicit val reads: Reads[CrnIndicator] = JsPath
     .read[Int]
     .map {

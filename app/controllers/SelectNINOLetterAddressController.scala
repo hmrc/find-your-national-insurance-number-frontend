@@ -18,21 +18,24 @@ package controllers
 
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
-import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse}
+import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.{Mode, PersonDetailsResponse, PersonDetailsSuccessResponse, SelectNINOLetterAddress}
 import navigation.Navigator
 import pages.SelectNINOLetterAddressPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.{CitizenDetailsService, NPSFMNService}
+import services.{AuditService, CitizenDetailsService, NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SelectNINOLetterAddressView
 import org.apache.commons.lang3.StringUtils
+import play.api.Logging
 import play.api.data.Form
+import util.AuditUtils
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class SelectNINOLetterAddressController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -45,8 +48,10 @@ class SelectNINOLetterAddressController @Inject()(
                                        val controllerComponents: MessagesControllerComponents,
                                        view: SelectNINOLetterAddressView,
                                        citizenDetailsService: CitizenDetailsService,
+                                       personalDetailsValidationService: PersonalDetailsValidationService,
+                                       auditService: AuditService,
                                        npsFMNService: NPSFMNService
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[SelectNINOLetterAddress] = formProvider()
 
@@ -74,7 +79,21 @@ class SelectNINOLetterAddressController @Inject()(
             postCode = getPostCode(personalDetails)
           } yield BadRequest(view(formWithErrors, mode, postCode)),
 
-        value =>
+        value => {
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+            case Success(pdv) =>
+              auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+                "FindYourNinoOnlineLetterOption",
+                pdv.map(_.validationStatus).getOrElse(""),
+                pdv.map(_.CRN.getOrElse("")).getOrElse(""),
+                pdv.map(_.id).getOrElse(""),
+                Some(value.toString),
+                None,
+                None,
+                None
+              ))
+            case Failure(ex) => logger.warn(ex.getMessage)
+          }
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectNINOLetterAddressPage, value))
             _ <- sessionRepository.set(updatedAnswers)
@@ -86,12 +105,46 @@ class SelectNINOLetterAddressController @Inject()(
                 Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
               case Some(SelectNINOLetterAddress.Postcode) =>
                 status match {
-                  case LetterIssuedResponse => Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
-                  case RLSDLONFAResponse => Redirect(routes.SendLetterErrorController.onPageLoad(mode))
-                  case _ => Redirect(routes.TechnicalErrorController.onPageLoad())
+                  case LetterIssuedResponse() => Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
+                  case RLSDLONFAResponse(responseStatus, responseMessage) =>
+                    personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+                      case Success(pdv) =>
+                        auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+                          "FindYourNinoError",
+                          pdv.map(_.validationStatus).getOrElse(""),
+                          pdv.map(_.CRN.getOrElse("")).getOrElse(""),
+                          pdv.map(_.id).getOrElse(""),
+                          None,
+                          Some("/postcode"),
+                          Some(responseStatus.toString),
+                          Some(responseMessage)
+                        ))
+                      case Failure(ex) => logger.warn(ex.getMessage)
+                    }
+                    Redirect(routes.SendLetterErrorController.onPageLoad(mode))
+                  case TechnicalIssueResponse(responseStatus, responseMessage) =>
+                    personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+                      case Success(pdv) =>
+                        auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+                          "FindYourNinoError",
+                          pdv.map(_.validationStatus).getOrElse(""),
+                          pdv.map(_.CRN.getOrElse("")).getOrElse(""),
+                          pdv.map(_.id).getOrElse(""),
+                          None,
+                          Some("/postcode"),
+                          Some(responseStatus.toString),
+                          Some(responseMessage)
+                        ))
+                      case Failure(ex) => logger.warn(ex.getMessage)
+                    }
+                    Redirect(routes.TechnicalErrorController.onPageLoad())
+                  case _ =>
+                    logger.warn("Unknown NPS FMN API response")
+                    Redirect(routes.TechnicalErrorController.onPageLoad())
                 }
             }
           }
+        }
       )
   }
 
