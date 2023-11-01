@@ -32,15 +32,16 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
   val getNINOByPost = "/fill-online/get-your-national-insurance-number-by-post"
 
   private val normalRoutes: Page => UserAnswers => Call = {
-    case HaveSetUpGGUserIDPage        => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
-    case PostNINOLetterPage           => userAnswers => navigatePostNINOLetter(userAnswers)
-    case SelectNINOLetterAddressPage  => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
-    case SelectAlternativeServicePage => userAnswers => navigateSelectAlternativeService(userAnswers)
-    case TechnicalErrorPage           => userAnswers => navigateTechnicalErrorService(userAnswers)
-    case InvalidDataNINOHelpPage      => userAnswers => navigateInvalidDataNINOHelp(userAnswers)
-    case ValidDataNINOHelpPage        => userAnswers => navigateValidDataNINOHelp(userAnswers)
-    case EnteredPostCodeNotFoundPage  => userAnswers => navigateEnteredPostCodeNotFound(userAnswers)
-    case _                            => _           => routes.IndexController.onPageLoad
+    case HaveSetUpGGUserIDPage              => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
+    case PostNINOLetterPage                 => userAnswers => navigatePostNINOLetter(userAnswers)
+    case SelectNINOLetterAddressPage        => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
+    case SelectAlternativeServicePage       => userAnswers => navigateSelectAlternativeService(userAnswers)
+    case TechnicalErrorPage                 => userAnswers => navigateTechnicalErrorService(userAnswers)
+    case InvalidDataNINOHelpPage            => userAnswers => navigateInvalidDataNINOHelp(userAnswers)
+    case ValidDataNINOHelpPage              => userAnswers => navigateValidDataNINOHelp(userAnswers)
+    case ValidDataNINOMatchedNINOHelpPage   => userAnswers => navigateValidDataNINOMatchedNINOHelp(userAnswers)
+    case EnteredPostCodeNotFoundPage        => userAnswers => navigateEnteredPostCodeNotFound(userAnswers)
+    case _                                  => _           => routes.IndexController.onPageLoad
   }
 
   private val checkRouteMap: Page => UserAnswers => Call = {
@@ -103,13 +104,6 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
       case Some(ValidDataNINOHelp.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
       case Some(ValidDataNINOHelp.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
       case _                                 => routes.JourneyRecoveryController.onPageLoad()
-    }
-
-  private def navigateEnteredPostCodeNotFound(userAnswers: UserAnswers): Call =
-    userAnswers.get(EnteredPostCodeNotFoundPage) match {
-      case Some(EnteredPostCodeNotFound.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
-      case Some(EnteredPostCodeNotFound.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
-      case _ => routes.JourneyRecoveryController.onPageLoad()
     }
 
 }

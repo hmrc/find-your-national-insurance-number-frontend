@@ -76,6 +76,7 @@ class CheckDetailsController @Inject()(
                   }
                 }
               } else {
+                // TODO - redirect to ValidDataNINOMatchedNINOHelpController when the NINO has been entered instead of a postcode in PDV
                 Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
               }
             }
