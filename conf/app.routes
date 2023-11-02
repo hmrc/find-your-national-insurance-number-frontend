@@ -70,3 +70,8 @@ POST        /changeSendLetterError                          controllers.SendLett
 
 GET         /service-issue                                  controllers.TechnicalErrorController.onPageLoad(mode: Mode = NormalMode)
 POST        /service-issue                                  controllers.TechnicalErrorController.onSubmit(mode: Mode = NormalMode)
+
+GET         /postcode-issue                                 controllers.EnteredPostCodeNotFoundController.onPageLoad(mode: Mode = NormalMode)
+POST        /postcode-issue                                 controllers.EnteredPostCodeNotFoundController.onSubmit(mode: Mode = NormalMode)
+GET         /changeEnteredPostCodeNotFound                  controllers.EnteredPostCodeNotFoundController.onPageLoad(mode: Mode = CheckMode)
+POST        /changeEnteredPostCodeNotFound                  controllers.EnteredPostCodeNotFoundController.onSubmit(mode: Mode = CheckMode)

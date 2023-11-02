@@ -21,6 +21,9 @@ import pages._
 
 trait PageGenerators {
 
+  implicit lazy val arbitraryEnteredPostCodeNotFoundPage: Arbitrary[EnteredPostCodeNotFoundPage.type] =
+    Arbitrary(EnteredPostCodeNotFoundPage)
+
   implicit lazy val arbitrarySelectAlternativeServicePage: Arbitrary[SelectAlternativeServicePage.type] =
     Arbitrary(SelectAlternativeServicePage)
 
