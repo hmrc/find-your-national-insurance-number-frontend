@@ -202,3 +202,11 @@ technicalError.printForm.hint = Once we have received the completed form, we can
 technicalError.phoneHMRC = Phone HMRC
 technicalError.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it. We will not tell you your National Insurance number over the phone.
 technicalError.error.required = Tell us what you would like to do
+
+validDataNINOMatchedNINOHelp.title = Get your National Insurance number posted to you on a letter
+validDataNINOMatchedNINOHelp.heading = Get your National Insurance number posted to you on a letter
+validDataNINOMatchedNINOHelp.p1 = If you need your number on a letter, HMRC can post it to you. It’ll then arrive within 15 working days.
+validDataNINOMatchedNINOHelp.h2 = Would you like the letter posted to you?
+validDataNINOMatchedNINOHelp.checkYourAnswersLabel = validDataNINOMatchedNINOHelp
+validDataNINOMatchedNINOHelp.error.required = Select an option to continue
+validDataNINOMatchedNINOHelp.change.hidden = ValidDataNINOMatchedNINOHelp

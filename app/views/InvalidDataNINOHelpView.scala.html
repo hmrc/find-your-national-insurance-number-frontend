@@ -29,7 +29,7 @@
 @(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
 @layout(
-    pageTitle = titleNoForm(messages("invalidDataNinoHelp.title")),
+    pageTitle = title(form, messages("invalidDataNinoHelp.title")),
     showBackLinkJS = true,
     fullWidth = false
 ) {

@@ -70,3 +70,8 @@ POST        /changeSendLetterError                          controllers.SendLett
 
 GET         /service-issue                                  controllers.TechnicalErrorController.onPageLoad(mode: Mode = NormalMode)
 POST        /service-issue                                  controllers.TechnicalErrorController.onSubmit(mode: Mode = NormalMode)
+
+GET         /number-letter                                  controllers.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode: Mode = NormalMode)
+POST        /number-letter                                  controllers.ValidDataNINOMatchedNINOHelpController.onSubmit(mode: Mode = NormalMode)
+GET         /changeValidDataNINOMatchedNINOHelp             controllers.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode: Mode = CheckMode)
+POST        /changeValidDataNINOMatchedNINOHelp             controllers.ValidDataNINOMatchedNINOHelpController.onSubmit(mode: Mode = CheckMode)

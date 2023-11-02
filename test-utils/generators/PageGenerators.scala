@@ -21,6 +21,9 @@ import pages._
 
 trait PageGenerators {
 
+  implicit lazy val arbitraryValidDataNINOMatchedNINOHelpPage: Arbitrary[ValidDataNINOMatchedNINOHelpPage.type] =
+    Arbitrary(ValidDataNINOMatchedNINOHelpPage)
+
   implicit lazy val arbitrarySelectAlternativeServicePage: Arbitrary[SelectAlternativeServicePage.type] =
     Arbitrary(SelectAlternativeServicePage)
 
