@@ -105,8 +105,8 @@ ninoLetterPostedConfirmation.heading = Your National Insurance number will be se
 ninoLetterPostedConfirmation.letterArrival = We’ll post the letter confirming your number. It will arrive within 15 days.
 ninoLetterPostedConfirmation.goBackToGovUK = Exit and go back to GOV.UK
 
-selectAlternativeService.title = How would you like to contact HMRC?
-selectAlternativeService.heading = How would you like to contact HMRC?
+selectAlternativeService.title = What would you like to do instead?
+selectAlternativeService.heading = What would you like to do instead?
 selectAlternativeService.printForm = Print and post a form
 selectAlternativeService.printForm.hint = Once we have received the completed form, we can send you a letter confirming your National Insurance number.
 selectAlternativeService.phoneHMRC = Phone HMRC
@@ -118,7 +118,7 @@ selectAlternativeService.tryAgain = Try again to confirm your identity online
 selectAlternativeService.requestALetterOnline = Request a letter online
 selectAlternativeService.options = These are your options if you:
 selectAlternativeService.options.l1 = are not able to get your National Insurance number online
-selectAlternativeService.options.l2 = need us to post your number to a different address
+selectAlternativeService.options.l2 = previously selected 'No' or 'Not to this address'
 
 phoneHMRCDetails.title = Phone HMRC for a letter with your National Insurance number on it
 phoneHMRCDetails.heading = Phone HMRC for a letter with your National Insurance number on it
