@@ -210,3 +210,13 @@ validDataNINOMatchedNINOHelp.h2 = Would you like the letter posted to you?
 validDataNINOMatchedNINOHelp.checkYourAnswersLabel = validDataNINOMatchedNINOHelp
 validDataNINOMatchedNINOHelp.error.required = Select an option to continue
 validDataNINOMatchedNINOHelp.change.hidden = ValidDataNINOMatchedNINOHelp
+
+confirmYourPostcode.title = You need to confirm your postcode
+confirmYourPostcode.heading = You need to confirm your postcode
+confirmYourPostcode.p1 = For security reasons the postcode you enter must match our records. For example, a permanent address that you would give to an employer.
+confirmYourPostcode.h2 = Enter your postcode
+confirmYourPostcode.hint = For example SW1A 2AA
+confirmYourPostcode.checkYourAnswersLabel = confirmYourPostcode
+confirmYourPostcode.error.required = Enter your postcode
+confirmYourPostcode.error.invalid = Enter a valid UK postcode
+confirmYourPostcode.change.hidden = ConfirmYourPostcode

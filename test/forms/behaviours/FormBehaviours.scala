@@ -74,6 +74,17 @@ trait FormBehaviours extends FormSpec {
     }
   }
 
+  def formWithRegex(fields: RegexField*) = {
+    for (field <- fields) {
+      s"fail regex validation ${field.regexString}" in {
+        val invalid = "."
+        val data = validData + (field.fieldName -> invalid)
+        val expectedError = error(field.fieldName, field.errorMessageKey, field.regexString)
+        checkForError(form, data, expectedError)
+      }
+    }
+  }
+
   def formWithBooleans(fields: String*) = {
     for (field <- fields) {
       s"fail to bind when $field is omitted" in {

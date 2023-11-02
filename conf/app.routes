@@ -75,3 +75,8 @@ GET         /number-letter                                  controllers.ValidDat
 POST        /number-letter                                  controllers.ValidDataNINOMatchedNINOHelpController.onSubmit(mode: Mode = NormalMode)
 GET         /changeValidDataNINOMatchedNINOHelp             controllers.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode: Mode = CheckMode)
 POST        /changeValidDataNINOMatchedNINOHelp             controllers.ValidDataNINOMatchedNINOHelpController.onSubmit(mode: Mode = CheckMode)
+
+GET         /confirm-your-postcode                          controllers.ConfirmYourPostcodeController.onPageLoad(mode: Mode = NormalMode)
+POST        /confirm-your-postcode                          controllers.ConfirmYourPostcodeController.onSubmit(mode: Mode = NormalMode)
+GET         /changeConfirmYourPostcode                      controllers.ConfirmYourPostcodeController.onPageLoad(mode: Mode = CheckMode)
+POST        /changeConfirmYourPostcode                      controllers.ConfirmYourPostcodeController.onSubmit(mode: Mode = CheckMode)

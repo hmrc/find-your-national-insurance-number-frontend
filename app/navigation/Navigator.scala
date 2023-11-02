@@ -107,8 +107,8 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
 
   private def navigateValidDataNINOMatchedNINOHelp(userAnswers: UserAnswers): Call =
     userAnswers.get(ValidDataNINOMatchedNINOHelpPage) match {
-      case Some(true) => ???
-      case Some(false) => routes.SelectAlternativeServiceController.onPageLoad(mode= NormalMode)
+      case Some(true) => routes.ConfirmYourPostcodeController.onPageLoad(mode = NormalMode)
+      case Some(false) => routes.SelectAlternativeServiceController.onPageLoad(mode = NormalMode)
       case _ => routes.JourneyRecoveryController.onPageLoad()
     }
 
