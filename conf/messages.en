@@ -203,6 +203,19 @@ technicalError.phoneHMRC = Phone HMRC
 technicalError.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it. We will not tell you your National Insurance number over the phone.
 technicalError.error.required = Tell us what you would like to do
 
+enteredPostCodeNotFound.title = The postcode you entered does not match our records
+enteredPostCodeNotFound.heading = The postcode you entered does not match our records
+enteredPostCodeNotFound.inset = This online service can only send your National Insurance number to the address HMRC has on record for you
+enteredPostCodeNotFound.p1 = You need to call HMRC or print and post a form to get your number sent to a different address. It’ll then arrive within 15 working days.
+enteredPostCodeNotFound.p2 = What would you like to do?
+enteredPostCodeNotFound.printForm = Print and post a form
+enteredPostCodeNotFound.printForm.hint = Once we have received the completed form, we can send you a letter confirming your National Insurance number.
+enteredPostCodeNotFound.phoneHmrc = Phone HMRC
+enteredPostCodeNotFound.phoneHmrc.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it.
+enteredPostCodeNotFound.checkYourAnswersLabel = The postcode you entered does not match our records
+enteredPostCodeNotFound.error.required = Tell us what you would like to do
+enteredPostCodeNotFound.change.hidden = EnteredPostCodeNotFound
+
 validDataNINOMatchedNINOHelp.title = Get your National Insurance number posted to you on a letter
 validDataNINOMatchedNINOHelp.heading = Get your National Insurance number posted to you on a letter
 validDataNINOMatchedNINOHelp.p1 = If you need your number on a letter, HMRC can post it to you. It’ll then arrive within 15 working days.
