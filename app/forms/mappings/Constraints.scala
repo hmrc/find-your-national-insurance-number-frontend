@@ -22,6 +22,8 @@ import play.api.data.validation.{Constraint, Invalid, Valid}
 
 trait Constraints {
 
+  private val regexPostcode = """([A-Za-z]\s*[A-HJ-Ya-hj-y]?\s*[0-9]\s*[A-Za-z0-9]?|[A-Za-z]\s*[A-HJ-Ya-hj-y]\s*[A-Za-z])\s*[0-9]\s*([ABDEFGHJLNPQRSTUWXYZabdefghjlnpqrstuwxyz]\s*){2}"""
+
   protected def firstError[A](constraints: Constraint[A]*): Constraint[A] =
     Constraint {
       input =>
@@ -109,4 +111,6 @@ trait Constraints {
       case _ =>
         Invalid(errorKey)
     }
+
+  protected def postCode(errorKey: String): Constraint[String] = regexp(regexPostcode, errorKey)
 }

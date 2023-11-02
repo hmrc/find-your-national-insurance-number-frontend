@@ -76,6 +76,11 @@ POST        /number-letter                                  controllers.ValidDat
 GET         /changeValidDataNINOMatchedNINOHelp             controllers.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode: Mode = CheckMode)
 POST        /changeValidDataNINOMatchedNINOHelp             controllers.ValidDataNINOMatchedNINOHelpController.onSubmit(mode: Mode = CheckMode)
 
+GET         /confirm-your-postcode                          controllers.ConfirmYourPostcodeController.onPageLoad(mode: Mode = NormalMode)
+POST        /confirm-your-postcode                          controllers.ConfirmYourPostcodeController.onSubmit(mode: Mode = NormalMode)
+GET         /changeConfirmYourPostcode                      controllers.ConfirmYourPostcodeController.onPageLoad(mode: Mode = CheckMode)
+POST        /changeConfirmYourPostcode                      controllers.ConfirmYourPostcodeController.onSubmit(mode: Mode = CheckMode)
+
 GET         /postcode-issue                                 controllers.EnteredPostCodeNotFoundController.onPageLoad(mode: Mode = NormalMode)
 POST        /postcode-issue                                 controllers.EnteredPostCodeNotFoundController.onSubmit(mode: Mode = NormalMode)
 GET         /changeEnteredPostCodeNotFound                  controllers.EnteredPostCodeNotFoundController.onPageLoad(mode: Mode = CheckMode)

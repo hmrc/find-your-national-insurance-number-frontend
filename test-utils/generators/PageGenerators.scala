@@ -24,6 +24,9 @@ trait PageGenerators {
   implicit lazy val arbitraryValidDataNINOMatchedNINOHelpPage: Arbitrary[ValidDataNINOMatchedNINOHelpPage.type] =
     Arbitrary(ValidDataNINOMatchedNINOHelpPage)
 
+  implicit lazy val arbitraryConfirmYourPostcodePage: Arbitrary[ConfirmYourPostcodePage.type] =
+    Arbitrary(ConfirmYourPostcodePage)
+
   implicit lazy val arbitraryEnteredPostCodeNotFoundPage: Arbitrary[EnteredPostCodeNotFoundPage.type] =
     Arbitrary(EnteredPostCodeNotFoundPage)
 
