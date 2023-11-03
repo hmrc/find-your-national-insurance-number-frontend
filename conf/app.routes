@@ -85,8 +85,3 @@ GET         /confirm-your-postcode                          controllers.ConfirmY
 POST        /confirm-your-postcode                          controllers.ConfirmYourPostcodeController.onSubmit(mode: Mode = NormalMode)
 GET         /changeConfirmYourPostcode                      controllers.ConfirmYourPostcodeController.onPageLoad(mode: Mode = CheckMode)
 POST        /changeConfirmYourPostcode                      controllers.ConfirmYourPostcodeController.onSubmit(mode: Mode = CheckMode)
-
-GET         /postcode-issue                                 controllers.EnteredPostCodeNotFoundController.onPageLoad(mode: Mode = NormalMode)
-POST        /postcode-issue                                 controllers.EnteredPostCodeNotFoundController.onSubmit(mode: Mode = NormalMode)
-GET         /changeEnteredPostCodeNotFound                  controllers.EnteredPostCodeNotFoundController.onPageLoad(mode: Mode = CheckMode)
-POST        /changeEnteredPostCodeNotFound                  controllers.EnteredPostCodeNotFoundController.onSubmit(mode: Mode = CheckMode)
