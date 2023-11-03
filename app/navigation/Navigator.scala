@@ -39,6 +39,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     case TechnicalErrorPage                 => userAnswers => navigateTechnicalErrorService(userAnswers)
     case InvalidDataNINOHelpPage            => userAnswers => navigateInvalidDataNINOHelp(userAnswers)
     case ValidDataNINOHelpPage              => userAnswers => navigateValidDataNINOHelp(userAnswers)
+    case EnteredPostCodeNotFoundPage        => userAnswers => navigateEnteredPostCodeNotFound(userAnswers)
     case ValidDataNINOMatchedNINOHelpPage   => userAnswers => navigateValidDataNINOMatchedNINOHelp(userAnswers)
     case _                                  => _           => routes.IndexController.onPageLoad
   }
@@ -105,6 +106,13 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
       case _                                 => routes.JourneyRecoveryController.onPageLoad()
     }
 
+  private def navigateEnteredPostCodeNotFound(userAnswers: UserAnswers): Call =
+    userAnswers.get(EnteredPostCodeNotFoundPage) match {
+      case Some(EnteredPostCodeNotFound.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
+      case Some(EnteredPostCodeNotFound.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
+      case _ => routes.JourneyRecoveryController.onPageLoad()
+    }
+  
   private def navigateValidDataNINOMatchedNINOHelp(userAnswers: UserAnswers): Call =
     userAnswers.get(ValidDataNINOMatchedNINOHelpPage) match {
       case Some(true) => routes.ConfirmYourPostcodeController.onPageLoad(mode = NormalMode)

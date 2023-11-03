@@ -24,6 +24,14 @@ import play.api.libs.json.{JsValue, Json}
 
 trait UserAnswersEntryGenerators extends PageGenerators with ModelGenerators {
 
+  implicit lazy val arbitraryEnteredPostCodeNotFoundUserAnswersEntry: Arbitrary[(EnteredPostCodeNotFoundPage.type, JsValue)] =
+    Arbitrary {
+      for {
+        page  <- arbitrary[EnteredPostCodeNotFoundPage.type]
+        value <- arbitrary[EnteredPostCodeNotFound].map(Json.toJson(_))
+      } yield (page, value)
+    }
+
   implicit lazy val arbitraryValidDataNINOMatchedNINOHelpUserAnswersEntry: Arbitrary[(ValidDataNINOMatchedNINOHelpPage.type, JsValue)] =
     Arbitrary {
       for {
