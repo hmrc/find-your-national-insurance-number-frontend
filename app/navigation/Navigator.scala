@@ -41,7 +41,6 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     case ValidDataNINOHelpPage              => userAnswers => navigateValidDataNINOHelp(userAnswers)
     case EnteredPostCodeNotFoundPage        => userAnswers => navigateEnteredPostCodeNotFound(userAnswers)
     case ValidDataNINOMatchedNINOHelpPage   => userAnswers => navigateValidDataNINOMatchedNINOHelp(userAnswers)
-    case EnteredPostCodeNotFoundPage        => userAnswers => navigateEnteredPostCodeNotFound(userAnswers)
     case _                                  => _           => routes.IndexController.onPageLoad
   }
 

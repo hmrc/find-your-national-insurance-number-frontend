@@ -67,7 +67,7 @@ class ConfirmYourPostcodeController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmYourPostcodePage, value))
             _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(routes.ConfirmYourPostcodeController.onPageLoad(mode = NormalMode)) // TODO replace with redirection based on postcode matching or not matching
+          } yield Redirect(routes.EnteredPostCodeNotFoundController.onPageLoad(mode = NormalMode)) // TODO replace with redirection based on postcode matching or not matching
       )
   }
 }
