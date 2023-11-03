@@ -76,7 +76,6 @@ POST        /postcode-issue                                 controllers.EnteredP
 GET         /changeEnteredPostCodeNotFound                  controllers.EnteredPostCodeNotFoundController.onPageLoad(mode: Mode = CheckMode)
 POST        /changeEnteredPostCodeNotFound                  controllers.EnteredPostCodeNotFoundController.onSubmit(mode: Mode = CheckMode)
 
-
 GET         /number-letter                                  controllers.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode: Mode = NormalMode)
 POST        /number-letter                                  controllers.ValidDataNINOMatchedNINOHelpController.onSubmit(mode: Mode = NormalMode)
 GET         /changeValidDataNINOMatchedNINOHelp             controllers.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode: Mode = CheckMode)
