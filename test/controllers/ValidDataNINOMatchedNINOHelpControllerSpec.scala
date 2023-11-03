@@ -29,7 +29,6 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
-import services.PersonalDetailsValidationService
 import views.html.ValidDataNINOMatchedNINOHelpView
 
 import scala.concurrent.Future
@@ -45,17 +44,10 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
 
   "ValidDataNINOMatchedNINOHelp Controller" - {
 
-    val mockPersonalDetailsValidationService =  mock[PersonalDetailsValidationService]
-
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(
-          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-        )
         .build()
-
-      when(mockPersonalDetailsValidationService.getValidCustomerStatus(any())).thenReturn(Future.successful("true"))
 
       running(application) {
         val request = FakeRequest(GET, validDataNINOMatchedNINOHelpRoute)
@@ -74,12 +66,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
       val userAnswers = UserAnswers(userAnswersId).set(ValidDataNINOMatchedNINOHelpPage, true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(
-          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-        )
         .build()
-
-      when(mockPersonalDetailsValidationService.getValidCustomerStatus(any())).thenReturn(Future.successful("true"))
 
       running(application) {
         val request = FakeRequest(GET, validDataNINOMatchedNINOHelpRoute)
