@@ -48,14 +48,6 @@ trait UserAnswersEntryGenerators extends PageGenerators with ModelGenerators {
       } yield (page, value)
     }
 
-  implicit lazy val arbitraryEnteredPostCodeNotFoundUserAnswersEntry: Arbitrary[(EnteredPostCodeNotFoundPage.type, JsValue)] =
-    Arbitrary {
-      for {
-        page  <- arbitrary[EnteredPostCodeNotFoundPage.type]
-        value <- arbitrary[EnteredPostCodeNotFound].map(Json.toJson(_))
-      } yield (page, value)
-    }
-
   implicit lazy val arbitrarySelectAlternativeServiceUserAnswersEntry: Arbitrary[(SelectAlternativeServicePage.type, JsValue)] =
     Arbitrary {
       for {
