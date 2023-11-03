@@ -30,7 +30,6 @@ trait UserAnswersGenerator extends TryValues {
     arbitrary[(EnteredPostCodeNotFoundPage.type, JsValue)] ::
     arbitrary[(ValidDataNINOMatchedNINOHelpPage.type, JsValue)] ::
     arbitrary[(ConfirmYourPostcodePage.type, JsValue)] ::
-    arbitrary[(EnteredPostCodeNotFoundPage.type, JsValue)] ::
     arbitrary[(SelectAlternativeServicePage.type, JsValue)] ::
     arbitrary[(SelectNINOLetterAddressPage.type, JsValue)] ::
     arbitrary[(HaveSetUpGGUserIDPage.type, JsValue)] ::
