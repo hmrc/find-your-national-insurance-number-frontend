@@ -22,11 +22,10 @@ import forms.ValidDataNINOMatchedNINOHelpFormProvider
 import javax.inject.Inject
 import models.{Mode, NormalMode}
 import navigation.Navigator
-import pages.{ValidDataNINOHelpPage, ValidDataNINOMatchedNINOHelpPage}
+import pages.ValidDataNINOMatchedNINOHelpPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.PersonalDetailsValidationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ValidDataNINOMatchedNINOHelpView
 import scala.concurrent.{ExecutionContext, Future}
@@ -40,31 +39,19 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
                                          requireData: DataRequiredAction,
                                          formProvider: ValidDataNINOMatchedNINOHelpFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
-                                         personalDetailsValidationService: PersonalDetailsValidationService,
                                          view: ValidDataNINOMatchedNINOHelpView
                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireData) async {
+  def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      val resp = personalDetailsValidationService.getValidCustomerStatus(request.nino.getOrElse("")).map(
-        validCustomer =>
-          if (validCustomer == "true") {
-            val preparedForm = request.userAnswers.get(ValidDataNINOMatchedNINOHelpPage) match {
-              case None => form
-              case Some(value) => form.fill(value)
-            }
-
-            Ok(view(preparedForm, mode))
-          } else {
-            Redirect(controllers.routes.UnauthorisedController.onPageLoad)
-          }
-      )
-      request.nino match {
-        case Some(nino) => resp
-        case None => Future.successful(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
+      val preparedForm = request.userAnswers.get(ValidDataNINOMatchedNINOHelpPage) match {
+        case None => form
+        case Some(value) => form.fill(value)
       }
+
+      Ok(view(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
