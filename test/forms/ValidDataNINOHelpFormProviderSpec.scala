@@ -16,24 +16,23 @@
 
 package forms
 
-import forms.behaviours.OptionFieldBehaviours
-import models.ValidDataNINOHelp
+import forms.behaviours.BooleanFieldBehaviours
 import play.api.data.FormError
 
-class ValidDataNINOHelpFormProviderSpec extends OptionFieldBehaviours {
+class ValidDataNINOHelpFormProviderSpec extends BooleanFieldBehaviours {
+
+  val requiredKey = "ninoHelpView.error.required"
+  val invalidKey = "error.boolean"
 
   val form = new ValidDataNINOHelpFormProvider()()
 
   ".value" - {
 
     val fieldName = "value"
-    val requiredKey = "ninoHelpView.error.required"
-
-    behave like optionsField[ValidDataNINOHelp](
+    behave like booleanField(
       form,
       fieldName,
-      validValues  = ValidDataNINOHelp.values,
-      invalidError = FormError(fieldName, "error.invalid")
+      invalidError = FormError(fieldName, invalidKey)
     )
 
     behave like mandatoryField(

@@ -17,15 +17,14 @@
 package forms
 
 import forms.mappings.Mappings
-import models.ValidDataNINOHelp
 import play.api.data.Form
 
 import javax.inject.Inject
 
 class ValidDataNINOHelpFormProvider @Inject() extends Mappings {
 
-  def apply(): Form[ValidDataNINOHelp] =
+  def apply(): Form[Boolean] =
     Form(
-      "value" -> enumerable[ValidDataNINOHelp]("ninoHelpView.error.required")
+      "value" -> boolean("ninoHelpView.error.required")
     )
 }

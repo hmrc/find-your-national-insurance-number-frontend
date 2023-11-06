@@ -76,7 +76,7 @@ trait UserAnswersEntryGenerators extends PageGenerators with ModelGenerators {
     Arbitrary {
       for {
         page <- Arbitrary.arbitrary[ValidDataNINOHelpPage.type]
-        value <- Arbitrary.arbitrary[ValidDataNINOHelp].map(Json.toJson(_))
+        value <- Arbitrary.arbitrary[Boolean].map(Json.toJson(_))
       } yield (page, value)
     }
 }
