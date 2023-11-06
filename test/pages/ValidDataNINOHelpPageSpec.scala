@@ -16,17 +16,16 @@
 
 package pages
 
-import models.ValidDataNINOHelp
 import pages.behaviours.PageBehaviours
 
 class ValidDataNINOHelpPageSpec extends PageBehaviours {
 
   "ValidDataNINOHelpPage" - {
 
-    beRetrievable[ValidDataNINOHelp](ValidDataNINOHelpPage)
+    beRetrievable[Boolean](ValidDataNINOHelpPage)
 
-    beSettable[ValidDataNINOHelp](ValidDataNINOHelpPage)
+    beSettable[Boolean](ValidDataNINOHelpPage)
 
-    beRemovable[ValidDataNINOHelp](ValidDataNINOHelpPage)
+    beRemovable[Boolean](ValidDataNINOHelpPage)
   }
 }

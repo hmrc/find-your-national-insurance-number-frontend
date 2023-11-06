@@ -161,14 +161,8 @@ ninoHelpView.title = HMRC can post your National Insurance number to you
 ninoHelpView.heading = HMRC can post your National Insurance number to you
 ninoHelpView.inset = HMRC will not tell you your National Insurance number over the phone.
 ninoHelpView.p1 = You can request a letter with your number on it. It’ll then arrive within 15 working days.
-ninoHelpView.h2 = How would you like to ask HMRC to post your number to you?
-ninoHelpView.error.required = Tell us what you would like to do
-ninoHelpView.onlineService = Use this online service now
-ninoHelpView.onlineService.hint = You only need to confirm your postcode and then we’ll post the letter to you.
-ninoHelpView.printForm = Print and post a form
-ninoHelpView.printForm.hint = Once we have received the completed form, we can send you a letter confirming your National Insurance number.
-ninoHelpView.phoneHMRC = Phone HMRC
-ninoHelpView.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it.
+ninoHelpView.h2 = Would you like your number posted to you?
+ninoHelpView.error.required = Select an option to continue
 
 invalidDataNinoHelp.title = HMRC can post your National Insurance number to you
 invalidDataNinoHelp.heading = HMRC can post your National Insurance number to you

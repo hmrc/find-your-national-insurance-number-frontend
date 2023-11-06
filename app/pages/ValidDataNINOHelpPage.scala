@@ -16,10 +16,9 @@
 
 package pages
 
-import models.ValidDataNINOHelp
 import play.api.libs.json.JsPath
 
-case object ValidDataNINOHelpPage extends QuestionPage[ValidDataNINOHelp] {
+case object ValidDataNINOHelpPage extends QuestionPage[Boolean] {
 
   override def path: JsPath = JsPath \ toString
 

@@ -47,17 +47,14 @@
     @formHelper(action = routes.ValidDataNINOHelpController.onSubmit(mode), 'autoComplete -> "off") {
 
         @govukRadios(
-                    RadiosViewModel(
-                        field  = form("value"),
-                        legend = LegendViewModel(messages("ninoHelpView.h2")).asPageSubHeading(LegendSize.Large),
-                        items  = ValidDataNINOHelp.options
-                    )
+            RadiosViewModel.yesNo(
+                field = form("value"),
+                legend = LegendViewModel(messages("ninoHelpView.h2")).asPageSubHeading(LegendSize.Large)
             )
+        )
 
         @govukButton(
             ButtonViewModel(messages("site.continue"))
         )
-
     }
-
 }
