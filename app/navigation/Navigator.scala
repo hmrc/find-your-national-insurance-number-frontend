@@ -100,9 +100,8 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
 
   private def navigateValidDataNINOHelp(userAnswers: UserAnswers): Call =
     userAnswers.get(ValidDataNINOHelpPage) match {
-      case Some(ValidDataNINOHelp.OnlineService) => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
-      case Some(ValidDataNINOHelp.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
-      case Some(ValidDataNINOHelp.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
+      case Some(true) => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
+      case Some(false) => routes.SelectAlternativeServiceController.onPageLoad(mode = NormalMode)
       case _                                 => routes.JourneyRecoveryController.onPageLoad()
     }
 
