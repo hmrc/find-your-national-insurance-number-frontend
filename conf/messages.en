@@ -205,7 +205,7 @@ technicalError.error.required = Tell us what you would like to do
 
 enteredPostCodeNotFound.title = The postcode you entered does not match our records
 enteredPostCodeNotFound.heading = The postcode you entered does not match our records
-enteredPostCodeNotFound.inset = This online service can only send your National Insurance number to the address HMRC has on record for you
+enteredPostCodeNotFound.inset = This online service can only send your National Insurance number to the address HMRC has on record for you.
 enteredPostCodeNotFound.p1 = You need to call HMRC or print and post a form to get your number sent to a different address. It’ll then arrive within 15 working days.
 enteredPostCodeNotFound.p2 = What would you like to do?
 enteredPostCodeNotFound.printForm = Print and post a form
