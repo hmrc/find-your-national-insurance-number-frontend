@@ -10,27 +10,8 @@ site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
 
-date.day = Day
-date.month = Month
-date.year = Year
-
-timeout.title = You’re about to be signed out
-timeout.message = For security reasons, you will be signed out of this service in
-timeout.keepAlive = Stay signed in
-timeout.signOut = Sign out
-
 error.browser.title.prefix = Error:
 error.boolean = Please give an answer
-error.invalid_date = Give a correct date
-error.date.day_blank = Enter a day
-error.date.day_invalid = Give a correct day using numbers 1 to 31
-error.date.month_blank = Enter a month
-error.date.month_invalid = Give a correct month using numbers 1 to 12
-error.date.year_blank = Enter a year
-error.date.year_invalid = Give a correct year
-error.integer = Give an answer in whole numbers
-error.non_numeric = Give a value using only numbers
-error.number = Please enter a valid number
 error.required = Please enter a value
 error.summary.title = There is a problem
 
@@ -48,9 +29,6 @@ index.confirmYourIdentity.heading = 3. Confirm your identity
 index.confirmYourIdentity.p1 = To prove who you are, you can choose to use:
 index.confirmYourIdentity.l1.li1 = identity documents including a passport and UK photocard driving licence
 index.confirmYourIdentity.l1.li2 = details from your P60, Self Assessment or credit record
-
-checkYourAnswers.title = Check Your Answers
-checkYourAnswers.heading = Check Your Answers
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
@@ -79,26 +57,13 @@ haveSetUpGGUserID.l1.li2 = sign up for another online government service
 haveSetUpGGUserID.yes = Yes
 haveSetUpGGUserID.no = No
 haveSetUpGGUserID.notSure = Not sure
-haveSetUpGGUserID.checkYourAnswersLabel = Have you set up a Government Gateway user ID before?
 haveSetUpGGUserID.error.required = Select an option to continue
-haveSetUpGGUserID.change.hidden = HaveSetUpGGUserID
-
-postNINOLetter.title = Would you like us to post your National Insurance number to you?
-postNINOLetter.heading = Would you like us to post your National Insurance number to you?
-postNINOLetter.confirmIdentity = As you’re not able to confirm your identity, you can instead get your number in the post.
-postNINOLetter.letterArrival = The letter will arrive within 15 days.
-postNINOLetter.notTellNINOViaPhone = HMRC will not tell you your National Insurance number over the phone.
-postNINOLetter.checkYourAnswersLabel = Would you like us to post your National Insurance number to you?
-postNINOLetter.error.required = Please select yes or no if you would like us to post your National Insurance number to you
-postNINOLetter.change.hidden = postNINOLetter
 
 selectNINOLetterAddress.title = Where would you like the letter sent?
 selectNINOLetterAddress.heading = Where would you like the letter sent?
 selectNINOLetterAddress.postCode = To the address with the postcode
 selectNINOLetterAddress.notThisAddress = Not to this address
-selectNINOLetterAddress.checkYourAnswersLabel = Where would you like the letter sent?
 selectNINOLetterAddress.error.required = Tell us where you would like the letter sent
-selectNINOLetterAddress.change.hidden = SelectNINOLetterAddress
 
 ninoLetterPostedConfirmation.title = Your National Insurance number will be sent by post
 ninoLetterPostedConfirmation.heading = Your National Insurance number will be sent by post
@@ -112,7 +77,6 @@ selectAlternativeService.printForm.hint = Once we have received the completed fo
 selectAlternativeService.phoneHMRC = Phone HMRC
 selectAlternativeService.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it. We will not tell you your National Insurance number over the phone.
 selectAlternativeService.error.required = Tell us what you would like to do
-selectAlternativeService.change.hidden = SelectAlternativeService
 selectAlternativeService.options = These are your options if you:
 selectAlternativeService.options.l1 = are not able to get your National Insurance number online
 selectAlternativeService.options.l2 = previously selected ‘No’ or ‘Not to this address’
@@ -136,12 +100,6 @@ phoneHMRCDetails.openingTimes.mondayToFriday = Monday to Friday: 8am to 6pm
 phoneHMRCDetails.openingTimes.weekendAndBankHoliday = Closed on Saturdays, Sundays and bank holidays.
 phoneHMRCDetails.hmrcExtraHelp = Get help <a href="{0}" class="govuk-link" target="_blank">dealing with HMRC if you have additional needs.</a>
 phoneHMRCDetails.findOutCallCharges = <a href="{0}" class="govuk-link" target="_blank">Find out about call charges.</a>
-
-viewNinoInPTA.title = You can view your National Insurance number in your personal tax account
-viewNinoInPTA.heading = You can view your National Insurance number in your personal tax account
-viewNinoInPTA.body = You can now access your personal tax account to:
-viewNinoInPTA.li1 = get official confirmation of your National Insurance number
-viewNinoInPTA.li2 = check your tax records and manage your details with HMRC
 
 interruptView.title = You need to confirm your National Insurance number
 interruptView.heading = You need to confirm your National Insurance number
@@ -170,7 +128,6 @@ invalidDataNinoHelp.printForm = Print and post a form
 invalidDataNinoHelp.printForm.hint = Once we have received the completed form, we can send you a letter confirming your National Insurance number.
 invalidDataNinoHelp.phoneHMRC = Phone HMRC
 invalidDataNinoHelp.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it.
-invalidDataNinoHelp.checkYourAnswersLabel = How would you like to contact HMRC?
 invalidDataNinoHelp.error.required = Select an option to continue
 
 sendLetterError.title = There is a problem
@@ -203,24 +160,18 @@ enteredPostCodeNotFound.printForm = Print and post a form
 enteredPostCodeNotFound.printForm.hint = Once we have received the completed form, we can send you a letter confirming your National Insurance number.
 enteredPostCodeNotFound.phoneHmrc = Phone HMRC
 enteredPostCodeNotFound.phoneHmrc.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it.
-enteredPostCodeNotFound.checkYourAnswersLabel = The postcode you entered does not match our records
 enteredPostCodeNotFound.error.required = Tell us what you would like to do
-enteredPostCodeNotFound.change.hidden = EnteredPostCodeNotFound
 
 validDataNINOMatchedNINOHelp.title = Get your National Insurance number posted to you on a letter
 validDataNINOMatchedNINOHelp.heading = Get your National Insurance number posted to you on a letter
 validDataNINOMatchedNINOHelp.p1 = If you need your number on a letter, HMRC can post it to you. It’ll then arrive within 15 working days.
 validDataNINOMatchedNINOHelp.h2 = Would you like the letter posted to you?
-validDataNINOMatchedNINOHelp.checkYourAnswersLabel = validDataNINOMatchedNINOHelp
 validDataNINOMatchedNINOHelp.error.required = Select an option to continue
-validDataNINOMatchedNINOHelp.change.hidden = ValidDataNINOMatchedNINOHelp
 
 confirmYourPostcode.title = You need to confirm your postcode
 confirmYourPostcode.heading = You need to confirm your postcode
 confirmYourPostcode.p1 = For security reasons the postcode you enter must match our records. For example, a permanent address that you would give to an employer.
 confirmYourPostcode.h2 = Enter your postcode
 confirmYourPostcode.hint = For example SW1A 2AA
-confirmYourPostcode.checkYourAnswersLabel = confirmYourPostcode
 confirmYourPostcode.error.required = Enter your postcode
 confirmYourPostcode.error.invalid = Enter a valid UK postcode
-confirmYourPostcode.change.hidden = ConfirmYourPostcode
