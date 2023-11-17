@@ -131,3 +131,10 @@ technicalError.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, g
 technicalError.phoneHMRC = Ffonio CThEF
 technicalError.phoneHMRC.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno. Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
 technicalError.error.required = Rhowch wybod i ni beth yr hoffech ei wneud
+
+enteredPostCodeNotFound.p2 = Beth yr hoffech ei wneud?
+enteredPostCodeNotFound.printForm = Argraffu ac anfon ffurflen
+enteredPostCodeNotFound.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol.
+enteredPostCodeNotFound.phoneHmrc = Ffonio CThEF
+enteredPostCodeNotFound.phoneHmrc.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno.
+enteredPostCodeNotFound.error.required = Rhowch wybod i ni beth yr hoffech ei wneud
