@@ -43,7 +43,6 @@ haveSetUpGGUserID.l1.li2 = gofrestru ar gyfer gwasanaeth ar-lein arall gan y lly
 haveSetUpGGUserID.yes = Iawn
 haveSetUpGGUserID.no = Na
 haveSetUpGGUserID.notSure = Ansicr
-haveSetUpGGUserID.checkYourAnswersLabel = A ydych wedi sefydlu Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth o’r blaen?
 haveSetUpGGUserID.error.required = Dewiswch opsiwn i fynd yn eich blaen
 haveSetUpGGUserID.change.hidden = HaveSetUpGGUserID
 
@@ -57,7 +56,6 @@ selectNINOLetterAddress.title = I ble’r hoffech i ni anfon y llythyr?
 selectNINOLetterAddress.heading = I ble’r hoffech i ni anfon y llythyr?
 selectNINOLetterAddress.postCode = I’r cyfeiriad sydd â’r cod post
 selectNINOLetterAddress.notThisAddress = Dim i’r cyfeiriad hwn
-selectNINOLetterAddress.checkYourAnswersLabel = I ble’r hoffech i ni anfon y llythyr?
 selectNINOLetterAddress.error.required = Rhowch wybod i ni i ble yr hoffech i’r llythyr gael ei anfon
 selectNINOLetterAddress.change.hidden = SelectNINOLetterAddress
 
@@ -111,7 +109,6 @@ invalidDataNinoHelp.printForm = Argraffu ac anfon ffurflen
 invalidDataNinoHelp.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol.
 invalidDataNinoHelp.phoneHMRC = Ffonio CThEF
 invalidDataNinoHelp.phoneHMRC.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno.
-invalidDataNinoHelp.checkYourAnswersLabel = Sut yr hoffech chi gysylltu â CThEF?
 invalidDataNinoHelp.error.required = Dewiswch opsiwn i fynd yn eich blaen
 
 sendLetterError.title = Mae problem wedi codi
@@ -134,3 +131,10 @@ technicalError.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, g
 technicalError.phoneHMRC = Ffonio CThEF
 technicalError.phoneHMRC.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno. Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
 technicalError.error.required = Rhowch wybod i ni beth yr hoffech ei wneud
+
+enteredPostCodeNotFound.p2 = Beth yr hoffech ei wneud?
+enteredPostCodeNotFound.printForm = Argraffu ac anfon ffurflen
+enteredPostCodeNotFound.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol.
+enteredPostCodeNotFound.phoneHmrc = Ffonio CThEF
+enteredPostCodeNotFound.phoneHmrc.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno.
+enteredPostCodeNotFound.error.required = Rhowch wybod i ni beth yr hoffech ei wneud
