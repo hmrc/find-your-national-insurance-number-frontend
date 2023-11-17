@@ -93,11 +93,21 @@ phoneHMRCDetails.openingTimes.weekendAndBankHoliday = Ar gau ar y penwythnos ac 
 phoneHMRCDetails.hmrcExtraHelp = Cael help <a href="{0}" class="govuk-link" target="_blank"> wrth ddelio â CThEF os oes gennych anghenion ychwanegol</a>
 phoneHMRCDetails.findOutCallCharges = <a href="{0}" class="govuk-link" target="_blank">Cael gwybod am gostau galwadau.</a>
 
+interruptView.title = Mae angen i chi gadarnhau'ch rhif Yswiriant Gwladol
+interruptView.heading = Mae angen i chi gadarnhau'ch rhif Yswiriant Gwladol
+interruptView.body = Mae dwy ffordd y gallwch ei gadarnhau:
+interruptView.li1 = ffoniwch 0300 200 1900 i siarad ag ymgynghorydd a chadarnhau'ch rhif Yswiriant Gwladol gydag ef
+interruptView.li2 = <a href="{0}" target="_blank">llenwch ffurflen CA5403 ar-lein,</a> ei hargraffu a'i hanfon i:
+interruptView.li2.address.line1 = Gwasanaeth Cwsmeriaid Cymraeg CThEF
+interruptView.li2.address.line2 = HMRC
+interruptView.li2.address.postcode = BX9 1ST
+interruptView.p1 = Os ydych yn llenwi ffurflen CA5403, mae'n bosibl y bydd angen i chi gadarnhau pwy ydych drwy ddefnyddio dogfennau penodol. Bydd y ffurflen ar-lein yn rhoi gwybod i chi pa ddogfennau y bydd eu hangen arnoch.
+interruptView.p2 = Dylai'ch rhif Yswiriant Gwladol eich cyrraedd cyn pen 15 diwrnod ar ôl i chi gysylltu â ni.
+
 ninoHelpView.title = Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
 ninoHelpView.heading = Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
 ninoHelpView.inset = Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
 ninoHelpView.p1 = Gallwch ofyn am gael llythyr sy’n dangos eich rhif. Bydd hwnnw yn cyrraedd cyn pen 15 diwrnod gwaith.
-
 ninoHelpView.error.required = Dewiswch opsiwn i fynd yn eich blaen
 
 invalidDataNinoHelp.title = Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
