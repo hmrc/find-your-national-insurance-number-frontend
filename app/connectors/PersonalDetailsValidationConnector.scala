@@ -17,17 +17,24 @@
 package connectors
 
 import config.FrontendAppConfig
-import models.{PDVErrorResponse, PDVNotFoundResponse, PDVResponse, PDVResponseData, PDVSuccessResponse, PDVUnexpectedResponse}
-import uk.gov.hmrc.http.HeaderCarrier
+import models.{CorrelationId, PDVErrorResponse, PDVNotFoundResponse, PDVResponse, PDVResponseData, PDVSuccessResponse, PDVUnexpectedResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import com.google.inject.{Inject, Singleton}
+import models.pdv.PDVRequest
 import play.api.Logging
 import services.http.SimpleHttp
+import uk.gov.hmrc.http.client.HttpClientV2
 import play.api.http.Status._
+import play.api.libs.json.{JsValue, Json, OFormat, Writes}
+import play.api.libs.ws.BodyWritable
+import models.pdv.PDVRequest._
 
+import java.net.URL
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PersonalDetailsValidationConnector @Inject()(val simpleHttp: SimpleHttp, config: FrontendAppConfig) extends Logging {
+class PersonalDetailsValidationConnector @Inject()(val httpClientV2: HttpClientV2, simpleHttp: SimpleHttp, config: FrontendAppConfig) extends Logging {
 
   private lazy val personalDetailsValidationBaseUrl: String = config.pdvBaseUrl
 
@@ -52,6 +59,17 @@ class PersonalDetailsValidationConnector @Inject()(val simpleHttp: SimpleHttp, c
         PDVErrorResponse(e)
       }
     )
+  }
+
+  def retrieveMatchingDetails2(body2: PDVRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse] = {
+    val url = s"$personalDetailsValidationBaseUrl/personal-details-validation/retrieve-by-session"
+    httpClientV2
+      .post(new URL(url))
+      .withBody(body2)
+      .execute[HttpResponse]
+      .flatMap { response =>
+        Future.successful(response)
+      }
   }
 
 }

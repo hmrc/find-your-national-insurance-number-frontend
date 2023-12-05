@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package models
+package models.pdv
 
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.http.HttpResponse
+import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.ws.BodyWritable
 
-sealed trait PDVResponse
-case class PDVSuccessResponse(pdvResponseData: PDVResponseData) extends PDVResponse
-case class PDVNotFoundResponse(r: HttpResponse) extends PDVResponse
-case class PDVUnexpectedResponse(r: HttpResponse) extends PDVResponse
-case class PDVErrorResponse(cause: Exception) extends PDVResponse
+case class PDVRequest(credentialId: String, sessionId: String)
+object PDVRequest{
+  implicit val writes: Writes[PDVRequest] = Json.writes[PDVRequest]
 
-object PDVResponse{
-  implicit val format: OFormat[PDVSuccessResponse] = Json.format[PDVSuccessResponse]
+  implicit def jsonBodyWritable[T](implicit writes: Writes[T],
+                                   jsValueBodyWritable: BodyWritable[JsValue]
+                                  ): BodyWritable[T] = jsValueBodyWritable.map(writes.writes)
 }
-

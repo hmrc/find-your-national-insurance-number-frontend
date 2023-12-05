@@ -25,38 +25,48 @@ import models.individualdetails.AccountStatusType._
 import models.individualdetails.AddressStatus._
 import models.individualdetails.CrnIndicator._
 import models.individualdetails.AddressType._
-
 import models.individualdetails.{Address, AddressList, IndividualDetails, ResolveMerge}
+import models.pdv.PDVRequest
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, PDVResponseData}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{AuditService, PersonalDetailsValidationService}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.AuditUtils
+import uk.gov.hmrc.auth.core.retrieve.Credentials
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.credentials
 
 import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckDetailsController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        identify: IdentifierAction,
-                                        getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
-                                        personalDetailsValidationService: PersonalDetailsValidationService,
-                                        auditService: AuditService,
-                                        individualDetailsConnector: IndividualDetailsConnector,
-                                        val controllerComponents: MessagesControllerComponents
-                                      )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
-  extends FrontendBaseController with I18nSupport with Logging {
+      override val messagesApi: MessagesApi,
+      identify: IdentifierAction,
+      getData: DataRetrievalAction,
+      requireData: DataRequiredAction,
+      personalDetailsValidationService: PersonalDetailsValidationService,
+      auditService: AuditService,
+      individualDetailsConnector: IndividualDetailsConnector,
+      val controllerComponents: MessagesControllerComponents,
+      val authConnector: AuthConnector
+    )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
+  extends FrontendBaseController with AuthorisedFunctions with I18nSupport with Logging {
 
-  def onPageLoad(mode: Mode, validationId: String): Action[AnyContent] = (identify andThen getData andThen requireData) async {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) async {
     implicit request => {
+
+      lazy val toAuthCredentialId: Option[Credentials] => Future[Option[String]] =
+        (credentials: Option[Credentials]) => Future.successful(credentials.map(_.providerId))
+
       for {
-        pdvData <- getPDVData(validationId)
+        credentialId <- authorised().retrieve(credentials)(toAuthCredentialId).recover { case _ => None }
+        pdvRequest = PDVRequest(credentialId.getOrElse(""), request.session.data.getOrElse("sessionId", ""))
+        pdvData <- getPDVData(pdvRequest)
         idData <- getIdData(pdvData)
       } yield (pdvData, idData) match {
         case (pdvData: PDVResponseData, Right(idData)) => {
@@ -64,7 +74,7 @@ class CheckDetailsController @Inject()(
             case individualDetailsData => {
               auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
                 pdvData.validationStatus, individualDetailsData.crnIndicator.asString, pdvData.id, None, None, None, None))
-              if (pdvData.getPostCode.length > 0) {
+              if (pdvData.getPostCode.nonEmpty) {
                 checkConditions(individualDetailsData, pdvData.getPostCode) match {
                   case (true, reason) => {
                     personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, true, reason)
@@ -86,7 +96,6 @@ class CheckDetailsController @Inject()(
       }
     }
   }
-
 
   def getIdData(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
     getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
@@ -113,9 +122,9 @@ class CheckDetailsController @Inject()(
    * @param hc
    * @returns Future (rowdId and PDV data)
    */
-  def getPDVData(validationId: String)(implicit hc: HeaderCarrier): Future[PDVResponseData] = {
+  def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponseData] = {
     for {
-      pdvValidationId <- personalDetailsValidationService.createPDVDataFromPDVMatch(validationId)
+      pdvValidationId <- personalDetailsValidationService.createPDVDataFromPDVMatch(body)
       pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvValidationId)
     } yield (pdvData) match {
       case Some(data) => data //returning a tuple of rowId and PDV data

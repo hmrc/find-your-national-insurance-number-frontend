@@ -17,9 +17,11 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.{PDVResponse, PDVResponseData, PDVSuccessResponse}
+import models.pdv.PDVRequest
+import models.PDVResponseData
 import org.mongodb.scala.MongoException
 import play.api.Logging
+import play.api.libs.json.Json
 import repositories.PersonalDetailsValidationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -30,12 +32,12 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
                                                  personalDetailsValidationRepository: PersonalDetailsValidationRepository
                                                 )(implicit val ec: ExecutionContext) extends Logging{
 
-  def createPDVDataFromPDVMatch(validationId: String)(implicit hc:HeaderCarrier): Future[String] = {
+  def createPDVDataFromPDVMatch(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[String] = {
     for {
-      pdvResponse <- getPDVMatchResult(validationId)
-      pdvValidationId <-  createPDVDataRow(pdvResponse.asInstanceOf[PDVSuccessResponse].pdvResponseData)
+      pdvResponse <- getPDVMatchResult(pdvRequest)
+      pdvValidationId <-  createPDVDataRow(pdvResponse)
     } yield pdvValidationId match {
-      case "" => throw new RuntimeException(s"Failed Creating PDV data for validation id: $validationId")
+      case "" => throw new RuntimeException(s"Failed Creating PDV data.")
       case v => {
         logger.debug(s"Successfully created PDV data for validation id: $v")
         pdvValidationId
@@ -43,14 +45,15 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     }
   }
 
-
   //get a PDV match result
-  private def getPDVMatchResult(validationId: String)(implicit hc:HeaderCarrier): Future[PDVResponse] =
-    connector.retrieveMatchingDetails(validationId) map {
-      //this can be a failed or successful match result
-      case pdvResponse: PDVSuccessResponse => pdvResponse
-      case _ => {
-        throw new RuntimeException(s"Failed getting PDV data for validation id: $validationId")
+  private def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponseData] =
+    connector.retrieveMatchingDetails2(pdvRequest) map { response =>
+        response.status match {
+        //this can be a failed or successful match result
+        case 200 =>
+          Json.parse(response.body).as[PDVResponseData]
+        case _ =>
+          throw new RuntimeException(s"Failed getting PDV data.")
       }
     }
 

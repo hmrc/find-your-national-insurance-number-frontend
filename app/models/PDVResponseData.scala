@@ -22,22 +22,28 @@ import uk.gov.hmrc.domain.Nino
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.{Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
+import java.time.{Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset}
 
-case class PersonalDetails(firstName: String, lastName: String, nino: Nino, postCode: Option[String], dateOfBirth: LocalDate)
+case class PersonalDetails(
+      firstName: String,
+      lastName: String,
+      nino: Nino,
+      dateOfBirth: LocalDate,
+      postCode: Option[String]
+  )
 object PersonalDetails {
   implicit val format: Format[PersonalDetails] = Json.format[PersonalDetails]
 }
 
 case class PDVResponseData(
-                            id: String,
-                            validationStatus: String,
-                            personalDetails: Option[PersonalDetails],
-                            lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC),
-                            reason: Option[String],
-                            validCustomer: Option[String],
-                            CRN: Option[String]
-                          )
+      id: String,
+      validationStatus: String,
+      personalDetails: Option[PersonalDetails],
+      lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC),
+      reason: Option[String],
+      validCustomer: Option[String],
+      CRN: Option[String]
+  )
 
 object PDVResponseData {
 
