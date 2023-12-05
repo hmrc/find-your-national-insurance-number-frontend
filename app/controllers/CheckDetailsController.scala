@@ -86,8 +86,7 @@ class CheckDetailsController @Inject()(
                   }
                 }
               } else {
-                // TODO - redirect to ValidDataNINOMatchedNINOHelpController when the NINO has been entered instead of a postcode in PDV
-                Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+                Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode))
               }
             }
             case _ => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
@@ -148,15 +147,15 @@ class CheckDetailsController @Inject()(
     if (!getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo))) {
       reason += "ResidentialAddressStatus is Dlo or Nfa;"
     }
-    if (!(getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode)))) {
-      reason += "ResidentialPostcode is not equal to PDVPostcode;"
-    }
+//    if (!(getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode)))) {
+//      reason += "ResidentialPostcode is not equal to PDVPostcode;"
+//    }
 
     val status = {
       idData.accountStatusType.exists(_.equals(FullLive)) &&
         idData.crnIndicator.equals(False) &&
-        getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo)) &&
-        getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode))
+        getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo)) //&&
+        //getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode))
     }
 
     (status, reason)
