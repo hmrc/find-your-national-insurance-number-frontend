@@ -17,7 +17,7 @@
 package connectors
 
 import config.FrontendAppConfig
-import models.{PDVNotFoundResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
+import models.pdv.{PDVNotFoundResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.libs.json.Json

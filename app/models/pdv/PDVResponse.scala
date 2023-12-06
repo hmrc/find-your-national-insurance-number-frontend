@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package models
+package models.pdv
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.http.HttpResponse
 
 sealed trait PDVResponse
 case class PDVSuccessResponse(pdvResponseData: PDVResponseData) extends PDVResponse
+case class PDVBadRequestResponse(r: HttpResponse) extends PDVResponse
 case class PDVNotFoundResponse(r: HttpResponse) extends PDVResponse
 case class PDVUnexpectedResponse(r: HttpResponse) extends PDVResponse
 case class PDVErrorResponse(cause: Exception) extends PDVResponse

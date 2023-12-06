@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package models
+package models.pdv
 
 import org.apache.commons.lang3.StringUtils
-import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.domain.Nino
 import play.api.libs.json._
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.{Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset}
+import java.time._
 
 case class PersonalDetails(
       firstName: String,
       lastName: String,
       nino: Nino,
-      dateOfBirth: LocalDate,
-      postCode: Option[String]
+      postCode: Option[String],
+      dateOfBirth: LocalDate
   )
 object PersonalDetails {
   implicit val format: Format[PersonalDetails] = Json.format[PersonalDetails]
@@ -50,6 +49,11 @@ object PDVResponseData {
   implicit class PDVResponseDataOps(private val pdvResponseData:PDVResponseData) extends AnyVal {
     def getPostCode: String = pdvResponseData.personalDetails match {
       case Some(pd) => pd.postCode.getOrElse(StringUtils.EMPTY)
+      case _ => StringUtils.EMPTY
+    }
+
+    def getNino: String = pdvResponseData.personalDetails match {
+      case Some(pd) => pd.nino.nino
       case _ => StringUtils.EMPTY
     }
 

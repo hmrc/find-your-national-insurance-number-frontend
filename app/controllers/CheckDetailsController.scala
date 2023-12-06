@@ -26,8 +26,8 @@ import models.individualdetails.AddressStatus._
 import models.individualdetails.CrnIndicator._
 import models.individualdetails.AddressType._
 import models.individualdetails.{Address, AddressList, IndividualDetails, ResolveMerge}
-import models.pdv.PDVRequest
-import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, PDVResponseData}
+import models.pdv.{PDVRequest, PDVResponseData}
+import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -69,29 +69,59 @@ class CheckDetailsController @Inject()(
         pdvData <- getPDVData(pdvRequest)
         idData <- getIdData(pdvData)
       } yield (pdvData, idData) match {
-        case (pdvData: PDVResponseData, Right(idData)) => {
-          idData match {
-            case individualDetailsData => {
-              auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
-                pdvData.validationStatus, individualDetailsData.crnIndicator.asString, pdvData.id, None, None, None, None))
-              if (pdvData.getPostCode.nonEmpty) {
-                checkConditions(individualDetailsData, pdvData.getPostCode) match {
-                  case (true, reason) => {
-                    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, true, reason)
-                    Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
-                  }
-                  case (false, reason) => {
-                    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, false, reason)
-                    Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-                  }
-                }
+
+        case (
+          pdvData @ PDVResponseData(id, validationStatus, personalDetails, _, _, _, _),
+          Right(idData @ IndividualDetails(_, _, accountStatusType, _, _, _, _, _, _, crnIndicator, _, addressList))
+          ) =>
+            auditService.audit(AuditUtils.buildAuditEvent(personalDetails, "StartFindYourNino",
+              validationStatus, crnIndicator.asString, id, None, None, None, None))
+
+            val orConditions =
+              validationStatus.equals("failure") ||
+                !accountStatusType.exists(_.equals(FullLive)) ||
+                  crnIndicator.equals(True) ||
+                    !getAddressTypeResidential(addressList).addressStatus.exists(_.equals(NotDlo))
+
+            if(orConditions)
+              Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+            else {
+              val idPostCode = getNPSPostCode(idData)
+              if (pdvData.getPostCode.nonEmpty){
+                if (idPostCode.equals(pdvData.getPostCode))
+                  Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
+                else
+                  Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
               } else {
+                //personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(pdvData.getNino, idPostCode)
                 Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode))
               }
             }
-            case _ => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-          }
-        }
+
+
+//        case (pdvData: PDVResponseData, Right(idData)) => {
+//          idData match {
+//            case individualDetailsData => {
+//              auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
+//                pdvData.validationStatus, individualDetailsData.crnIndicator.asString, pdvData.id, None, None, None, None))
+//              if (pdvData.getPostCode.nonEmpty) {
+//                checkConditions(individualDetailsData, pdvData.getPostCode) match {
+//                  case (true, reason) => {
+//                    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, true, reason)
+//                    Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
+//                  }
+//                  case (false, reason) => {
+//                    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, false, reason)
+//                    Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+//                  }
+//                }
+//              } else {
+//                Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode))
+//              }
+//            }
+//            case _ => Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+//          }
+//        }
       }
     }
   }
@@ -123,17 +153,21 @@ class CheckDetailsController @Inject()(
    */
   def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponseData] = {
     for {
-      pdvValidationId <- personalDetailsValidationService.createPDVDataFromPDVMatch(body)
-      pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvValidationId)
-    } yield (pdvData) match {
-      case Some(data) => data //returning a tuple of rowId and PDV data
-      case None => {
+      pdvData <- personalDetailsValidationService.createPDVDataFromPDVMatch(body)
+      //pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvValidationId)
+    } yield pdvData match {
+      case data @ PDVResponseData(_, _, _, _, _, _, _) => data //returning a tuple of rowId and PDV data
+      case _ => {
         auditService.audit(AuditUtils.buildAuditEvent(None, "FindYourNinoError",
           "failure", "Empty", "", None, Some("/checkDetails"), None, Some("No PDV data found")))
         throw new Exception("No PDV data found")
       }
     }
   }
+
+  def getNPSPostCode(idData: IndividualDetails): String =
+    getAddressTypeResidential(idData.addressList).addressPostcode.map(_.value).getOrElse("")
+
 
   def checkConditions(idData: IndividualDetails, pdvPostCode: String): (Boolean, String) = {
     var reason = ""
@@ -147,15 +181,15 @@ class CheckDetailsController @Inject()(
     if (!getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo))) {
       reason += "ResidentialAddressStatus is Dlo or Nfa;"
     }
-//    if (!(getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode)))) {
-//      reason += "ResidentialPostcode is not equal to PDVPostcode;"
-//    }
+    if (!(getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode)))) {
+      reason += "ResidentialPostcode is not equal to PDVPostcode;"
+    }
 
     val status = {
       idData.accountStatusType.exists(_.equals(FullLive)) &&
         idData.crnIndicator.equals(False) &&
-        getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo)) //&&
-        //getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode))
+        getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo)) &&
+        getAddressTypeResidential(idData.addressList).addressPostcode.exists(_.value.equals(pdvPostCode))
     }
 
     (status, reason)

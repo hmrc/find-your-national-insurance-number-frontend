@@ -17,7 +17,8 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.{PDVResponseData, PDVSuccessResponse, PersonalDetails}
+import models.pdv.{PDVResponseData, PDVSuccessResponse, PersonalDetails}
+import models.pdv
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.MockitoSugar
@@ -81,7 +82,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
   "createPDVFromValidationId" must {
     "return success string when passed a valid validationId" in {
       when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
-        .thenReturn(Future(PDVSuccessResponse(personalDetailsValidation))(ec))
+        .thenReturn(Future(pdv.PDVSuccessResponse(personalDetailsValidation))(ec))
 
       when(mockPersonalDetailsValidationRepository.insertOrReplacePDVResultData(any())(any()))
         .thenReturn(Future.successful(validationId))

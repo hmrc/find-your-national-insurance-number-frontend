@@ -16,7 +16,7 @@
 
 package util
 
-import models.PersonalDetails
+import models.pdv.PersonalDetails
 import play.api.libs.json.{JsValue, Json, OFormat}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
