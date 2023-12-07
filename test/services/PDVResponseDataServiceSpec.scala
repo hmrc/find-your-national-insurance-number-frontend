@@ -122,8 +122,8 @@ object PDVResponseDataServiceSpec {
       Some(personalDetails),
       reason = None,
       validCustomer = None,
-      CRN = None
-
+      CRN = None,
+      npsPostCode = None
     )
 
 }
