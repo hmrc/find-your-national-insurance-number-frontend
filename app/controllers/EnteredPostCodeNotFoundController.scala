@@ -18,17 +18,22 @@ package controllers
 
 import controllers.actions._
 import forms.EnteredPostCodeNotFoundFormProvider
+
 import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
 import pages.EnteredPostCodeNotFoundPage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.EnteredPostCodeNotFoundView
+import util.AuditUtils
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class EnteredPostCodeNotFoundController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -39,8 +44,10 @@ class EnteredPostCodeNotFoundController @Inject()(
                                        requireData: DataRequiredAction,
                                        formProvider: EnteredPostCodeNotFoundFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
-                                       view: EnteredPostCodeNotFoundView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                       view: EnteredPostCodeNotFoundView,
+                                       personalDetailsValidationService: PersonalDetailsValidationService,
+                                       auditService: AuditService,
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
 
@@ -62,11 +69,27 @@ class EnteredPostCodeNotFoundController @Inject()(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
-        value =>
+        value => {
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+            case Success(pdv) =>
+              auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+                "FindYourNinoOptionChosen",
+                pdv.map(_.validationStatus).getOrElse(""),
+                pdv.map(_.CRN.getOrElse("")).getOrElse(""),
+                Some(value.toString),
+                None,
+                None,
+                None,
+                None,
+                None
+              ))
+            case Failure(ex) => logger.warn(ex.getMessage)
+          }
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(EnteredPostCodeNotFoundPage, value))
-            _              <- sessionRepository.set(updatedAnswers)
+            _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(EnteredPostCodeNotFoundPage, mode, updatedAnswers))
+        }
       )
   }
 }

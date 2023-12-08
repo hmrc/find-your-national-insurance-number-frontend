@@ -25,7 +25,7 @@ sealed trait TechnicalErrorService
 
 object TechnicalErrorService extends Enumerable.Implicits {
 
-  case object TryAgain extends WithName("tryAgainForm") with TechnicalErrorService
+  case object TryAgain extends WithName("tryAgain") with TechnicalErrorService
   case object PrintForm extends WithName("printForm") with TechnicalErrorService
   case object PhoneHmrc extends WithName("phoneHMRC") with TechnicalErrorService
 

@@ -88,9 +88,10 @@ class TechnicalErrorController @Inject()(
               auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                 "FindYourNinoOptionChosen",
                 pdv.map(_.validationStatus).getOrElse(""),
-                "TODO",
-                pdv.map(_.id).getOrElse(""),
+                pdv.map(_.CRN.getOrElse("")).getOrElse(""),
                 Some(value.toString),
+                None,
+                None,
                 None,
                 None,
                 None
@@ -100,7 +101,7 @@ class TechnicalErrorController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(TechnicalErrorPage, value))
             _ <- sessionRepository.set(updatedAnswers)
-            _ = if (value.toString == "tryAgainForm") tryAgainCountRepository.insertOrIncrement(request.userId)
+            _ = if (value.toString == "tryAgain") tryAgainCountRepository.insertOrIncrement(request.userId)
           } yield Redirect(navigator.nextPage(TechnicalErrorPage, mode, updatedAnswers))
         }
       )
