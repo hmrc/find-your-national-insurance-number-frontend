@@ -72,7 +72,7 @@ class CheckDetailsController @Inject()(
           idData <- getIdData(pdvData)
         } yield (pdvData, idData) match {
           case (
-            pdvData@PDVResponseData(id, validationStatus, personalDetails, _, _, _, _),
+            pdvData@PDVResponseData(id, validationStatus, personalDetails, _, _, _, _, _),
             Right(idData@IndividualDetails(_, _, accountStatusType, _, _, _, _, _, _, crnIndicator, _, addressList))
             ) => {
             auditService.audit(AuditUtils.buildAuditEvent(personalDetails, "StartFindYourNino",
@@ -92,7 +92,7 @@ class CheckDetailsController @Inject()(
                   Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
                 }
               } else {
-                //personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(pdvData.getNino, idPostCode)
+                personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(pdvData.getNino, idPostCode)
                 Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode))
               }
             }
@@ -152,7 +152,7 @@ class CheckDetailsController @Inject()(
       pdvData <- personalDetailsValidationService.createPDVDataFromPDVMatch(body)
       //pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvValidationId)
     } yield pdvData match {
-      case data@PDVResponseData(_, _, _, _, _, _, _) => data //returning a tuple of rowId and PDV data
+      case data@PDVResponseData(_, _, _, _, _, _, _, _) => data //returning a tuple of rowId and PDV data
       case _ => {
         auditService.audit(AuditUtils.buildAuditEvent(None, "FindYourNinoError",
           "failure", "Empty", "", None, Some("/checkDetails"), None, Some("No PDV data found")))

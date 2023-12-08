@@ -18,14 +18,19 @@ package controllers
 
 import controllers.actions._
 import forms.ConfirmYourPostcodeFormProvider
+import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
+import models.pdv.{PDVResponseData, PersonalDetails}
 
 import javax.inject.Inject
-import models.{Mode, NormalMode}
+import models.{Mode, NormalMode, UserAnswers}
 import navigation.Navigator
-import pages.ConfirmYourPostcodePage
+import pages.{ConfirmYourPostcodePage, SelectNINOLetterAddressPage}
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
+import services.{NPSFMNService, PersonalDetailsValidationService}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ConfirmYourPostcodeView
 
@@ -40,8 +45,10 @@ class ConfirmYourPostcodeController @Inject()(
                                         requireData: DataRequiredAction,
                                         formProvider: ConfirmYourPostcodeFormProvider,
                                         val controllerComponents: MessagesControllerComponents,
-                                        view: ConfirmYourPostcodeView
-                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                        view: ConfirmYourPostcodeView,
+                                        personalDetailsValidationService: PersonalDetailsValidationService,
+                                        npsFMNService: NPSFMNService
+                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
 
@@ -66,8 +73,46 @@ class ConfirmYourPostcodeController @Inject()(
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmYourPostcodePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(routes.EnteredPostCodeNotFoundController.onPageLoad(mode = NormalMode)) // TODO replace with redirection based on postcode matching or not matching
+            _ <- sessionRepository.set(updatedAnswers)
+            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse(""))
+            redirectBasedOnMatch <- pdvData match {
+              case Some(pdvValidData) => pdvValidData.npsPostCode match {
+                case Some(npsPostCode) if npsPostCode.equalsIgnoreCase(value) =>
+                  npsLetterChecks(pdvValidData, npsPostCode, mode, updatedAnswers)
+                case None => Future(Redirect(routes.TechnicalErrorController.onPageLoad()))
+                case _ => Future(Redirect(routes.EnteredPostCodeNotFoundController.onPageLoad(mode = NormalMode)))
+              }
+              case None => Future(Redirect(routes.TechnicalErrorController.onPageLoad()))
+            }
+          } yield redirectBasedOnMatch
       )
   }
+
+  def npsLetterChecks(personalDetailsResponse: PDVResponseData, npsPostCode: String, mode: Mode, updatedAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Result] = {
+    personalDetailsResponse.personalDetails match {
+      case Some(personalDetails: PersonalDetails) =>
+        for {
+          status <- npsFMNService.updateDetails(personalDetails.nino.nino, getNPSFMNRequest(personalDetails, npsPostCode))
+        } yield status match {
+          case LetterIssuedResponse() =>
+            Redirect(routes.NINOLetterPostedConfirmationController.onPageLoad())
+          case RLSDLONFAResponse(_, _) =>
+            Redirect(routes.SendLetterErrorController.onPageLoad(mode))
+          case TechnicalIssueResponse(_ , _) =>
+            Redirect(routes.TechnicalErrorController.onPageLoad())
+          case _ =>
+            logger.warn("Unknown NPS FMN API response")
+            Redirect(routes.TechnicalErrorController.onPageLoad())
+        }
+      case None => Future(Redirect(routes.TechnicalErrorController.onPageLoad()))
+    }
+  }
+
+  private def getNPSFMNRequest(personDetails: PersonalDetails, npsPostCode: String): NPSFMNRequest =
+      NPSFMNRequest(
+        personDetails.firstName,
+        personDetails.lastName,
+        personDetails.dateOfBirth.toString,
+        npsPostCode
+      )
 }
