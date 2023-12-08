@@ -166,7 +166,7 @@ class CheckDetailsController @Inject()(
       case ex: HttpException =>
         auditService.audit(AuditUtils.buildAuditEvent(None, "FindYourNinoError",
           "", "", None, None, None, Some("/checkDetails"), Some(ex.responseCode.toString), Some(ex.message)))
-        logger.error(s"An error occurred, redirecting....: ${ex.getMessage}" + ex.asInstanceOf[uk.gov.hmrc.http.NotFoundException].responseCode)
+        logger.debug(ex.getMessage)
         throw ex
     }
   }
