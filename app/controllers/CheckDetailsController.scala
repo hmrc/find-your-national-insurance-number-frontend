@@ -71,16 +71,17 @@ class CheckDetailsController @Inject()(
           pdvData <- getPDVData(pdvRequest)
           idData <- getIdData(pdvData)
         } yield (pdvData, idData) match {
-          case (
-            pdvData@PDVResponseData(id, validationStatus, personalDetails, _, _, _, _, _),
-            Right(idData@IndividualDetails(_, _, accountStatusType, _, _, _, _, _, _, crnIndicator, _, addressList))
-            ) => {
-            auditService.audit(AuditUtils.buildAuditEvent(personalDetails, "StartFindYourNino",
-              validationStatus, crnIndicator.asString, None, None, None, None, None, None))
+          case (pdvData, Left(idData)) =>
+            auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
+              pdvData.validationStatus, "", None, None, None, None, None, None))
+            Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+          case (pdvData, Right(idData)) => {
+            auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
+              pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
 
             val NPSChecks = checkConditions(idData)
 
-            if (!NPSChecks._1 || validationStatus.equals("failure")) {
+            if (!NPSChecks._1 || pdvData.validationStatus.equals("failure")) {
               Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
             } else {
               personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, NPSChecks._1, NPSChecks._2)
