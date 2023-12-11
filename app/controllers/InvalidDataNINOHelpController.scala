@@ -75,8 +75,9 @@ class InvalidDataNINOHelpController @Inject()(
                 "FindYourNinoOptionChosen",
                 pdv.map(_.validationStatus).getOrElse(""),
                 pdv.map(_.CRN.getOrElse("")).getOrElse(""),
-                pdv.map(_.id).getOrElse(""),
                 Some(value.toString),
+                None,
+                None,
                 None,
                 None,
                 None
