@@ -47,7 +47,7 @@ class SendLetterErrorController @Inject()(
                                            personalDetailsValidationService: PersonalDetailsValidationService,
                                            auditService: AuditService,
                                            val controllerComponents: MessagesControllerComponents
-                                         )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging{
+                                         )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
 
@@ -74,8 +74,9 @@ class SendLetterErrorController @Inject()(
                 "FindYourNinoOptionChosen",
                 pdv.map(_.validationStatus).getOrElse(""),
                 pdv.map(_.CRN.getOrElse("")).getOrElse(""),
-                pdv.map(_.id).getOrElse(""),
                 Some(value.toString),
+                None,
+                None,
                 None,
                 None,
                 None

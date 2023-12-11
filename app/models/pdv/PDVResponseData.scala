@@ -14,36 +14,47 @@
  * limitations under the License.
  */
 
-package models
+package models.pdv
 
 import org.apache.commons.lang3.StringUtils
-import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.domain.Nino
 import play.api.libs.json._
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.{Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset, ZonedDateTime}
+import java.time._
 
-case class PersonalDetails(firstName: String, lastName: String, nino: Nino, postCode: Option[String], dateOfBirth: LocalDate)
+case class PersonalDetails(
+      firstName: String,
+      lastName: String,
+      nino: Nino,
+      postCode: Option[String],
+      dateOfBirth: LocalDate
+  )
 object PersonalDetails {
   implicit val format: Format[PersonalDetails] = Json.format[PersonalDetails]
 }
 
 case class PDVResponseData(
-                            id: String,
-                            validationStatus: String,
-                            personalDetails: Option[PersonalDetails],
-                            lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC),
-                            reason: Option[String],
-                            validCustomer: Option[String],
-                            CRN: Option[String]
-                          )
+      id: String,
+      validationStatus: String,
+      personalDetails: Option[PersonalDetails],
+      lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC),
+      reason: Option[String],
+      validCustomer: Option[String],
+      CRN: Option[String],
+      npsPostCode: Option[String]
+  )
 
 object PDVResponseData {
 
   implicit class PDVResponseDataOps(private val pdvResponseData:PDVResponseData) extends AnyVal {
     def getPostCode: String = pdvResponseData.personalDetails match {
       case Some(pd) => pd.postCode.getOrElse(StringUtils.EMPTY)
+      case _ => StringUtils.EMPTY
+    }
+
+    def getNino: String = pdvResponseData.personalDetails match {
+      case Some(pd) => pd.nino.nino
       case _ => StringUtils.EMPTY
     }
 
@@ -60,7 +71,8 @@ object PDVResponseData {
           Reads.pure(Instant.now) and
         (__ \ "reason").readNullable[String] and
         (__ \ "validCustomer").readNullable[String] and
-        (__ \ "CRN").readNullable[String]
+        (__ \ "CRN").readNullable[String] and
+        (__ \ "npsPostCode").readNullable[String]
       )(PDVResponseData.apply _)
   }
 
@@ -75,7 +87,8 @@ object PDVResponseData {
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat) and
         (__ \ "reason").writeNullable[String] and
         (__ \ "validCustomer").writeNullable[String] and
-        (__ \ "CRN").writeNullable[String]
+        (__ \ "CRN").writeNullable[String] and
+        (__ \ "npsPostCode").writeNullable[String]
       )(unlift(PDVResponseData.unapply))
   }
 

@@ -18,30 +18,38 @@ package controllers
 
 import controllers.actions._
 import forms.ConfirmYourPostcodeFormProvider
+import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
+import models.pdv.{PDVResponseData, PersonalDetails}
 
 import javax.inject.Inject
-import models.{Mode, NormalMode}
+import models.{Mode, NormalMode, UserAnswers}
 import navigation.Navigator
 import pages.ConfirmYourPostcodePage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
+import services.{AuditService, NPSFMNService, PersonalDetailsValidationService}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ConfirmYourPostcodeView
+import util.AuditUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmYourPostcodeController @Inject()(
                                         override val messagesApi: MessagesApi,
                                         sessionRepository: SessionRepository,
-                                        navigator: Navigator,
                                         identify: IdentifierAction,
                                         getData: DataRetrievalAction,
                                         requireData: DataRequiredAction,
                                         formProvider: ConfirmYourPostcodeFormProvider,
                                         val controllerComponents: MessagesControllerComponents,
-                                        view: ConfirmYourPostcodeView
-                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                        view: ConfirmYourPostcodeView,
+                                        personalDetailsValidationService: PersonalDetailsValidationService,
+                                        npsFMNService: NPSFMNService,
+                                        auditService: AuditService
+                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
 
@@ -63,11 +71,107 @@ class ConfirmYourPostcodeController @Inject()(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
-        value =>
+        value => {
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmYourPostcodePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(routes.EnteredPostCodeNotFoundController.onPageLoad(mode = NormalMode)) // TODO replace with redirection based on postcode matching or not matching
+            _ <- sessionRepository.set(updatedAnswers)
+            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse(""))
+            redirectBasedOnMatch <- pdvData match {
+              case Some(pdvValidData) => pdvValidData.npsPostCode match {
+                case Some(npsPostCode) if npsPostCode.equalsIgnoreCase(value) =>
+                  auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
+                    "FindYourNinoConfirmPostcode",
+                    pdvData.map(_.validationStatus).getOrElse(""),
+                    pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+                    None,
+                    Some(value),
+                    Some("true"),
+                    None,
+                    None,
+                    None
+                  ))
+                  npsLetterChecks(pdvValidData, npsPostCode, mode, updatedAnswers)
+                case None =>
+                  auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
+                    "FindYourNinoConfirmPostcode",
+                    pdvData.map(_.validationStatus).getOrElse(""),
+                    pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+                    None,
+                    Some(value),
+                    Some("false"),
+                    None,
+                    None,
+                    None
+                  ))
+                  Future(Redirect(routes.TechnicalErrorController.onPageLoad()))
+                case _ =>
+                  auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
+                    "FindYourNinoConfirmPostcode",
+                    pdvData.map(_.validationStatus).getOrElse(""),
+                    pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+                    None,
+                    Some(value),
+                    Some("false"),
+                    None,
+                    None,
+                    None
+                  ))
+                  Future(Redirect(routes.EnteredPostCodeNotFoundController.onPageLoad(mode = NormalMode)))
+              }
+              case None => Future(Redirect(routes.TechnicalErrorController.onPageLoad()))
+            }
+          } yield redirectBasedOnMatch
+        }
       )
   }
+
+  def npsLetterChecks(personalDetailsResponse: PDVResponseData, npsPostCode: String, mode: Mode, updatedAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Result] = {
+    personalDetailsResponse.personalDetails match {
+      case Some(personalDetails: PersonalDetails) =>
+        for {
+          status <- npsFMNService.updateDetails(personalDetails.nino.nino, getNPSFMNRequest(personalDetails, npsPostCode))
+        } yield status match {
+          case LetterIssuedResponse() =>
+            Redirect(routes.NINOLetterPostedConfirmationController.onPageLoad())
+          case RLSDLONFAResponse(responseStatus, responseMessage) =>
+            auditService.audit(AuditUtils.buildAuditEvent(Some(personalDetails),
+              "FindYourNinoError",
+              personalDetailsResponse.validationStatus,
+              personalDetailsResponse.CRN.getOrElse(""),
+              None,
+              None,
+              None,
+              Some("/confirm-your-postcode"),
+              Some(responseStatus.toString),
+              Some(responseMessage)
+            ))
+            Redirect(routes.SendLetterErrorController.onPageLoad(mode))
+          case TechnicalIssueResponse(responseStatus, responseMessage) =>
+            auditService.audit(AuditUtils.buildAuditEvent(Some(personalDetails),
+              "FindYourNinoError",
+              personalDetailsResponse.validationStatus,
+              personalDetailsResponse.CRN.getOrElse(""),
+              None,
+              None,
+              None,
+              Some("/confirm-your-postcode"),
+              Some(responseStatus.toString),
+              Some(responseMessage)
+            ))
+            Redirect(routes.TechnicalErrorController.onPageLoad())
+          case _ =>
+            logger.warn("Unknown NPS FMN API response")
+            Redirect(routes.TechnicalErrorController.onPageLoad())
+        }
+      case None => Future(Redirect(routes.TechnicalErrorController.onPageLoad()))
+    }
+  }
+
+  private def getNPSFMNRequest(personDetails: PersonalDetails, npsPostCode: String): NPSFMNRequest =
+      NPSFMNRequest(
+        personDetails.firstName,
+        personDetails.lastName,
+        personDetails.dateOfBirth.toString,
+        npsPostCode
+      )
 }

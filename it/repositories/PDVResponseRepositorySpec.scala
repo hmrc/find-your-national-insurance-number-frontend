@@ -1,7 +1,7 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.{PDVResponseData, PersonalDetails}
+import models.pdv.{PDVResponseData, PersonalDetails}
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}

@@ -16,7 +16,7 @@
 
 package util
 
-import models.PersonalDetails
+import models.pdv.PersonalDetails
 import play.api.libs.json.{JsValue, Json, OFormat}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
@@ -32,6 +32,8 @@ object AuditUtils {
                                     personalDetailsValidationIdentifierType: String,
                                     identifierFromPersonalDetailsValidation: String,
                                     findMyNinoOption: Option[String],
+                                    findMyNinoPostcodeEntered: Option[String],
+                                    findMyNinoPostcodeMatched: Option[String],
                                     pageErrorGeneratedFrom: Option[String],
                                     errorStatus: Option[String],
                                     errorReason: Option[String]
@@ -62,7 +64,8 @@ object AuditUtils {
   }
 
   private def buildDetails(postcode: Option[String], nino: Option[String], validationOutcome: String, identifierType: String,
-                           pdvId: String, findMyNinoOption: Option[String], pageErrorGeneratedFrom: Option[String],
+                           pdvId: String, findMyNinoOption: Option[String], findMyNinoPostcodeEntered: Option[String],
+                           findMyNinoPostcodeMatched: Option[String], pageErrorGeneratedFrom: Option[String],
                            errorStatus: Option[String], errorReason: Option[String]): YourDetailsAuditEvent = {
 
     YourDetailsAuditEvent(
@@ -72,13 +75,15 @@ object AuditUtils {
       identifierType,
       pdvId,
       findMyNinoOption,
+      findMyNinoPostcodeEntered,
+      findMyNinoPostcodeMatched,
       pageErrorGeneratedFrom,
       errorStatus,
       errorReason
     )
   }
 
-  def checkCRN(crnIndicator: String): String = {
+  private def checkCRN(crnIndicator: String): String = {
     crnIndicator match {
       case "true" => "CRN"
       case "false" => "Nino"
@@ -86,7 +91,7 @@ object AuditUtils {
     }
   }
 
-  def getValidationOutcome(validationOutcome: String): String = {
+  private def getValidationOutcome(validationOutcome: String): String = {
     validationOutcome match {
       case "success" => "Matched"
       case "failure" => "Unmatched"
@@ -94,13 +99,23 @@ object AuditUtils {
     }
   }
 
-  def getFindMyNinoOption(findMyNinoOption: Option[String]): Option[String] = {
+  private def getFindMyNinoOption(findMyNinoOption: Option[String]): Option[String] = {
     findMyNinoOption match {
-      case Some("onlineService") => Some("Online")
+      case Some("true") => Some("Send letter")
+      case Some("false") => Some("No to send letter")
       case Some("printForm") => Some("Print and Post")
       case Some("phoneHMRC") => Some("Phone HMRC")
       case Some("postCode") => Some("Matched address")
       case Some("notThisAddress") => Some("Other address")
+      case Some("tryAgain") => Some("Try again")
+      case _ => None
+    }
+  }
+
+  private def getFindMyNinoPostcodeMatched(postcodeMatched: Option[String]): Option[String] = {
+    postcodeMatched match {
+      case Some("true") => Some("Matched")
+      case Some("false") => Some("Unmatched")
       case _ => None
     }
   }
@@ -110,8 +125,9 @@ object AuditUtils {
                       auditType: String,
                       validationOutcome: String,
                       identifierType: String,
-                      pdvId: String,
                       findMyNinoOption: Option[String],
+                      findMyNinoPostcodeEntered: Option[String],
+                      findMyNinoPostcodeMatched: Option[String],
                       pageErrorGeneratedFrom: Option[String],
                       errorStatus: Option[String],
                       errorReason: Option[String]
@@ -124,8 +140,10 @@ object AuditUtils {
             if (!usePostcode) Some(pd.nino.nino) else None,
             getValidationOutcome(validationOutcome),
             checkCRN(identifierType),
-            pdvId,
+            pd.nino.nino,
             getFindMyNinoOption(findMyNinoOption),
+            findMyNinoPostcodeEntered,
+            getFindMyNinoPostcodeMatched(findMyNinoPostcodeMatched),
             pageErrorGeneratedFrom,
             errorStatus,
             errorReason)))
@@ -135,8 +153,10 @@ object AuditUtils {
             None,
             getValidationOutcome(validationOutcome),
             checkCRN(identifierType),
-            pdvId,
+            "",
             getFindMyNinoOption(findMyNinoOption),
+            findMyNinoPostcodeEntered,
+            getFindMyNinoPostcodeMatched(findMyNinoPostcodeMatched),
             pageErrorGeneratedFrom,
             errorStatus,
             errorReason)))

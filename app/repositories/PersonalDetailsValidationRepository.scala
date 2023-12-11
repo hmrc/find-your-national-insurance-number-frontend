@@ -19,7 +19,7 @@ package repositories
 import com.google.inject.{Inject, Singleton}
 import com.mongodb.client.model.Updates
 import config.FrontendAppConfig
-import models.PDVResponseData
+import models.pdv.PDVResponseData
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.model._
 import play.api.Logging
@@ -69,7 +69,7 @@ class PersonalDetailsValidationRepository @Inject()(
     }
   }
 
-  def updateCustomerValidityWithReason(id: String, validCustomer: Boolean, reason: String)(implicit ec: ExecutionContext) = {
+  def updateCustomerValidityWithReason(id: String, validCustomer: Boolean, reason: String)(implicit ec: ExecutionContext): Future[String] = {
     logger.info(s"Updating one in $collectionName table")
     collection.updateMany(Filters.equal("id", id),
         Updates.combine(
@@ -84,6 +84,18 @@ class PersonalDetailsValidationRepository @Inject()(
     }
   }
 
+  def updatePDVDataWithNPSPostCode(nino: String, npsPostCode: String)(implicit ec: ExecutionContext): Future[String] = {
+    logger.info(s"Updating one in $collectionName table")
+    collection.updateMany(Filters.equal("personalDetails.nino", nino),
+        Updates.combine(
+          Updates.set("npsPostCode", npsPostCode)))
+      .toFuture()
+      .map(_ => nino) recover {
+      case e: MongoWriteException if e.getCode == 11000 =>
+        logger.warn(s"error updating $collectionName table")
+        ""
+    }
+  }
 
   def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] = {
     collection.find(Filters.equal("id", id))

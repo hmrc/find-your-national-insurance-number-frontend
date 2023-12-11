@@ -23,12 +23,17 @@ import javax.inject.Inject
 import models.{Mode, NormalMode}
 import navigation.Navigator
 import pages.ValidDataNINOMatchedNINOHelpPage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import util.AuditUtils
 import views.html.ValidDataNINOMatchedNINOHelpView
+
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class ValidDataNINOMatchedNINOHelpController @Inject()(
                                          override val messagesApi: MessagesApi,
@@ -39,8 +44,10 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
                                          requireData: DataRequiredAction,
                                          formProvider: ValidDataNINOMatchedNINOHelpFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
-                                         view: ValidDataNINOMatchedNINOHelpView
-                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                         view: ValidDataNINOMatchedNINOHelpView,
+                                         auditService: AuditService,
+                                         personalDetailsValidationService: PersonalDetailsValidationService
+                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
 
@@ -60,6 +67,22 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode))),
         value => {
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+            case Success(pdv) =>
+              auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+                "FindYourNinoOptionChosen",
+                pdv.map(_.validationStatus).getOrElse(""),
+                pdv.map(_.CRN.getOrElse("")).getOrElse(""),
+                Some(value.toString),
+                None,
+                None,
+                None,
+                None,
+                None
+              ))
+            case Failure(ex) =>
+              logger.warn(ex.getMessage)
+          }
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(ValidDataNINOMatchedNINOHelpPage, value))
             _ <- sessionRepository.set(updatedAnswers)

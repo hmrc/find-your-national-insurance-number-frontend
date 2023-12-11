@@ -15,17 +15,16 @@
  */
 
 package controllers
-/*
+
 import base.SpecBase
 import models.NormalMode
+import models.pdv.PDVResponseData
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.inject
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.PersonalDetailsValidationService
-import services.PDVResponseDataServiceSpec.personalDetailsValidation
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
 
@@ -37,6 +36,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
     val validationId = "31423424242423r23g4resds"
     val mockPersonalDetailsValidationService =  mock[PersonalDetailsValidationService]
+    val mockPDVResponseData = mock[PDVResponseData]
 
     "must return OK and the correct view for a GET" in {
 
@@ -47,13 +47,10 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         .build()
 
       when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
-        .thenReturn(Future.successful(validationId))
-
-      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByValidationId(any()))
-        .thenReturn(Future.successful(Some(personalDetailsValidation)))
+        .thenReturn(Future.successful(mockPDVResponseData))
 
       running(application) {
-        val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode, validationId).url)
+        val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode).url)
 
         val result = route(application, request).value
 
@@ -67,4 +64,3 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
   }
 }
-*/
