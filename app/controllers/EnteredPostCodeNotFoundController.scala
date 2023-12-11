@@ -46,7 +46,7 @@ class EnteredPostCodeNotFoundController @Inject()(
                                        val controllerComponents: MessagesControllerComponents,
                                        view: EnteredPostCodeNotFoundView,
                                        personalDetailsValidationService: PersonalDetailsValidationService,
-                                       auditService: AuditService,
+                                       auditService: AuditService
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
