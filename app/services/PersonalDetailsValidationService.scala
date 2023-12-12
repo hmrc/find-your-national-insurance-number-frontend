@@ -66,14 +66,6 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
         logger.warn(s"Failed creating PDV data row.")
         throw new RuntimeException(s"Failed creating PDV data row.")
     }
-//    personalDetailsValidationRepository.insertOrReplacePDVResultData(personalDetailsValidation) map {
-//      case id => id //this is validation id
-//    } recover {
-//      case e: MongoException => {
-//        logger.warn(s"Failed creating PDV data row for validation id: ${personalDetailsValidation.id}, ${e.getMessage}")
-//        ""
-//      }
-//    }
   }
 
   //add a function to update the PDV data row with the a validationStatus which is boolean value
@@ -99,17 +91,6 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
         false
     }
   }
-
-//  def getPersonalDetailsValidationByValidationId(validationId: String): Future[Option[PDVResponseData]] = {
-//    personalDetailsValidationRepository.findByValidationId(validationId) map {
-//      case Some(pdvResponseData) => Some(pdvResponseData)
-//      case _ => None
-//    } recover({
-//      case e: MongoException =>
-//        logger.warn(s"Failed finding PDV data by validationid: $validationId, ${e.getMessage}")//val errorCode = e.getCode
-//        None
-//    })
-//  }
 
   def getPersonalDetailsValidationByNino(nino: String): Future[Option[PDVResponseData]] = {
     personalDetailsValidationRepository.findByNino(nino) map {

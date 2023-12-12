@@ -19,13 +19,14 @@ package controllers
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
 import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
-import models.{Mode, PersonDetailsResponse, PersonDetailsSuccessResponse, SelectNINOLetterAddress}
+import models.pdv.PDVResponseData
+import models.{Mode, SelectNINOLetterAddress}
 import navigation.Navigator
 import pages.SelectNINOLetterAddressPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.{AuditService, CitizenDetailsService, NPSFMNService, PersonalDetailsValidationService}
+import services.{AuditService, NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SelectNINOLetterAddressView
 import org.apache.commons.lang3.StringUtils
@@ -47,7 +48,6 @@ class SelectNINOLetterAddressController @Inject()(
                                        formProvider: SelectNINOLetterAddressFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: SelectNINOLetterAddressView,
-                                       citizenDetailsService: CitizenDetailsService,
                                        personalDetailsValidationService: PersonalDetailsValidationService,
                                        auditService: AuditService,
                                        npsFMNService: NPSFMNService
@@ -63,8 +63,8 @@ class SelectNINOLetterAddressController @Inject()(
         }
 
       for {
-        personalDetails <- citizenDetailsService.getPersonalDetails(request.nino.getOrElse(StringUtils.EMPTY))
-        postCode = getPostCode(personalDetails)
+        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse(""))
+        postCode = getPostCode(pdvData)
       } yield Ok(view(preparedForm, mode, postCode))
   }
 
@@ -75,8 +75,8 @@ class SelectNINOLetterAddressController @Inject()(
       form.bindFromRequest().fold(
         formWithErrors =>
           for {
-            personalDetails <- citizenDetailsService.getPersonalDetails(nino)
-            postCode = getPostCode(personalDetails)
+            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
+            postCode = getPostCode(pdvData)
           } yield BadRequest(view(formWithErrors, mode, postCode)),
 
         value => {
@@ -98,8 +98,8 @@ class SelectNINOLetterAddressController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectNINOLetterAddressPage, value))
             _ <- sessionRepository.set(updatedAnswers)
-            personalDetails <- citizenDetailsService.getPersonalDetails(nino)
-            status <- npsFMNService.updateDetails(nino, getNPSFMNRequest(personalDetails))
+            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
+            status <- npsFMNService.updateDetails(nino, getNPSFMNRequest(pdvData))
           } yield {
             updatedAnswers.get(SelectNINOLetterAddressPage) match {
               case Some(SelectNINOLetterAddress.NotThisAddress) =>
@@ -151,22 +151,22 @@ class SelectNINOLetterAddressController @Inject()(
       )
   }
 
-  private def getPostCode(personDetailsResponse: PersonDetailsResponse): String =
-    personDetailsResponse match {
-      case PersonDetailsSuccessResponse(pd) => pd.getPostCode
-      case _                   => StringUtils.EMPTY
+  private def getPostCode(pdvResponseData: Option[PDVResponseData]): String =
+    pdvResponseData match {
+      case Some(pd) => pd.getPostCode
+      case _ => StringUtils.EMPTY
     }
 
-  private def getNPSFMNRequest(personDetailsResponse: PersonDetailsResponse): NPSFMNRequest =
-    personDetailsResponse match {
-      case PersonDetailsSuccessResponse(pd) =>
+  private def getNPSFMNRequest(pdvResponseData: Option[PDVResponseData]): NPSFMNRequest =
+    pdvResponseData match {
+      case Some(pd) if pd.personalDetails.isDefined =>
         NPSFMNRequest(
-          pd.person.getFirstName,
-          pd.person.getLastName,
-          pd.person.getDateOfBirth,
+          pd.getFirstName,
+          pd.getLastName,
+          pd.getDateOfBirth,
           pd.getPostCode
         )
-      case _                   => NPSFMNRequest.empty
+      case _ => NPSFMNRequest.empty
     }
 
 }

@@ -17,8 +17,7 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.pdv.{PDVResponseData, PDVSuccessResponse, PersonalDetails}
-import models.pdv
+import models.pdv.{PDVResponseData, PersonalDetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.MockitoSugar
@@ -42,25 +41,6 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
     reset(mockConnector, mockPersonalDetailsValidationRepository)
   }
 
-/*  "getPersonalDetailsValidationByValidationId" must {
-    "return the details when validationId exists" in {
-
-      when(mockPersonalDetailsValidationRepository.findByValidationId(eqTo(validationId))(any()))
-        .thenReturn(Future.successful(Option(personalDetailsValidation)))
-      personalDetailsValidationService.getPersonalDetailsValidationByValidationId(validationId).map { result =>
-        result mustBe Some(personalDetailsValidation)
-      }(ec)
-    }
-    "return None when validationId does NOT exist" in {
-      when(mockPersonalDetailsValidationRepository.findByValidationId(eqTo("test2"))(any()))
-        .thenReturn(Future.successful(None))
-
-      personalDetailsValidationService.getPersonalDetailsValidationByValidationId("test2").map { result =>
-        result mustBe None
-      }(ec)
-    }
-  }*/
-
   "getPersonalDetailsValidationByNino" must {
     "return the details when nino exists" in {
       when(mockPersonalDetailsValidationRepository.findByNino(eqTo(fakeNino.nino))(any()))
@@ -78,20 +58,6 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
       }(ec)
     }
   }
-
-//  "createPDVFromValidationId" must {
-//    "return success string when passed a valid validationId" in {
-//      when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
-//        .thenReturn(Future(pdv.PDVSuccessResponse(personalDetailsValidation))(ec))
-//
-//      when(mockPersonalDetailsValidationRepository.insertOrReplacePDVResultData(any())(any()))
-//        .thenReturn(Future.successful(validationId))
-//
-//      personalDetailsValidationService.createPDVDataFromPDVMatch(validationId)(hc).map { result =>
-//        result mustBe validationId
-//      }(ec)
-//    }
-//  }
 
 }
 
