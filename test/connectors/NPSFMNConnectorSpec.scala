@@ -104,7 +104,7 @@ class NPSFMNConnectorSpec
   "NPS FMN Connector" must {
 
     trait LocalSetup extends SpecSetup {
-      def url(nino: String) = s"/sca-nino-stubs/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/${nino}"
+      def url(nino: String) = s"/find-your-national-insurance-number/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/${nino}"
     }
 
     "return Ok (200) when called with an invalid nino" in new LocalSetup {
