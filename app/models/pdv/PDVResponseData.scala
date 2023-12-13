@@ -58,6 +58,20 @@ object PDVResponseData {
       case _ => StringUtils.EMPTY
     }
 
+    def getFirstName: String = pdvResponseData.personalDetails match {
+      case Some(pd) => pd.firstName
+      case _ => StringUtils.EMPTY
+    }
+
+    def getLastName: String = pdvResponseData.personalDetails match {
+      case Some(pd) => pd.lastName
+      case _ => StringUtils.EMPTY
+    }
+
+    def getDateOfBirth: String = pdvResponseData.personalDetails match {
+      case Some(pd) => pd.dateOfBirth.toString
+      case _ => StringUtils.EMPTY
+    }
   }
 
   val reads: Reads[PDVResponseData] = {

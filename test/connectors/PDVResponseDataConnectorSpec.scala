@@ -16,21 +16,18 @@
 
 package connectors
 
-
 import config.FrontendAppConfig
-import models.pdv.{PDVNotFoundResponse, PDVRequest, PDVResponseData, PDVSuccessResponse, PersonalDetails}
+import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.libs.json.Json
 import play.api.test.{DefaultAwaitTimeout, Injecting}
-import org.mockito.ArgumentMatchers.any
 import play.api.mvc.Result
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.http.HttpResponse._
 import uk.gov.hmrc.http.client.HttpClientV2
 import util.WireMockHelper
-import play.api.mvc.Results.{BadRequest, NotFound, Ok}
+import play.api.mvc.Results.Ok
 
 import java.time.{LocalDate, LocalDateTime, ZoneId, ZoneOffset}
 import scala.util.Random

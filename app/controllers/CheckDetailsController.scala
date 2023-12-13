@@ -71,7 +71,7 @@ class CheckDetailsController @Inject()(
           pdvData <- getPDVData(pdvRequest)
           idData <- getIdData(pdvData)
         } yield (pdvData, idData) match {
-          case (pdvData, Left(idData)) =>
+          case (pdvData, Left(_)) =>
             auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
               pdvData.validationStatus, "", None, None, None, None, None, None))
             Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
@@ -120,7 +120,6 @@ class CheckDetailsController @Inject()(
     }
   }
 
-
   def getIdData(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
     val idData = getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
       case Some(data) => data.nino.nino
@@ -156,7 +155,6 @@ class CheckDetailsController @Inject()(
   def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponseData] = {
     val p = for {
       pdvData <- personalDetailsValidationService.createPDVDataFromPDVMatch(body)
-      //pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByValidationId(pdvValidationId)
     } yield pdvData match {
       case data@PDVResponseData(_, _, _, _, _, _, _, _) => data //returning a tuple of rowId and PDV data
       case _ => {
@@ -193,7 +191,6 @@ class CheckDetailsController @Inject()(
       reason += "ResidentialAddressStatus is Dlo or Nfa;"
     }
 
-
     val status = {
       idData.accountStatusType.exists(_.equals(FullLive)) &&
         idData.crnIndicator.equals(False) &&
@@ -202,7 +199,6 @@ class CheckDetailsController @Inject()(
     }
 
     (status, reason)
-
   }
 
 }

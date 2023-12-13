@@ -17,48 +17,18 @@
 package connectors
 
 import config.FrontendAppConfig
-import models.{CorrelationId, pdv}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import com.google.inject.{Inject, Singleton}
-import models.pdv.{PDVErrorResponse, PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PDVUnexpectedResponse}
+import models.pdv.PDVRequest
 import play.api.Logging
-import services.http.SimpleHttp
 import uk.gov.hmrc.http.client.HttpClientV2
-import play.api.http.Status._
-import play.api.libs.json.{JsValue, Json, OFormat, Writes}
-import play.api.libs.ws.BodyWritable
 import models.pdv.PDVRequest._
 
 import java.net.URL
-import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PersonalDetailsValidationConnector @Inject()(val httpClientV2: HttpClientV2, config: FrontendAppConfig) extends Logging {
-
-
-//  def retrieveMatchingDetails(validationId: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[PDVResponse] = {
-//    simpleHttp.get[PDVResponse](s"$personalDetailsValidationBaseUrl/personal-details-validation/$validationId")(
-//      onComplete = {
-//        case response if response.status >= 200 && response.status < 300 =>
-//          pdv.PDVSuccessResponse(response.json.as[PDVResponseData])
-//
-//        case response if response.status == NOT_FOUND => {
-//          logger.warn("Unable to find personal details record in personal-details-validation")
-//          PDVNotFoundResponse(response)
-//        }
-//
-//        case response =>
-//          if (response.status >= INTERNAL_SERVER_ERROR)
-//            logger.warn(s"Unexpected ${response.status} response getting personal details record from PDV")
-//          PDVUnexpectedResponse(response)
-//      },
-//      onError = { e =>
-//        logger.warn("Error getting personal details record from personal-details-validation", e)
-//        PDVErrorResponse(e)
-//      }
-//    )
-//  }
 
   def retrieveMatchingDetails(pdvRequest: PDVRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse] = {
     val url = s"${config.pdvBaseUrl}/personal-details-validation/retrieve-by-session"

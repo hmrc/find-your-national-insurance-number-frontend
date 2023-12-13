@@ -34,7 +34,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
   "CheckDetailsController" - {
 
-    val validationId = "31423424242423r23g4resds"
     val mockPersonalDetailsValidationService =  mock[PersonalDetailsValidationService]
     val mockPDVResponseData = mock[PDVResponseData]
 
