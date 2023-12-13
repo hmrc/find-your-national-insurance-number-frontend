@@ -49,7 +49,7 @@ class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2, appConfig: Fr
                    )(implicit hc: HeaderCarrier,correlationId: CorrelationId, ec: ExecutionContext): Future[HttpResponse] = {
     val url = s"${appConfig.npsFMNAPIUrl}/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/$nino"
     val headers = Seq("correlationId" -> correlationId.value.toString,
-      "gov-uk-originator-id" -> "FIND_MY_NINO")
+      "gov-uk-originator-id" -> appConfig.npsFMNAPIOriginatorId)
 
     httpClientV2
       .post(new URL(url))
