@@ -71,7 +71,7 @@ class CheckDetailsController @Inject()(
           pdvData <- getPDVData(pdvRequest)
           idData <- getIdData(pdvData)
         } yield (pdvData, idData) match {
-          case (pdvData, Left(idData)) =>
+          case (pdvData, Left(_)) =>
             auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
               pdvData.validationStatus, "", None, None, None, None, None, None))
             Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
