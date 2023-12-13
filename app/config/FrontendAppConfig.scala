@@ -117,6 +117,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   lazy val npsFMNAPIHost: String = configuration.get[String]("external-url.nps-fmn-api.host")
   lazy val npsFMNAPIBaseUrl: String = configuration.get[String]("external-url.nps-fmn-api.base-url")
   lazy val npsFMNAPIPort: String = configuration.get[String]("external-url.nps-fmn-api.port")
+  lazy val npsFMNAPIOriginatorId: String = configuration.get[String]("external-url.nps-fmn-api.gov-uk-originator-id")
 
   val npsFMNAPIUrl: String = s"$npsFMNAPIProtocol://$npsFMNAPIHost:$npsFMNAPIPort$npsFMNAPIBaseUrl"
 
