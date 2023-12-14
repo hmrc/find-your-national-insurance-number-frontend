@@ -129,7 +129,7 @@ class ConfirmYourPostcodeController @Inject()(
     personalDetailsResponse.personalDetails match {
       case Some(personalDetails: PersonalDetails) =>
         for {
-          status <- npsFMNService.updateDetails(personalDetails.nino.nino, getNPSFMNRequest(personalDetails, npsPostCode))
+          status <- npsFMNService.sendLetter(personalDetails.nino.nino, getNPSFMNRequest(personalDetails, npsPostCode))
         } yield status match {
           case LetterIssuedResponse() =>
             Redirect(routes.NINOLetterPostedConfirmationController.onPageLoad())

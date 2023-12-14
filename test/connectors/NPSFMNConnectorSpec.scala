@@ -111,7 +111,7 @@ class NPSFMNConnectorSpec
       implicit val correlationId = CorrelationId(UUID.randomUUID())
       val body = mock[NPSFMNRequest]
       stubPost(url(nino.nino), OK, Some(Json.toJson(body).toString()), Some(""))
-      val result = connector.updateDetails(nino.nino, body).futureValue.leftSideValue
+      val result = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
       result.status mustBe OK
       result.body mustBe ""
     }
@@ -120,7 +120,7 @@ class NPSFMNConnectorSpec
       implicit val correlationId = CorrelationId(UUID.randomUUID())
       val body = mock[NPSFMNRequest]
       stubPost(url(nino.nino), NOT_FOUND, Some(Json.toJson(body).toString()), Some(jsonNotFound))
-      val result = connector.updateDetails(nino.nino, body).futureValue.leftSideValue
+      val result = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
       result.status mustBe NOT_FOUND
       result.body mustBe jsonNotFound
     }
@@ -129,7 +129,7 @@ class NPSFMNConnectorSpec
       implicit val correlationId = CorrelationId(UUID.randomUUID())
       val body = mock[NPSFMNRequest]
       stubPost(url(nino.nino), NOT_FOUND, Some(Json.toJson(body).toString()), Some(jsonResourceNotFound))
-      val result = connector.updateDetails(nino.nino, body).futureValue.leftSideValue
+      val result = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
       result.status mustBe NOT_FOUND
       result.body mustBe jsonResourceNotFound
     }
@@ -138,7 +138,7 @@ class NPSFMNConnectorSpec
       implicit val correlationId = CorrelationId(UUID.randomUUID())
       val body = mock[NPSFMNRequest]
       stubPost(url(nino.nino), INTERNAL_SERVER_ERROR, Some(Json.toJson(body).toString()), Some(jsonInternalServerError))
-      val result = connector.updateDetails(nino.nino, body).futureValue.leftSideValue
+      val result = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
       result.status mustBe INTERNAL_SERVER_ERROR
       result.body mustBe jsonInternalServerError
     }

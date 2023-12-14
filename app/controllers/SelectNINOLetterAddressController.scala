@@ -99,7 +99,7 @@ class SelectNINOLetterAddressController @Inject()(
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectNINOLetterAddressPage, value))
             _ <- sessionRepository.set(updatedAnswers)
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
-            status <- npsFMNService.updateDetails(nino, getNPSFMNRequest(pdvData))
+            status <- npsFMNService.sendLetter(nino, getNPSFMNRequest(pdvData))
           } yield {
             updatedAnswers.get(SelectNINOLetterAddressPage) match {
               case Some(SelectNINOLetterAddress.NotThisAddress) =>

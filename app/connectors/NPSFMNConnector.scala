@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[DefaultNPSFMNConnector])
 trait NPSFMNConnector {
 
-  def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
+  def sendLetter(nino: String, npsFMNRequest: NPSFMNRequest
                    )(implicit hc: HeaderCarrier,correlationId: CorrelationId, ec: ExecutionContext): Future[HttpResponse]
 }
 
@@ -45,7 +45,7 @@ class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2, appConfig: Fr
   with HttpReadsWrapper[UpstreamFailures, Failure]
   with MetricsSupport {
 
-  def updateDetails(nino: String, body: NPSFMNRequest
+  def sendLetter(nino: String, body: NPSFMNRequest
                    )(implicit hc: HeaderCarrier,correlationId: CorrelationId, ec: ExecutionContext): Future[HttpResponse] = {
     val url = s"${appConfig.npsFMNAPIUrl}/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/$nino"
     val headers = Seq("correlationId" -> correlationId.value.toString,
@@ -57,6 +57,7 @@ class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2, appConfig: Fr
       .setHeader(headers:_*)
       .execute[HttpResponse]
       .flatMap{ response =>
+        logger.info(s"FE [NPSFMNConnector][sendLetter] NPS FMN response = ${response}")
         Future.successful(response)
       }
   }
