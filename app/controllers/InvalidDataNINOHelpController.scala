@@ -72,6 +72,7 @@ class InvalidDataNINOHelpController @Inject()(
           personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
             case Success(pdv) =>
               auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+                None,
                 "FindYourNinoOptionChosen",
                 pdv.map(_.validationStatus).getOrElse(""),
                 pdv.map(_.CRN.getOrElse("")).getOrElse(""),

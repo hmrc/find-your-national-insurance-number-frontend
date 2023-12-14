@@ -16,13 +16,17 @@
 
 package controllers
 
+import config.FrontendAppConfig
+import connectors.IndividualDetailsConnector
 import controllers.actions._
 import forms.ConfirmYourPostcodeFormProvider
+import models.individualdetails.AddressType.ResidentialAddress
+import models.individualdetails.ResolveMerge
 import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.{PDVResponseData, PersonalDetails}
 
 import javax.inject.Inject
-import models.{Mode, NormalMode, UserAnswers}
+import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, NormalMode, UserAnswers}
 import navigation.Navigator
 import pages.ConfirmYourPostcodePage
 import play.api.Logging
@@ -30,11 +34,13 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
 import services.{AuditService, NPSFMNService, PersonalDetailsValidationService}
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ConfirmYourPostcodeView
 import util.AuditUtils
 
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmYourPostcodeController @Inject()(
@@ -48,7 +54,9 @@ class ConfirmYourPostcodeController @Inject()(
                                         view: ConfirmYourPostcodeView,
                                         personalDetailsValidationService: PersonalDetailsValidationService,
                                         npsFMNService: NPSFMNService,
-                                        auditService: AuditService
+                                        auditService: AuditService,
+                                        individualDetailsConnector: IndividualDetailsConnector,
+                                        appConfig: FrontendAppConfig
                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
@@ -76,23 +84,29 @@ class ConfirmYourPostcodeController @Inject()(
             updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmYourPostcodePage, value))
             _ <- sessionRepository.set(updatedAnswers)
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse(""))
+            idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(request.nino.getOrElse("")))
             redirectBasedOnMatch <- pdvData match {
               case Some(pdvValidData) => pdvValidData.npsPostCode match {
                 case Some(npsPostCode) if npsPostCode.equalsIgnoreCase(value) =>
-                  auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
-                    "FindYourNinoConfirmPostcode",
-                    pdvData.map(_.validationStatus).getOrElse(""),
-                    pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
-                    None,
-                    Some(value),
-                    Some("true"),
-                    None,
-                    None,
-                    None
-                  ))
+                  idAddress match {
+                    case Right(idAddress) =>
+                      auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
+                        Some(idAddress),
+                        "FindYourNinoConfirmPostcode",
+                        pdvData.map(_.validationStatus).getOrElse(""),
+                        pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+                        None,
+                        Some(value),
+                        Some("true"),
+                        None,
+                        None,
+                        None
+                      ))
+                  }
                   npsLetterChecks(pdvValidData, npsPostCode, mode, updatedAnswers)
                 case None =>
                   auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
+                    None,
                     "FindYourNinoConfirmPostcode",
                     pdvData.map(_.validationStatus).getOrElse(""),
                     pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
@@ -106,6 +120,7 @@ class ConfirmYourPostcodeController @Inject()(
                   Future(Redirect(routes.TechnicalErrorController.onPageLoad()))
                 case _ =>
                   auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
+                    None,
                     "FindYourNinoConfirmPostcode",
                     pdvData.map(_.validationStatus).getOrElse(""),
                     pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
@@ -135,6 +150,7 @@ class ConfirmYourPostcodeController @Inject()(
             Redirect(routes.NINOLetterPostedConfirmationController.onPageLoad())
           case RLSDLONFAResponse(responseStatus, responseMessage) =>
             auditService.audit(AuditUtils.buildAuditEvent(Some(personalDetails),
+              None,
               "FindYourNinoError",
               personalDetailsResponse.validationStatus,
               personalDetailsResponse.CRN.getOrElse(""),
@@ -148,6 +164,7 @@ class ConfirmYourPostcodeController @Inject()(
             Redirect(routes.SendLetterErrorController.onPageLoad(mode))
           case TechnicalIssueResponse(responseStatus, responseMessage) =>
             auditService.audit(AuditUtils.buildAuditEvent(Some(personalDetails),
+              None,
               "FindYourNinoError",
               personalDetailsResponse.validationStatus,
               personalDetailsResponse.CRN.getOrElse(""),
@@ -174,4 +191,15 @@ class ConfirmYourPostcodeController @Inject()(
         personDetails.dateOfBirth.toString,
         npsPostCode
       )
+
+  def getIndividualDetailsAddress(nino: IndividualDetailsNino
+                                 )(implicit ec: ExecutionContext, hc: HeaderCarrier) = {
+    implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
+    implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
+    val idAddress = for {
+      idData <- IndividualDetailsResponseEnvelope.fromEitherF(individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y')).value)
+      idDataAddress = idData.addressList.getAddress.filter(_.addressType.equals(ResidentialAddress)).head
+    } yield idDataAddress
+    idAddress.value
+  }
 }

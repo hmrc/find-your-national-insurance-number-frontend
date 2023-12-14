@@ -16,6 +16,7 @@
 
 package util
 
+import models.individualdetails.Address
 import models.pdv.PersonalDetails
 import play.api.libs.json.{JsValue, Json, OFormat}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -28,6 +29,12 @@ object AuditUtils {
   case class YourDetailsAuditEvent(
                                     postcodeChecked: Option[String],
                                     ninoChecked: Option[String],
+                                    addressLine1: Option[String],
+                                    addressLine2: Option[String],
+                                    addressLine3: Option[String],
+                                    addressLine4: Option[String],
+                                    addressLine5: Option[String],
+                                    addressPostcode: Option[String],
                                     personalDetailsValidationOutcome: String,
                                     personalDetailsValidationIdentifierType: String,
                                     identifierFromPersonalDetailsValidation: String,
@@ -63,14 +70,32 @@ object AuditUtils {
     )
   }
 
-  private def buildDetails(postcode: Option[String], nino: Option[String], validationOutcome: String, identifierType: String,
-                           pdvId: String, findMyNinoOption: Option[String], findMyNinoPostcodeEntered: Option[String],
-                           findMyNinoPostcodeMatched: Option[String], pageErrorGeneratedFrom: Option[String],
-                           errorStatus: Option[String], errorReason: Option[String]): YourDetailsAuditEvent = {
-
+  private def buildDetails(postcode: Option[String],
+                           nino: Option[String],
+                           addressLine1: Option[String],
+                           addressLine2: Option[String],
+                           addressLine3: Option[String],
+                           addressLine4: Option[String],
+                           addressLine5: Option[String],
+                           addressPostcode: Option[String],
+                           validationOutcome: String,
+                           identifierType: String,
+                           pdvId: String,
+                           findMyNinoOption: Option[String],
+                           findMyNinoPostcodeEntered: Option[String],
+                           findMyNinoPostcodeMatched: Option[String],
+                           pageErrorGeneratedFrom: Option[String],
+                           errorStatus: Option[String],
+                           errorReason: Option[String]): YourDetailsAuditEvent = {
     YourDetailsAuditEvent(
       postcode,
       nino,
+      addressLine1,
+      addressLine2,
+      addressLine3,
+      addressLine4,
+      addressLine5,
+      addressPostcode,
       validationOutcome,
       identifierType,
       pdvId,
@@ -122,6 +147,7 @@ object AuditUtils {
 
 
   def buildAuditEvent(personDetails: Option[PersonalDetails],
+                      individualDetailsAddress: Option[Address],
                       auditType: String,
                       validationOutcome: String,
                       identifierType: String,
@@ -138,6 +164,12 @@ object AuditUtils {
         buildDataEvent(auditType, s"$auditType",
           Json.toJson(buildDetails(if (usePostcode) Some(pd.postCode.getOrElse("")) else None,
             if (!usePostcode) Some(pd.nino.nino) else None,
+            individualDetailsAddress.map(_.addressLine1.value),
+            individualDetailsAddress.map(_.addressLine2.value),
+            individualDetailsAddress.flatMap(_.addressLine3.map(_.value)),
+            individualDetailsAddress.flatMap(_.addressLine4.map(_.value)),
+            individualDetailsAddress.flatMap(_.addressLine5.map(_.value)),
+            individualDetailsAddress.flatMap(_.addressPostcode.map(_.value)),
             getValidationOutcome(validationOutcome),
             checkCRN(identifierType),
             pd.nino.nino,
@@ -151,6 +183,12 @@ object AuditUtils {
         buildDataEvent(auditType, s"$auditType",
           Json.toJson(buildDetails(None,
             None,
+            individualDetailsAddress.map(_.addressLine1.value),
+            individualDetailsAddress.map(_.addressLine2.value),
+            individualDetailsAddress.flatMap(_.addressLine3.map(_.value)),
+            individualDetailsAddress.flatMap(_.addressLine4.map(_.value)),
+            individualDetailsAddress.flatMap(_.addressLine5.map(_.value)),
+            individualDetailsAddress.flatMap(_.addressPostcode.map(_.value)),
             getValidationOutcome(validationOutcome),
             checkCRN(identifierType),
             "",
