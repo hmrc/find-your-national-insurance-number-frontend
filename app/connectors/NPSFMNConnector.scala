@@ -57,6 +57,7 @@ class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2, appConfig: Fr
       .setHeader(headers:_*)
       .execute[HttpResponse]
       .flatMap{ response =>
+        logger.info(s"FE [NPSFMNConnector][updateDetails] NPS FMN response = ${response}")
         Future.successful(response)
       }
   }

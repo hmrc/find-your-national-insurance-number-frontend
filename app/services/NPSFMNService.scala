@@ -31,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[NPSFMNServiceImpl])
 trait NPSFMNService {
-  def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
+  def sendLetter(nino: String, npsFMNRequest: NPSFMNRequest
                    )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNServiceResponse]
 }
 
@@ -39,7 +39,7 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
   config: FrontendAppConfig)(implicit val ec: ExecutionContext)
   extends NPSFMNService with Logging {
 
-  def updateDetails(nino: String, npsFMNRequest: NPSFMNRequest
+  def sendLetter(nino: String, npsFMNRequest: NPSFMNRequest
                    )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNServiceResponse] = {
     implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
     val identifier = nino.substring(0, nino.length-1)
