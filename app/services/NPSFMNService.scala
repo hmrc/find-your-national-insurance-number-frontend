@@ -43,7 +43,7 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
                    )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNServiceResponse] = {
     implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
     val identifier = nino.substring(0, nino.length-1)
-    connector.updateDetails(identifier, npsFMNRequest)
+    connector.sendLetter(identifier, npsFMNRequest)
       .map{ response =>
         response.status match {
           case 202 =>
