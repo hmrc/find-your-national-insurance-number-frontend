@@ -16,11 +16,15 @@
 
 package controllers
 
+import config.FrontendAppConfig
+import connectors.IndividualDetailsConnector
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
+import models.individualdetails.AddressType.ResidentialAddress
+import models.individualdetails.ResolveMerge
 import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.PDVResponseData
-import models.{Mode, SelectNINOLetterAddress}
+import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, SelectNINOLetterAddress}
 import navigation.Navigator
 import pages.SelectNINOLetterAddressPage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -32,8 +36,11 @@ import views.html.SelectNINOLetterAddressView
 import org.apache.commons.lang3.StringUtils
 import play.api.Logging
 import play.api.data.Form
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
+import uk.gov.hmrc.http.HeaderCarrier
 import util.AuditUtils
 
+import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -50,7 +57,9 @@ class SelectNINOLetterAddressController @Inject()(
                                        view: SelectNINOLetterAddressView,
                                        personalDetailsValidationService: PersonalDetailsValidationService,
                                        auditService: AuditService,
-                                       npsFMNService: NPSFMNService
+                                       npsFMNService: NPSFMNService,
+                                       individualDetailsConnector: IndividualDetailsConnector,
+                                       appConfig: FrontendAppConfig
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[SelectNINOLetterAddress] = formProvider()
@@ -80,21 +89,6 @@ class SelectNINOLetterAddressController @Inject()(
           } yield BadRequest(view(formWithErrors, mode, postCode)),
 
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
-            case Success(pdv) =>
-              auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
-                "FindYourNinoOnlineLetterOption",
-                pdv.map(_.validationStatus).getOrElse(""),
-                pdv.map(_.CRN.getOrElse("")).getOrElse(""),
-                Some(value.toString),
-                None,
-                None,
-                None,
-                None,
-                None
-              ))
-            case Failure(ex) => logger.warn(ex.getMessage)
-          }
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectNINOLetterAddressPage, value))
             _ <- sessionRepository.set(updatedAnswers)
@@ -106,11 +100,31 @@ class SelectNINOLetterAddressController @Inject()(
                 Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
               case Some(SelectNINOLetterAddress.Postcode) =>
                 status match {
-                  case LetterIssuedResponse() => Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
+                  case LetterIssuedResponse() =>
+                    for {
+                      pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse(""))
+                      idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(request.nino.getOrElse("")))
+                    } yield (pdvData, idAddress) match {
+                      case (pdvData, Right(idAddress)) =>
+                        auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
+                          Some(idAddress),
+                          "FindYourNinoOnlineLetterOption",
+                          pdvData.map(_.validationStatus).getOrElse(""),
+                          pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+                          Some(value.toString),
+                          None,
+                          None,
+                          None,
+                          None,
+                          None
+                        ))
+                    }
+                    Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
                   case RLSDLONFAResponse(responseStatus, responseMessage) =>
                     personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
                       case Success(pdv) =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+                          None,
                           "FindYourNinoError",
                           pdv.map(_.validationStatus).getOrElse(""),
                           pdv.map(_.CRN.getOrElse("")).getOrElse(""),
@@ -128,6 +142,7 @@ class SelectNINOLetterAddressController @Inject()(
                     personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
                       case Success(pdv) =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+                          None,
                           "FindYourNinoError",
                           pdv.map(_.validationStatus).getOrElse(""),
                           pdv.map(_.CRN.getOrElse("")).getOrElse(""),
@@ -169,4 +184,14 @@ class SelectNINOLetterAddressController @Inject()(
       case _ => NPSFMNRequest.empty
     }
 
+  def getIndividualDetailsAddress(nino: IndividualDetailsNino
+                          )(implicit ec: ExecutionContext, hc: HeaderCarrier) = {
+    implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
+    implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
+    val idAddress = for {
+      idData <- IndividualDetailsResponseEnvelope.fromEitherF(individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y')).value)
+      idDataAddress = idData.addressList.getAddress.filter(_.addressType.equals(ResidentialAddress)).head
+    } yield idDataAddress
+    idAddress.value
+  }
 }

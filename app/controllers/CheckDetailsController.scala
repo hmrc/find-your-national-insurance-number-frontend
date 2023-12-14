@@ -20,7 +20,7 @@ import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
-import models.errors.IndividualDetailsError
+import models.errors.{ConnectorError, IndividualDetailsError}
 import models.individualdetails.AccountStatusType._
 import models.individualdetails.AddressStatus._
 import models.individualdetails.AddressType._
@@ -71,12 +71,23 @@ class CheckDetailsController @Inject()(
           pdvData <- getPDVData(pdvRequest)
           idData <- getIdData(pdvData)
         } yield (pdvData, idData) match {
-          case (pdvData, Left(_)) =>
-            auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
-              pdvData.validationStatus, "", None, None, None, None, None, None))
+          case (pdvData, Left(idData)) =>
+            if (pdvData.validationStatus.equals("failure")) {
+              auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
+                pdvData.validationStatus, "", None, None, None, None, None, None))
+            }
+            else {
+              var errorStatusCode: Option[String] = None
+              idData match {
+                case conError: ConnectorError => errorStatusCode = Some(conError.statusCode.toString)
+              }
+              auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "FindYourNinoError",
+                pdvData.validationStatus, "", None, None, None, Some("/checkDetails"), errorStatusCode, Some(idData.errorMessage)))
+              logger.debug(s"Failed to retrieve Individual Details data: ${idData.errorMessage}")
+            }
             Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
           case (pdvData, Right(idData)) => {
-            auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "StartFindYourNino",
+            auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
               pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
 
             val NPSChecks = checkConditions(idData)
@@ -121,21 +132,12 @@ class CheckDetailsController @Inject()(
   }
 
   def getIdData(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
-    val idData = getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
+    getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
       case Some(data) => data.nino.nino
       case None =>
         logger.debug("No Personal Details found in PDV data, likely validation failed")
         ""
     })).value
-    idData.recover {
-      case ex: HttpException =>
-        auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, "FindYourNinoError",
-          pdvData.validationStatus, "", None, None, None, Some("/checkDetails"), Some(ex.responseCode.toString), Some(ex.message)))
-        logger.debug(s"Failed to retrieve Individual Details data, status: ${ex.responseCode}")
-        throw ex
-      case ex =>
-        throw ex
-    }
   }
 
   def getIndividualDetails(nino: IndividualDetailsNino
@@ -163,7 +165,7 @@ class CheckDetailsController @Inject()(
     }
     p.recover {
       case ex: HttpException =>
-        auditService.audit(AuditUtils.buildAuditEvent(None, "FindYourNinoError",
+        auditService.audit(AuditUtils.buildAuditEvent(None, None, "FindYourNinoError",
           "", "", None, None, None, Some("/checkDetails"), Some(ex.responseCode.toString), Some(ex.message)))
         logger.debug(ex.getMessage)
         throw ex
