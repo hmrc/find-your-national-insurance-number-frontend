@@ -18,11 +18,8 @@ package controllers
 
 import base.SpecBase
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.PlaySpec
 import play.api.i18n.Lang
-import play.api.mvc.{ControllerComponents, MessagesControllerComponents, Result, Results}
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.mvc.Results
 import config.FrontendAppConfig
 import org.mockito.MockitoSugar.when
 import uk.gov.hmrc.play.language.LanguageUtils

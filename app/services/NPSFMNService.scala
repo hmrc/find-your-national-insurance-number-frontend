@@ -49,17 +49,21 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
           case 202 =>
             LetterIssuedResponse()
           case 400 if check(response.body) =>
-            RLSDLONFAResponse(response.status, (Json.parse(response.body) \ "jsonServiceError" \ "message").as[String])
+            RLSDLONFAResponse(response.status, getMessage(response.body))
           case _ =>
-            TechnicalIssueResponse(response.status, (Json.parse(response.body) \ "jsonServiceError" \ "message").as[String])
+            TechnicalIssueResponse(response.status, getMessage(response.body))
         }
     }
   }
 
+  private def getMessage(responseBody: String): String =
+    (Json.parse(responseBody) \ "response" \ "jsonServiceError" \ "message").as[String]
+
+
   private def check(responseBody: String):Boolean = {
     val appStatusMessageList = config.npsFMNAppStatusMessageList.split(",").toList
-    val response = Json.parse(responseBody).as[NPSFMNResponse]
-    response.jsonServiceError.appStatusMessageList.appStatusMessage match {
+    val npsFMNResponse = Json.parse(responseBody).as[NPSFMNResponse]
+    npsFMNResponse.response.jsonServiceError.appStatusMessageList.appStatusMessage match {
       case message :: Nil => appStatusMessageList.contains(message)
       case _ => false
     }

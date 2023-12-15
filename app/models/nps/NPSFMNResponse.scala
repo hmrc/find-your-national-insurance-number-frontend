@@ -25,11 +25,14 @@ case class JsonServiceError(
                              appStatusMessageCount: Int,
                              appStatusMessageList: AppStatusMessageList
                            )
-case class NPSFMNResponse(jsonServiceError: JsonServiceError)
+case class Response(jsonServiceError: JsonServiceError)
+
+case class NPSFMNResponse(origin: String, response: Response)
 
 object NPSFMNResponse {
   implicit val appStatusMessageListformat: Format[AppStatusMessageList] = Json.format[AppStatusMessageList]
   implicit val jsonServiceErrorformat: Format[JsonServiceError] = Json.format[JsonServiceError]
+  implicit val jsonResponse: Format[Response] = Json.format[Response]
   implicit val npsFMNResponseformat: Format[NPSFMNResponse] = Json.format[NPSFMNResponse]
 }
 
