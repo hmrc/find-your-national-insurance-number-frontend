@@ -71,12 +71,13 @@ class CheckDetailsController @Inject()(
           pdvData <- getPDVData(pdvRequest)
           idData <- getIdData(pdvData)
         } yield (pdvData, idData) match {
+
           case (pdvData, Left(idData)) =>
             if (pdvData.validationStatus.equals("failure")) {
               auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
                 pdvData.validationStatus, "", None, None, None, None, None, None))
-            }
-            else {
+              Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+            } else {
               var errorStatusCode: Option[String] = None
               idData match {
                 case conError: ConnectorError => errorStatusCode = Some(conError.statusCode.toString)
@@ -84,35 +85,37 @@ class CheckDetailsController @Inject()(
               auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "FindYourNinoError",
                 pdvData.validationStatus, "", None, None, None, Some("/checkDetails"), errorStatusCode, Some(idData.errorMessage)))
               logger.debug(s"Failed to retrieve Individual Details data: ${idData.errorMessage}")
+              Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
             }
-            Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-          case (pdvData, Right(idData)) => {
+
+          case (pdvData, Right(idData)) =>
             auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
               pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
 
-            val NPSChecks = checkConditions(idData)
+            val api1694Checks = checkConditions(idData)
+            personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, api1694Checks._1, api1694Checks._2)
 
-            if (!NPSChecks._1 || pdvData.validationStatus.equals("failure")) {
-              Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-            } else {
-              personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, NPSChecks._1, NPSChecks._2)
+            if (api1694Checks._1) {
               val idPostCode = getNPSPostCode(idData)
               if (pdvData.getPostCode.nonEmpty) {
+                // Matched with Postcode
                 if (idPostCode.equals(pdvData.getPostCode)) {
                   Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
                 } else {
                   Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
                 }
-              } else {
+              } else { // Matched with NINO
                 personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(pdvData.getNino, idPostCode)
                 Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode))
               }
+            } else {
+              Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
             }
-          }
-          case _ => {
+
+          case _ =>
             logger.debug("No Personal Details found in PDV data, likely validation failed")
             Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-          }
+
         }
 
         processData.recover {
@@ -197,7 +200,6 @@ class CheckDetailsController @Inject()(
       idData.accountStatusType.exists(_.equals(FullLive)) &&
         idData.crnIndicator.equals(False) &&
         getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo))
-
     }
 
     (status, reason)
