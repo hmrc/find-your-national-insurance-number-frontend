@@ -58,15 +58,18 @@ class CheckDetailsController @Inject()(
                                       )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
   extends FrontendBaseController with AuthorisedFunctions with I18nSupport with Logging {
 
+  def getCredentialId()(implicit hc: HeaderCarrier): Future[Option[String]] =  {
+    lazy val toAuthCredentialId: Option[Credentials] => Future[Option[String]] =
+      (credentials: Option[Credentials]) => Future.successful(credentials.map(_.providerId))
+    authorised().retrieve(credentials)(toAuthCredentialId).recover { case _ => None }
+  }
+
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request => {
+
       val result: Try[Future[Result]] = Try {
-
-        lazy val toAuthCredentialId: Option[Credentials] => Future[Option[String]] =
-          (credentials: Option[Credentials]) => Future.successful(credentials.map(_.providerId))
-
         val processData = for {
-          credentialId <- authorised().retrieve(credentials)(toAuthCredentialId).recover { case _ => None }
+          credentialId <- getCredentialId()
           pdvRequest = PDVRequest(credentialId.getOrElse(""), request.session.data.getOrElse("sessionId", ""))
           pdvData <- getPDVData(pdvRequest)
           idData <- getIdData(pdvData)

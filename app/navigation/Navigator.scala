@@ -79,7 +79,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
   private def navigateSelectAlternativeService(userAnswers: UserAnswers): Call =
     userAnswers.get(SelectAlternativeServicePage) match {
       case Some(SelectAlternativeService.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
-      case Some(SelectAlternativeService.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}${getNINOByPost}")
+      case Some(SelectAlternativeService.PrintForm) => Call(GET, s"${config.ninoByPostServiceUrl}$getNINOByPost")
       case _                                        => routes.JourneyRecoveryController.onPageLoad()
     }
 
@@ -87,14 +87,14 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     userAnswers.get(TechnicalErrorPage) match {
       case Some(TechnicalErrorService.TryAgain)  => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
       case Some(TechnicalErrorService.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
-      case Some(TechnicalErrorService.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}${getNINOByPost}")
+      case Some(TechnicalErrorService.PrintForm) => Call(GET, s"${config.ninoByPostServiceUrl}$getNINOByPost")
       case _                                     => routes.JourneyRecoveryController.onPageLoad()
     }
 
   private def navigateInvalidDataNINOHelp(userAnswers: UserAnswers): Call =
     userAnswers.get(InvalidDataNINOHelpPage) match {
       case Some(InvalidDataNINOHelp.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
-      case Some(InvalidDataNINOHelp.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
+      case Some(InvalidDataNINOHelp.PrintForm) => Call(GET, s"${config.ninoByPostServiceUrl}$getNINOByPost")
       case _                                   => routes.JourneyRecoveryController.onPageLoad()
     }
 
@@ -108,7 +108,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
   private def navigateEnteredPostCodeNotFound(userAnswers: UserAnswers): Call =
     userAnswers.get(EnteredPostCodeNotFoundPage) match {
       case Some(EnteredPostCodeNotFound.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
-      case Some(EnteredPostCodeNotFound.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}/fill-online/get-your-national-insurance-number-by-post")
+      case Some(EnteredPostCodeNotFound.PrintForm) => Call(GET, s"${config.ninoByPostServiceUrl}$getNINOByPost")
       case _ => routes.JourneyRecoveryController.onPageLoad()
     }
   
