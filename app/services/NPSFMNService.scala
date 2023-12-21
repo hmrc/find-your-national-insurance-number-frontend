@@ -57,8 +57,10 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
   }
 
   private def getMessage(responseBody: String): String =
-    (Json.parse(responseBody) \ "response" \ "jsonServiceError" \ "message").as[String]
-
+    (Json.parse(responseBody) \ "origin").asOpt[String] match {
+      case Some(_) => (Json.parse(responseBody) \ "response" \ "jsonServiceError" \ "message").as[String]
+      case _ => (Json.parse(responseBody) \ "jsonServiceError" \ "message").as[String]
+    }
 
   private def check(responseBody: String):Boolean = {
     val appStatusMessageList = config.npsFMNAppStatusMessageList.split(",").toList
