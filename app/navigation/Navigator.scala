@@ -29,7 +29,7 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class Navigator @Inject()(implicit config: FrontendAppConfig) {
 
-  val getNINOByPost = "/fill-online/get-your-national-insurance-number-by-post"
+  private val getNINOByPost = "/fill-online/get-your-national-insurance-number-by-post"
 
   private val normalRoutes: Page => UserAnswers => Call = {
     case HaveSetUpGGUserIDPage              => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
