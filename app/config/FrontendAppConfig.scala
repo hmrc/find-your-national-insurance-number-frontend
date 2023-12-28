@@ -86,8 +86,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   val callChargesUrl: String = configuration.get[String]("urls.callCharges")
 
   val SCAWrapperEnabled: Boolean = configuration.getOptional[Boolean]("features.sca-wrapper-enabled").getOrElse(false)
-  
-  val ninoByPostServiceUrl: String = configuration.get[Service]("microservice.services.national-insurance-number-by-post").baseUrl
 
   val accessibilityStatementToggle: Boolean =
     configuration.getOptional[Boolean](s"accessibility-statement.toggle").getOrElse(false)
