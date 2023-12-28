@@ -35,8 +35,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   private val contactFormServiceIdentifier = "find-your-national-insurance-number"
 
   val gtmContainer: String = configuration.get[String]("tracking-consent-frontend.gtm.container")
-  lazy val trackingHost: String = getExternalUrl(s"tracking-frontend.host").getOrElse("")
-  lazy val trackingServiceUrl = s"$trackingHost/track"
+  val trackingHost: String = getExternalUrl(s"tracking-frontend.host").getOrElse("")
+  val trackingServiceUrl = s"$trackingHost/track"
   val enc = URLEncoder.encode(_: String, "UTF-8")
 
   def feedbackUrl(implicit request: RequestHeader): String =
@@ -51,8 +51,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
   val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/find-your-national-insurance-number"
 
-  lazy val feedbackSurveyFrontendHost = getExternalUrl(s"feedback-survey-frontend.host").getOrElse("")
-  lazy val basGatewayFrontendHost = getExternalUrl(s"bas-gateway-frontend.host").getOrElse("")
+  val feedbackSurveyFrontendHost = getExternalUrl(s"feedback-survey-frontend.host").getOrElse("")
+  val basGatewayFrontendHost = getExternalUrl(s"bas-gateway-frontend.host").getOrElse("")
 
   val defaultOrigin: Origin = Origin("FIND_MY_NINO")
   private def getExternalUrl(key: String): Option[String] =
@@ -76,9 +76,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
 
   val cacheTtl: Int = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
-  lazy val pdvBaseUrl: String = configuration.get[Service]("microservice.services.personal-details-validation").baseUrl
-
-  val getNinoUrl: String = configuration.get[String]("external-url.get-nino.CA5403form")
+  val pdvBaseUrl: String = configuration.get[Service]("microservice.services.personal-details-validation").baseUrl
 
   val printAndPostServiceUrl: String = configuration.get[String]("external-url.national-insurance-number-letter-frontend.host")
 
@@ -87,14 +85,15 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   val hmrcExtraSupportUrl: String = configuration.get[String]("urls.hmrcExtraSupport")
   val callChargesUrl: String = configuration.get[String]("urls.callCharges")
 
-  lazy val SCAWrapperEnabled = configuration.getOptional[Boolean]("features.sca-wrapper-enabled").getOrElse(false)
+  val SCAWrapperEnabled: Boolean = configuration.getOptional[Boolean]("features.sca-wrapper-enabled").getOrElse(false)
   
   val ninoByPostServiceUrl: String = configuration.get[Service]("microservice.services.national-insurance-number-by-post").baseUrl
 
-  lazy val accessibilityStatementToggle: Boolean =
+  val accessibilityStatementToggle: Boolean =
     configuration.getOptional[Boolean](s"accessibility-statement.toggle").getOrElse(false)
-  lazy val accessibilityBaseUrl: String = servicesConfig.getString("accessibility-statement.baseUrl")
-  lazy private val accessibilityRedirectUrl =
+
+  val accessibilityBaseUrl: String = servicesConfig.getString("accessibility-statement.baseUrl")
+  private val accessibilityRedirectUrl =
     servicesConfig.getString("accessibility-statement.redirectUrl")
 
   def accessibilityStatementUrl(referrer: String) =
@@ -104,18 +103,18 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   def individualDetails: DesApiServiceConfig =
     DesApiServiceConfig(configuration.get[Configuration]("microservice.services.individual-details"))
 
-  lazy val individualDetailsProtocol: String = configuration.get[String]("external-url.individual-details.protocol")
-  lazy val individualDetailsHost: String = configuration.get[String]("external-url.individual-details.host")
-  lazy val individualDetailsBaseUrl: String = configuration.get[String]("external-url.individual-details.base-url")
-  lazy val individualDetailsPort: String = configuration.get[String]("external-url.individual-details.port")
+  val individualDetailsProtocol: String = configuration.get[String]("external-url.individual-details.protocol")
+  val individualDetailsHost: String = configuration.get[String]("external-url.individual-details.host")
+  val individualDetailsBaseUrl: String = configuration.get[String]("external-url.individual-details.base-url")
+  val individualDetailsPort: String = configuration.get[String]("external-url.individual-details.port")
 
   val individualDetailsServiceUrl: String = s"$individualDetailsProtocol://$individualDetailsHost:$individualDetailsPort$individualDetailsBaseUrl"
 
-  lazy val npsFMNAPIProtocol: String = configuration.get[String]("external-url.nps-fmn-api.protocol")
-  lazy val npsFMNAPIHost: String = configuration.get[String]("external-url.nps-fmn-api.host")
-  lazy val npsFMNAPIBaseUrl: String = configuration.get[String]("external-url.nps-fmn-api.base-url")
-  lazy val npsFMNAPIPort: String = configuration.get[String]("external-url.nps-fmn-api.port")
-  lazy val npsFMNAPIOriginatorId: String = configuration.get[String]("external-url.nps-fmn-api.gov-uk-originator-id")
+  val npsFMNAPIProtocol: String = configuration.get[String]("external-url.nps-fmn-api.protocol")
+  val npsFMNAPIHost: String = configuration.get[String]("external-url.nps-fmn-api.host")
+  val npsFMNAPIBaseUrl: String = configuration.get[String]("external-url.nps-fmn-api.base-url")
+  val npsFMNAPIPort: String = configuration.get[String]("external-url.nps-fmn-api.port")
+  val npsFMNAPIOriginatorId: String = configuration.get[String]("external-url.nps-fmn-api.gov-uk-originator-id")
 
   val npsFMNAPIUrl: String = s"$npsFMNAPIProtocol://$npsFMNAPIHost:$npsFMNAPIPort$npsFMNAPIBaseUrl"
 
