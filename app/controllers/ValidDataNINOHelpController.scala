@@ -30,7 +30,7 @@ import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.AuditUtils
 import views.html.ValidDataNINOHelpView
-
+import play.api.mvc.Codec.utf_8
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}

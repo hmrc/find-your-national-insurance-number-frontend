@@ -78,32 +78,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    //TODO add redirection test in when redirection is added
-    /*"must redirect to the next page when valid data is submitted" in {
 
-      val mockSessionRepository = mock[SessionRepository]
-
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
-          .build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, confirmYourPostcodeRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
-      }
-    }*/
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
@@ -124,5 +99,10 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
       }
     }
+
+
+
+
+
   }
 }
