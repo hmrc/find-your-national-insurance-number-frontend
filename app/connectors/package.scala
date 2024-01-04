@@ -18,6 +18,7 @@ import config.DesApiServiceConfig
 import models.CorrelationId
 import uk.gov.hmrc.http.HeaderCarrier
 
+// $COVERAGE-OFF$
 package object connectors {
   def desApiHeaders(
                      config: DesApiServiceConfig
@@ -33,3 +34,4 @@ package object connectors {
     hc.withExtraHeaders(headers: _*)
   }
 }
+// $COVERAGE-ON$

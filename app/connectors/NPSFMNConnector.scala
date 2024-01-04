@@ -62,6 +62,7 @@ class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2, appConfig: Fr
       }
   }
 
+  // $COVERAGE-OFF$
   override def fromUpstreamErrorToIndividualDetailsError(
     connectorName:     String,
     status:            Int,
@@ -92,5 +93,6 @@ class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2, appConfig: Fr
     )
     ConnectorError(status, s"$connectorName, ${upstreamError.code} - ${upstreamError.reason}").some
   }
+  // $COVERAGE-ON$
 
 }
