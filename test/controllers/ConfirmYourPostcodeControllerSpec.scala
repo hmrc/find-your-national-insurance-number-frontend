@@ -24,7 +24,7 @@ import models.individualdetails._
 import models.nps.LetterIssuedResponse
 import models.pdv.{PDVResponseData, PersonalDetails}
 import models.{AddressLine, CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, NormalMode, UserAnswers, individualdetails}
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, anyChar, argThat}
 import org.mockito.MockitoSugar.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.ConfirmYourPostcodePage
@@ -44,6 +44,10 @@ import com.kenshoo.play.metrics.Metrics
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
+import org.mockito.ArgumentMatcher
+import java.util.UUID
+import repositories.PersonalDetailsValidationRepository
+import repositories.TryAgainCountRepository
 
 class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
 
@@ -152,8 +156,10 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the confirmation page when valid data is submitted to NPS FMN API" ignore {
+    "must redirect to the confirmation page when valid data is submitted to NPS FMN API" in {
       val mockSessionRepository = mock[SessionRepository]
+      val mpdvr = mock[PersonalDetailsValidationRepository]
+      val mtacr = mock[TryAgainCountRepository]
       val mockNPSFMNConnector = mock[NPSFMNConnector]
       val mockNPSFMNService = mock[NPSFMNService]
       val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
@@ -162,8 +168,8 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       //val mockDesApiServiceConfig = mock[DesApiServiceConfig]
       val mockAuthConnector = mock[AuthConnector]
       val mockMetrics = mock[Metrics]
-//      val mockDefaultIndividualDetailsConnector = new DefaultIndividualDetailsConnector(mockHttpClient, mockAppConfig, mockMetrics)
-      val mockIndividualDetailsConnector: DefaultIndividualDetailsConnector = mock[DefaultIndividualDetailsConnector]
+     val mockDefaultIndividualDetailsConnector = new DefaultIndividualDetailsConnector(mockHttpClient, mockAppConfig, mockMetrics)
+      val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
       when(
         mockAuthConnector.authorise[Option[String] ~ Option[CredentialRole] ~ Option[String]](
           any[Predicate],
@@ -174,7 +180,22 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any())).thenReturn(Future(Some(fakePDVResponseData)))
 
-      when(mockIndividualDetailsConnector.getIndividualDetails(any(), any())(any(), any(), any()))
+
+      trait Default[T] {
+        def getDefault: T
+      }
+
+      def anyValueType[T](implicit d: Default[T]): T = {
+          argThat(new ArgumentMatcher[T] {
+          def matches(argument: T): Boolean = true
+        })
+         d.getDefault
+      }
+
+      implicit val defaultResolveMerge: Default[ResolveMerge] = new Default[ResolveMerge] { val getDefault = ResolveMerge('X') }
+      implicit val defaultCorelationId: Default[CorrelationId] = new Default[CorrelationId] { val getDefault = CorrelationId(UUID.nameUUIDFromBytes(new Array[Byte](16))) }
+
+      when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
         .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
 
       when(mockMetrics.defaultRegistry).thenReturn(new com.codahale.metrics.MetricRegistry())
@@ -185,9 +206,11 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[PersonalDetailsValidationRepository].toInstance(mpdvr),
+            bind[TryAgainCountRepository].toInstance(mtacr),
             bind[NPSFMNService].toInstance(mockNPSFMNService),
             bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
-            bind[DefaultIndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
+            bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
             bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
             bind[HttpClient].toInstance(mockHttpClient),
             bind[FrontendAppConfig].toInstance(mockAppConfig),
