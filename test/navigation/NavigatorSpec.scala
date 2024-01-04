@@ -44,5 +44,42 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(UnknownPage, CheckMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad
       }
     }
+
+    "in Normal mode" - {
+
+      "must go from ConfirmYourPostcodePage to ConfirmYourAddressPage" in {
+
+        navigator.nextPage(ConfirmYourPostcodePage, NormalMode, UserAnswers("id")) mustBe routes.IndexController.onPageLoad
+      }
+
+      "must go from ConfirmYourAddressPage to CheckYourAnswersPage" in {
+
+        navigator.nextPage(EnteredPostCodeNotFoundPage, NormalMode, UserAnswers("id")) mustBe routes.JourneyRecoveryController.onPageLoad(continueUrl = None)
+      }
+
+      "must go from CheckYourAnswersPage to IndexPage" in {
+
+        navigator.nextPage(EnteredPostCodeNotFoundPage, NormalMode, UserAnswers("id")) mustBe routes.JourneyRecoveryController.onPageLoad(continueUrl = None)
+      }
+    }
+
+    "in Check mode" - {
+
+      "must go from ConfirmYourPostcodePage to CheckYourAnswersPage" in {
+
+        navigator.nextPage(ConfirmYourPostcodePage, CheckMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad
+      }
+
+      "must go from ConfirmYourAddressPage to CheckYourAnswersPage" in {
+
+        navigator.nextPage(EnteredPostCodeNotFoundPage, CheckMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad
+      }
+
+      "must go from CheckYourAnswersPage to IndexPage" in {
+
+        navigator.nextPage(EnteredPostCodeNotFoundPage, CheckMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad
+      }
+    }
+
   }
 }

@@ -59,6 +59,47 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
     }
   }
 
+  "updatePDVDataRowWithValidationStatus" must {
+    "update the row with valid validation status" in {
+      when(mockPersonalDetailsValidationRepository.updateCustomerValidityWithReason(any(), any(), any())(any()))
+        .thenReturn(Future.successful(validationId))
+
+      personalDetailsValidationService.updatePDVDataRowWithValidationStatus(validationId, true, "success").map { result =>
+        result mustBe true
+      }(ec)
+    }
+  }
+
+  "updatePDVDataRowWithNPSPostCode" must {
+    "update the row with valid NPS post code" in {
+      when(mockPersonalDetailsValidationRepository.updatePDVDataWithNPSPostCode(any(), any())(any()))
+        .thenReturn(Future.successful(validationId))
+
+      personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(validationId, "AA1 1AA").map { result =>
+        result mustBe true
+      }(ec)
+    }
+  }
+
+  "getValidCustomerStatus" must {
+    "return true when valid customer status exists" in {
+      when(mockPersonalDetailsValidationRepository.findByNino(any())(any()))
+        .thenReturn(Future.successful(Option(personalDetailsValidation2)))
+
+      personalDetailsValidationService.getValidCustomerStatus(validationId).map { result =>
+        result mustBe "true"
+      }(ec)
+    }
+    "return None when valid customer status does NOT exist" in {
+      when(mockPersonalDetailsValidationRepository.findByNino(any())(any()))
+        .thenReturn(Future.successful(None))
+
+      personalDetailsValidationService.getValidCustomerStatus(validationId).map { result =>
+        result mustBe "false"
+      }(ec)
+    }
+  }
+
 }
 
 object PDVResponseDataServiceSpec {
@@ -70,7 +111,7 @@ object PDVResponseDataServiceSpec {
 
   val personalDetailsValidationService = new PersonalDetailsValidationService(mockConnector, mockPersonalDetailsValidationRepository)
 
-  val validationId = "abc1234"
+  val validationId = "abcd01234"
   val fakeNino: Nino = Nino(new Generator(new Random()).nextNino.nino)
 
   val personalDetails: PersonalDetails =
@@ -88,6 +129,17 @@ object PDVResponseDataServiceSpec {
       Some(personalDetails),
       reason = None,
       validCustomer = None,
+      CRN = None,
+      npsPostCode = None
+    )
+
+  val personalDetailsValidation2: PDVResponseData =
+    PDVResponseData(
+      validationId,
+      "success",
+      Some(personalDetails),
+      reason = None,
+      validCustomer = Some("true"),
       CRN = None,
       npsPostCode = None
     )
