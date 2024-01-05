@@ -18,7 +18,8 @@ package services
 
 import config.FrontendAppConfig
 import connectors.DefaultNPSFMNConnector
-import models.nps.NPSFMNRequest
+import models.CorrelationId
+import models.nps.{LetterIssuedResponse, NPSFMNRequest, TechnicalIssueResponse}
 import org.mockito.MockitoSugar
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers
@@ -27,6 +28,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.mock
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import util.AnyValueTypeMatcher.anyValueType
 
 import scala.concurrent.Future
 import scala.util.Random
@@ -40,40 +42,31 @@ class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar wi
 
   "NPSFMNServiceImpl.sendLetter" must {
 
-    "sendLetter return true when connector returns 200" ignore {
-      when(mockConnector.sendLetter(any(), any())(any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(200, "")))
+    "sendLetter return true when connector returns 202" in {
+      when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
+        .thenReturn(Future.successful(HttpResponse(202, "")))
 
       npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
-        result mustBe true
+        result mustBe LetterIssuedResponse()
       }
     }
 
-    "sendLetter return false when connector returns 400" ignore {
-      when(mockConnector.sendLetter(any(), any())(any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(400, "")))
+    "sendLetter return false when connector returns 404" in {
+      when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
+        .thenReturn(Future.successful(HttpResponse(404, NotfoundObject)))
 
       npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
-        result mustBe false
+        result mustBe TechnicalIssueResponse(404, "MATCHING_RESOURCE_NOT_FOUND")
       }
 
     }
 
-    "sendLetter return false when connector returns 500" ignore {
-      when(mockConnector.sendLetter(any(), any())(any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(500, "")))
+    "sendLetter return false when connector returns 500" in {
+      when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
+        .thenReturn(Future.successful(HttpResponse(500, InternalServerErrorObject)))
 
       npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
-        result mustBe false
-      }
-    }
-
-    "sendLetter return false when connector returns 404" ignore {
-      when(mockConnector.sendLetter(any(), any())(any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(404, "")))
-
-      npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
-        result mustBe false
+        result mustBe TechnicalIssueResponse(500, "GENERIC_SERVER_ERROR")
       }
     }
 
@@ -91,4 +84,43 @@ object NPSFMNServiceSpec {
   val npsFMNService = new NPSFMNServiceImpl(mockConnector, mockFrontendAppConfig)(ec)
   val fakeNino: Nino = Nino(new Generator(new Random()).nextNino.nino)
   val fakeNPSRequest: NPSFMNRequest = NPSFMNRequest("test", "test", "test", "test")
+
+  val NotfoundObject: String =
+    s"""
+       |{
+       | "origin": "HoD",
+       | "response": {
+       |  "jsonServiceError": {
+       |    "requestURL": "/itmp/find-my-nino/api/v1/individual/AA123456A",
+       |    "message": "MATCHING_RESOURCE_NOT_FOUND",
+       |    "appStatusMessageCount": 1,
+       |    "appStatusMessageList": {
+       |      "appStatusMessage": [
+       |        "Uri does not exist"
+       |      ]
+       |    }
+       |  }
+       |  }
+       |}
+       |""".stripMargin
+
+  val InternalServerErrorObject: String =
+    s"""
+       |{
+       | "origin": "HoD",
+       | "response": {
+       |  "jsonServiceError": {
+       |    "requestURL": "/itmp/find-my-nino/api/v1/individual/AA123456A",
+       |    "message": "GENERIC_SERVER_ERROR",
+       |    "appStatusMessageCount": 1,
+       |    "appStatusMessageList": {
+       |      "appStatusMessage": [
+       |        "Internal Server Error"
+       |      ]
+       |    }
+       |  }
+       |  }
+       |}
+       |""".stripMargin
+
 }
