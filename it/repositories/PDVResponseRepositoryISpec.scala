@@ -16,7 +16,7 @@ import java.time.{Instant, LocalDate}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 
-class PDVResponseRepositorySpec
+class PDVResponseRepositoryISpec
   extends AnyFreeSpec
     with Matchers
     with DefaultPlayMongoRepositorySupport[PDVResponseData]
