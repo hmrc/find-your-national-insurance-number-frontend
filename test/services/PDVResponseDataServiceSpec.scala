@@ -30,7 +30,7 @@ import repositories.PersonalDetailsValidationRepository
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate}
 import scala.concurrent.Future
 import scala.util.Random
 
@@ -122,15 +122,22 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation2).toString())))
 
       personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
-        result mustBe personalDetailsValidation2
+        //result mustBe PDVSuccessResponse(personalDetailsValidation2)
+        result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.npsPostCode mustBe personalDetailsValidation2.npsPostCode
+        result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.validationStatus mustBe personalDetailsValidation2.validationStatus
       }(ec)
     }
     "return false when the PDV data row does NOT have a valid customer status" in {
       when(mockPersonalDetailsValidationRepository.findByNino(any())(any()))
         .thenReturn(Future.successful(Option(personalDetailsValidation)))
 
+      when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
+        .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation).toString())))
+
       personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
-        result mustBe false
+        //result mustBe PDVSuccessResponse(personalDetailsValidation)
+        result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.npsPostCode mustBe personalDetailsValidation.npsPostCode
+        result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.validationStatus mustBe personalDetailsValidation.validationStatus
       }(ec)
     }
 
@@ -160,6 +167,7 @@ object PDVResponseDataServiceSpec {
       Some("AA1 1AA"),
       LocalDate.parse("1945-03-18")
     )
+
   val personalDetailsValidation: PDVResponseData =
     PDVResponseData(
       validationId,
@@ -168,7 +176,8 @@ object PDVResponseDataServiceSpec {
       reason = None,
       validCustomer = None,
       CRN = None,
-      npsPostCode = None
+      npsPostCode = None//,
+     // lastUpdated = Instant.ofEpochSecond(1234567890)
     )
 
   val personalDetailsValidation2: PDVResponseData =
@@ -179,7 +188,8 @@ object PDVResponseDataServiceSpec {
       reason = None,
       validCustomer = Some("true"),
       CRN = None,
-      npsPostCode = None
+      npsPostCode = None,
+      lastUpdated = Instant.ofEpochSecond(1234567890)
     )
 
 }

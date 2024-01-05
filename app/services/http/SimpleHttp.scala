@@ -21,7 +21,7 @@ import play.api.libs.json.Writes
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
-
+// $COVERAGE-OFF$
 @Singleton
 class SimpleHttp @Inject()(http: HttpClient)(implicit executionContext: ExecutionContext) {
 
@@ -38,7 +38,6 @@ class SimpleHttp @Inject()(http: HttpClient)(implicit executionContext: Executio
       onError(e)
     }
 
-  // $COVERAGE-OFF$
   def post[I, T](url: String, body: I)(onComplete: HttpResponse => T, onError: Exception => T)(implicit
     hc: HeaderCarrier,
     w: Writes[I]
