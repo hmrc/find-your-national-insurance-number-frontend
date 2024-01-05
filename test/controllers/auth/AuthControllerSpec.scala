@@ -23,6 +23,7 @@ import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
@@ -32,104 +33,132 @@ import scala.concurrent.Future
 
 class AuthControllerSpec extends SpecBase with MockitoSugar {
 
-  "signOut" - {
-
-    "must clear user answers and redirect to sign out, specifying the exit survey as the continue URL when the sca wrapper is enabled" in {
-
-      val mockSessionRepository = mock[SessionRepository]
-      when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
-
-      val application =
-        applicationBuilder(None)
-          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-          .configure("features.sca-wrapper-enabled" -> true)
-          .build()
-
-      running(application) {
-
-        val sentLocation = "http://example.com&origin=FIND_MY_NINO"
-        val appConfig = application.injector.instanceOf[FrontendAppConfig]
-        val request = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), Some(Origin("FIND_MY_NINO"))).url)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-
-      }
-    }
-
-    "must clear user answers and redirect to sign out, specifying the exit survey as the continue URL when the sca wrapper is disabled" in {
-
-      val mockSessionRepository = mock[SessionRepository]
-      when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
-
-      val application =
-        applicationBuilder(None)
-          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-          .configure("features.sca-wrapper-enabled" -> false)
-          .build()
-
-      running(application) {
-
-        val sentLocation = "http://example.com&origin=FIND_MY_NINO"
-        val appConfig = application.injector.instanceOf[FrontendAppConfig]
-        val request = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), Some(Origin("FIND_MY_NINO"))).url)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-      }
-    }
-
-    "must not redirect when origin is missing" in {
-
-      val mockSessionRepository = mock[SessionRepository]
-      when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
-
-      val application =
-        applicationBuilder(None)
-          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-          .configure("features.sca-wrapper-enabled" -> false)
-          .build()
-
-      running(application) {
-
-        val sentLocation = "http://example.com&origin=FIND_MY_NINO"
-        val request = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), None).url)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-      }
-    }
-  }
-
   trait LocalSetup {
-    val controller = app.injector.instanceOf[AuthController]
+    val controller: AuthController = app.injector.instanceOf[AuthController]
   }
 
-  "AuthController.timeOut" - {
+  "AuthController" - {
 
-    "return 303" in new LocalSetup {
+    "signOut" - {
 
-      val result = controller.timeOut()(FakeRequest("GET", ""))
+      "must clear user answers and redirect to sign out, specifying the exit survey as the continue URL when the sca wrapper is enabled" in {
 
-      status(result) mustBe SEE_OTHER
+        val mockSessionRepository = mock[SessionRepository]
+        when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
+
+        val application =
+          applicationBuilder(None)
+            .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+            .configure("features.sca-wrapper-enabled" -> true)
+            .build()
+
+        running(application) {
+
+          val sentLocation = "http://example.com&origin=FIND_MY_NINO"
+          val appConfig = application.injector.instanceOf[FrontendAppConfig]
+          val request = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), Some(Origin("FIND_MY_NINO"))).url)
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+
+        }
+      }
+
+      "must clear user answers and redirect to sign out, specifying the exit survey as the continue URL when the sca wrapper is disabled" in {
+
+        val mockSessionRepository = mock[SessionRepository]
+        when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
+
+        val application =
+          applicationBuilder(None)
+            .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+            .configure("features.sca-wrapper-enabled" -> false)
+            .build()
+
+        running(application) {
+
+          val sentLocation = "http://example.com&origin=FIND_MY_NINO"
+          val appConfig = application.injector.instanceOf[FrontendAppConfig]
+          val request = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), Some(Origin("FIND_MY_NINO"))).url)
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+        }
+      }
+
+      "must not redirect when origin is missing" in {
+
+        val mockSessionRepository = mock[SessionRepository]
+        when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
+
+        val application =
+          applicationBuilder(None)
+            .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+            .configure("features.sca-wrapper-enabled" -> false)
+            .build()
+
+        running(application) {
+
+          val sentLocation = "http://example.com&origin=FIND_MY_NINO"
+          val request = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), None).url)
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+        }
+      }
+    }
+
+    "timeOut" - {
+
+      "return 303" in new LocalSetup {
+
+        val result: Future[Result] = controller.timeOut()(FakeRequest("GET", ""))
+
+        status(result) mustBe SEE_OTHER
+
+      }
+
+      "redirect to the session timeout page" in new LocalSetup {
+
+        val result: Future[Result] = controller.timeOut()(FakeRequest("GET", ""))
+
+        redirectLocation(result).getOrElse("Unable to complete") mustBe controllers.auth.routes.SignedOutController.onPageLoad.url
+      }
+
+      "clear the session upon redirect" in new LocalSetup {
+
+        val result: Future[Result] = controller.timeOut()(FakeRequest("GET", "").withSession("test" -> "session"))
+
+        session(result) mustBe empty
+      }
+    }
+
+    "redirectToRegister" - {
+
+      "must redirect to the register page" in new LocalSetup {
+
+        val result: Future[Result] = controller.redirectToRegister("http://localhost:9553/feedback-survey?origin=FIND_MY_NINO")(FakeRequest("GET", ""))
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe "http://localhost:9553/bas-gateway/register?origin=find-your-national-insurance-number-frontend&continueUrl=http%3A%2F%2Flocalhost%3A9553%2Ffeedback-survey%3Forigin%3DFIND_MY_NINO&accountType=Individual"
+      }
 
     }
 
-    "redirect to the session timeout page" in new LocalSetup {
+    "redirectToSMN" - {
 
-      val result = controller.timeOut()(FakeRequest("GET", ""))
+      "must redirect to the SMN page" in new LocalSetup {
 
-      redirectLocation(result).getOrElse("Unable to complete") mustBe controllers.auth.routes.SignedOutController.onPageLoad.url
+        val result: Future[Result] = controller.redirectToSMN()(FakeRequest("GET", ""))
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe "http://localhost:9949/auth-login-stub/gg-sign-in?continue=http%3A%2F%2Flocalhost"
+      }
     }
 
-    "clear the session upon redirect" in new LocalSetup {
-
-      val result = controller.timeOut()(FakeRequest("GET", "").withSession("test" -> "session"))
-
-      session(result) mustBe empty
-    }
   }
+
 }

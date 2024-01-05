@@ -17,7 +17,7 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.{PDVRequest, PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.MockitoSugar
@@ -25,9 +25,10 @@ import org.mockito.MockitoSugar.mock
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
+import play.api.libs.json.Json
 import repositories.PersonalDetailsValidationRepository
 import uk.gov.hmrc.domain.{Generator, Nino}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -64,7 +65,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
       when(mockPersonalDetailsValidationRepository.updateCustomerValidityWithReason(any(), any(), any())(any()))
         .thenReturn(Future.successful(validationId))
 
-      personalDetailsValidationService.updatePDVDataRowWithValidationStatus(validationId, true, "success").map { result =>
+      personalDetailsValidationService.updatePDVDataRowWithValidationStatus(validationId, validationStatus = true, "success").map { result =>
         result mustBe true
       }(ec)
     }
@@ -100,6 +101,41 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
     }
   }
 
+  "createPDVDataRow" must {
+    "create a row with valid data" in {
+      when(mockPersonalDetailsValidationRepository.insertOrReplacePDVResultData(any())(any()))
+        .thenReturn(Future.successful(validationId))
+
+      personalDetailsValidationService.createPDVDataRow(PDVSuccessResponse(personalDetailsValidation)).map { result =>
+        result mustBe personalDetailsValidation
+      }(ec)
+    }
+
+  }
+
+  "getPDVMatchResult" must {
+    "return true when the PDV data row has a valid customer status" in {
+      when(mockPersonalDetailsValidationRepository.findByNino(any())(any()))
+        .thenReturn(Future.successful(Option(personalDetailsValidation2)))
+
+      when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
+        .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation2).toString())))
+
+      personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
+        result mustBe personalDetailsValidation2
+      }(ec)
+    }
+    "return false when the PDV data row does NOT have a valid customer status" in {
+      when(mockPersonalDetailsValidationRepository.findByNino(any())(any()))
+        .thenReturn(Future.successful(Option(personalDetailsValidation)))
+
+      personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
+        result mustBe false
+      }(ec)
+    }
+
+  }
+
 }
 
 object PDVResponseDataServiceSpec {
@@ -113,6 +149,8 @@ object PDVResponseDataServiceSpec {
 
   val validationId = "abcd01234"
   val fakeNino: Nino = Nino(new Generator(new Random()).nextNino.nino)
+
+  val pdvRequest: PDVRequest = PDVRequest("credid=12345", "session-67890")
 
   val personalDetails: PersonalDetails =
     PersonalDetails(

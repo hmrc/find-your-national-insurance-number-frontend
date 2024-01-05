@@ -38,20 +38,46 @@ class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar wi
     reset(mockConnector, mockFrontendAppConfig)
   }
 
-  "NPSFMNServiceImpl" must {
+  "NPSFMNServiceImpl.sendLetter" must {
 
-    "sendLetter" ignore {
+    "sendLetter return true when connector returns 200" ignore {
       when(mockConnector.sendLetter(any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(200, "")))
 
       npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
         result mustBe true
-      }(ec)
+      }
+    }
+
+    "sendLetter return false when connector returns 400" ignore {
+      when(mockConnector.sendLetter(any(), any())(any(), any(), any()))
+        .thenReturn(Future.successful(HttpResponse(400, "")))
+
+      npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
+        result mustBe false
+      }
 
     }
 
-  }
+    "sendLetter return false when connector returns 500" ignore {
+      when(mockConnector.sendLetter(any(), any())(any(), any(), any()))
+        .thenReturn(Future.successful(HttpResponse(500, "")))
 
+      npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
+        result mustBe false
+      }
+    }
+
+    "sendLetter return false when connector returns 404" ignore {
+      when(mockConnector.sendLetter(any(), any())(any(), any(), any()))
+        .thenReturn(Future.successful(HttpResponse(404, "")))
+
+      npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
+        result mustBe false
+      }
+    }
+
+  }
 
 }
 
@@ -64,5 +90,5 @@ object NPSFMNServiceSpec {
 
   val npsFMNService = new NPSFMNServiceImpl(mockConnector, mockFrontendAppConfig)(ec)
   val fakeNino: Nino = Nino(new Generator(new Random()).nextNino.nino)
-  val fakeNPSRequest = NPSFMNRequest("test", "test", "test", "test")
+  val fakeNPSRequest: NPSFMNRequest = NPSFMNRequest("test", "test", "test", "test")
 }
