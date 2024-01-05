@@ -16,7 +16,7 @@ import java.time.temporal.ChronoUnit
 import java.time.{Clock, Instant, ZoneId}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class TryAgainCountRepositorySpec
+class TryAgainCountRepositoryISpec
   extends AnyFreeSpec
     with Matchers
     with DefaultPlayMongoRepositorySupport[TryAgainCount]

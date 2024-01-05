@@ -38,10 +38,6 @@ trait IndividualDetailsConnector {
                           )(implicit ec: ExecutionContext,
                             hc: HeaderCarrier,
                             correlationId: CorrelationId): IndividualDetailsResponseEnvelope[IndividualDetails]
-
-  def blah(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge)(implicit ec: ExecutionContext,
-                            hc: HeaderCarrier,
-                            correlationId: CorrelationId) : IndividualDetailsResponseEnvelope[IndividualDetails]
 }
 
 @Singleton
@@ -49,12 +45,6 @@ class DefaultIndividualDetailsConnector @Inject() (httpClient: HttpClient,
     appConfig:  FrontendAppConfig, metrics: Metrics) extends IndividualDetailsConnector
     with HttpReadsWrapper[UpstreamFailures, Failure]
     with MetricsSupport {
-
-    def blah(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge)(implicit ec: ExecutionContext,
-                            hc: HeaderCarrier,
-                            correlationId: CorrelationId): IndividualDetailsResponseEnvelope[IndividualDetails] = ???
-
-
   def getIndividualDetails(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge
                           )(implicit ec: ExecutionContext,hc: HeaderCarrier, correlationId: CorrelationId
   ): IndividualDetailsResponseEnvelope[IndividualDetails] = {
