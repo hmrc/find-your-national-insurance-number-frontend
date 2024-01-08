@@ -161,7 +161,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
     "must redirect to ValidDataNINOMatchedNINOHelpController page when PDVResponseData is matched and postcode is matched" in {
 
-      // construct PDVResponseData with some values
       val mockPDVResponseDataWithValues = PDVResponseData(
         "01234",
         "success",
@@ -259,14 +258,11 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
       running(application) {
 
-      // Call the onPageLoad method
       val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode).url)
       val result = controller.onPageLoad(NormalMode)(request)
 
-      // Assert that the status of the result is SEE_OTHER
       status(result) mustEqual SEE_OTHER
 
-      // Assert that the redirect location of the result is the URL of the ValidDataNINOMatchedNINOHelpController page
       // redirectLocation(result).value mustEqual routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(NormalMode).url
     }}
 
