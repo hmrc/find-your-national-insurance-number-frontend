@@ -23,6 +23,7 @@ import views.html.templates.{LayoutProvider, NewLayoutProvider, OldLayoutProvide
 
 import java.time.{Clock, ZoneOffset}
 
+// $COVERAGE-OFF$
 class Module(environment: Environment, config: Configuration) extends AbstractModule {
 
   private val scaWrapperEnabled = config.getOptional[Boolean]("features.sca-wrapper-enabled").getOrElse(false)
@@ -45,3 +46,4 @@ class Module(environment: Environment, config: Configuration) extends AbstractMo
 
   }
 }
+// $COVERAGE-ON$

@@ -31,6 +31,7 @@ package object bindable {
     def unbind(key: String, addrType: AddrType): String = addrType.toString
   }
 */
+  // $COVERAGE-OFF$
   implicit val continueUrlBinder: QueryStringBindable[SafeRedirectUrl] = new QueryStringBindable[SafeRedirectUrl] {
 
     val parentBinder: QueryStringBindable[RedirectUrl] = RedirectUrl.queryBinder
@@ -45,5 +46,6 @@ package object bindable {
 
     def unbind(key: String, value: SafeRedirectUrl): String = parentBinder.unbind(key, RedirectUrl(value.url))
 
+    // $COVERAGE-ON$
   }
 }

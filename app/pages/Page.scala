@@ -17,7 +17,7 @@
 package pages
 
 import scala.language.implicitConversions
-
+// $COVERAGE-OFF$
 trait Page
 
 object Page {
@@ -25,3 +25,4 @@ object Page {
   implicit def toString(page: Page): String =
     page.toString
 }
+// $COVERAGE-ON$

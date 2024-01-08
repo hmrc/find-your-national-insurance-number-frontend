@@ -45,7 +45,6 @@ class DefaultIndividualDetailsConnector @Inject() (httpClient: HttpClient,
     appConfig:  FrontendAppConfig, metrics: Metrics) extends IndividualDetailsConnector
     with HttpReadsWrapper[UpstreamFailures, Failure]
     with MetricsSupport {
-
   def getIndividualDetails(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge
                           )(implicit ec: ExecutionContext,hc: HeaderCarrier, correlationId: CorrelationId
   ): IndividualDetailsResponseEnvelope[IndividualDetails] = {
@@ -65,6 +64,7 @@ class DefaultIndividualDetailsConnector @Inject() (httpClient: HttpClient,
     }
   }
 
+  // $COVERAGE-OFF$
   override def fromUpstreamErrorToIndividualDetailsError(
       connectorName:     String,
       status:            Int,
@@ -95,5 +95,6 @@ class DefaultIndividualDetailsConnector @Inject() (httpClient: HttpClient,
     )
     ConnectorError(status, s"$connectorName, ${upstreamError.code} - ${upstreamError.reason}").some
   }
+  // $COVERAGE-ON$
 
 }

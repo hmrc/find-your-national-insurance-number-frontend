@@ -40,7 +40,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
 
 
   //get a PDV match result
-  private def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponse] =
+  def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponse] =
     connector.retrieveMatchingDetails(pdvRequest) map { response =>
         response.status match {
         case OK =>
@@ -57,7 +57,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     }
 
   //create a PDV data row
-  private def createPDVDataRow(personalDetailsValidation: PDVResponse): Future[PDVResponseData] = {
+  def createPDVDataRow(personalDetailsValidation: PDVResponse): Future[PDVResponseData] = {
     personalDetailsValidation match {
       case _ @ PDVSuccessResponse(pdvResponseData) =>
         personalDetailsValidationRepository.insertOrReplacePDVResultData(pdvResponseData)

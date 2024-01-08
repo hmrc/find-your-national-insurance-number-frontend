@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import forms.{NoRetryTechnicalErrorServiceFormProvider, TechnicalErrorServiceFormProvider}
+import forms.TechnicalErrorServiceFormProvider
 import models.{NormalMode, TechnicalErrorService, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any

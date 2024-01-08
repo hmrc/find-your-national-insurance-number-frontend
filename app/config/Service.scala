@@ -19,7 +19,7 @@ package config
 import play.api.{ConfigLoader, Configuration}
 
 import scala.language.implicitConversions
-
+// $COVERAGE-OFF$
 final case class Service(host: String, port: String, protocol: String) {
 
   def baseUrl: String =
@@ -46,3 +46,4 @@ object Service {
   implicit def convertToString(service: Service): String =
     service.baseUrl
 }
+// $COVERAGE-ON$

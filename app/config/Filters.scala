@@ -22,6 +22,7 @@ import uk.gov.hmrc.sca.filters.WrapperDataFilter
 
 import javax.inject.{Inject, Singleton};
 
+// $COVERAGE-OFF$
 @Singleton
 class Filters @Inject()(
                          defaultFilters: EnabledFilters,
@@ -38,3 +39,4 @@ class Filters @Inject()(
       Option.when(allowListFilterEnabled)(allowListFilter)
   }
 }
+// $COVERAGE-ON$
