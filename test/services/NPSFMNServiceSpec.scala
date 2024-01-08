@@ -70,6 +70,15 @@ class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar wi
       }
     }
 
+    "sendLetter return false when connector returns 501" in {
+      when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
+        .thenReturn(Future.successful(HttpResponse(501, NotImplementedObject)))
+
+      npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
+        result mustBe TechnicalIssueResponse(501, "NOT_IMPLEMENTED")
+      }
+    }
+
   }
 
 }
@@ -123,4 +132,19 @@ object NPSFMNServiceSpec {
        |}
        |""".stripMargin
 
+  val NotImplementedObject: String =
+    s"""
+       |{
+       |  "jsonServiceError": {
+       |    "requestURL": "/itmp/find-my-nino/api/v1/individual/AA123456A",
+       |    "message": "NOT_IMPLEMENTED",
+       |    "appStatusMessageCount": 1,
+       |    "appStatusMessageList": {
+       |      "appStatusMessage": [
+       |        "Context determined but code is not active"
+       |      ]
+       |    }
+       |  }
+       |}
+       |""".stripMargin
 }

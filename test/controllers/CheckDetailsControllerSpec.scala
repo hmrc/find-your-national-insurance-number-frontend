@@ -18,11 +18,10 @@ package controllers
 
 import base.SpecBase
 import connectors.IndividualDetailsConnector
-import models.{AddressLine, IndividualDetailsIdentifier, IndividualDetailsNino, IndividualDetailsResponseEnvelope, NormalMode, PersonDetails, TemporaryReferenceNumber, individualdetails}
+import models.{AddressLine, IndividualDetailsNino, IndividualDetailsResponseEnvelope, NormalMode, TemporaryReferenceNumber, individualdetails}
 import models.individualdetails._
 import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails}
 import models.errors.ConnectorError
-import models.errors.IndividualDetailsError
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import play.api.inject
@@ -30,9 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.PersonalDetailsValidationService
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, ~}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.HeaderCarrier
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
 
@@ -100,16 +97,12 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
     crnIndicator = CrnIndicator.False,
     nameList = NameList(Some(List(fakeName))),
     addressList = AddressList(Some(List(fakeAddress)))
-
   )
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
   val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
   val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
-
-
   val controller: CheckDetailsController = application.injector.instanceOf[CheckDetailsController]
-
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -117,8 +110,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
   }
 
   "CheckDetailsController" - {
-
-
 
     "must return OK and the correct view for a GET" in {
 
@@ -154,7 +145,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
         .build()
-
 
       when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
         .thenReturn(Future.successful(mockPDVResponseData))
@@ -233,7 +223,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
     "must redirect to InvalidDataNINOHelpController page when IndividualDetails is failed" in {
 
-
       when(mockIndividualDetailsConnector.getIndividualDetails(TemporaryReferenceNumber("fakeNino"), ResolveMerge('Y')))
         .thenReturn(IndividualDetailsResponseEnvelope(Left(ConnectorError(500, "test"))))
 
@@ -241,13 +230,11 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode).url)
       val result = controller.onPageLoad(NormalMode)(request)
 
-
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
     }
 
     "must redirect to ValidDataNINOMatchedNINOHelpController page when IndividualDetails is successful" in {
-
 
       val pdvRequest = PDVRequest("credentialId", "sessionId")
       val mockPDVResponseDataWithValues = PDVResponseData(
@@ -260,10 +247,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(pdvRequest)(hc))
         .thenReturn(Future.successful(mockPDVResponseDataWithValues))
 
-
       when(mockIndividualDetailsConnector.getIndividualDetails(TemporaryReferenceNumber("fakeNino"), ResolveMerge('Y')))
         .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
-
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
@@ -271,7 +256,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector)
         )
         .build()
-
 
       running(application) {
 
@@ -282,10 +266,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       // Assert that the status of the result is SEE_OTHER
       status(result) mustEqual SEE_OTHER
 
-
-
       // Assert that the redirect location of the result is the URL of the ValidDataNINOMatchedNINOHelpController page
-     // redirectLocation(result).value mustEqual routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(NormalMode).url
+      // redirectLocation(result).value mustEqual routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(NormalMode).url
     }}
 
     "getIdData" - {
@@ -307,7 +289,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           case _ => fail("Expected a Right with IndividualDetails, but got a Left")
         }
       }
-
 
       "must return IndividualDetailsError when IndividualDetailsConnector returns an error" in {
         val mockPDVResponseData = PDVResponseData(
@@ -463,7 +444,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
             .thenReturn(Future.successful(mockPDVResponseData))
          when(mockIndividualDetailsConnector.getIndividualDetails(IndividualDetailsNino(mockPDVResponseData.personalDetails.get.nino.nino), ResolveMerge('Y')))
            .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
-
 
           val ap = applicationBuilder(userAnswers = Some(emptyUserAnswers))
             .overrides(
