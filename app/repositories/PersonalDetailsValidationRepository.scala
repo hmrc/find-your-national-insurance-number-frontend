@@ -79,9 +79,9 @@ class PersonalDetailsValidationRepository @Inject()(
 
     collection.updateMany(Filters.equal("id", id),
         Updates.combine(
-          Updates.set("validCustomer",  toBson(encryptField(validCustomer.toString, id, appConfig.encryptionKey))),
-          Updates.set("reason",  toBson(encryptField(reason, id, appConfig.encryptionKey))),
-          Updates.set("CRN", if (reason.contains("CRN;"))  toBson(encryptField("true",id,  appConfig.encryptionKey)) else  toBson(encryptField("false", id, appConfig.encryptionKey)))))
+          Updates.set("validCustomer",  toBson(encryptField(validCustomer.toString, appConfig.encryptionKey))),
+          Updates.set("reason",  toBson(encryptField(reason, appConfig.encryptionKey))),
+          Updates.set("CRN", if (reason.contains("CRN;"))  toBson(encryptField("true", appConfig.encryptionKey)) else  toBson(encryptField("false", appConfig.encryptionKey)))))
       .toFuture()
       .map(_ => id) recover {
       case e: MongoWriteException if e.getCode == 11000 =>
@@ -90,12 +90,12 @@ class PersonalDetailsValidationRepository @Inject()(
     }
   }
 
-  def updatePDVDataWithNPSPostCode(nino: String, npsPostCode: String, pdvId: String)(implicit ec: ExecutionContext): Future[String] = {
+  def updatePDVDataWithNPSPostCode(nino: String, npsPostCode: String)(implicit ec: ExecutionContext): Future[String] = {
     logger.info(s"Updating one in $collectionName table")
 
-    collection.updateMany(Filters.equal("personalDetails.nino", encryptField(nino, pdvId, appConfig.encryptionKey)),
+    collection.updateMany(Filters.equal("personalDetails.nino", nino),
         Updates.combine(
-          Updates.set("npsPostCode", toBson(encryptField(npsPostCode, pdvId, appConfig.encryptionKey)))))
+          Updates.set("npsPostCode", toBson(encryptField(npsPostCode, appConfig.encryptionKey)))))
       .toFuture()
       .map(_ => nino) recover {
       case e: MongoWriteException if e.getCode == 11000 =>
@@ -120,6 +120,7 @@ class PersonalDetailsValidationRepository @Inject()(
   }
 
     def findByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] = {
+
       collection.find(Filters.equal("personalDetails.nino", nino))
         .first()
         .toFutureOption()

@@ -67,13 +67,13 @@ object EncryptedPDVResponseData {
       )(EncryptedPDVResponseData.apply, unlift(EncryptedPDVResponseData.unapply))
   }
 
-  def encryptField(field: String, pdvId: String, key: String): EncryptedValue = {
-    SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(field, pdvId)
+  def encryptField(fieldValue: String, key: String): EncryptedValue = {
+    SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(fieldValue, key)
   }
 
   def encrypt(pDVResponseData: PDVResponseData, key: String): EncryptedPDVResponseData = {
-    def e(field: String): EncryptedValue = {
-      SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(field, pDVResponseData.id)
+    def e(fieldValue: String): EncryptedValue = {
+      SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(fieldValue, key)
     }
 
     EncryptedPDVResponseData(
@@ -90,7 +90,7 @@ object EncryptedPDVResponseData {
 
   def decrypt(encryptedRowPersonDetails: EncryptedPDVResponseData, key: String): PDVResponseData = {
     def d(field: EncryptedValue): String = {
-      SymmetricCryptoFactory.aesGcmAdCrypto(key).decrypt(field, encryptedRowPersonDetails.id)
+      SymmetricCryptoFactory.aesGcmAdCrypto(key).decrypt(field, key)
     }
 
     PDVResponseData(

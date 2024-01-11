@@ -108,7 +108,7 @@ class CheckDetailsController @Inject()(
                   Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
                 }
               } else { // Matched with NINO
-                personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(pdvData.getNino, idPostCode, pdvData.id)
+                personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(pdvData.getNino, idPostCode)
                 Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode))
               }
             } else {

@@ -81,8 +81,8 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     }
   }
 
-  def updatePDVDataRowWithNPSPostCode(nino: String, npsPostCode: String, pdvId: String): Future[Boolean] = {
-    personalDetailsValidationRepository.updatePDVDataWithNPSPostCode(nino, npsPostCode, pdvId) map {
+  def updatePDVDataRowWithNPSPostCode(nino: String, npsPostCode: String): Future[Boolean] = {
+    personalDetailsValidationRepository.updatePDVDataWithNPSPostCode(nino, npsPostCode) map {
       case nino: String if nino.nonEmpty => true
       case _ => false
     } recover {
