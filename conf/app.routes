@@ -60,8 +60,8 @@ POST        /changeSelectAlternativeService                 controllers.SelectAl
 
 GET         /phone-hmrc                                     controllers.PhoneHMRCDetailsController.onPageLoad()
 
-GET         /checkDetails                                   controllers.CheckDetailsController.onPageLoad(mode: Mode = NormalMode)
-GET         /changeCheckDetails                             controllers.CheckDetailsController.onPageLoad(mode: Mode = CheckMode)
+GET         /checkDetails                                   controllers.CheckDetailsController.onPageLoad(origin: Option[String] ?= None, mode: Mode = NormalMode)
+GET         /changeCheckDetails                             controllers.CheckDetailsController.onPageLoad(origin: Option[String] ?= None, mode: Mode = CheckMode)
 
 GET         /issue                                          controllers.SendLetterErrorController.onPageLoad(mode: Mode = NormalMode)
 POST        /issue                                          controllers.SendLetterErrorController.onSubmit(mode: Mode = NormalMode)
