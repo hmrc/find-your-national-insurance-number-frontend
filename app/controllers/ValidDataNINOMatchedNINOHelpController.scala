@@ -53,6 +53,7 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
 
   def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
+      logger.logger.debug(s"\n\n\n\n ******************************************************** (ValidDataNINOMatchedNINOHelpController) ${request.session.data} \n\n\n\n")
       val preparedForm = request.userAnswers.get(ValidDataNINOMatchedNINOHelpPage) match {
         case None => form
         case Some(value) => form.fill(value)

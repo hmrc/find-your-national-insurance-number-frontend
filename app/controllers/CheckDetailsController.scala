@@ -77,8 +77,8 @@ class CheckDetailsController @Inject()(
           pdvData <- getPDVData(pdvRequest)
           nino <- personalDetailsValidationService.getNinoByPersonalDetails(pdvData.personalDetails)
           // Add nino to request session or requireData
-          _ = request.session.data + ("nino" -> nino)
-          _ = println(s"\n\n\n\n ${request.session.data} \n\n\n\n")
+          //_ = request.session.data + ("nino" -> nino)
+          //_ = println(s"\n\n\n\n ${request.session.data} \n\n\n\n")
           idData <- getIdData(pdvData)
         } yield (pdvData, idData) match {
 
@@ -99,6 +99,10 @@ class CheckDetailsController @Inject()(
             }
 
           case (pdvData, Right(idData)) =>
+
+            val sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
+            logger.logger.debug(s"\n\n\n\n ******************************************************** (CheckDetailsController) ${sessionWithNINO.data} \n\n\n\n")
+
             auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
               pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
 
@@ -110,13 +114,13 @@ class CheckDetailsController @Inject()(
               if (pdvData.getPostCode.nonEmpty) {
                 // Matched with Postcode
                 if (idPostCode.equals(pdvData.getPostCode)) {
-                  Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
+                  Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
                 } else {
                   Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
                 }
               } else { // Matched with NINO
                 personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(pdvData.getNino, idPostCode)
-                Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode))
+                Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
               }
             } else {
               Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))

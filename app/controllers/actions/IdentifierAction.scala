@@ -40,7 +40,7 @@ class SessionIdentifierAction @Inject()(
  )(implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions {
 
   private val AuthPredicate = AuthProviders(GovernmentGateway)
-  private val FMNRetrievals = Retrievals.nino
+  //private val FMNRetrievals = Retrievals.nino
   private val FMNRetrievals2 = Retrievals.credentials
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {

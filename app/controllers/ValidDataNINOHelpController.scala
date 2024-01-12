@@ -53,6 +53,7 @@ class ValidDataNINOHelpController @Inject()(
 
   def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireData) async {
     implicit request =>
+      logger.logger.debug(s"\n\n\n\n ******************************************************** (ValidDataNINOHelpController) ${request.session.data} \n\n\n\n")
       val resp = personalDetailsValidationService.getValidCustomerStatus(request.nino.getOrElse("")).map(
         validCustomer =>
           if (validCustomer == "true") {
