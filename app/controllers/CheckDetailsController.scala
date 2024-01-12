@@ -66,12 +66,19 @@ class CheckDetailsController @Inject()(
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request => {
+      val pdvRequest = PDVRequest(
+        request.credId.getOrElse(""),
+        request.session.data.getOrElse("sessionId", "")
+      )
 
       val result: Try[Future[Result]] = Try {
         val processData = for {
-          credentialId <- getCredentialId()
-          pdvRequest = PDVRequest(credentialId.getOrElse(""), request.session.data.getOrElse("sessionId", ""))
+          //credentialId <- getCredentialId()
           pdvData <- getPDVData(pdvRequest)
+          nino <- personalDetailsValidationService.getNinoByPersonalDetails(pdvData.personalDetails)
+          // Add nino to request session or requireData
+          _ = request.session.data + ("nino" -> nino)
+          _ = println(s"\n\n\n\n ${request.session.data} \n\n\n\n")
           idData <- getIdData(pdvData)
         } yield (pdvData, idData) match {
 

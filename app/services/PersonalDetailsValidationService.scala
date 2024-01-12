@@ -17,7 +17,7 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.pdv.{PDVBadRequestResponse, PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse}
+import models.pdv.{PDVBadRequestResponse, PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import org.mongodb.scala.MongoException
 import play.api.Logging
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
@@ -111,5 +111,20 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
       case e: Exception => "false"
     }
   }
+
+    def getNinoByPersonalDetails(personalDetails: Option[PersonalDetails]): Future[Option[String]] = {
+        personalDetails match {
+          case Some(pd) =>
+              personalDetailsValidationRepository.findNino(pd.firstName, pd.lastName, pd.postCode.getOrElse("")) map {
+                  case Some(pdvResponseData) => Some(pdvResponseData)
+                  case _ => None
+                  } recover {
+                  case e: MongoException =>
+                      logger.warn(s"Failed finding PDV data by firstName: ${pd.firstName}, lastName: ${pd.lastName}, postCode: ${pd.postCode}, ${e.getMessage}")
+                      None
+                  }
+            case _ => Future.successful(None)
+          }
+      }
 
 }

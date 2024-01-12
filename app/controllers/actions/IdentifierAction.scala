@@ -41,16 +41,17 @@ class SessionIdentifierAction @Inject()(
 
   private val AuthPredicate = AuthProviders(GovernmentGateway)
   private val FMNRetrievals = Retrievals.nino
+  private val FMNRetrievals2 = Retrievals.credentials
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    authorised(AuthPredicate).retrieve(FMNRetrievals) {
-      case Some(nino) =>
+    authorised(AuthPredicate).retrieve(FMNRetrievals2) {
+      case Some(credentials) =>
         hc.sessionId match {
           case Some(session) =>
-            block(IdentifierRequest(request, session.value, Some(nino)))
+            block(IdentifierRequest(request, session.value, None, Some(credentials.providerId)))
           case None =>
             Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
         }
