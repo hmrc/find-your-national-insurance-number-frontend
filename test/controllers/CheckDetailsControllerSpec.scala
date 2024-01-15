@@ -18,22 +18,23 @@ package controllers
 
 import base.SpecBase
 import connectors.IndividualDetailsConnector
-import models.{AddressLine, IndividualDetailsNino, IndividualDetailsResponseEnvelope, NormalMode, TemporaryReferenceNumber, individualdetails}
+import models.errors.ConnectorError
 import models.individualdetails._
 import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails}
-import models.errors.ConnectorError
+import models.{AddressLine, CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, NormalMode, TemporaryReferenceNumber, individualdetails}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito.{reset, times, verify, when}
 import play.api.inject
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.PersonalDetailsValidationService
+import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
+import util.AnyValueTypeMatcher.anyValueType
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
 
-import java.time.{Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset}
+import java.time._
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -103,6 +104,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
   val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
   val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
   val controller: CheckDetailsController = application.injector.instanceOf[CheckDetailsController]
+  val auditService: AuditService = mock[AuditService]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -159,64 +161,45 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "must redirect to ValidDataNINOMatchedNINOHelpController page when PDVResponseData is matched and postcode is matched" in {
-
-      val mockPDVResponseDataWithValues = PDVResponseData(
-        "01234",
-        "success",
-        Some(models.pdv.PersonalDetails("John", "Smith", Nino("AB123456C"), None, LocalDate.now())),
-        LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
-      )
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(
-          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-        )
-        .build()
-
-      val pdvRequest = PDVRequest("credentialId", "sessionId")
-
-      when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(pdvRequest)(hc))
-        .thenReturn(Future.successful(mockPDVResponseDataWithValues))
-
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode).url)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual 303
-        //redirectLocation(result).value mustEqual routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(NormalMode).url
-      }
-    }
-
+    //*************************************
     "must redirect to ValidDataNINOMatchedNINOHelpController page when PDVResponseData is matched and nino is matched, postcode is missing" in {
 
-      // construct PDVResponseData with some values
-      val mockPDVResponseDataWithValues = PDVResponseData(
+      val mockPDVResponseData = PDVResponseData(
         "01234",
         "success",
         Some(models.pdv.PersonalDetails("John", "Smith", Nino("AB123456C"), None, LocalDate.now())),
         LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
       )
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val fakeIndividualDetailsWithConditionsMet = fakeIndividualDetails.copy(
+        accountStatusType = Some(AccountStatusType.FullLive),
+        crnIndicator = CrnIndicator.False,
+        addressList = AddressList(Some(List(fakeAddress.copy(addressStatus = Some(AddressStatus.NotDlo)))))
+      )
+
+      when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+        .thenReturn(Future.successful(mockPDVResponseData))
+
+      when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
+        .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetailsWithConditionsMet)))
+
+      val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
+          inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-        )
-        .build()
+        ).build()
 
-      val pdvRequest = PDVRequest("credentialId", "sessionId")
+      val controller = app.injector.instanceOf[CheckDetailsController]
 
-      when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(pdvRequest)(hc))
-        .thenReturn(Future.successful(mockPDVResponseDataWithValues))
-
-      running(application) {
+      running(app) {
         val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode).url)
+          .withSession("sessionId" -> "", "nino" -> "AB123456C", "credentialId" -> "")
+        val result = controller.onPageLoad(NormalMode)(request)
 
-        val result = route(application, request).value
-
-        status(result) mustEqual 303
-        //redirectLocation(result).value mustEqual routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(NormalMode).url
+        status(result) mustEqual SEE_OTHER
+        verify(mockPersonalDetailsValidationService, times(1)).createPDVDataFromPDVMatch(any())(any())
+        val resp = controller.onPageLoad(NormalMode)(request)
+        redirectLocation(resp).value mustEqual routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(NormalMode).url
       }
     }
 
@@ -233,38 +216,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
     }
 
-    "must redirect to ValidDataNINOMatchedNINOHelpController page when IndividualDetails is successful" in {
-
-      val pdvRequest = PDVRequest("credentialId", "sessionId")
-      val mockPDVResponseDataWithValues = PDVResponseData(
-        "01234",
-        "success",
-        Some(models.pdv.PersonalDetails("John", "Smith", Nino("AB123456C"), None, LocalDate.now())),
-        LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
-      )
-
-      when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(pdvRequest)(hc))
-        .thenReturn(Future.successful(mockPDVResponseDataWithValues))
-
-      when(mockIndividualDetailsConnector.getIndividualDetails(TemporaryReferenceNumber("fakeNino"), ResolveMerge('Y')))
-        .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(
-          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
-          inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector)
-        )
-        .build()
-
-      running(application) {
-
-      val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode).url)
-      val result = controller.onPageLoad(NormalMode)(request)
-
-      status(result) mustEqual SEE_OTHER
-
-      // redirectLocation(result).value mustEqual routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(NormalMode).url
-    }}
 
     "getIdData" - {
       "must return IndividualDetails when IndividualDetailsConnector returns a successful response" in {
@@ -410,7 +361,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
             .thenReturn(Future.successful(PDVResponseData("id", "success", None, Instant.now(), None, None, None, None)))
           when(mockIndividualDetailsConnector.getIndividualDetails(IndividualDetailsNino("fakeNino"), ResolveMerge('Y')))
-            .thenReturn(IndividualDetailsResponseEnvelope(Left(ConnectorError(500,"error"))))
+            .thenReturn(IndividualDetailsResponseEnvelope(Left(ConnectorError(500, "error"))))
 
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode).url)
           val result = controller.onPageLoad(NormalMode)(request)
@@ -419,8 +370,36 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
         }
 
-       "must redirect to ValidDataNINOMatchedNINOHelpController page when getIdData returns a Right " +
-         "with IndividualDetails and checkConditions returns true" in {
+        "must redirect to InvalidDataNINOHelpController page when PDVResponseData validationStatus is failure" in {
+          val mockPDVResponseData = PDVResponseData(
+            "01234",
+            "failure",
+            Some(models.pdv.PersonalDetails("John", "Smith", Nino("AB123456C"), None, LocalDate.now())),
+            LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
+          )
+
+          when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+            .thenReturn(Future.successful(mockPDVResponseData))
+
+          val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+            .overrides(
+              inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+            )
+            .build()
+
+          running(application) {
+            val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode).url)
+            val result = route(application, request).value
+
+            status(result) mustEqual 303
+            redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+          }
+        }
+
+
+
+        "must redirect to ValidDataNINOMatchedNINOHelpController page when getIdData returns a Right " +
+          "with IndividualDetails and checkConditions returns true" in {
 
           //val fakeCredentials = Credentials("providerId", "providerType")
           val mockPDVResponseData = PDVResponseData(
@@ -438,24 +417,141 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
             .thenReturn(Future.successful(mockPDVResponseData))
-         when(mockIndividualDetailsConnector.getIndividualDetails(IndividualDetailsNino(mockPDVResponseData.personalDetails.get.nino.nino), ResolveMerge('Y')))
-           .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
 
-          val ap = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
+            .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetailsWithConditionsMet)))
+
+          val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
             .overrides(
+              inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
+              inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+            ).build()
+
+          val controller = app.injector.instanceOf[CheckDetailsController]
+
+          running(app) {
+            val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode).url)
+              .withSession("sessionId" -> "", "nino" -> "AB123456C", "credentialId" -> "")
+            val result = controller.onPageLoad(NormalMode)(request)
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(NormalMode).url
+          }
+        }
+
+        "must redirect to InvalidDataNINOHelpController page and audit the event when getIdData returns a Left with ConnectorError" in {
+          val mockPDVResponseData = PDVResponseData(
+            "01234",
+            "success",
+            Some(models.pdv.PersonalDetails("John", "Smith", Nino("AB123456C"), None, LocalDate.now())),
+            LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
+          )
+
+          val connectorError = ConnectorError(500, "test")
+
+          when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+            .thenReturn(Future.successful(mockPDVResponseData))
+          when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
+            .thenReturn(IndividualDetailsResponseEnvelope(Left(connectorError)))
+
+          val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+            .overrides(
+              inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
               inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
-              inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector)
+              inject.bind[AuditService].toInstance(auditService)
             )
             .build()
 
-          running(ap) {
+          running(application) {
             val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode).url)
-            val result = controller.onPageLoad(NormalMode)(request)
+            val result = route(application, request).value
 
-            status(result) mustEqual SEE_OTHER
-            //redirectLocation(result).value mustEqual routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(NormalMode).url
+            status(result) mustEqual 303
+            redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+
+            // Verify that the audit event was sent
+            verify(auditService, times(1)).audit(any())(any())
+          }
+
+        }
+
+
+        "must redirect to ValidDataNINOMatchedNINOHelpController page when idPostCode equals pdvData.getPostCode" in {
+          val mockPDVResponseData = PDVResponseData(
+            "01234",
+            "success",
+            Some(models.pdv.PersonalDetails("John", "Smith", Nino("AB123456C"), Some("AA1 1AA"), LocalDate.now())),
+            LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
+          )
+
+          val fakeIndividualDetailsWithMatchingPostcode = fakeIndividualDetails.copy(
+            accountStatusType = Some(AccountStatusType.FullLive),
+            crnIndicator = CrnIndicator.False,
+            addressList = AddressList(Some(List(fakeAddress.copy(addressPostcode = Some(AddressPostcode("AA1 1AA"))))))
+          )
+
+
+          when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+            .thenReturn(Future.successful(mockPDVResponseData))
+          when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
+            .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetailsWithMatchingPostcode)))
+
+          val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+            .overrides(
+              inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
+              inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+            )
+            .build()
+
+          val controller = app.injector.instanceOf[CheckDetailsController]
+
+          running(app) {
+            val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode).url)
+              .withSession("sessionId" -> "", "credentialId" -> "")
+
+            val resp = controller.onPageLoad(NormalMode)(request)
+            status(resp) mustEqual 303
           }
         }
+
+        "must redirect to InvalidDataNINOHelpController page when idPostCode does not equals pdvData.getPostCode" in {
+          val mockPDVResponseData = PDVResponseData(
+            "01234",
+            "success",
+            Some(models.pdv.PersonalDetails("John", "Smith", Nino("AB123456C"), Some("AA1 1AA"), LocalDate.now())),
+            LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
+          )
+
+          val fakeIndividualDetailsWithMatchingPostcode = fakeIndividualDetails.copy(
+            accountStatusType = Some(AccountStatusType.FullLive),
+            crnIndicator = CrnIndicator.False,
+            addressList = AddressList(Some(List(fakeAddress.copy(addressPostcode = Some(AddressPostcode("AA1 2AA"))))))
+          )
+
+
+          when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+            .thenReturn(Future.successful(mockPDVResponseData))
+          when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
+            .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetailsWithMatchingPostcode)))
+
+          val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+            .overrides(
+              inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
+              inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+            )
+            .build()
+
+          val controller = app.injector.instanceOf[CheckDetailsController]
+
+          running(app) {
+            val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode).url)
+              .withSession("sessionId" -> "", "credentialId" -> "")
+
+            val resp = controller.onPageLoad(NormalMode)(request)
+            status(resp) mustEqual 303
+          }
+        }
+
+
       }
     }
   }
