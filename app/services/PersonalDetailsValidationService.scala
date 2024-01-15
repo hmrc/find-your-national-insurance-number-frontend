@@ -103,6 +103,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     })
   }
 
+  // TODO change to boolean
   def getValidCustomerStatus(nino: String): Future[String] = {
     getPersonalDetailsValidationByNino(nino) map {
       case Some(pdvData) => pdvData.validCustomer.getOrElse("false")

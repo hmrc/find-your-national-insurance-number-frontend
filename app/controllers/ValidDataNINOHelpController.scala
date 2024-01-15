@@ -23,6 +23,7 @@ import models.{Mode, NormalMode}
 import navigation.Navigator
 import pages.ValidDataNINOHelpPage
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -31,6 +32,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.AuditUtils
 import views.html.ValidDataNINOHelpView
 import play.api.mvc.Codec.utf_8
+
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -49,27 +51,27 @@ class ValidDataNINOHelpController @Inject()(
                                              val controllerComponents: MessagesControllerComponents
                                   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
-  val form = formProvider()
+  val form: Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireData) async {
     implicit request =>
-      logger.logger.debug(s"\n\n\n\n ******************************************************** (ValidDataNINOHelpController) ${request.session.data} \n\n\n\n")
-      val resp = personalDetailsValidationService.getValidCustomerStatus(request.nino.getOrElse("")).map(
+      val nino = request.session.data.getOrElse("nino", "")
+      val resp = personalDetailsValidationService.getValidCustomerStatus(nino).map(
         validCustomer =>
           if (validCustomer == "true") {
             val preparedForm = request.userAnswers.get(ValidDataNINOHelpPage) match {
               case None => form
               case Some(value) => form.fill(value)
             }
-
             Ok(view(preparedForm, mode))
           } else {
             Redirect(controllers.routes.UnauthorisedController.onPageLoad)
           }
       )
-      request.nino match {
-        case Some(nino) => resp
-        case None => Future.successful(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
+
+      request.session.data.get("nino") match {
+        case Some(_) => resp
+        case _       => Future.successful(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
       }
   }
 
@@ -80,7 +82,7 @@ class ValidDataNINOHelpController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).onComplete {
             case Success(pdv) =>
               auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                 None,

@@ -58,12 +58,6 @@ class CheckDetailsController @Inject()(
                                       )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
   extends FrontendBaseController with AuthorisedFunctions with I18nSupport with Logging {
 
-  def getCredentialId()(implicit hc: HeaderCarrier): Future[Option[String]] =  {
-    lazy val toAuthCredentialId: Option[Credentials] => Future[Option[String]] =
-      (credentials: Option[Credentials]) => Future.successful(credentials.map(_.providerId))
-    authorised().retrieve(credentials)(toAuthCredentialId).recover { case _ => None }
-  }
-
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request => {
       val pdvRequest = PDVRequest(
@@ -73,12 +67,7 @@ class CheckDetailsController @Inject()(
 
       val result: Try[Future[Result]] = Try {
         val processData = for {
-          //credentialId <- getCredentialId()
           pdvData <- getPDVData(pdvRequest)
-          nino <- personalDetailsValidationService.getNinoByPersonalDetails(pdvData.personalDetails)
-          // Add nino to request session or requireData
-          //_ = request.session.data + ("nino" -> nino)
-          //_ = println(s"\n\n\n\n ${request.session.data} \n\n\n\n")
           idData <- getIdData(pdvData)
         } yield (pdvData, idData) match {
 
@@ -101,7 +90,6 @@ class CheckDetailsController @Inject()(
           case (pdvData, Right(idData)) =>
 
             val sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
-            logger.logger.debug(s"\n\n\n\n ******************************************************** (CheckDetailsController) ${sessionWithNINO.data} \n\n\n\n")
 
             auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
               pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))

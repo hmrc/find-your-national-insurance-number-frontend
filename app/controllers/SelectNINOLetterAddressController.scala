@@ -72,14 +72,14 @@ class SelectNINOLetterAddressController @Inject()(
         }
 
       for {
-        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse(""))
+        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", ""))
         postCode = getPostCode(pdvData)
       } yield Ok(view(preparedForm, mode, postCode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val nino = request.nino.getOrElse(StringUtils.EMPTY)
+      val nino = request.session.data.getOrElse("nino", StringUtils.EMPTY)
 
       form.bindFromRequest().fold(
         formWithErrors =>
@@ -102,8 +102,8 @@ class SelectNINOLetterAddressController @Inject()(
                 status match {
                   case LetterIssuedResponse() =>
                     for {
-                      pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse(""))
-                      idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(request.nino.getOrElse("")))
+                      pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
+                      idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
                     } yield (pdvData, idAddress) match {
                       case (pdvData, Right(idAddress)) =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
@@ -121,7 +121,7 @@ class SelectNINOLetterAddressController @Inject()(
                     }
                     Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
                   case RLSDLONFAResponse(responseStatus, responseMessage) =>
-                    personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+                    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
                       case Success(pdv) =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                           None,
@@ -139,7 +139,7 @@ class SelectNINOLetterAddressController @Inject()(
                     }
                     Redirect(routes.SendLetterErrorController.onPageLoad(mode))
                   case TechnicalIssueResponse(responseStatus, responseMessage) =>
-                    personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+                    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
                       case Success(pdv) =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                           None,
@@ -162,6 +162,7 @@ class SelectNINOLetterAddressController @Inject()(
                 }
             }
           }
+
         }
       )
   }

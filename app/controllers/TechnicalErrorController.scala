@@ -83,7 +83,7 @@ class TechnicalErrorController @Inject()(
           } yield BadRequest(view(formWithErrors, mode, retryAllowed)),
 
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).onComplete {
             case Success(pdv) =>
               auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                 None,
