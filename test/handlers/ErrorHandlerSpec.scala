@@ -47,6 +47,6 @@ object ErrorHandlerSpec {
 
   val messagesApi: MessagesApi = mock[MessagesApi]
   val errorTemplate: ErrorTemplate = mock[ErrorTemplate]
-  val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(NormalMode).url)
+  val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(Some("PDV"), NormalMode).url)
   implicit val fakeMessages: Messages = messagesApi.preferred(fakeRequest)
 }
