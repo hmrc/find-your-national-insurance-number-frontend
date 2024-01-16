@@ -67,8 +67,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
         throw new RuntimeException(s"Failed creating PDV data row.")
     }
   }
-
-  //add a function to update the PDV data row with the a validationStatus which is boolean value
+  
   def updatePDVDataRowWithValidationStatus(validationId: String, validationStatus: Boolean, reason:String): Future[Boolean] = {
     personalDetailsValidationRepository.updateCustomerValidityWithReason(validationId, validationStatus, reason) map {
       case str:String =>if(str.length > 8) true else false
@@ -109,23 +108,10 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
       case Some(pdvData) => pdvData.validCustomer.getOrElse("false")
       case None => "false"
     } recover {
-      case e: Exception => "false"
+      case e: Exception =>
+        logger.warn(s"Failed finding valid customer by NINO: $nino, ${e.getMessage}")
+        "false"
     }
   }
-
-    def getNinoByPersonalDetails(personalDetails: Option[PersonalDetails]): Future[Option[String]] = {
-        personalDetails match {
-          case Some(pd) =>
-              personalDetailsValidationRepository.findNino(pd.firstName, pd.lastName, pd.postCode.getOrElse("")) map {
-                  case Some(pdvResponseData) => Some(pdvResponseData)
-                  case _ => None
-                  } recover {
-                  case e: MongoException =>
-                      logger.warn(s"Failed finding PDV data by firstName: ${pd.firstName}, lastName: ${pd.lastName}, postCode: ${pd.postCode}, ${e.getMessage}")
-                      None
-                  }
-            case _ => Future.successful(None)
-          }
-      }
 
 }

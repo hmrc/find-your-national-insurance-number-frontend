@@ -118,20 +118,5 @@ class PersonalDetailsValidationRepository @Inject()(
         }
       }.map(_.headOption)
 
-    def findNino(firstName: String, lastName: String, postCode: String)(implicit ec: ExecutionContext): Future[Option[String]] =
-        collection.find(
-              Filters.and(
-                  Filters.equal("personalDetails.firstName", firstName),
-                  Filters.equal("personalDetails.lastName", lastName),
-                  Filters.equal("personalDetails.postCode", postCode)
-                  )
-              )
-        .toFuture()
-        .recoverWith {
-            case e: Throwable => {
-                logger.info(s"Failed finding PDV data by firstName: $firstName, lastName: $lastName, postCode: $postCode, ${e.getMessage}")
-                Future.failed(e)
-             }
-            }.map(_.headOption.map(_.personalDetails.map(_.nino.nino).getOrElse("")))
 
 }
