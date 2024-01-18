@@ -27,7 +27,6 @@ import models.pdv.{PDVResponseData, PersonalDetails}
 
 import javax.inject.Inject
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, NormalMode, UserAnswers}
-import navigation.Navigator
 import pages.ConfirmYourPostcodePage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}

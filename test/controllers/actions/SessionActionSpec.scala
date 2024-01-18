@@ -18,7 +18,6 @@ package controllers.actions
 
 import base.SpecBase
 import config.FrontendAppConfig
-import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.{Action, AnyContent, BodyParsers, Results}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
