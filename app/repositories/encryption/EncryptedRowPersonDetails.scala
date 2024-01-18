@@ -22,6 +22,7 @@ import play.api.libs.json.{OFormat, __}
 import uk.gov.hmrc.crypto.{EncryptedValue, SymmetricCryptoFactory}
 import repositories.encryption.EncryptedValueFormat._
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
 
 import java.time.{Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset}
 
@@ -59,7 +60,7 @@ object EncryptedPDVResponseData {
     ((__ \ "id").format[String]
       ~ (__ \ "validationStatus").format[EncryptedValue]
       ~ (__ \ "personalDetails").formatNullable[EncryptedPersonalDetails](encryptedPersonalDetailsFormat)
-      ~ (__ \ "lastUpdated").format[Instant]
+      ~ (__ \ "lastUpdated").format[Instant](instantFormat)
       ~ (__ \ "reason").formatNullable[EncryptedValue]
       ~ (__ \ "validCustomer").formatNullable[EncryptedValue]
       ~ (__ \ "CRN").formatNullable[EncryptedValue]
