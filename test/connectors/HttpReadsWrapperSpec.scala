@@ -16,7 +16,6 @@
 
 package connectors
 
-import cats.data.EitherT
 import com.codahale.metrics.{Counter, Meter, MetricRegistry, Timer}
 import models.IndividualDetailsResponseEnvelope
 import models.errors.{ConnectorError, IndividualDetailsError}
@@ -28,17 +27,13 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json.Format.GenericFormat
-import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
-import play.api.libs.json.{JsError, JsResult, JsSuccess, JsValue, Json, Reads}
+import play.api.libs.json.{JsResult, JsSuccess, JsValue, Json, Reads}
 import uk.gov.hmrc.http.{HttpException, HttpReads, HttpResponse, UpstreamErrorResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
-
+import scala.concurrent.Future
 
 class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar {
-
-
 
   // Mocks
   val metricRegistry: MetricRegistry = mock[MetricRegistry]

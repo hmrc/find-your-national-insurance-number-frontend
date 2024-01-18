@@ -58,8 +58,13 @@ class CheckDetailsController @Inject()(
                                       )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
   extends FrontendBaseController with AuthorisedFunctions with I18nSupport with Logging {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onPageLoad(origin: Option[String], mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request => {
+      
+    origin.map(_.toUpperCase) match {
+      case Some("PDV") | Some("IV") =>
+      logger.info(s"Valid origin: $origin")
+              
       val pdvRequest = PDVRequest(
         request.credId.getOrElse(""),
         request.session.data.getOrElse("sessionId", "")
@@ -102,8 +107,11 @@ class CheckDetailsController @Inject()(
               if (pdvData.getPostCode.nonEmpty) {
                 // Matched with Postcode
                 if (idPostCode.equals(pdvData.getPostCode)) {
+                  logger.info(s"PDV and API 1694 postcodes matched")
                   Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
+
                 } else {
+                  logger.warn(s"API 1694 checks failed: ${api1694Checks._2}")
                   Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
                 }
               } else { // Matched with NINO
@@ -114,23 +122,28 @@ class CheckDetailsController @Inject()(
               Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
             }
 
-          case _ =>
-            logger.debug("No Personal Details found in PDV data, likely validation failed")
-            Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+              case _ =>
+                logger.warn("No Personal Details found in PDV data, likely validation failed")
+                Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
 
-        }
+            }
 
-        processData.recover {
-          case ex: Exception =>
-            logger.error(s"An error occurred, redirecting....: ${ex.getMessage}")
-            Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-        }
-      }
+            processData.recover {
+              case ex: Exception =>
+                logger.error(s"An error occurred in process data: ${ex.getMessage}")
+                Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+            }
+          }
 
-      result match {
-        case Success(res) => res
-        case Failure(ex) =>
-          logger.error(s"An error occurred, redirecting.... ${ex.getMessage}")
+          result match {
+            case Success(res) => res
+            case Failure(ex) =>
+              logger.error(s"An error occurred, redirecting: ${ex.getMessage}")
+              Future(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
+          }
+
+        case _ =>
+          logger.error(s"Invalid origin: $origin")
           Future(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
       }
     }
@@ -140,7 +153,7 @@ class CheckDetailsController @Inject()(
     getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
       case Some(data) => data.nino.nino
       case None =>
-        logger.debug("No Personal Details found in PDV data, likely validation failed")
+        logger.warn("No Personal Details found in PDV data, likely validation failed")
         ""
     })).value
   }
@@ -164,9 +177,8 @@ class CheckDetailsController @Inject()(
       pdvData <- personalDetailsValidationService.createPDVDataFromPDVMatch(body)
     } yield pdvData match {
       case data@PDVResponseData(_, _, _, _, _, _, _, _) => data //returning a tuple of rowId and PDV data
-      case _ => {
+      case _ =>
         throw new Exception("No PDV data found")
-      }
     }
     p.recover {
       case ex: HttpException =>
