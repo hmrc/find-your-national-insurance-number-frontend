@@ -244,6 +244,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
     }
+
     "getNPSPostCode" - {
       "must return the postcode of the residential address in IndividualDetails" in {
         val fakePostcode = "AA1 1AA"
@@ -389,6 +390,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
     }
+
   }
 }
 object CheckDetailsControllerSpec {

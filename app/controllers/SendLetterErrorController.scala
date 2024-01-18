@@ -21,6 +21,7 @@ import controllers.actions._
 import forms.SelectAlternativeServiceFormProvider
 import models.Mode
 import navigation.Navigator
+import org.apache.commons.lang3.StringUtils
 import pages.SelectAlternativeServicePage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -68,7 +69,7 @@ class SendLetterErrorController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY)).onComplete {
             case Success(pdv) =>
               auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                 None,

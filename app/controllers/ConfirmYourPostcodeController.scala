@@ -83,8 +83,8 @@ class ConfirmYourPostcodeController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmYourPostcodePage, value))
             _ <- sessionRepository.set(updatedAnswers)
-            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse(""))
-            idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(request.nino.getOrElse("")))
+            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", ""))
+            idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(request.session.data.getOrElse("nino", "")))
             redirectBasedOnMatch <- pdvData match {
               case Some(pdvValidData) => pdvValidData.npsPostCode match {
                 case Some(npsPostCode) if npsPostCode.equalsIgnoreCase(value) =>

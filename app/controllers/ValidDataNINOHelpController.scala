@@ -21,6 +21,7 @@ import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierA
 import forms.ValidDataNINOHelpFormProvider
 import models.{Mode, NormalMode}
 import navigation.Navigator
+import org.apache.commons.lang3.StringUtils
 import pages.ValidDataNINOHelpPage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -31,6 +32,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.AuditUtils
 import views.html.ValidDataNINOHelpView
 import play.api.mvc.Codec.utf_8
+
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -53,7 +55,8 @@ class ValidDataNINOHelpController @Inject()(
 
   def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireData) async {
     implicit request =>
-      val resp = personalDetailsValidationService.getValidCustomerStatus(request.nino.getOrElse("")).map(
+      val nino = request.session.data.get("nino")
+      val resp = personalDetailsValidationService.getValidCustomerStatus(nino.getOrElse(StringUtils.EMPTY)).map(
         validCustomer =>
           if (validCustomer == "true") {
             val preparedForm = request.userAnswers.get(ValidDataNINOHelpPage) match {
@@ -66,8 +69,9 @@ class ValidDataNINOHelpController @Inject()(
             Redirect(controllers.routes.UnauthorisedController.onPageLoad)
           }
       )
-      request.nino match {
-        case Some(nino) => resp
+      // TODO combine this block with previous block with case nino match { case some(nino) => ??? case _ => ??? }
+      nino match {
+        case Some(_) => resp
         case None => Future.successful(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
       }
   }
@@ -79,7 +83,7 @@ class ValidDataNINOHelpController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino","")).onComplete {
             case Success(pdv) =>
               auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                 None,
