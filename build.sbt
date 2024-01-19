@@ -45,7 +45,6 @@ lazy val root = (project in file("."))
       "controllers.routes._",
       "viewmodels.govuk.all._"
     ),
-    PlayKeys.playDefaultPort := 9000,
     scalacOptions ++= Seq(
       "-feature",
       "-language:postfixOps",
@@ -66,7 +65,9 @@ lazy val root = (project in file("."))
         ))
     ),
     pipelineStages := Seq(digest),
-  ).settings(scoverageSettings: _*)
+  )
+.settings(PlayKeys.playDefaultPort := 14033)
+.settings(scoverageSettings: _*)
 
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(
   fork := true,
