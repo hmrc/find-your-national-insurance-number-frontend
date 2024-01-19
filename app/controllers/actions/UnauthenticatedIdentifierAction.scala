@@ -39,7 +39,7 @@ class UnauthenticatedIdentifierActionImpl @Inject()(
 
     hc.sessionId match {
       case Some(session) =>
-        block(IdentifierRequest(request, session.value, None, None))
+        block(IdentifierRequest(request, session.value, None))
       case None =>
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }

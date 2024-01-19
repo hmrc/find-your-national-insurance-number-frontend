@@ -50,7 +50,7 @@ class SessionIdentifierAction @Inject()(
       case Some(credentials) =>
         hc.sessionId match {
           case Some(session) =>
-            block(IdentifierRequest(request, session.value, None, Some(credentials.providerId)))
+            block(IdentifierRequest(request, session.value, Some(credentials.providerId)))
           case None =>
             Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
         }
