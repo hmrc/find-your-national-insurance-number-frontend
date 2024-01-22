@@ -137,7 +137,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         val view = application.injector.instanceOf[CheckYourAnswersView]
         val list = SummaryListViewModel(Seq.empty)
 
-        status(result) mustEqual 303
+        status(result) mustEqual SEE_OTHER
         contentAsString(result) contains view(list)(request, messages(application)).toString
       }
     }
@@ -159,12 +159,11 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
         val result = route(application, request).value
 
-        status(result) mustEqual 303
+        status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
       }
     }
 
-    //*************************************
     "must redirect to ValidDataNINOMatchedNINOHelpController page when PDVResponseData is matched and nino is matched, postcode is missing" in {
 
       val mockPDVResponseData = PDVResponseData(
@@ -209,7 +208,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
     "must redirect to InvalidDataNINOHelpController page when IndividualDetails is failed" in {
 
       when(mockIndividualDetailsConnector.getIndividualDetails(TemporaryReferenceNumber("fakeNino"), ResolveMerge('Y')))
-        .thenReturn(IndividualDetailsResponseEnvelope(Left(ConnectorError(500, "test"))))
+        .thenReturn(IndividualDetailsResponseEnvelope(Left(ConnectorError(INTERNAL_SERVER_ERROR, "test"))))
 
 
       val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
@@ -248,14 +247,13 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
         )
 
-        //val error = IndividualDetailsError("error")
         when(mockIndividualDetailsConnector.getIndividualDetails(IndividualDetailsNino(mockPDVResponseData.personalDetails.get.nino.nino), ResolveMerge('Y')))
-          .thenReturn(IndividualDetailsResponseEnvelope(Left(ConnectorError(500, "test"))))
+          .thenReturn(IndividualDetailsResponseEnvelope(Left(ConnectorError(INTERNAL_SERVER_ERROR, "test"))))
 
         val result = controller.getIdData(mockPDVResponseData)
 
         result.map {
-          case Left(individualDetailsError) => individualDetailsError mustBe ConnectorError(500, "test")
+          case Left(individualDetailsError) => individualDetailsError mustBe ConnectorError(INTERNAL_SERVER_ERROR, "test")
           case _ => fail("Expected a Left with IndividualDetailsError, but got a Right")
         }
       }
@@ -363,7 +361,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
             .thenReturn(Future.successful(PDVResponseData("id", "success", None, Instant.now(), None, None, None, None)))
           when(mockIndividualDetailsConnector.getIndividualDetails(IndividualDetailsNino("fakeNino"), ResolveMerge('Y')))
-            .thenReturn(IndividualDetailsResponseEnvelope(Left(ConnectorError(500, "error"))))
+            .thenReturn(IndividualDetailsResponseEnvelope(Left(ConnectorError(INTERNAL_SERVER_ERROR, "error"))))
 
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(ivOrigin, NormalMode).url)
           val result = controller.onPageLoad(ivOrigin, NormalMode)(request)
@@ -393,17 +391,14 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
             val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
             val result = route(application, request).value
 
-            status(result) mustEqual 303
+            status(result) mustEqual SEE_OTHER
             redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
           }
         }
 
-
-
         "must redirect to ValidDataNINOMatchedNINOHelpController page when getIdData returns a Right " +
           "with IndividualDetails and checkConditions returns true" in {
 
-          //val fakeCredentials = Credentials("providerId", "providerType")
           val mockPDVResponseData = PDVResponseData(
             "01234",
             "success",
@@ -448,7 +443,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
             LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
           )
 
-          val connectorError = ConnectorError(500, "test")
+          val connectorError = ConnectorError(INTERNAL_SERVER_ERROR, "test")
 
           when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
             .thenReturn(Future.successful(mockPDVResponseData))
@@ -467,10 +462,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
             val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(ivOrigin, NormalMode).url)
             val result = route(application, request).value
 
-            status(result) mustEqual 303
+            status(result) mustEqual SEE_OTHER
             redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
-            // Verify that the audit event was sent
             verify(auditService, times(1)).audit(any())(any())
           }
 
@@ -509,7 +503,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
               .withSession("sessionId" -> "", "credentialId" -> "")
 
             val resp = controller.onPageLoad(pdvOrigin, NormalMode)(request)
-            status(resp) mustEqual 303
+            status(resp) mustEqual SEE_OTHER
+            redirectLocation(resp).value mustEqual routes.ValidDataNINOHelpController.onPageLoad(NormalMode).url
           }
         }
 
@@ -526,7 +521,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
             crnIndicator = CrnIndicator.False,
             addressList = AddressList(Some(List(fakeAddress.copy(addressPostcode = Some(AddressPostcode("AA1 2AA"))))))
           )
-
 
           when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
             .thenReturn(Future.successful(mockPDVResponseData))
@@ -547,10 +541,10 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
               .withSession("sessionId" -> "", "credentialId" -> "")
 
             val resp = controller.onPageLoad(ivOrigin, NormalMode)(request)
-            status(resp) mustEqual 303
+            status(resp) mustEqual SEE_OTHER
+            redirectLocation(resp).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
           }
         }
-
 
       }
     }

@@ -110,7 +110,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
 
     "timeOut" - {
 
-      "return 303" in new LocalSetup {
+      "return SEE_OTHER" in new LocalSetup {
 
         val result: Future[Result] = controller.timeOut()(FakeRequest("GET", ""))
 
