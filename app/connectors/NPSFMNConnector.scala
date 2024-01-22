@@ -26,7 +26,7 @@ import models.upstreamfailure.{Failure, UpstreamFailures}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import org.apache.commons.lang3.StringUtils
+import util.FMNConstants.EmptyString
 
 import java.net.URL
 import javax.inject.{Inject, Singleton}
@@ -69,7 +69,7 @@ class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2, appConfig: Fr
     upstreamError:     UpstreamFailures,
     additionalLogInfo: Option[AdditionalLogInfo]
   ): ConnectorError = {
-    val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse(StringUtils.EMPTY)
+    val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse(EmptyString)
     logger.debug(s"$additionalLogInformation$connectorName with status: $status, ${upstreamError.failures
       .map(f => s"code: ${f.code}. reason: ${f.reason}")
       .mkString(";")}")
@@ -86,7 +86,7 @@ class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2, appConfig: Fr
     upstreamError:     Failure,
     additionalLogInfo: Option[AdditionalLogInfo]
   ): Option[IndividualDetailsError] = {
-    val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse(StringUtils.EMPTY)
+    val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse(EmptyString)
 
     logger.debug(
       s"$additionalLogInformation$connectorName with status: $status, ${upstreamError.code} - ${upstreamError.reason}"
