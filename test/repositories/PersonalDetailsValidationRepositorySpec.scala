@@ -24,6 +24,7 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
+import repositories.encryption.EncryptedPDVResponseData
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
@@ -33,7 +34,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class PersonalDetailsValidationRepositorySpec
   extends AnyFreeSpec
   with Matchers
-  with DefaultPlayMongoRepositorySupport[PDVResponseData]
+  with DefaultPlayMongoRepositorySupport[EncryptedPDVResponseData]
   with ScalaFutures
   with IntegrationPatience
   with OptionValues
@@ -41,6 +42,7 @@ class PersonalDetailsValidationRepositorySpec
 
   private val mockAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1
+  when(mockAppConfig.encryptionKey) thenReturn "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
 
   private val instant = Instant.ofEpochSecond(1234567890)
 

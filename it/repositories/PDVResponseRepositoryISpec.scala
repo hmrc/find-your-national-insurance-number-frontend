@@ -8,6 +8,8 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
+import repositories.encryption.EncryptedPDVResponseData
+import repositories.encryption.EncryptedPDVResponseData.encrypt
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
@@ -19,7 +21,7 @@ import scala.util.Random
 class PDVResponseRepositoryISpec
   extends AnyFreeSpec
     with Matchers
-    with DefaultPlayMongoRepositorySupport[PDVResponseData]
+    with DefaultPlayMongoRepositorySupport[EncryptedPDVResponseData]
     with ScalaFutures
     with IntegrationPatience
     with OptionValues
@@ -48,6 +50,7 @@ class PDVResponseRepositoryISpec
 
   private val mockAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1
+  when(mockAppConfig.encryptionKey) thenReturn "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
 
   protected override val repository = new PersonalDetailsValidationRepository(
     mongoComponent = mongoComponent,
@@ -63,7 +66,7 @@ class PDVResponseRepositoryISpec
 
         val expectedResult = validCustomerPDVResponseData copy (lastUpdated = instant)
 
-        insert(pdvResponseData).futureValue
+        insert(encrypt(pdvResponseData, mockAppConfig.encryptionKey)).futureValue
 
         repository.updateCustomerValidityWithReason(pdvResponseData.id, validCustomer = true, "Valid Reason").futureValue
 
@@ -78,7 +81,7 @@ class PDVResponseRepositoryISpec
 
         val expectedResult = invalidCustomerPDVResponseData copy (lastUpdated = instant)
 
-        insert(pdvResponseData).futureValue
+        insert(encrypt(pdvResponseData, mockAppConfig.encryptionKey)).futureValue
 
         repository.updateCustomerValidityWithReason(pdvResponseData.id, validCustomer = false, "Invalid Reason").futureValue
 
@@ -97,7 +100,7 @@ class PDVResponseRepositoryISpec
 
       "must get the record" in {
 
-        insert(pdvResponseData).futureValue
+        insert(encrypt(pdvResponseData, mockAppConfig.encryptionKey)).futureValue
 
         val result = repository.findByValidationId(pdvResponseData.id).futureValue
         val expectedResult = pdvResponseData
@@ -122,7 +125,7 @@ class PDVResponseRepositoryISpec
 
       "must get the record" in {
 
-        insert(pdvResponseData).futureValue
+        insert(encrypt(pdvResponseData, mockAppConfig.encryptionKey)).futureValue
 
         val result = repository.findByNino(pdvResponseData.personalDetails.get.nino.value).futureValue
         val expectedResult = pdvResponseData
