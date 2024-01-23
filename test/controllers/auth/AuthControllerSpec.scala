@@ -17,9 +17,8 @@
 package controllers.auth
 
 import base.SpecBase
-import config.FrontendAppConfig
 import controllers.bindable.Origin
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
@@ -55,7 +54,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         running(application) {
 
           val sentLocation = "http://example.com&origin=FIND_MY_NINO"
-          val appConfig = application.injector.instanceOf[FrontendAppConfig]
           val request = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), Some(Origin("FIND_MY_NINO"))).url)
 
           val result = route(application, request).value
@@ -79,7 +77,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         running(application) {
 
           val sentLocation = "http://example.com&origin=FIND_MY_NINO"
-          val appConfig = application.injector.instanceOf[FrontendAppConfig]
           val request = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), Some(Origin("FIND_MY_NINO"))).url)
 
           val result = route(application, request).value
@@ -113,7 +110,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
 
     "timeOut" - {
 
-      "return 303" in new LocalSetup {
+      "return SEE_OTHER" in new LocalSetup {
 
         val result: Future[Result] = controller.timeOut()(FakeRequest("GET", ""))
 

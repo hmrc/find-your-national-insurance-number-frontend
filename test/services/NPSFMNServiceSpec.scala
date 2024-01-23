@@ -26,6 +26,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
 import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.mock
+import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, NOT_IMPLEMENTED}
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import util.AnyValueTypeMatcher.anyValueType
@@ -53,29 +54,29 @@ class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar wi
 
     "sendLetter return false when connector returns 404" in {
       when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
-        .thenReturn(Future.successful(HttpResponse(404, NotfoundObject)))
+        .thenReturn(Future.successful(HttpResponse(NOT_FOUND, NotfoundObject)))
 
       npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
-        result mustBe TechnicalIssueResponse(404, "MATCHING_RESOURCE_NOT_FOUND")
+        result mustBe TechnicalIssueResponse(NOT_FOUND, "MATCHING_RESOURCE_NOT_FOUND")
       }
 
     }
 
     "sendLetter return false when connector returns 500" in {
       when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
-        .thenReturn(Future.successful(HttpResponse(500, InternalServerErrorObject)))
+        .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, InternalServerErrorObject)))
 
       npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
-        result mustBe TechnicalIssueResponse(500, "GENERIC_SERVER_ERROR")
+        result mustBe TechnicalIssueResponse(INTERNAL_SERVER_ERROR, "GENERIC_SERVER_ERROR")
       }
     }
 
     "sendLetter return false when connector returns 501" in {
       when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
-        .thenReturn(Future.successful(HttpResponse(501, NotImplementedObject)))
+        .thenReturn(Future.successful(HttpResponse(NOT_IMPLEMENTED, NotImplementedObject)))
 
       npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
-        result mustBe TechnicalIssueResponse(501, "NOT_IMPLEMENTED")
+        result mustBe TechnicalIssueResponse(NOT_IMPLEMENTED, "NOT_IMPLEMENTED")
       }
     }
 

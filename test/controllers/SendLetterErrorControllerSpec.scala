@@ -22,7 +22,6 @@ import models.{NormalMode, SelectAlternativeService, SelectNINOLetterAddress, Us
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.SelectNINOLetterAddressPage
 import play.api.inject.bind
 import play.api.mvc.Call

@@ -32,8 +32,6 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services.{AuditService, PersonalDetailsValidationService}
-import uk.gov.hmrc.auth.core.retrieve.Credentials
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.credentials
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
@@ -57,23 +55,21 @@ class CheckDetailsController @Inject()(
                                         val authConnector: AuthConnector
                                       )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
   extends FrontendBaseController with AuthorisedFunctions with I18nSupport with Logging {
-
-  def getCredentialId()(implicit hc: HeaderCarrier): Future[Option[String]] =  {
-    lazy val toAuthCredentialId: Option[Credentials] => Future[Option[String]] =
-      (credentials: Option[Credentials]) => Future.successful(credentials.map(_.providerId))
-    authorised().retrieve(credentials)(toAuthCredentialId).recover { case _ => None }
-  }
-
+  
   def onPageLoad(origin: Option[String], mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request => {
+
       origin.map(_.toUpperCase) match {
-        case Some("PDV") | Some("IV") =>
+        case Some("PDV") | Some("IV") => {
           logger.info(s"Valid origin: $origin")
+
+          val pdvRequest = PDVRequest(
+            request.credId.getOrElse(""),
+            request.session.data.getOrElse("sessionId", "")
+          )
 
           val result: Try[Future[Result]] = Try {
             val processData = for {
-              credentialId <- getCredentialId()
-              pdvRequest = PDVRequest(credentialId.getOrElse(""), request.session.data.getOrElse("sessionId", ""))
               pdvData <- getPDVData(pdvRequest)
               idData <- getIdData(pdvData)
             } yield (pdvData, idData) match {
@@ -101,20 +97,22 @@ class CheckDetailsController @Inject()(
                 val api1694Checks = checkConditions(idData)
                 personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, api1694Checks._1, api1694Checks._2)
 
+                val sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
+
                 if (api1694Checks._1) {
                   val idPostCode = getNPSPostCode(idData)
                   if (pdvData.getPostCode.nonEmpty) {
                     // Matched with Postcode
                     if (idPostCode.equals(pdvData.getPostCode)) {
                       logger.info(s"PDV and API 1694 postcodes matched")
-                      Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode))
+                      Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
                     } else {
                       logger.warn(s"PDV and API 1694 postcodes not matched")
                       Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
                     }
                   } else { // Matched with NINO
                     personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(pdvData.getNino, idPostCode)
-                    Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode))
+                    Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
                   }
                 } else {
                   logger.warn(s"API 1694 checks failed: ${api1694Checks._2}")
@@ -140,10 +138,12 @@ class CheckDetailsController @Inject()(
               logger.error(s"An error occurred, redirecting: ${ex.getMessage}")
               Future(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
           }
+        }
 
         case _ =>
           logger.error(s"Invalid origin: $origin")
           Future(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
+
       }
     }
   }

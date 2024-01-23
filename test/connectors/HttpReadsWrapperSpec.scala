@@ -94,10 +94,10 @@ class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar {
 
     "handle successful response with NO_CONTENT" in {
       val wrapper = new TestHttpReadsWrapper
-      val successResponse = HttpResponse(Status.NO_CONTENT)
+      val successResponse = HttpResponse(Status.NO_CONTENT, "")
 
       when(response.status).thenReturn(successResponse.status)
-      when(response.body).thenReturn("")
+      when(response.body).thenReturn(successResponse.body)
 
       wrapper.withHttpReads("test", metricRegistry) {
         httpReads: HttpReads[Either[IndividualDetailsError, Unit]] =>
@@ -129,7 +129,7 @@ class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar {
       }
     }
 
-    "handle failed response with JSON parsing error" ignore {
+    "handle failed response with JSON parsing error" in {
       val wrapper = new TestHttpReadsWrapper
       val invalidJson = "{ invalid }"
       val failedResponse = HttpResponse(Status.OK, invalidJson)

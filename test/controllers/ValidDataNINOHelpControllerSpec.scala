@@ -64,9 +64,8 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
 
   val userAnswersJson: JsValue = Json.toJson(userAnswers)
 
-  val fakeRetrievalResult: Future[Option[String] ~ Option[CredentialRole] ~ Option[String]] =
-    Future.successful(new~(new~(Some("AB123456C"), Some(User)), Some("pdv-success-nino-AA123456")))
-
+  val fakeRetrievalResult: Future[Option[CredentialRole] ~ Option[String]] =
+    Future.successful(new ~(Some(User), Some("id")))
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
@@ -84,16 +83,13 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
     reason = None
   )
 
-
-
   "ValidDataNINOHelpController" - {
 
     "must return OK and the correct view for a GET" in {
 
-
-      when(mockAuthConnector.authorise[Option[String] ~ Option[CredentialRole] ~ Option[String]](
+      when(mockAuthConnector.authorise[Option[CredentialRole] ~ Option[String]](
         any[Predicate],
-        any[Retrieval[Option[String] ~ Option[CredentialRole] ~ Option[String]]])(any[HeaderCarrier], any[ExecutionContext]))
+        any[Retrieval[Option[CredentialRole] ~ Option[String]]])(any[HeaderCarrier], any[ExecutionContext]))
         .thenReturn(fakeRetrievalResult)
 
       when(mockPersonalDetailsValidationService.getValidCustomerStatus(any[String]))
@@ -105,7 +101,6 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         ).build()
 
-
       running(application) {
 
         val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
@@ -113,7 +108,9 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
           controllers.routes.ValidDataNINOHelpController.onPageLoad(NormalMode).url
         ).withSession(
           SessionKeys.sessionId -> "id",
-          "UserAnswers" -> userAnswersJson.toString())
+          "UserAnswers" -> userAnswersJson.toString(),
+          "nino" -> "AA000003B"
+        )
 
         val result = route(application, fakeRequest).value
         status(result) mustEqual OK
@@ -122,9 +119,9 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
 
     "must redirect to UnauthorisedController when the user is not logged in" in {
 
-      when(mockAuthConnector.authorise[Option[String] ~ Option[CredentialRole] ~ Option[String]](
+      when(mockAuthConnector.authorise[Option[CredentialRole] ~ Option[String]](
         any[Predicate],
-        any[Retrieval[Option[String] ~ Option[CredentialRole] ~ Option[String]]])(any[HeaderCarrier], any[ExecutionContext]))
+        any[Retrieval[Option[CredentialRole] ~ Option[String]]])(any[HeaderCarrier], any[ExecutionContext]))
         .thenReturn(fakeRetrievalResult)
 
       when(mockPersonalDetailsValidationService.getValidCustomerStatus(any[String]))
@@ -136,23 +133,33 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         ).build()
 
+      running(application) {
+        val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
+          Helpers.GET,
+          controllers.routes.ValidDataNINOHelpController.onPageLoad(NormalMode).url
+        ).withSession(
+          SessionKeys.sessionId -> "id",
+          "UserAnswers" -> userAnswersJson.toString())
 
+        val result = route(application, fakeRequest).value
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+      }
     }
-
 
     "must redirect to the next page for a POST with valid data" in {
 
-        when(mockAuthConnector.authorise[Option[String] ~ Option[CredentialRole] ~ Option[String]](
+        when(mockAuthConnector.authorise[Option[CredentialRole] ~ Option[String]](
           any[Predicate],
-          any[Retrieval[Option[String] ~ Option[CredentialRole] ~ Option[String]]])(any[HeaderCarrier], any[ExecutionContext]))
+          any[Retrieval[Option[CredentialRole] ~ Option[String]]])(any[HeaderCarrier], any[ExecutionContext]))
           .thenReturn(fakeRetrievalResult)
 
         when(mockPersonalDetailsValidationService.getValidCustomerStatus(any[String]))
           .thenReturn(Future.successful("true"))
 
-        when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino("AA000003B")).thenReturn(Future.successful(Some(fakePDVResponseData)))
+        when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+          .thenReturn(Future.successful(Some(fakePDVResponseData)))
         when(mockSessionRepository.set(any[UserAnswers])).thenReturn(Future.successful(true))
-
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
@@ -170,5 +177,6 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
       }
 
     }
+
   }
 }

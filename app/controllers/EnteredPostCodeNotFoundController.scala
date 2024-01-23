@@ -70,7 +70,7 @@ class EnteredPostCodeNotFoundController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.nino.getOrElse("")).onComplete {
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).onComplete {
             case Success(pdv) =>
               auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                 None,

@@ -40,22 +40,22 @@ class SessionIdentifierAction @Inject()(
  )(implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions {
 
   private val AuthPredicate = AuthProviders(GovernmentGateway)
-  private val FMNRetrievals = Retrievals.nino
+  private val FMNRetrievals = Retrievals.credentials
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     authorised(AuthPredicate).retrieve(FMNRetrievals) {
-      case Some(nino) =>
+      case Some(credentials) =>
         hc.sessionId match {
           case Some(session) =>
-            block(IdentifierRequest(request, session.value, Some(nino)))
+            block(IdentifierRequest(request, session.value, Some(credentials.providerId)))
           case None =>
             Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
         }
       case _ =>
-        throw new UnauthorizedException("Unable to retrieve internal Id and nino")
+        throw new UnauthorizedException("Unable to retrieve internal Id and credentials Id.")
     } recover {
       case _: NoActiveSession =>
         Redirect(config.loginUrl, Map("continue" -> Seq(resolveCorrectUrl(request))))
