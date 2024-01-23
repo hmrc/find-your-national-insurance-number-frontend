@@ -32,47 +32,19 @@ class NavigatorSpec extends SpecBase {
 
   "Navigator" - {
 
-    "in Normal mode" - {
-      "must go from a page that doesn't exist in the route map to Index" in {
-
-        case object UnknownPage extends Page
-        navigator.nextPage(UnknownPage, NormalMode, UserAnswers("id")) mustBe routes.IndexController.onPageLoad
-      }
+    "When checkRouteMap" - {
+      val page = mock[Page] // replace with a specific instance of Page
+      val userAnswers = UserAnswers("id") // replace with a specific instance of UserAnswers
+      navigator.nextPage(page, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad
     }
 
-    "in Check mode" - {
-      "must go from a page that doesn't exist in the edit route map to CheckYourAnswers" in {
-
-        case object UnknownPage extends Page
-        navigator.nextPage(UnknownPage, CheckMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad
-      }
-    }
-
-    "in Normal mode" - {
-      "must go from ConfirmYourPostcodePage to ConfirmYourAddressPage" in {
-        navigator.nextPage(ConfirmYourPostcodePage, NormalMode, UserAnswers("id")) mustBe routes.IndexController.onPageLoad
-      }
-
-      "must go from ConfirmYourAddressPage to CheckYourAnswersPage" in {
-        navigator.nextPage(EnteredPostCodeNotFoundPage, NormalMode, UserAnswers("id")) mustBe routes.JourneyRecoveryController.onPageLoad(continueUrl = None)
-      }
-
-      "must go from CheckYourAnswersPage to IndexPage" in {
-        navigator.nextPage(EnteredPostCodeNotFoundPage, NormalMode, UserAnswers("id")) mustBe routes.JourneyRecoveryController.onPageLoad(continueUrl = None)
-      }
-    }
-
-    "in Check mode" - {
-      "must go from ConfirmYourPostcodePage to CheckYourAnswersPage" in {
-        navigator.nextPage(ConfirmYourPostcodePage, CheckMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad
-      }
-
-      "must go from ConfirmYourAddressPage to CheckYourAnswersPage" in {
-        navigator.nextPage(EnteredPostCodeNotFoundPage, CheckMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad
-      }
-
-      "must go from CheckYourAnswersPage to IndexPage" in {
-        navigator.nextPage(EnteredPostCodeNotFoundPage, CheckMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad
+    "When normalRoutes" - {
+      "for any other page" - {
+        "must always go to IndexController" in {
+          val page = mock[Page] // replace with a specific instance of Page
+          val userAnswers = UserAnswers("id") // replace with a specific instance of UserAnswers
+          navigator.nextPage(page, NormalMode, userAnswers) mustBe routes.IndexController.onPageLoad
+        }
       }
     }
 
@@ -274,6 +246,23 @@ class NavigatorSpec extends SpecBase {
           val userAnswers = UserAnswers("id").set(EnteredPostCodeNotFoundPage, EnteredPostCodeNotFound.PhoneHmrc).success.value
           navigator.nextPage(EnteredPostCodeNotFoundPage, NormalMode, userAnswers) mustBe routes.PhoneHMRCDetailsController.onPageLoad()
         }
+
+        "when the answer is PrintForm" - {
+
+          "must go to the print and post service" in {
+            val userAnswers = UserAnswers("id").set(EnteredPostCodeNotFoundPage, EnteredPostCodeNotFound.PrintForm).success.value
+            navigator.nextPage(EnteredPostCodeNotFoundPage, NormalMode, userAnswers) mustBe Call(GET, s"${config.printAndPostServiceUrl}$getNINOByPost")
+          }
+        }
+
+        "when there is no answer" - {
+
+          "must go to JourneyRecoveryController" in {
+            val userAnswers = UserAnswers("id")
+            navigator.nextPage(EnteredPostCodeNotFoundPage, NormalMode, userAnswers) mustBe routes.JourneyRecoveryController.onPageLoad()
+          }
+        }
+
       }
 
 
