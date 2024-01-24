@@ -16,10 +16,10 @@
 
 package models.pdv
 
+import util.FMNConstants.EmptyString
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
-import util.FMNConstants.EmptyString
 import java.time._
 
 case class PersonalDetails(
