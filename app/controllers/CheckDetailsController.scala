@@ -80,10 +80,12 @@ class CheckDetailsController @Inject()(
                     pdvData.validationStatus, "", None, None, None, None, None, None))
                   Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
                 } else {
-                  var errorStatusCode: Option[String] = None
-                  idData match {
-                    case conError: ConnectorError => errorStatusCode = Some(conError.statusCode.toString)
+
+                  val errorStatusCode: Option[String] = idData match {
+                    case conError: ConnectorError => Some(conError.statusCode.toString)
+                    case _ => None
                   }
+
                   auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "FindYourNinoError",
                     pdvData.validationStatus, "", None, None, None, Some("/checkDetails"), errorStatusCode, Some(idData.errorMessage)))
                   logger.warn(s"Failed to retrieve Individual Details data: ${idData.errorMessage}")
@@ -175,9 +177,8 @@ class CheckDetailsController @Inject()(
     val p = for {
       pdvData <- personalDetailsValidationService.createPDVDataFromPDVMatch(body)
     } yield pdvData match {
-      case data@PDVResponseData(_, _, _, _, _, _, _, _) => data //returning a tuple of rowId and PDV data
-      case _ =>
-        throw new Exception("No PDV data found")
+      case data: PDVResponseData => data //returning a tuple of rowId and PDV data
+      case _ => throw new Exception("No PDV data found")
     }
     p.recover {
       case ex: HttpException =>
