@@ -21,7 +21,9 @@ import models.IndividualDetailsResponseEnvelope
 import models.errors.{ConnectorError, IndividualDetailsError}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Logger
@@ -34,7 +36,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Success
 
-class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar {
+class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar with ScalaFutures {
+
+  implicit val defaultPatience =
+    PatienceConfig(timeout = Span(5, Seconds), interval = Span(500, Millis))
 
   // Mocks
   val metricRegistry: MetricRegistry = mock[MetricRegistry]
@@ -95,6 +100,7 @@ class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar {
     }
 
     "handle successful response with NO_CONTENT" in {
+
       val wrapper = new TestHttpReadsWrapper
 
       when(response.status).thenReturn(Status.NO_CONTENT)
@@ -102,14 +108,14 @@ class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar {
 
       val result = wrapper.withHttpReads("test", metricRegistry) {
         httpReads: HttpReads[Either[IndividualDetailsError, Unit]] =>
-          IndividualDetailsResponseEnvelope.fromEitherF(Future(httpReads.read("GET", "/", response)))
+          IndividualDetailsResponseEnvelope(httpReads.read("GET", "/", response))
       }(
         readsSuccessUnit,
         implicitly,
         implicitly
-      ).map { result =>
-        result shouldEqual Right(())
-      }
+      ).value.futureValue
+
+      result shouldBe Right(())
 
     }
 
