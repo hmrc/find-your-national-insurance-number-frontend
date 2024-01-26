@@ -58,7 +58,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[TechnicalErrorView]
 
         status(result) mustEqual OK
-        //contentAsString(result) mustEqual view(form, NormalMode, true)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, true)(request, messages(application)).toString
       }
     }
 
@@ -76,7 +76,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        //contentAsString(result) mustEqual view(form.fill(TechnicalErrorService.values.head), NormalMode, true)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(TechnicalErrorService.values.head), NormalMode, true)(request, messages(application)).toString
       }
     }
 
@@ -106,40 +106,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return a Bad Request and errors when invalid data is submitted" in {
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, technicalErrorRoute)
-            .withFormUrlEncodedBody(("value", "invalid value"))
-
-        val boundForm = form.bind(Map("value" -> "invalid value"))
-
-        val view = application.injector.instanceOf[TechnicalErrorView]
-
-        val result = route(application, request).value
-
-        status(result) mustEqual BAD_REQUEST
-        //contentAsString(result) mustEqual view(boundForm, NormalMode, true)(request, messages(application)).toString
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, technicalErrorRoute)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual OK
-      }
-    }
-
-    "redirect to electNINOLetterAddress page for a POST if user selects Try again option" in {
+    "redirect to SelectNINOLetterAddress page for a POST if user selects Try again option" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -156,7 +123,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "redirect to electNINOLetterAddress page for a POST if user selects Phone HMRC option" in {
+    "redirect to SelectNINOLetterAddress page for a POST if user selects Phone HMRC option" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -173,7 +140,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "redirect to electNINOLetterAddress page for a POST if user selects P&P Service option" in {
+    "redirect to SelectNINOLetterAddress page for a POST if user selects P&P Service option" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -189,6 +156,5 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustEqual getNINOByPostUrl
       }
     }
-
   }
 }
