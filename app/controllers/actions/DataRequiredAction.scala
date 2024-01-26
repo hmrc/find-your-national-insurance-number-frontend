@@ -30,10 +30,10 @@ class DataRequiredActionImpl @Inject()(implicit val executionContext: ExecutionC
 
     request.userAnswers match {
       case None => {
-        val userAnswers = request.userAnswers.getOrElse(UserAnswers(
+        val userAnswers = UserAnswers(
           id = request.userId,
           lastUpdated = Instant.now(java.time.Clock.systemUTC())
-        ))
+        )
         Future.successful(Right(DataRequest(request.request, request.userId, userAnswers, request.credId)))
       }
       case Some(data) =>
