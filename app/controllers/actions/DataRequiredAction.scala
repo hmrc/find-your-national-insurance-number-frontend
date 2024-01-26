@@ -20,8 +20,8 @@ import javax.inject.Inject
 import models.UserAnswers
 import models.requests.{DataRequest, OptionalDataRequest}
 import play.api.mvc.{ActionRefiner, Result}
-//import play.api.mvc.Results.Redirect
-//import controllers.routes
+
+import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
 class DataRequiredActionImpl @Inject()(implicit val executionContext: ExecutionContext) extends DataRequiredAction {
@@ -30,7 +30,10 @@ class DataRequiredActionImpl @Inject()(implicit val executionContext: ExecutionC
 
     request.userAnswers match {
       case None =>
-        Future.successful(Right(DataRequest(request.request, request.userId, UserAnswers(""), request.credId)))
+        Future.successful(Right(DataRequest(request.request, request.userId, UserAnswers(
+          id = request.userId,
+          lastUpdated = Instant.now(java.time.Clock.systemUTC()),
+        ), request.credId)))
       case Some(data) =>
         Future.successful(Right(DataRequest(request.request, request.userId, data, request.credId)))
     }
