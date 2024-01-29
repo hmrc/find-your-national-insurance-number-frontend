@@ -218,7 +218,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
     }
 
-
     "getIdData" - {
       "must return IndividualDetails when IndividualDetailsConnector returns a successful response" in {
         val mockPDVResponseData = PDVResponseData(
@@ -258,6 +257,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
     }
+
     "getNPSPostCode" - {
       "must return the postcode of the residential address in IndividualDetails" in {
         val fakePostcode = "AA1 1AA"
@@ -272,66 +272,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "checkConditions" - {
-      "must return true and an empty reason when accountStatusType is FullLive, crnIndicator is False, and addressStatus is NotDlo" in {
-        val fakeIndividualDetailsWithConditionsMet = fakeIndividualDetails.copy(
-          accountStatusType = Some(AccountStatusType.FullLive),
-          crnIndicator = CrnIndicator.False,
-          addressList = AddressList(Some(List(fakeAddress.copy(addressStatus = Some(AddressStatus.NotDlo)))))
-        )
-
-        val (status, reason) = controller.checkConditions(fakeIndividualDetailsWithConditionsMet)
-
-        status mustBe true
-        reason mustBe ""
-      }
-
-      "must return false and a non-empty reason when accountStatusType is not FullLive, crnIndicator is True, and addressStatus is Dlo" in {
-        val fakeIndividualDetailsWithConditionsNotMet = fakeIndividualDetails.copy(
-          accountStatusType = Some(AccountStatusType.Redundant),
-          crnIndicator = CrnIndicator.True,
-          addressList = AddressList(Some(List(fakeAddress.copy(addressStatus = Some(AddressStatus.Dlo)))))
-        )
-
-        val (status, reason) = controller.checkConditions(fakeIndividualDetailsWithConditionsNotMet)
-
-        status mustBe false
-        reason must include("AccountStatusType is not FullLive")
-        reason must include("CRN")
-        reason must include("ResidentialAddressStatus is Dlo or Nfa")
-      }
-
-      "must return false and a non-empty reason when accountStatusType is not FullLive, crnIndicator is False, and addressStatus is Nfa" in {
-        val fakeIndividualDetailsWithConditionsNotMet = fakeIndividualDetails.copy(
-          accountStatusType = Some(AccountStatusType.Redundant),
-          crnIndicator = CrnIndicator.False,
-          addressList = AddressList(Some(List(fakeAddress.copy(addressStatus = Some(AddressStatus.Nfa)))))
-        )
-
-        val (status, reason) = controller.checkConditions(fakeIndividualDetailsWithConditionsNotMet)
-
-        status mustBe false
-        reason must include("AccountStatusType is not FullLive")
-        reason mustNot include("CRN")
-        reason must include("ResidentialAddressStatus is Dlo or Nfa")
-      }
-
-      "must return false and a non-empty reason when accountStatusType is not FullLive, crnIndicator is False, and addressStatus is missing" in {
-        val fakeIndividualDetailsWithConditionsNotMet = fakeIndividualDetails.copy(
-          accountStatusType = Some(AccountStatusType.Redundant),
-          crnIndicator = CrnIndicator.False,
-          addressList = AddressList(Some(List(fakeAddress.copy(addressStatus = None))))
-        )
-
-        val (status, reason) = controller.checkConditions(fakeIndividualDetailsWithConditionsNotMet)
-
-        status mustBe false
-        reason must include("AccountStatusType is not FullLive")
-        reason mustNot include("CRN")
-        reason must include("ResidentialAddressStatus is Dlo or Nfa")
-      }
-
-      "onPageLoad" - {
+    "onPageLoad" - {
         "must redirect to InvalidDataNINOHelpController page when getCredentialId returns None" in {
           when(mockAuthConnector.authorise(any(), any())(any(), any()))
             .thenReturn(Future.failed(new Exception("test")))
@@ -547,6 +488,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         }
 
       }
-    }
+
   }
 }

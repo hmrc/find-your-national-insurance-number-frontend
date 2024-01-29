@@ -197,7 +197,7 @@ class CheckDetailsController @Inject()(
     residentialAddress.head
   }
 
-  def checkConditions(idData: IndividualDetails): (Boolean, String) = {
+  private def checkConditions(idData: IndividualDetails): (Boolean, String) = {
     var reason = ""
 
     if (!idData.accountStatusType.exists(_.equals(FullLive))) {
