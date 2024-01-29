@@ -150,7 +150,7 @@ class CheckDetailsController @Inject()(
     }
   }
 
-  def getIdData(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
+  private def getIdData(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
     getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
       case Some(data) => data.nino.nino
       case None =>
@@ -159,7 +159,7 @@ class CheckDetailsController @Inject()(
     })).value
   }
 
-  def getIndividualDetails(nino: IndividualDetailsNino
+  private def getIndividualDetails(nino: IndividualDetailsNino
                           )(implicit ec: ExecutionContext, hc: HeaderCarrier): IndividualDetailsResponseEnvelope[IndividualDetails] = {
     implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
     implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
@@ -173,7 +173,7 @@ class CheckDetailsController @Inject()(
    * @param hc
    * @returns Future (rowdId and PDV data)
    */
-  def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponseData] = {
+  private def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponseData] = {
     val p = for {
       pdvData <- personalDetailsValidationService.createPDVDataFromPDVMatch(body)
     } yield pdvData match {
@@ -189,10 +189,10 @@ class CheckDetailsController @Inject()(
     }
   }
 
-  def getNPSPostCode(idData: IndividualDetails): String =
+  private def getNPSPostCode(idData: IndividualDetails): String =
     getAddressTypeResidential(idData.addressList).addressPostcode.map(_.value).getOrElse("")
 
-  def getAddressTypeResidential(addressList: AddressList): Address = {
+  private def getAddressTypeResidential(addressList: AddressList): Address = {
     val residentialAddress = addressList.getAddress.filter(_.addressType.equals(ResidentialAddress))
     residentialAddress.head
   }

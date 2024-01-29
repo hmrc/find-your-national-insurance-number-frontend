@@ -34,7 +34,6 @@ import uk.gov.hmrc.http.{HttpException, HttpReads, HttpResponse, UpstreamErrorRe
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.Success
 
 class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar with ScalaFutures {
 

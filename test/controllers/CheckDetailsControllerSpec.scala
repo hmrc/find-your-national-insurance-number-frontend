@@ -218,60 +218,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
     }
 
-    "getIdData" - {
-      "must return IndividualDetails when IndividualDetailsConnector returns a successful response" in {
-        val mockPDVResponseData = PDVResponseData(
-          "01234",
-          "success",
-          Some(models.pdv.PersonalDetails("John", "Smith", Nino("AB123456C"), None, LocalDate.now())),
-          LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
-        )
-
-        when(mockIndividualDetailsConnector.getIndividualDetails(IndividualDetailsNino(mockPDVResponseData.personalDetails.get.nino.nino), ResolveMerge('Y')))
-          .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
-
-        val result = controller.getIdData(mockPDVResponseData)
-
-        result.map {
-          case Right(individualDetails) => individualDetails mustBe fakeIndividualDetails
-          case _ => fail("Expected a Right with IndividualDetails, but got a Left")
-        }
-      }
-
-      "must return IndividualDetailsError when IndividualDetailsConnector returns an error" in {
-        val mockPDVResponseData = PDVResponseData(
-          "01234",
-          "success",
-          Some(models.pdv.PersonalDetails("John", "Smith", Nino("AB123456C"), None, LocalDate.now())),
-          LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
-        )
-
-        when(mockIndividualDetailsConnector.getIndividualDetails(IndividualDetailsNino(mockPDVResponseData.personalDetails.get.nino.nino), ResolveMerge('Y')))
-          .thenReturn(IndividualDetailsResponseEnvelope(Left(ConnectorError(INTERNAL_SERVER_ERROR, "test"))))
-
-        val result = controller.getIdData(mockPDVResponseData)
-
-        result.map {
-          case Left(individualDetailsError) => individualDetailsError mustBe ConnectorError(INTERNAL_SERVER_ERROR, "test")
-          case _ => fail("Expected a Left with IndividualDetailsError, but got a Right")
-        }
-      }
-    }
-
-    "getNPSPostCode" - {
-      "must return the postcode of the residential address in IndividualDetails" in {
-        val fakePostcode = "AA1 1AA"
-        val fakeAddressWithPostcode = fakeAddress.copy(addressPostcode = Some(AddressPostcode(fakePostcode)))
-        val fakeIndividualDetailsWithPostcode = fakeIndividualDetails.copy(
-          addressList = AddressList(Some(List(fakeAddressWithPostcode)))
-        )
-
-        val result = controller.getNPSPostCode(fakeIndividualDetailsWithPostcode)
-
-        result mustEqual fakePostcode
-      }
-    }
-
     "onPageLoad" - {
         "must redirect to InvalidDataNINOHelpController page when getCredentialId returns None" in {
           when(mockAuthConnector.authorise(any(), any())(any(), any()))
