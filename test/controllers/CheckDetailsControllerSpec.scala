@@ -32,7 +32,6 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
 import util.AnyValueTypeMatcher.anyValueType
 import viewmodels.govuk.SummaryListFluency
-import views.html.CheckYourAnswersView
 
 import java.time._
 import java.util.UUID
@@ -115,32 +114,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
   val ivOrigin: Option[String] = Some("IV")
 
   "CheckDetailsController" - {
-
-    "must return OK and the correct view for a GET" in {
-
-      val mockPDVResponseData = mock[PDVResponseData].copy(validationStatus = "success")
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(
-          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-        )
-        .build()
-
-      when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
-        .thenReturn(Future.successful(mockPDVResponseData))
-
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
-
-        val result = route(application, request).value
-
-        val view = application.injector.instanceOf[CheckYourAnswersView]
-        val list = SummaryListViewModel(Seq.empty)
-
-        status(result) mustEqual SEE_OTHER
-        contentAsString(result) contains view(list)(request, messages(application)).toString
-      }
-    }
 
     "must redirect to InvalidDataNINOHelpController page when PDVResponseData is empty" in {
       val mockPDVResponseData = mock[PDVResponseData].copy(validationStatus = "failure")

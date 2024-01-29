@@ -12,7 +12,7 @@ GET         /refresh-session                                controllers.KeepAliv
 
 GET         /there-is-a-problem                             controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
-GET         /check-your-answers                             controllers.CheckYourAnswersController.onPageLoad
+#GET         /check-your-answers                             controllers.CheckYourAnswersController.onPageLoad
 
 GET         /account/register                               controllers.auth.AuthController.redirectToRegister(continueUrl: String)
 GET         /redirect-to-save                               controllers.auth.AuthController.redirectToSMN
@@ -31,8 +31,8 @@ POST        /government-gateway                             controllers.HaveSetU
 #GET         /changeHaveSetUpGGUserID                        controllers.HaveSetUpGGUserIDController.onPageLoad(mode: Mode = CheckMode)
 #POST        /changeHaveSetUpGGUserID                        controllers.HaveSetUpGGUserIDController.onSubmit(mode: Mode = CheckMode)
 
-GET         /postNationalInsuranceLetter                    controllers.PostNINOLetterController.onPageLoad(mode: Mode ?= NormalMode)
-POST        /postNationalInsuranceLetter                    controllers.PostNINOLetterController.onSubmit(mode: Mode ?= NormalMode)
+#GET         /postNationalInsuranceLetter                    controllers.PostNINOLetterController.onPageLoad(mode: Mode ?= NormalMode)
+#POST        /postNationalInsuranceLetter                    controllers.PostNINOLetterController.onSubmit(mode: Mode ?= NormalMode)
 #GET         /changePostNationalInsuranceLetter              controllers.PostNINOLetterController.onPageLoad(mode: Mode = CheckMode)
 #POST        /changePostNationalInsuranceLetter              controllers.PostNINOLetterController.onSubmit(mode: Mode = CheckMode)
 
