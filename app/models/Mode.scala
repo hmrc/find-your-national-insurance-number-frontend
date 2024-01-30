@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.mvc.JavascriptLiteral
+import play.api.mvc.{JavascriptLiteral, QueryStringBindable}
 
 sealed trait Mode
 
@@ -29,6 +29,25 @@ object Mode {
     override def to(value: Mode): String = value match {
       case NormalMode => "NormalMode"
       case CheckMode => "CheckMode"
+    }
+  }
+
+  implicit object bindable extends QueryStringBindable[Mode] {
+
+    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Mode]] = {
+      params.get(key).flatMap(_.headOption).map {
+        case "NormalMode" => Right(NormalMode)
+        case "CheckMode" => Right(CheckMode)
+        case unknown => Left(s"Unknown mode: $unknown")
+      }
+    }
+
+    override def unbind(key: String, mode: Mode): String = {
+      val modeStr = mode match {
+        case NormalMode => "NormalMode"
+        case CheckMode => "CheckMode"
+      }
+      s"$key=$modeStr"
     }
   }
 }
