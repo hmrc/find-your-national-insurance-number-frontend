@@ -12,8 +12,6 @@ GET         /refresh-session                                controllers.KeepAliv
 
 GET         /there-is-a-problem                             controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
-#GET         /check-your-answers                             controllers.CheckYourAnswersController.onPageLoad
-
 GET         /account/register                               controllers.auth.AuthController.redirectToRegister(continueUrl: String)
 GET         /redirect-to-save                               controllers.auth.AuthController.redirectToSMN
 GET         /account/signin                                 controllers.auth.SignedOutController.onPageLoad
@@ -28,60 +26,36 @@ GET         /set-up-government-gateway/register             controllers.SetUpGGU
 
 GET         /government-gateway                             controllers.HaveSetUpGGUserIDController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /government-gateway                             controllers.HaveSetUpGGUserIDController.onSubmit(mode: Mode ?= NormalMode)
-#GET         /changeHaveSetUpGGUserID                        controllers.HaveSetUpGGUserIDController.onPageLoad(mode: Mode = CheckMode)
-#POST        /changeHaveSetUpGGUserID                        controllers.HaveSetUpGGUserIDController.onSubmit(mode: Mode = CheckMode)
-
-#GET         /postNationalInsuranceLetter                    controllers.PostNINOLetterController.onPageLoad(mode: Mode ?= NormalMode)
-#POST        /postNationalInsuranceLetter                    controllers.PostNINOLetterController.onSubmit(mode: Mode ?= NormalMode)
-#GET         /changePostNationalInsuranceLetter              controllers.PostNINOLetterController.onPageLoad(mode: Mode = CheckMode)
-#POST        /changePostNationalInsuranceLetter              controllers.PostNINOLetterController.onSubmit(mode: Mode = CheckMode)
 
 GET         /number-by-post                                 controllers.ValidDataNINOHelpController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /number-by-post                                 controllers.ValidDataNINOHelpController.onSubmit(mode: Mode ?= NormalMode)
-#GET         /changeValidDataNINOHelp                        controllers.ValidDataNINOHelpController.onPageLoad(mode: Mode = CheckMode)
-#POST        /changeValidDataNINOHelp                        controllers.ValidDataNINOHelpController.onSubmit(mode: Mode = CheckMode)
 
 GET         /help-contact-hmrc                              controllers.InvalidDataNINOHelpController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /help-contact-hmrc                              controllers.InvalidDataNINOHelpController.onSubmit(mode: Mode ?= NormalMode)
-#GET         /changeInvalidDataNINOHelp                      controllers.InvalidDataNINOHelpController.onPageLoad(mode: Mode = CheckMode)
-#POST        /changeInvalidDataNINOHelp                      controllers.InvalidDataNINOHelpController.onSubmit(mode: Mode = CheckMode)
 
 GET         /postcode                                       controllers.SelectNINOLetterAddressController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /postcode                                       controllers.SelectNINOLetterAddressController.onSubmit(mode: Mode ?= NormalMode)
-#GET         /changeSelectNationalInsuranceLetterAddress     controllers.SelectNINOLetterAddressController.onPageLoad(mode: Mode = CheckMode)
-#POST        /changeSelectNationalInsuranceLetterAddress     controllers.SelectNINOLetterAddressController.onSubmit(mode: Mode = CheckMode)
 
 GET         /letter-confirmed                               controllers.NINOLetterPostedConfirmationController.onPageLoad()
 
 GET         /contact-hmrc                                   controllers.SelectAlternativeServiceController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /contact-hmrc                                   controllers.SelectAlternativeServiceController.onSubmit(mode: Mode ?= NormalMode)
-#GET         /changeSelectAlternativeService                 controllers.SelectAlternativeServiceController.onPageLoad(mode: Mode = CheckMode)
-#POST        /changeSelectAlternativeService                 controllers.SelectAlternativeServiceController.onSubmit(mode: Mode = CheckMode)
 
 GET         /phone-hmrc                                     controllers.PhoneHMRCDetailsController.onPageLoad()
 
 GET         /checkDetails                                   controllers.CheckDetailsController.onPageLoad(origin: Option[String] ?= None, mode: Mode ?= NormalMode)
-#GET         /changeCheckDetails                             controllers.CheckDetailsController.onPageLoad(origin: Option[String] = None, mode: Mode = CheckMode)
 
 GET         /issue                                          controllers.SendLetterErrorController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /issue                                          controllers.SendLetterErrorController.onSubmit(mode: Mode ?= NormalMode)
-#GET         /changeSendLetterError                          controllers.SendLetterErrorController.onPageLoad(mode: Mode = CheckMode)
-#POST        /changeSendLetterError                          controllers.SendLetterErrorController.onSubmit(mode: Mode = NormalMode)
 
 GET         /service-issue                                  controllers.TechnicalErrorController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /service-issue                                  controllers.TechnicalErrorController.onSubmit(mode: Mode ?= NormalMode)
 
 GET         /postcode-issue                                 controllers.EnteredPostCodeNotFoundController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /postcode-issue                                 controllers.EnteredPostCodeNotFoundController.onSubmit(mode: Mode ?= NormalMode)
-#GET         /changeEnteredPostCodeNotFound                  controllers.EnteredPostCodeNotFoundController.onPageLoad(mode: Mode = CheckMode)
-#POST        /changeEnteredPostCodeNotFound                  controllers.EnteredPostCodeNotFoundController.onSubmit(mode: Mode = CheckMode)
 
 GET         /number-letter                                  controllers.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /number-letter                                  controllers.ValidDataNINOMatchedNINOHelpController.onSubmit(mode: Mode ?= NormalMode)
-#GET         /changeValidDataNINOMatchedNINOHelp             controllers.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode: Mode = CheckMode)
-#POST        /changeValidDataNINOMatchedNINOHelp             controllers.ValidDataNINOMatchedNINOHelpController.onSubmit(mode: Mode = CheckMode)
 
 GET         /confirm-your-postcode                          controllers.ConfirmYourPostcodeController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /confirm-your-postcode                          controllers.ConfirmYourPostcodeController.onSubmit(mode: Mode ?= NormalMode)
-#GET         /changeConfirmYourPostcode                      controllers.ConfirmYourPostcodeController.onPageLoad(mode: Mode = CheckMode)
-#POST        /changeConfirmYourPostcode                      controllers.ConfirmYourPostcodeController.onSubmit(mode: Mode = CheckMode)
