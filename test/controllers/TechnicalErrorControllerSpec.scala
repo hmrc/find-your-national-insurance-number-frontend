@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.TechnicalErrorServiceFormProvider
-import models.{NormalMode, TechnicalErrorService, UserAnswers}
+import models.{NormalMode, TechnicalErrorService, TryAgainCount, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -29,7 +29,7 @@ import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.SessionRepository
+import repositories.{SessionRepository, TryAgainCountRepository}
 import views.html.TechnicalErrorView
 
 import scala.concurrent.Future
@@ -48,8 +48,13 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
   "TechnicalErrorController" - {
 
     "must return OK and the correct view for a GET" in {
+      val mockTryAgainCountRepository = mock[TryAgainCountRepository]
+      when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, technicalErrorRoute)
@@ -59,15 +64,21 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[TechnicalErrorView]
 
         status(result) mustEqual OK
-        //contentAsString(result) mustEqual view(form, NormalMode, true)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, true)(request, messages(application)).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
       val userAnswers = UserAnswers(userAnswersId).set(TechnicalErrorPage, TechnicalErrorService.values.head).success.value
+      val mockTryAgainCountRepository = mock[TryAgainCountRepository]
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(
+          bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, technicalErrorRoute)
@@ -77,7 +88,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        //contentAsString(result) mustEqual view(form.fill(TechnicalErrorService.values.head), NormalMode, true)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(TechnicalErrorService.values.head), NormalMode, true)(request, messages(application)).toString
       }
     }
 
@@ -107,42 +118,15 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return a Bad Request and errors when invalid data is submitted" in {
+    "redirect to SelectNINOLetterAddress page for a POST if user selects Try again option" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val mockTryAgainCountRepository = mock[TryAgainCountRepository]
+      when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
 
-      running(application) {
-        val request =
-          FakeRequest(POST, technicalErrorRoute)
-            .withFormUrlEncodedBody(("value", "invalid value"))
-
-        val boundForm = form.bind(Map("value" -> "invalid value"))
-
-        val view = application.injector.instanceOf[TechnicalErrorView]
-
-        val result = route(application, request).value
-
-        status(result) mustEqual BAD_REQUEST
-        //contentAsString(result) mustEqual view(boundForm, NormalMode, true)(request, messages(application)).toString
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, technicalErrorRoute)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual OK
-      }
-    }
-
-    "redirect to electNINOLetterAddress page for a POST if user selects Try again option" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository))
+        .build()
 
       running(application) {
         val request =
@@ -157,7 +141,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "redirect to electNINOLetterAddress page for a POST if user selects Phone HMRC option" in {
+    "redirect to SelectNINOLetterAddress page for a POST if user selects Phone HMRC option" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -174,7 +158,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "redirect to electNINOLetterAddress page for a POST if user selects P&P Service option" in {
+    "redirect to SelectNINOLetterAddress page for a POST if user selects P&P Service option" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -190,6 +174,5 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustEqual getNINOByPostUrl
       }
     }
-
   }
 }

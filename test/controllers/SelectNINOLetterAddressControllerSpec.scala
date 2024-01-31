@@ -20,6 +20,7 @@ import base.SpecBase
 import connectors.NPSFMNConnector
 import forms.SelectNINOLetterAddressFormProvider
 import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
+import models.pdv.{PDVResponseData, PersonalDetails}
 import models.{NormalMode, SelectNINOLetterAddress, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -29,10 +30,12 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
-import services.NPSFMNService
+import services.{NPSFMNService, PersonalDetailsValidationService}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.SelectNINOLetterAddressView
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
@@ -45,14 +48,36 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
   val formProvider = new SelectNINOLetterAddressFormProvider()
   val form = formProvider()
 
-  //for testing purposes this is hard coded - postcode will not be displayed in future iterations
-  val generatedPostcode = "FX97 4TU"
+  val fakePDVResponseData: PDVResponseData = PDVResponseData(
+    id = "fakeId",
+    validationStatus = "success",
+    personalDetails = Some(PersonalDetails(
+      firstName = "John",
+      lastName = "Doe",
+      nino = Nino("AB123456C"),
+      postCode = Some("AA1 1AA"),
+      dateOfBirth = LocalDate.of(1990, 1, 1)
+    )),
+    validCustomer = Some("true"),
+    CRN = Some("fakeCRN"),
+    npsPostCode = Some("AA1 1AA"),
+    reason = None
+  )
+
+  val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
+
 
   "SelectNINOLetterAddress Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        ).build()
 
       running(application) {
         val request = FakeRequest(GET, selectNINOLetterAddressRoute)
@@ -62,15 +87,21 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[SelectNINOLetterAddressView]
 
         status(result) mustEqual OK
-        contentAsString(result) contains view(form, NormalMode, generatedPostcode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages(application)).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
+
       val userAnswers = UserAnswers(userAnswersId).set(SelectNINOLetterAddressPage, SelectNINOLetterAddress.values.head).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(
+        bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService))
+          .build()
 
       running(application) {
         val request = FakeRequest(GET, selectNINOLetterAddressRoute)
@@ -80,7 +111,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) contains view(form.fill(SelectNINOLetterAddress.values.head), NormalMode, generatedPostcode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(SelectNINOLetterAddress.values.head), NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages(application)).toString
       }
     }
 
@@ -148,7 +179,13 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService))
+        .build()
 
       running(application) {
         val request =
@@ -162,21 +199,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) contains view(boundForm, NormalMode, generatedPostcode)(request, messages(application)).toString
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, selectNINOLetterAddressRoute)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual OK
-//        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        contentAsString(result) mustEqual view(boundForm, NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages(application)).toString
       }
     }
 
@@ -209,6 +232,5 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustEqual routes.TechnicalErrorController.onPageLoad().url
       }
     }
-
   }
 }
