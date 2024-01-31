@@ -37,33 +37,23 @@ import scala.concurrent.Future
 
 class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar with ScalaFutures {
 
-  implicit val defaultPatience =
-    PatienceConfig(timeout = Span(5, Seconds), interval = Span(500, Millis))
+  implicit val defaultPatience: PatienceConfig =
+    PatienceConfig(timeout = Span(10, Seconds), interval = Span(1, Seconds))
 
   // Mocks
   val metricRegistry: MetricRegistry = mock[MetricRegistry]
   val logger: Logger = mock[Logger]
   val response: HttpResponse = mock[HttpResponse]
 
-  val readsSuccessUnit: Reads[Unit] = new Reads[Unit] {
-    override def reads(json: JsValue): JsResult[Unit] = JsSuccess(())
-  }
+  val readsSuccessUnit: Reads[Unit] = (json: JsValue) => JsSuccess(())
 
-  val readsSuccess: Reads[String] = new Reads[String] {
-    override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json)
-  }
+  val readsSuccess: Reads[String] = (json: JsValue) => Json.fromJson[String](json)
 
-  val readsError: Reads[String] = new Reads[String] {
-    override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json)
-  }
+  val readsError: Reads[String] = (json: JsValue) => Json.fromJson[String](json)
 
-  val readsErrorT: Reads[String] = new Reads[String] {
-    override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json)
-  }
+  val readsErrorT: Reads[String] = (json: JsValue) => Json.fromJson[String](json)
 
-  class TestHttpReadsWrapper(implicit readsSuccess: Reads[String],
-                             readsError: Reads[String],
-                             readsErrorT: Reads[String]) extends HttpReadsWrapper[String, String] with MetricsSupport {
+  class TestHttpReadsWrapper extends HttpReadsWrapper[String, String] {
     override def fromUpstreamErrorToIndividualDetailsError(
                                                             connectorName: String,
                                                             status: Int,

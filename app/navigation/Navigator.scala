@@ -33,7 +33,6 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
 
   private val normalRoutes: Page => UserAnswers => Call = {
     case HaveSetUpGGUserIDPage              => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
-    case PostNINOLetterPage                 => userAnswers => navigatePostNINOLetter(userAnswers)
     case SelectNINOLetterAddressPage        => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
     case SelectAlternativeServicePage       => userAnswers => navigateSelectAlternativeService(userAnswers)
     case TechnicalErrorPage                 => userAnswers => navigateTechnicalErrorService(userAnswers)
@@ -44,15 +43,9 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     case _                                  => _           => routes.IndexController.onPageLoad
   }
 
-  private val checkRouteMap: Page => UserAnswers => Call = {
-    case _ => _ => routes.CheckYourAnswersController.onPageLoad
-  }
-
   def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
-    case NormalMode =>
+    case _ =>
       normalRoutes(page)(userAnswers)
-    case CheckMode =>
-      checkRouteMap(page)(userAnswers)
   }
 
   private def navigateHaveSetUpGGUserID(userAnswers: UserAnswers): Call =
@@ -60,13 +53,6 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
       case Some(No)   => routes.SetUpGGUserIDStartController.onPageLoad()
       case Some(Yes)  => controllers.auth.routes.AuthController.redirectToSMN
       case _          => routes.SetUpGGUserIDStartController.onPageLoad()
-    }
-
-  private def navigatePostNINOLetter(userAnswers: UserAnswers): Call =
-    userAnswers.get(PostNINOLetterPage) match {
-      case Some(true)   => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
-      case Some(false)  => routes.SelectAlternativeServiceController.onPageLoad(mode = NormalMode)
-      case _            => routes.JourneyRecoveryController.onPageLoad()
     }
 
   private def navigateSelectNINOLetterAddress(userAnswers: UserAnswers): Call =

@@ -117,9 +117,12 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
   val ivOrigin: Option[String] = Some("IV")
 
   "CheckDetailsController" - {
+   
     "must redirect to InvalidDataNINOHelpController" - {
+      
       "when invalid origin" in {
         val invalidOrigin: Option[String] = Some("test")
+
 
         val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(invalidOrigin, NormalMode).url)
         val result = route(application, request).value

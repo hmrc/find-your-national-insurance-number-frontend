@@ -43,7 +43,7 @@ final case class AdditionalLogInfo(infoKeyValue: Map[String, String]) {
   }
 }
 
-trait HttpReadsWrapper[E, EE] { self: MetricsSupport =>
+trait HttpReadsWrapper[E, EE] {
   val logger: Logger = Logger(this.getClass)
   def withHttpReads[T](name: String, registry: MetricRegistry, additionalLogInfo: Option[AdditionalLogInfo] = None)(
       block:                 HttpReads[Either[IndividualDetailsError, T]] => IndividualDetailsResponseEnvelope[T]
@@ -53,7 +53,6 @@ trait HttpReadsWrapper[E, EE] { self: MetricsSupport =>
       readsErrorT:  Reads[EE]
   ): IndividualDetailsResponseEnvelope[T] = {
 
-    measure(name, registry) {
       block(
         getHttpReads(name: String, registry: MetricRegistry, additionalLogInfo: Option[AdditionalLogInfo])(
           readsSuccess,
@@ -61,7 +60,6 @@ trait HttpReadsWrapper[E, EE] { self: MetricsSupport =>
           readsErrorT
         )
       )
-    }
 
   }
 
@@ -75,10 +73,8 @@ trait HttpReadsWrapper[E, EE] { self: MetricsSupport =>
       val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse("")
       response.status match {
         case Status.NO_CONTENT =>
-          count(name, "success", registry)
           Right(().asInstanceOf[T])
         case Status.OK | Status.CREATED => {
-          count(name, "success", registry)
           Try(response.json) match {
             case Success(value) =>
               value
@@ -105,7 +101,6 @@ trait HttpReadsWrapper[E, EE] { self: MetricsSupport =>
         }
 
         case status => {
-          count(name, "failure", registry)
           Try(response.json) match {
             case Success(value) =>
               value
@@ -181,7 +176,7 @@ object HttpReadsWrapper {
       .mkString(", ")
   }
 
-  implicit class Recovered[T](httpResult: Future[Either[IndividualDetailsError, T]]) extends MetricsSupport {
+  implicit class Recovered[T](httpResult: Future[Either[IndividualDetailsError, T]]) {
     def recovered(
         logger:            Logger,
         connectorName:     String,
@@ -192,7 +187,6 @@ object HttpReadsWrapper {
     ): Future[Either[IndividualDetailsError, T]] = {
       val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse("")
 
-      count(connectorName, "failure", registry)
       httpResult.recover {
         case e: HttpException => {
           logger.debug(

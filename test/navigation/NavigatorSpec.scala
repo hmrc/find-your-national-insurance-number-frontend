@@ -32,12 +32,6 @@ class NavigatorSpec extends SpecBase {
 
   "Navigator" - {
 
-    "When checkRouteMap" - {
-      val page = mock[Page] // replace with a specific instance of Page
-      val userAnswers = UserAnswers("id") // replace with a specific instance of UserAnswers
-      navigator.nextPage(page, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad
-    }
-
     "When normalRoutes" - {
       "for any other page" - {
         "must always go to IndexController" in {
@@ -134,33 +128,6 @@ class NavigatorSpec extends SpecBase {
         "must go to JourneyRecoveryController" in {
           val userAnswers = UserAnswers("id")
           navigator.nextPage(SelectAlternativeServicePage, NormalMode, userAnswers) mustBe routes.JourneyRecoveryController.onPageLoad()
-        }
-      }
-    }
-
-    "When on PostNINOLetterPage" - {
-
-      "when the answer is true" - {
-
-        "must go to SelectNINOLetterAddressController" in {
-          val userAnswers = UserAnswers("id").set(PostNINOLetterPage, true).success.value
-          navigator.nextPage(PostNINOLetterPage, NormalMode, userAnswers) mustBe routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
-        }
-      }
-
-      "when the answer is false" - {
-
-        "must go to SelectAlternativeServiceController" in {
-          val userAnswers = UserAnswers("id").set(PostNINOLetterPage, false).success.value
-          navigator.nextPage(PostNINOLetterPage, NormalMode, userAnswers) mustBe routes.SelectAlternativeServiceController.onPageLoad(mode = NormalMode)
-        }
-      }
-
-      "when there is no answer" - {
-
-        "must go to JourneyRecoveryController" in {
-          val userAnswers = UserAnswers("id")
-          navigator.nextPage(PostNINOLetterPage, NormalMode, userAnswers) mustBe routes.JourneyRecoveryController.onPageLoad()
         }
       }
     }

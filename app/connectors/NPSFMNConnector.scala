@@ -42,8 +42,7 @@ trait NPSFMNConnector {
 @Singleton
 class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2, appConfig: FrontendAppConfig)
   extends  NPSFMNConnector
-  with HttpReadsWrapper[UpstreamFailures, Failure]
-  with MetricsSupport {
+  with HttpReadsWrapper[UpstreamFailures, Failure] {
 
   def sendLetter(nino: String, body: NPSFMNRequest
                    )(implicit hc: HeaderCarrier,correlationId: CorrelationId, ec: ExecutionContext): Future[HttpResponse] = {
