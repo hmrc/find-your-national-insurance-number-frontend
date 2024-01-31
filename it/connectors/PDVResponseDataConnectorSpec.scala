@@ -26,7 +26,7 @@ import play.api.mvc.Result
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.client.HttpClientV2
-import util.WireMockHelper
+import base.WireMockHelper
 import play.api.mvc.Results.Ok
 
 import java.time.{LocalDate, LocalDateTime, ZoneId, ZoneOffset}
