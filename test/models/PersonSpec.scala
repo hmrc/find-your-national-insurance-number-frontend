@@ -19,8 +19,6 @@ package models
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import java.time.LocalDate
-import uk.gov.hmrc.domain.Nino
-import models.Person
 
 class PersonSpec extends AnyFlatSpec with Matchers {
 

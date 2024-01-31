@@ -18,11 +18,9 @@ package models
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import play.api.libs.json.{JsString, Json}
-import models._
+import play.api.libs.json.Json
 
 class IndividualDetailsIdentifierSpec extends AnyFlatSpec with Matchers {
-
 
   "IndividualDetailsIdentifier reads" should "correctly parse IndividualDetailsNino" in {
     val json = Json.parse("\"AB123456B\"")

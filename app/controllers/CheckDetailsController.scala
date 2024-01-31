@@ -76,6 +76,7 @@ class CheckDetailsController @Inject()(
 
               case (pdvData, Left(idData)) =>
                 if (pdvData.validationStatus.equals("failure")) {
+                  logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
                   auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
                     pdvData.validationStatus, "", None, None, None, None, None, None))
                   Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
