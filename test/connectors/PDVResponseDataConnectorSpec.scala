@@ -24,7 +24,7 @@ import play.api.libs.json.Json
 import play.api.test.{DefaultAwaitTimeout, Injecting}
 import play.api.mvc.Result
 import uk.gov.hmrc.domain.{Generator, Nino}
-import uk.gov.hmrc.http.{HttpResponse, NotFoundException}
+import uk.gov.hmrc.http.{BadRequestException, HttpResponse, NotFoundException}
 import uk.gov.hmrc.http.client.HttpClientV2
 import util.WireMockHelper
 import play.api.mvc.Results.Ok
@@ -146,9 +146,9 @@ class PDVResponseDataConnectorSpec
       val pdvRequest: PDVRequest = PDVRequest("not found", "dummy")
       stubPost(url, NOT_FOUND, Some(Json.toJson(pdvRequest).toString()), Some(body))
 
-      val result: HttpResponse = await(connector.retrieveMatchingDetails(pdvRequest))
-
-      result.status mustBe NOT_FOUND
+      intercept[NotFoundException] {
+        await(connector.retrieveMatchingDetails(pdvRequest))
+      }
     }
 
     "return BAD_REQUEST when called with invalid data" in new LocalSetup {
@@ -156,9 +156,9 @@ class PDVResponseDataConnectorSpec
       val pdvRequest: PDVRequest = PDVRequest("invalid", "dummy")
       stubPost(url, BAD_REQUEST, Some(Json.toJson(pdvRequest).toString()), None)
 
-      val result: HttpResponse = await(connector.retrieveMatchingDetails(pdvRequest))
-
-      result.status mustBe BAD_REQUEST
+      intercept[BadRequestException] {
+        await(connector.retrieveMatchingDetails(pdvRequest))
+      }
     }
   }
 
