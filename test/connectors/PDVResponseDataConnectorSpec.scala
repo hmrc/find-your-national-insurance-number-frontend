@@ -24,10 +24,11 @@ import play.api.libs.json.Json
 import play.api.test.{DefaultAwaitTimeout, Injecting}
 import play.api.mvc.Result
 import uk.gov.hmrc.domain.{Generator, Nino}
-import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.http.{HttpResponse, NotFoundException}
 import uk.gov.hmrc.http.client.HttpClientV2
 import util.WireMockHelper
 import play.api.mvc.Results.Ok
+import play.api.test.Helpers.await
 
 import java.time.{LocalDate, LocalDateTime, ZoneId, ZoneOffset}
 import scala.util.Random
@@ -133,7 +134,7 @@ class PDVResponseDataConnectorSpec
       Json.parse(result.body).as[PDVResponseData].personalDetails mustBe personalDetailsValidation.personalDetails
     }
 
-    "return NOT_FOUND when called with an unknown validationId" ignore new LocalSetup {
+    "return NOT_FOUND when called with an unknown validationId" in new LocalSetup {
 
       val body =
         s"""
@@ -142,11 +143,22 @@ class PDVResponseDataConnectorSpec
            |}
            |""".stripMargin
 
-      val pdvRequest: PDVRequest = mock[PDVRequest]
-      stubPost(url, NOT_FOUND, None, Some(body))
+      val pdvRequest: PDVRequest = PDVRequest("not found", "dummy")
+      stubPost(url, NOT_FOUND, Some(Json.toJson(pdvRequest).toString()), Some(body))
 
-      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest).futureValue.leftSideValue
+      val result: HttpResponse = await(connector.retrieveMatchingDetails(pdvRequest))
+
       result.status mustBe NOT_FOUND
+    }
+
+    "return BAD_REQUEST when called with invalid data" in new LocalSetup {
+
+      val pdvRequest: PDVRequest = PDVRequest("invalid", "dummy")
+      stubPost(url, BAD_REQUEST, Some(Json.toJson(pdvRequest).toString()), None)
+
+      val result: HttpResponse = await(connector.retrieveMatchingDetails(pdvRequest))
+
+      result.status mustBe BAD_REQUEST
     }
   }
 
