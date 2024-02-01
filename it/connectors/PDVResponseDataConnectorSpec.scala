@@ -133,7 +133,7 @@ class PDVResponseDataConnectorSpec
       Json.parse(result.body).as[PDVResponseData].personalDetails mustBe personalDetailsValidation.personalDetails
     }
 
-    "return NOT_FOUND when called with an unknown validationId" ignore new LocalSetup {
+    "return NOT_FOUND when called with an unknown validationId" in new LocalSetup {
 
       val body =
         s"""

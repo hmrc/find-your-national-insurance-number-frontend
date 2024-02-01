@@ -17,12 +17,13 @@
 package connectors
 
 import config.FrontendAppConfig
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpException, HttpResponse}
 import com.google.inject.{Inject, Singleton}
 import models.pdv.PDVRequest
 import play.api.Logging
 import uk.gov.hmrc.http.client.HttpClientV2
 import models.pdv.PDVRequest._
+import play.api.http.Status.{NOT_FOUND,BAD_REQUEST, INTERNAL_SERVER_ERROR}
 
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,6 +39,11 @@ class PersonalDetailsValidationConnector @Inject()(val httpClientV2: HttpClientV
       .execute[HttpResponse]
       .flatMap { response =>
         Future.successful(response)
+      } recover {
+        case e: HttpException if e.responseCode == NOT_FOUND || e.responseCode == BAD_REQUEST =>
+            HttpResponse(e.responseCode, e.message)
+        case _ =>
+            HttpResponse(INTERNAL_SERVER_ERROR, "Service unavailable")
       }
   }
 
