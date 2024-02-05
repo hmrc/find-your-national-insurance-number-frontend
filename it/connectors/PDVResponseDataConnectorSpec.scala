@@ -16,18 +16,18 @@
 
 package connectors
 
+import base.WireMockHelper
 import config.FrontendAppConfig
 import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.libs.json.Json
-import play.api.test.{DefaultAwaitTimeout, Injecting}
 import play.api.mvc.Result
+import play.api.mvc.Results.Ok
+import play.api.test.{DefaultAwaitTimeout, Injecting}
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.client.HttpClientV2
-import base.WireMockHelper
-import play.api.mvc.Results.Ok
 
 import java.time.{LocalDate, LocalDateTime, ZoneId, ZoneOffset}
 import scala.util.Random
@@ -147,6 +147,15 @@ class PDVResponseDataConnectorSpec
 
       val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest).futureValue.leftSideValue
       result.status mustBe NOT_FOUND
+    }
+
+    "return BAD_REQUEST when called with invalid data" in new LocalSetup {
+
+      val pdvRequest: PDVRequest = PDVRequest("invalid", "dummy")
+      stubPost(url, BAD_REQUEST, Some(Json.toJson(pdvRequest).toString()), None)
+
+      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest).futureValue.leftSideValue
+      result.status mustBe BAD_REQUEST
     }
   }
 
