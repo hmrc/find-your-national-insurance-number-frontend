@@ -96,7 +96,8 @@ class TechnicalErrorController @Inject()(
                 None,
                 None,
                 None,
-                None
+                None,
+                Some(view.getClass.getName)
               ))
             case Failure(ex) => logger.warn(ex.getMessage)
           }
