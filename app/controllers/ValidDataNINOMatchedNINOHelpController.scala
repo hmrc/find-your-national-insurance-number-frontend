@@ -80,7 +80,7 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
                 None,
                 None,
                 None,
-                Some(request.uri)
+                Some(request.path)
               ))
             case Failure(ex) =>
               logger.warn(ex.getMessage)

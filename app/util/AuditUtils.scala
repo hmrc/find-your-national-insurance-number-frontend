@@ -44,7 +44,7 @@ object AuditUtils {
                                     pageErrorGeneratedFrom: Option[String],
                                     errorStatus: Option[String],
                                     errorReason: Option[String],
-                                    url: Option[String]
+                                    path: Option[String]
                                   )
 
   object YourDetailsAuditEvent {
@@ -88,7 +88,7 @@ object AuditUtils {
                            pageErrorGeneratedFrom: Option[String],
                            errorStatus: Option[String],
                            errorReason: Option[String],
-                           url: Option[String]): YourDetailsAuditEvent = {
+                           path: Option[String]): YourDetailsAuditEvent = {
     YourDetailsAuditEvent(
       postcode,
       nino,
@@ -107,7 +107,7 @@ object AuditUtils {
       pageErrorGeneratedFrom,
       errorStatus,
       errorReason,
-      url
+      path
     )
   }
 
@@ -160,7 +160,7 @@ object AuditUtils {
                       pageErrorGeneratedFrom: Option[String],
                       errorStatus: Option[String],
                       errorReason: Option[String],
-                      url: Option[String] = None
+                      path: Option[String] = None
                      )(implicit hc: HeaderCarrier): ExtendedDataEvent = {
     personDetails match {
       case Some(pd) =>
@@ -183,7 +183,7 @@ object AuditUtils {
             pageErrorGeneratedFrom,
             errorStatus,
             errorReason,
-            url)))
+            path)))
       case None =>
         buildDataEvent(auditType, s"$auditType",
           Json.toJson(buildDetails(None,
@@ -203,7 +203,7 @@ object AuditUtils {
             pageErrorGeneratedFrom,
             errorStatus,
             errorReason,
-            url)))
+            path)))
     }
   }
 }
