@@ -66,6 +66,7 @@ class ValidDataNINOHelpController @Inject()(
 
             Ok(view(preparedForm, mode))
           } else {
+            logger.warn("User is not authorised to access this page, redirecting ..... ")
             Redirect(controllers.routes.UnauthorisedController.onPageLoad)
           }
       )
