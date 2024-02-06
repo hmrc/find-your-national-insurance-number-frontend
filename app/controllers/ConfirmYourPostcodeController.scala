@@ -99,8 +99,7 @@ class ConfirmYourPostcodeController @Inject()(
                         Some("true"),
                         None,
                         None,
-                        None,
-                        Some(view.getClass.getName)
+                        None
                       ))
                   }
                   npsLetterChecks(pdvValidData, npsPostCode, mode, updatedAnswers)
@@ -115,8 +114,7 @@ class ConfirmYourPostcodeController @Inject()(
                     Some("false"),
                     None,
                     None,
-                    None,
-                    Some(view.getClass.getName)
+                    None
                   ))
                   Future(Redirect(routes.TechnicalErrorController.onPageLoad()))
                 case _ =>
@@ -130,8 +128,7 @@ class ConfirmYourPostcodeController @Inject()(
                     Some("false"),
                     None,
                     None,
-                    None,
-                    Some(view.getClass.getName)
+                    None
                   ))
                   Future(Redirect(routes.EnteredPostCodeNotFoundController.onPageLoad(mode = NormalMode)))
               }
@@ -161,8 +158,7 @@ class ConfirmYourPostcodeController @Inject()(
               None,
               Some("/confirm-your-postcode"),
               Some(responseStatus.toString),
-              Some(responseMessage),
-              Some(view.getClass.getName)
+              Some(responseMessage)
             ))
             Redirect(routes.SendLetterErrorController.onPageLoad(mode))
           case TechnicalIssueResponse(responseStatus, responseMessage) =>
@@ -176,8 +172,7 @@ class ConfirmYourPostcodeController @Inject()(
               None,
               Some("/confirm-your-postcode"),
               Some(responseStatus.toString),
-              Some(responseMessage),
-              Some(view.getClass.getName)
+              Some(responseMessage)
             ))
             Redirect(routes.TechnicalErrorController.onPageLoad())
           case _ =>

@@ -81,7 +81,7 @@ class SelectAlternativeServiceController @Inject()(
                 None,
                 None,
                 None,
-                Some(view.getClass.getName)
+                Some(request.uri)
               ))
             case Failure(ex) => logger.warn(ex.getMessage)
           }

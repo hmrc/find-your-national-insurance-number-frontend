@@ -116,8 +116,7 @@ class SelectNINOLetterAddressController @Inject()(
                           None,
                           None,
                           None,
-                          None,
-                          Some(view.getClass.getName)
+                          None
                         ))
                     }
                     Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
@@ -134,8 +133,7 @@ class SelectNINOLetterAddressController @Inject()(
                           None,
                           Some("/postcode"),
                           Some(responseStatus.toString),
-                          Some(responseMessage),
-                          Some(view.getClass.getName)
+                          Some(responseMessage)
                         ))
                       case Failure(ex) => logger.warn(ex.getMessage)
                     }
@@ -153,8 +151,7 @@ class SelectNINOLetterAddressController @Inject()(
                           None,
                           Some("/postcode"),
                           Some(responseStatus.toString),
-                          Some(responseMessage),
-                          Some(view.getClass.getName)
+                          Some(responseMessage)
                         ))
                       case Failure(ex) => logger.warn(ex.getMessage)
                     }
