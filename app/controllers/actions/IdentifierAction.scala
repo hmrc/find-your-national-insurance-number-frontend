@@ -20,6 +20,7 @@ import com.google.inject.Inject
 import config.FrontendAppConfig
 import controllers.routes
 import models.requests.IdentifierRequest
+import play.api.Logging
 import play.api.mvc.Results._
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
@@ -37,7 +38,7 @@ class SessionIdentifierAction @Inject()(
      override val authConnector: AuthConnector,
      config: FrontendAppConfig,
      val parser: BodyParsers.Default
- )(implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions {
+ )(implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions with Logging{
 
   private val AuthPredicate = AuthProviders(GovernmentGateway)
   private val FMNRetrievals = Retrievals.credentials
@@ -58,8 +59,10 @@ class SessionIdentifierAction @Inject()(
         throw new UnauthorizedException("Unable to retrieve internal Id and credentials Id.")
     } recover {
       case _: NoActiveSession =>
+        logger.warn(s"[SessionIdentifierAction][invokeBlock] No active session, redirecting...")
         Redirect(config.loginUrl, Map("continue" -> Seq(resolveCorrectUrl(request))))
       case _: AuthorisationException =>
+        logger.warn(s"[SessionIdentifierAction][invokeBlock] Authorisation exception, redirecting....}")
         Redirect(routes.UnauthorisedController.onPageLoad)
     }
    }
