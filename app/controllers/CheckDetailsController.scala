@@ -78,7 +78,7 @@ class CheckDetailsController @Inject()(
                 if (pdvData.validationStatus.equals("failure")) {
                   logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
                   auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
-                    pdvData.validationStatus, "", None, None, None, None, None, None, None))
+                    pdvData.validationStatus, "", None, None, None, None, None, None))
                   Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
                 } else {
 
@@ -88,14 +88,14 @@ class CheckDetailsController @Inject()(
                   }
 
                   auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "FindYourNinoError",
-                    pdvData.validationStatus, "", None, None, None, Some("/checkDetails"), errorStatusCode, Some(idData.errorMessage), None))
+                    pdvData.validationStatus, "", None, None, None, Some("/checkDetails"), errorStatusCode, Some(idData.errorMessage)))
                   logger.warn(s"Failed to retrieve Individual Details data: ${idData.errorMessage}")
                   Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
                 }
 
               case (pdvData, Right(idData)) =>
                 auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
-                  pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None, None))
+                  pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
 
                 val api1694Checks = checkConditions(idData)
                 personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, api1694Checks._1, api1694Checks._2)
@@ -184,7 +184,7 @@ class CheckDetailsController @Inject()(
     p.recover {
       case ex: HttpException =>
         auditService.audit(AuditUtils.buildAuditEvent(None, None, "FindYourNinoError",
-          "", "", None, None, None, Some("/checkDetails"), Some(ex.responseCode.toString), Some(ex.message), None))
+          "", "", None, None, None, Some("/checkDetails"), Some(ex.responseCode.toString), Some(ex.message)))
         logger.debug(ex.getMessage)
         throw ex
     }
