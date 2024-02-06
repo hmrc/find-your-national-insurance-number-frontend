@@ -21,6 +21,7 @@ import models.IndividualDetailsResponseEnvelope
 import models.errors.{ConnectorError, IndividualDetailsError}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -35,7 +36,12 @@ import uk.gov.hmrc.http.{HttpException, HttpReads, HttpResponse, UpstreamErrorRe
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar with ScalaFutures {
+class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar with ScalaFutures with BeforeAndAfterEach {
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(metricRegistry, response, logger)
+  }
 
   implicit val defaultPatience: PatienceConfig =
     PatienceConfig(timeout = Span(10, Seconds), interval = Span(1, Seconds))
