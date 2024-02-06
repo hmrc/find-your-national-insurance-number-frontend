@@ -17,12 +17,12 @@
 package controllers
 
 import base.SpecBase
-import forms.SelectAlternativeServiceFormProvider
-import models.{NormalMode, SelectAlternativeService, SelectNINOLetterAddress, UserAnswers}
+import forms.InvalidDataNINOHelpFormProvider
+import models.{InvalidDataNINOHelp, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import pages.SelectNINOLetterAddressPage
+import pages.InvalidDataNINOHelpPage
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -38,7 +38,7 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
 
   lazy val invalidDataNINOHelpRoute = routes.InvalidDataNINOHelpController.onPageLoad(mode = NormalMode).url
 
-  val formProvider = new SelectAlternativeServiceFormProvider()
+  val formProvider = new InvalidDataNINOHelpFormProvider()
   val form = formProvider()
 
   "InvalidDataNINOHelp Controller" - {
@@ -58,7 +58,7 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(SelectNINOLetterAddressPage, SelectNINOLetterAddress.values.head).success.value
+      val userAnswers = UserAnswers(userAnswersId).set(InvalidDataNINOHelpPage, InvalidDataNINOHelp.values.head).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -70,7 +70,7 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) contains view(form.fill(SelectAlternativeService.values.head), NormalMode)(request, messages(application), config).toString
+        contentAsString(result) mustEqual view(form.fill(InvalidDataNINOHelp.values.head), NormalMode)(request, messages(application), config).toString
       }
     }
 
@@ -91,7 +91,7 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
       running(application) {
         val request =
           FakeRequest(POST, invalidDataNINOHelpRoute)
-            .withFormUrlEncodedBody(("value", SelectAlternativeService.values.head.toString))
+            .withFormUrlEncodedBody(("value", InvalidDataNINOHelp.values.head.toString))
 
         val result = route(application, request).value
 
@@ -116,44 +116,8 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) contains view(boundForm, NormalMode)(request, messages(application), config).toString
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, invalidDataNINOHelpRoute)
-
-        val result = route(application, request).value
-
-//        status(result) mustEqual SEE_OTHER
-//        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-        status(result) mustEqual OK
-        val view = application.injector.instanceOf[InvalidDataNINOHelpView]
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application), config).toString
-      }
-    }
-
-    "redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, invalidDataNINOHelpRoute)
-            .withFormUrlEncodedBody(("value", SelectAlternativeService.values.head.toString))
-
-        val result = route(application, request).value
-
-//        status(result) mustEqual SEE_OTHER
-//        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-
-        status(result) mustEqual SEE_OTHER
+        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application), config).toString
       }
     }
   }
-
 }
