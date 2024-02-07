@@ -75,11 +75,14 @@ class CheckDetailsController @Inject()(
             } yield (pdvData, idData) match {
 
               case (pdvData, Left(idData)) =>
+                val sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
+
                 if (pdvData.validationStatus.equals("failure")) {
+
                   logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
                   auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
                     pdvData.validationStatus, "", None, None, None, None, None, None))
-                  Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+                  Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
                 } else {
 
                   val errorStatusCode: Option[String] = idData match {
@@ -90,17 +93,17 @@ class CheckDetailsController @Inject()(
                   auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "FindYourNinoError",
                     pdvData.validationStatus, "", None, None, None, Some("/checkDetails"), errorStatusCode, Some(idData.errorMessage)))
                   logger.warn(s"Failed to retrieve Individual Details data: ${idData.errorMessage}")
-                  Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+                  Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
                 }
 
               case (pdvData, Right(idData)) =>
+                val sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
+
                 auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
                   pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
 
                 val api1694Checks = checkConditions(idData)
                 personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, api1694Checks._1, api1694Checks._2)
-
-                val sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
 
                 if (api1694Checks._1) {
                   val idPostCode = getNPSPostCode(idData)
