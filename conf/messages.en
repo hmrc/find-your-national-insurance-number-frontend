@@ -147,8 +147,8 @@ enteredPostCodeNotFound.p1 = You need to call HMRC or print and post a form to g
 enteredPostCodeNotFound.p2 = What would you like to do?
 enteredPostCodeNotFound.printForm = Print and post a form
 enteredPostCodeNotFound.printForm.hint = Once we have received the completed form, we can send you a letter confirming your National Insurance number.
-enteredPostCodeNotFound.phoneHmrc = Phone HMRC
-enteredPostCodeNotFound.phoneHmrc.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it.
+enteredPostCodeNotFound.phoneHMRC = Phone HMRC
+enteredPostCodeNotFound.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it.
 enteredPostCodeNotFound.error.required = Tell us what you would like to do
 
 validDataNINOMatchedNINOHelp.title = Get your National Insurance number posted to you on a letter
