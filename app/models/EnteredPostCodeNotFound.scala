@@ -26,7 +26,7 @@ sealed trait EnteredPostCodeNotFound
 object EnteredPostCodeNotFound extends Enumerable.Implicits {
 
   case object PrintForm extends WithName("printForm") with EnteredPostCodeNotFound
-  case object PhoneHmrc extends WithName("phoneHmrc") with EnteredPostCodeNotFound
+  case object PhoneHmrc extends WithName("phoneHMRC") with EnteredPostCodeNotFound
 
   val values: Seq[EnteredPostCodeNotFound] = Seq(
     PrintForm, PhoneHmrc
