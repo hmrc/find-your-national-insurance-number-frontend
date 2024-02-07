@@ -97,13 +97,13 @@ class CheckDetailsController @Inject()(
                 }
 
               case (pdvData, Right(idData)) =>
+                val sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
+
                 auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
                   pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
 
                 val api1694Checks = checkConditions(idData)
                 personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, api1694Checks._1, api1694Checks._2)
-
-                val sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
 
                 if (api1694Checks._1) {
                   val idPostCode = getNPSPostCode(idData)
