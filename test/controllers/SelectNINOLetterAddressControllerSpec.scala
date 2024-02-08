@@ -23,7 +23,7 @@ import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueRespon
 import models.pdv.{PDVResponseData, PersonalDetails}
 import models.{NormalMode, SelectNINOLetterAddress, UserAnswers}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.SelectNINOLetterAddressPage
 import play.api.inject.bind
@@ -115,7 +115,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the confirmation page when valid data is submitted to NPS FMN API" in {
+    "must redirect to the confirmation page and call NPS FMN letter API when the to this address option is selected with valid data" in {
 
       val mockSessionRepository = mock[SessionRepository]
       val mockNPSFMNConnector = mock[NPSFMNConnector]
@@ -143,6 +143,37 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.NINOLetterPostedConfirmationController.onPageLoad().url
+        verify(mockNPSFMNService, times(1)).sendLetter(any(), any())(any(), any())
+      }
+    }
+
+    "must redirect to service alternatives and not call NPS FMN letter API when the not to this address option is selected" in {
+      val mockSessionRepository = mock[SessionRepository]
+      val mockNPSFMNConnector = mock[NPSFMNConnector]
+      val mockNPSFMNService = mock[NPSFMNService]
+
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
+        .thenReturn(Future.successful(LetterIssuedResponse()))
+
+      val application =
+        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NPSFMNService].toInstance(mockNPSFMNService),
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, selectNINOLetterAddressRoute)
+            .withFormUrlEncodedBody(("value", SelectNINOLetterAddress.NotThisAddress.toString))
+
+        val result = route(application, request).value
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.SelectAlternativeServiceController.onPageLoad().url
+        verify(mockNPSFMNService, never()).sendLetter(any(), any())(any(), any())
       }
     }
 
