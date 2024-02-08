@@ -100,9 +100,9 @@ class SelectNINOLetterAddressController @Inject()(
                 for {
                   idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
                 } yield idAddress match {
-                  case Right(idAddress) =>
+                  case Right(idAddr) =>
                     auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
-                      Some(idAddress),
+                      Some(idAddr),
                       "FindYourNinoOnlineLetterOption",
                       pdvData.map(_.validationStatus).getOrElse(""),
                       pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
@@ -119,9 +119,9 @@ class SelectNINOLetterAddressController @Inject()(
                 for {
                   idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
                 } yield idAddress match {
-                  case Right(idAddress) =>
+                  case Right(idAddr) =>
                     auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
-                      Some(idAddress),
+                      Some(idAddr),
                       "FindYourNinoOnlineLetterOption",
                       pdvData.map(_.validationStatus).getOrElse(""),
                       pdvData.map(_.CRN.getOrElse("")).getOrElse(""),

@@ -88,9 +88,9 @@ class ConfirmYourPostcodeController @Inject()(
               case Some(pdvValidData) => pdvValidData.npsPostCode match {
                 case Some(npsPostCode) if npsPostCode.equalsIgnoreCase(value) =>
                   idAddress match {
-                    case Right(idAddress) =>
+                    case Right(idAddr) =>
                       auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
-                        Some(idAddress),
+                        Some(idAddr),
                         "FindYourNinoConfirmPostcode",
                         pdvData.map(_.validationStatus).getOrElse(""),
                         pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
