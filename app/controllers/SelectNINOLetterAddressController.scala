@@ -97,31 +97,47 @@ class SelectNINOLetterAddressController @Inject()(
           } yield {
             updatedAnswers.get(SelectNINOLetterAddressPage) match {
               case Some(SelectNINOLetterAddress.NotThisAddress) =>
+                for {
+                  idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
+                } yield idAddress match {
+                  case Right(idAddr) =>
+                    auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
+                      Some(idAddr),
+                      "FindYourNinoOnlineLetterOption",
+                      pdvData.map(_.validationStatus).getOrElse(""),
+                      pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+                      Some(value.toString),
+                      None,
+                      None,
+                      None,
+                      None,
+                      None
+                    ))
+                }
                 Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
               case Some(SelectNINOLetterAddress.Postcode) =>
+                for {
+                  idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
+                } yield idAddress match {
+                  case Right(idAddr) =>
+                    auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
+                      Some(idAddr),
+                      "FindYourNinoOnlineLetterOption",
+                      pdvData.map(_.validationStatus).getOrElse(""),
+                      pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+                      Some(value.toString),
+                      None,
+                      None,
+                      None,
+                      None,
+                      None
+                    ))
+                }
                 status match {
                   case LetterIssuedResponse() =>
-                    for {
-                      pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY))
-                      idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(request.session.data.getOrElse("nino", StringUtils.EMPTY)))
-                    } yield (pdvData, idAddress) match {
-                      case (pdvData, Right(idAddress)) =>
-                        auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
-                          Some(idAddress),
-                          "FindYourNinoOnlineLetterOption",
-                          pdvData.map(_.validationStatus).getOrElse(""),
-                          pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
-                          Some(value.toString),
-                          None,
-                          None,
-                          None,
-                          None,
-                          None
-                        ))
-                    }
                     Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
                   case RLSDLONFAResponse(responseStatus, responseMessage) =>
-                    personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY)).onComplete {
+                    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
                       case Success(pdv) =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                           None,
@@ -139,7 +155,7 @@ class SelectNINOLetterAddressController @Inject()(
                     }
                     Redirect(routes.SendLetterErrorController.onPageLoad(mode))
                   case TechnicalIssueResponse(responseStatus, responseMessage) =>
-                    personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY)).onComplete {
+                    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
                       case Success(pdv) =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                           None,
