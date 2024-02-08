@@ -89,104 +89,96 @@ class SelectNINOLetterAddressController @Inject()(
           } yield BadRequest(view(formWithErrors, mode, postCode)),
 
         value => {
-
-          val updatedAnswers = Future.fromTry(request.userAnswers.set(SelectNINOLetterAddressPage, value))
-          val sessionFuture = updatedAnswers.flatMap(sessionRepository.set)
-
-          sessionFuture.flatMap { _ =>
-            updatedAnswers.flatMap { updatedAnswers =>
-
-              for {
-                pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
-                status <- npsFMNService.sendLetter(nino, getNPSFMNRequest(pdvData))
-              } yield {
-                updatedAnswers.get(SelectNINOLetterAddressPage) match {
-                  case Some(SelectNINOLetterAddress.NotThisAddress) =>
-                    for {
-                      idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
-                    } yield idAddress match {
-                      case Right(idAddr) =>
-                        auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
-                          Some(idAddr),
-                          "FindYourNinoOnlineLetterOption",
-                          pdvData.map(_.validationStatus).getOrElse(""),
-                          pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
-                          Some(value.toString),
-                          None,
-                          None,
-                          None,
-                          None,
-                          None
-                        ))
-                    }
-                    Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
-                  case Some(SelectNINOLetterAddress.Postcode) =>
-                    for {
-                      idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
-                    } yield idAddress match {
-                      case Right(idAddr) =>
-                        auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
-                          Some(idAddr),
-                          "FindYourNinoOnlineLetterOption",
-                          pdvData.map(_.validationStatus).getOrElse(""),
-                          pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
-                          Some(value.toString),
-                          None,
-                          None,
-                          None,
-                          None,
-                          None
-                        ))
-                    }
-                    status match {
-                      case LetterIssuedResponse() =>
-                        Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
-                      case RLSDLONFAResponse(responseStatus, responseMessage) =>
-                        personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
-                          case Success(pdv) =>
-                            auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
-                              None,
-                              "FindYourNinoError",
-                              pdv.map(_.validationStatus).getOrElse(""),
-                              pdv.map(_.CRN.getOrElse("")).getOrElse(""),
-                              None,
-                              None,
-                              None,
-                              Some("/postcode"),
-                              Some(responseStatus.toString),
-                              Some(responseMessage)
-                            ))
-                          case Failure(ex) => logger.warn(ex.getMessage)
-                        }
-                        Redirect(routes.SendLetterErrorController.onPageLoad(mode))
-                      case TechnicalIssueResponse(responseStatus, responseMessage) =>
-                        personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
-                          case Success(pdv) =>
-                            auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
-                              None,
-                              "FindYourNinoError",
-                              pdv.map(_.validationStatus).getOrElse(""),
-                              pdv.map(_.CRN.getOrElse("")).getOrElse(""),
-                              None,
-                              None,
-                              None,
-                              Some("/postcode"),
-                              Some(responseStatus.toString),
-                              Some(responseMessage)
-                            ))
-                          case Failure(ex) => logger.warn(ex.getMessage)
-                        }
-                        Redirect(routes.TechnicalErrorController.onPageLoad())
-                      case _ =>
-                        logger.warn("Unknown NPS FMN API response")
-                        Redirect(routes.TechnicalErrorController.onPageLoad())
-                    }
+          for {
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectNINOLetterAddressPage, value))
+            _ <- sessionRepository.set(updatedAnswers)
+            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
+          } yield {
+            updatedAnswers.get(SelectNINOLetterAddressPage) match {
+              case Some(SelectNINOLetterAddress.NotThisAddress) =>
+                for {
+                  idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
+                } yield idAddress match {
+                  case Right(idAddr) =>
+                    auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
+                      Some(idAddr),
+                      "FindYourNinoOnlineLetterOption",
+                      pdvData.map(_.validationStatus).getOrElse(""),
+                      pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+                      Some(value.toString),
+                      None,
+                      None,
+                      None,
+                      None,
+                      None
+                    ))
                 }
-              }
-            }
+                Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers)))
+              case Some(SelectNINOLetterAddress.Postcode) =>
+                for {
+                  idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
+                } yield idAddress match {
+                  case Right(idAddr) =>
+                    auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
+                      Some(idAddr),
+                      "FindYourNinoOnlineLetterOption",
+                      pdvData.map(_.validationStatus).getOrElse(""),
+                      pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+                      Some(value.toString),
+                      None,
+                      None,
+                      None,
+                      None,
+                      None
+                    ))
+                }
 
+                npsFMNService.sendLetter(nino, getNPSFMNRequest(pdvData)).map {
+                  case LetterIssuedResponse() =>
+                    Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
+                  case RLSDLONFAResponse(responseStatus, responseMessage) =>
+                    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
+                      case Success(pdv) =>
+                        auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+                          None,
+                          "FindYourNinoError",
+                          pdv.map(_.validationStatus).getOrElse(""),
+                          pdv.map(_.CRN.getOrElse("")).getOrElse(""),
+                          None,
+                          None,
+                          None,
+                          Some("/postcode"),
+                          Some(responseStatus.toString),
+                          Some(responseMessage)
+                        ))
+                      case Failure(ex) => logger.warn(ex.getMessage)
+                    }
+                    Redirect(routes.SendLetterErrorController.onPageLoad(mode))
+                  case TechnicalIssueResponse(responseStatus, responseMessage) =>
+                    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
+                      case Success(pdv) =>
+                        auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+                          None,
+                          "FindYourNinoError",
+                          pdv.map(_.validationStatus).getOrElse(""),
+                          pdv.map(_.CRN.getOrElse("")).getOrElse(""),
+                          None,
+                          None,
+                          None,
+                          Some("/postcode"),
+                          Some(responseStatus.toString),
+                          Some(responseMessage)
+                        ))
+                      case Failure(ex) => logger.warn(ex.getMessage)
+                    }
+                    Redirect(routes.TechnicalErrorController.onPageLoad())
+                  case _ =>
+                    logger.warn("Unknown NPS FMN API response")
+                    Redirect(routes.TechnicalErrorController.onPageLoad())
+                }
+            }
           }
-        }
+        }.flatten
       )
   }
 
