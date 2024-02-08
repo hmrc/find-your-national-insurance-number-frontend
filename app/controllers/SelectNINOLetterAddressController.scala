@@ -46,30 +46,30 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class SelectNINOLetterAddressController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       sessionRepository: SessionRepository,
-                                       navigator: Navigator,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
-                                       formProvider: SelectNINOLetterAddressFormProvider,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: SelectNINOLetterAddressView,
-                                       personalDetailsValidationService: PersonalDetailsValidationService,
-                                       auditService: AuditService,
-                                       npsFMNService: NPSFMNService,
-                                       individualDetailsConnector: IndividualDetailsConnector,
-                                       appConfig: FrontendAppConfig
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+                                                   override val messagesApi: MessagesApi,
+                                                   sessionRepository: SessionRepository,
+                                                   navigator: Navigator,
+                                                   identify: IdentifierAction,
+                                                   getData: DataRetrievalAction,
+                                                   requireData: DataRequiredAction,
+                                                   formProvider: SelectNINOLetterAddressFormProvider,
+                                                   val controllerComponents: MessagesControllerComponents,
+                                                   view: SelectNINOLetterAddressView,
+                                                   personalDetailsValidationService: PersonalDetailsValidationService,
+                                                   auditService: AuditService,
+                                                   npsFMNService: NPSFMNService,
+                                                   individualDetailsConnector: IndividualDetailsConnector,
+                                                   appConfig: FrontendAppConfig
+                                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[SelectNINOLetterAddress] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val preparedForm = request.userAnswers.get(SelectNINOLetterAddressPage) match {
-          case None => form
-          case Some(value) => form.fill(value)
-        }
+        case None => form
+        case Some(value) => form.fill(value)
+      }
 
       for {
         pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", ""))
@@ -93,7 +93,6 @@ class SelectNINOLetterAddressController @Inject()(
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectNINOLetterAddressPage, value))
             _ <- sessionRepository.set(updatedAnswers)
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
-            status <- npsFMNService.sendLetter(nino, getNPSFMNRequest(pdvData))
           } yield {
             updatedAnswers.get(SelectNINOLetterAddressPage) match {
               case Some(SelectNINOLetterAddress.NotThisAddress) =>
@@ -114,7 +113,7 @@ class SelectNINOLetterAddressController @Inject()(
                       None
                     ))
                 }
-                Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
+                Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers)))
               case Some(SelectNINOLetterAddress.Postcode) =>
                 for {
                   idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
@@ -133,7 +132,8 @@ class SelectNINOLetterAddressController @Inject()(
                       None
                     ))
                 }
-                status match {
+
+                npsFMNService.sendLetter(nino, getNPSFMNRequest(pdvData)).map {
                   case LetterIssuedResponse() =>
                     Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
                   case RLSDLONFAResponse(responseStatus, responseMessage) =>
@@ -178,7 +178,7 @@ class SelectNINOLetterAddressController @Inject()(
                 }
             }
           }
-        }
+        }.flatten
       )
   }
 
@@ -201,7 +201,7 @@ class SelectNINOLetterAddressController @Inject()(
     }
 
   def getIndividualDetailsAddress(nino: IndividualDetailsNino
-                          )(implicit ec: ExecutionContext, hc: HeaderCarrier) = {
+                                 )(implicit ec: ExecutionContext, hc: HeaderCarrier) = {
     implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
     implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
     val idAddress = for {
