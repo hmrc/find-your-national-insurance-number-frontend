@@ -99,8 +99,8 @@ class SelectNINOLetterAddressController @Inject()(
               case Some(SelectNINOLetterAddress.NotThisAddress) =>
                 for {
                   idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
-                } yield (pdvData, idAddress) match {
-                  case (pdvData, Right(idAddress)) =>
+                } yield idAddress match {
+                  case Right(idAddress) =>
                     auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
                       Some(idAddress),
                       "FindYourNinoOnlineLetterOption",
@@ -118,8 +118,8 @@ class SelectNINOLetterAddressController @Inject()(
               case Some(SelectNINOLetterAddress.Postcode) =>
                 for {
                   idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
-                } yield (pdvData, idAddress) match {
-                  case (pdvData, Right(idAddress)) =>
+                } yield idAddress match {
+                  case Right(idAddress) =>
                     auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
                       Some(idAddress),
                       "FindYourNinoOnlineLetterOption",
