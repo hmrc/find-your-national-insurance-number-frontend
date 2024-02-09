@@ -101,22 +101,22 @@ class SelectNINOLetterAddressController @Inject()(
       )
   }
 
-  private def sendLetter(nino: String, data: Option[PDVResponseData], value: String, uA: UserAnswers, mode: Mode)
+  private def sendLetter(nino: String, pdvData: Option[PDVResponseData], value: String, uA: UserAnswers, mode: Mode)
                         (implicit headerCarrier: HeaderCarrier): Future[Result] = {
-    npsFMNService.sendLetter(nino, getNPSFMNRequest(data)) map {
+    npsFMNService.sendLetter(nino, getNPSFMNRequest(pdvData)) map {
       case LetterIssuedResponse() =>
         for {
           idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
         } yield idAddress match {
           case Right(idAddress) =>
-            auditHelper.findYourNinoOnlineLetterOption(data, idAddress, value)
+            auditHelper.findYourNinoOnlineLetterOption(pdvData, idAddress, value)
         }
         Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA))
       case RLSDLONFAResponse(responseStatus, responseMessage) =>
-        auditHelper.findYourNinoError(data, responseStatus.toString, responseMessage)
+        auditHelper.findYourNinoError(pdvData, responseStatus.toString, responseMessage)
         Redirect(routes.SendLetterErrorController.onPageLoad(mode))
       case TechnicalIssueResponse(responseStatus, responseMessage) =>
-        auditHelper.findYourNinoError(data, responseStatus.toString, responseMessage)
+        auditHelper.findYourNinoError(pdvData, responseStatus.toString, responseMessage)
         Redirect(routes.TechnicalErrorController.onPageLoad())
       case _ =>
         logger.warn("Unknown NPS FMN API response")
@@ -124,14 +124,14 @@ class SelectNINOLetterAddressController @Inject()(
     }
   }
 
-  private def getPostCode(pdvResponseData: Option[PDVResponseData]): String =
-    pdvResponseData match {
+  private def getPostCode(pdvData: Option[PDVResponseData]): String =
+    pdvData match {
       case Some(pd) => pd.getPostCode
       case _ => StringUtils.EMPTY
     }
 
-  private def getNPSFMNRequest(pdvResponseData: Option[PDVResponseData]): NPSFMNRequest =
-    pdvResponseData match {
+  private def getNPSFMNRequest(pdvData: Option[PDVResponseData]): NPSFMNRequest =
+    pdvData match {
       case Some(pd) if pd.personalDetails.isDefined =>
         NPSFMNRequest(
           pd.getFirstName,
