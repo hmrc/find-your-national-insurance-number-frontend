@@ -22,6 +22,7 @@ import connectors.NPSFMNConnector
 import models.CorrelationId
 import models.nps.{LetterIssuedResponse, NPSFMNRequest, NPSFMNResponse, NPSFMNServiceResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import play.api.Logging
+import play.api.http.Status.{ACCEPTED, BAD_REQUEST}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -38,29 +39,28 @@ trait NPSFMNService {
 class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
   config: FrontendAppConfig)(implicit val ec: ExecutionContext)
   extends NPSFMNService with Logging {
-
   def sendLetter(nino: String, npsFMNRequest: NPSFMNRequest
                    )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNServiceResponse] = {
     implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
-    connector.sendLetter(nino.take(8), npsFMNRequest)
+    val takeChars: Int = 8
+
+    connector.sendLetter(nino.take(takeChars), npsFMNRequest)
       .map{ response =>
         response.status match {
-          case 202 =>
+          case ACCEPTED =>
             LetterIssuedResponse()
-          case 400 if check(response.body) =>
+          case BAD_REQUEST if check(response.body) =>
             RLSDLONFAResponse(response.status, getMessage(response.body))
           case _ =>
             TechnicalIssueResponse(response.status, getMessage(response.body))
         }
     }
   }
-
   private def getMessage(responseBody: String): String =
     (Json.parse(responseBody) \ "origin").asOpt[String] match {
       case Some(_) => (Json.parse(responseBody) \ "response" \ "jsonServiceError" \ "message").as[String]
       case _ => (Json.parse(responseBody) \ "jsonServiceError" \ "message").as[String]
     }
-
   private def check(responseBody: String):Boolean = {
     val appStatusMessageList = config.npsFMNAppStatusMessageList.split(",").toList
     val npsFMNResponse = Json.parse(responseBody).as[NPSFMNResponse]

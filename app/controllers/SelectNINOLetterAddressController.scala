@@ -20,8 +20,9 @@ import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
+import helpers.AuditHelper
 import models.individualdetails.AddressType.ResidentialAddress
-import models.individualdetails.{Address, ResolveMerge}
+import models.individualdetails.ResolveMerge
 import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.PDVResponseData
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, SelectNINOLetterAddress, UserAnswers}
@@ -33,11 +34,10 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
-import services.{AuditService, NPSFMNService, PersonalDetailsValidationService}
+import services.{NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import util.AuditUtils
 import views.html.SelectNINOLetterAddressView
 
 import java.util.UUID
@@ -56,7 +56,7 @@ class SelectNINOLetterAddressController @Inject()(
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: SelectNINOLetterAddressView,
                                                    personalDetailsValidationService: PersonalDetailsValidationService,
-                                                   auditService: AuditService,
+                                                   auditHelper: AuditHelper,
                                                    npsFMNService: NPSFMNService,
                                                    individualDetailsConnector: IndividualDetailsConnector,
                                                    appConfig: FrontendAppConfig
@@ -79,6 +79,7 @@ class SelectNINOLetterAddressController @Inject()(
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val nino = request.session.data.getOrElse("nino", StringUtils.EMPTY)
+
       personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).flatMap(data =>
         form.bindFromRequest().fold(
           formWithErrors =>
@@ -108,51 +109,19 @@ class SelectNINOLetterAddressController @Inject()(
           idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
         } yield idAddress match {
           case Right(idAddress) =>
-            auditWithAddress(data, idAddress, value)
+            auditHelper.findYourNinoOnlineLetterOption(data, idAddress, value)
         }
         Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA))
       case RLSDLONFAResponse(responseStatus, responseMessage) =>
-        auditOnError(data, responseStatus.toString, responseMessage)
+        auditHelper.findYourNinoError(data, responseStatus.toString, responseMessage)
         Redirect(routes.SendLetterErrorController.onPageLoad(mode))
       case TechnicalIssueResponse(responseStatus, responseMessage) =>
-        auditOnError(data, responseStatus.toString, responseMessage)
+        auditHelper.findYourNinoError(data, responseStatus.toString, responseMessage)
         Redirect(routes.TechnicalErrorController.onPageLoad())
       case _ =>
         logger.warn("Unknown NPS FMN API response")
         Redirect(routes.TechnicalErrorController.onPageLoad())
     }
-  }
-
-  private def auditWithAddress(data: Option[PDVResponseData], idAddress: Address, value: String)
-                              (implicit headerCarrier: HeaderCarrier): Unit = {
-    auditService.audit(AuditUtils.buildAuditEvent(data.flatMap(_.personalDetails),
-      Some(idAddress),
-      "FindYourNinoOnlineLetterOption",
-      data.map(_.validationStatus).getOrElse(""),
-      data.map(_.CRN.getOrElse("")).getOrElse(""),
-      Some(value.toString),
-      None,
-      None,
-      None,
-      None,
-      None
-    ))
-  }
-
-  private def auditOnError(data: Option[PDVResponseData], responseStatus: String, responseMessage: String)
-                          (implicit headerCarrier: HeaderCarrier): Unit = {
-    auditService.audit(AuditUtils.buildAuditEvent(data.flatMap(_.personalDetails),
-      None,
-      "FindYourNinoError",
-      data.map(_.validationStatus).getOrElse(""),
-      data.map(_.CRN.getOrElse("")).getOrElse(""),
-      None,
-      None,
-      None,
-      Some("/postcode"),
-      Some(responseStatus),
-      Some(responseMessage)
-    ))
   }
 
   private def getPostCode(pdvResponseData: Option[PDVResponseData]): String =
@@ -173,7 +142,7 @@ class SelectNINOLetterAddressController @Inject()(
       case _ => NPSFMNRequest.empty
     }
 
-  def getIndividualDetailsAddress(nino: IndividualDetailsNino
+  private def getIndividualDetailsAddress(nino: IndividualDetailsNino
                                  )(implicit ec: ExecutionContext, hc: HeaderCarrier) = {
     implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
     implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
