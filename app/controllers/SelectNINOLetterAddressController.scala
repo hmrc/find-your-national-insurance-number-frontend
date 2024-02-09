@@ -80,10 +80,10 @@ class SelectNINOLetterAddressController @Inject()(
     implicit request =>
       val nino = request.session.data.getOrElse("nino", StringUtils.EMPTY)
 
-      personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).flatMap(data =>
+      personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).flatMap(pdvData =>
         form.bindFromRequest().fold(
           formWithErrors =>
-            Future.successful(BadRequest(view(formWithErrors, mode, getPostCode(data)))),
+            Future.successful(BadRequest(view(formWithErrors, mode, getPostCode(pdvData)))),
           value => {
             request.userAnswers.set(SelectNINOLetterAddressPage, value) match {
               case Failure(_) => Future.successful(Redirect(routes.TechnicalErrorController.onPageLoad()))
@@ -93,7 +93,7 @@ class SelectNINOLetterAddressController @Inject()(
                   case Some(SelectNINOLetterAddress.NotThisAddress) =>
                     Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA)))
                   case Some(SelectNINOLetterAddress.Postcode) =>
-                    sendLetter(nino, data, value.toString, uA, mode)
+                    sendLetter(nino, pdvData, value.toString, uA, mode)
                 }
             }
           }
