@@ -65,7 +65,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
     )),
     validCustomer = Some("true"),
     CRN = Some("fakeCRN"),
-    npsPostCode = Some("AA1 1AA"),
+    npsPostCode = Some("AA1 1  AA"),
     reason = None
   )
 
@@ -75,7 +75,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
     personalDetails = None,
     validCustomer = Some("true"),
     CRN = Some("fakeCRN"),
-    npsPostCode = Some("AA1 1AA"),
+    npsPostCode = Some("AA1 1  AA"),
     reason = None
   )
 

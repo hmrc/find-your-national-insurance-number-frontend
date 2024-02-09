@@ -37,6 +37,7 @@ import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.AuditUtils
+import util.FMNHelper.comparePostCode
 
 import java.util.UUID
 import javax.inject.Inject
@@ -108,8 +109,7 @@ class CheckDetailsController @Inject()(
                 if (api1694Checks._1) {
                   val idPostCode = getNPSPostCode(idData)
                   if (pdvData.getPostCode.nonEmpty) {
-                    // Matched with Postcode
-                    if (idPostCode.equals(pdvData.getPostCode)) {
+                    if (comparePostCode(idPostCode,pdvData.getPostCode)) {
                       logger.info(s"PDV and API 1694 postcodes matched")
                       Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
                     } else {
@@ -153,6 +153,9 @@ class CheckDetailsController @Inject()(
       }
     }
   }
+
+
+
 
   private def getIdData(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
     getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {

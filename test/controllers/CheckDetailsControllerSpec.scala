@@ -205,7 +205,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       }
       "when idPostCode does not equal pdvData.getPostCode" in {
         val fakeIndividualDetailsWithMatchingPostcode = fakeIndividualDetails.copy(
-          addressList = AddressList(Some(List(fakeAddress.copy(addressPostcode = Some(AddressPostcode("AA1 2AA"))))))
+          addressList = AddressList(Some(List(fakeAddress.copy(addressPostcode = Some(AddressPostcode("  A A1 2AA   "))))))
         )
 
         when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
@@ -229,6 +229,10 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
         }
       }
+
+
+
+
       "when AccountStatusType is not FullLive" in {
         val fakeIndividualDetailsWithConditionsNotMet = fakeIndividualDetails.copy(
           accountStatusType = Some(AccountStatusType.Redundant)
