@@ -38,6 +38,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ConfirmYourPostcodeView
 import util.AuditUtils
+import util.FMNHelper.comparePostCode
 
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
@@ -78,15 +79,15 @@ class ConfirmYourPostcodeController @Inject()(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
-        value => {
+        userEnteredPostCode => {
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmYourPostcodePage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmYourPostcodePage, userEnteredPostCode))
             _ <- sessionRepository.set(updatedAnswers)
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", ""))
             idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(request.session.data.getOrElse("nino", "")))
             redirectBasedOnMatch <- pdvData match {
               case Some(pdvValidData) => pdvValidData.npsPostCode match {
-                case Some(npsPostCode) if npsPostCode.equalsIgnoreCase(value) =>
+                case Some(npsPostCode) if comparePostCode(npsPostCode,userEnteredPostCode) =>
                   idAddress match {
                     case Right(idAddr) =>
                       auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
@@ -95,7 +96,7 @@ class ConfirmYourPostcodeController @Inject()(
                         pdvData.map(_.validationStatus).getOrElse(""),
                         pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
                         None,
-                        Some(value),
+                        Some(userEnteredPostCode),
                         Some("true"),
                         None,
                         None,
@@ -110,7 +111,7 @@ class ConfirmYourPostcodeController @Inject()(
                     pdvData.map(_.validationStatus).getOrElse(""),
                     pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
                     None,
-                    Some(value),
+                    Some(userEnteredPostCode),
                     Some("false"),
                     None,
                     None,
@@ -124,7 +125,7 @@ class ConfirmYourPostcodeController @Inject()(
                     pdvData.map(_.validationStatus).getOrElse(""),
                     pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
                     None,
-                    Some(value),
+                    Some(userEnteredPostCode),
                     Some("false"),
                     None,
                     None,
