@@ -28,6 +28,6 @@ object FMNHelper {
 
   def splitPostCode(postCode: String): String = {
     val withoutSpaces = removeSpaces(postCode)
-    withoutSpaces.patch(withoutSpaces.length - 3, " ", 0)
+    withoutSpaces.patch(withoutSpaces.length - 3, " ", 0).toUpperCase
   }
 }
