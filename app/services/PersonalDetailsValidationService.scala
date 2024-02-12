@@ -69,13 +69,12 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
   }
 
   //add a function to update the PDV data row with the a validationStatus which is boolean value
-  def updatePDVDataRowWithValidationStatus(validationId: String, validationStatus: Boolean, reason:String): Future[Boolean] = {
-    personalDetailsValidationRepository.updateCustomerValidityWithReason(validationId, validationStatus, reason) map {
+  def updatePDVDataRowWithValidationStatus(nino: String, validationStatus: Boolean, reason:String): Future[Boolean] = {
+    personalDetailsValidationRepository.updateCustomerValidityWithReason(nino, validationStatus, reason) map {
       case str:String =>if(str.length > 8) true else false
       case _ => false
     } recover {
       case e: MongoException => {
-        logger.warn(s"Failed updating PDV data row for validation id: $validationId, ${e.getMessage}")
         false
       }
     }

@@ -71,7 +71,7 @@ class PersonalDetailsValidationRepositorySpec
         )
 
         val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
-        result mustBe "id"
+        result mustBe "AB123456C"
       }
 
       "must insert or replace the PDVResultData when the PDVResultData already exists" in {
@@ -90,7 +90,7 @@ class PersonalDetailsValidationRepositorySpec
         )
 
         val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
-        result mustBe "id"
+        result mustBe "AB123456C"
 
         val pdvResultData2 = PDVResponseData(
           id = "id",
@@ -107,7 +107,7 @@ class PersonalDetailsValidationRepositorySpec
         )
 
         val result2 = repository.insertOrReplacePDVResultData(pdvResultData2).futureValue
-        result2 mustBe "id"
+        result2 mustBe "AB123456C"
 
       }
 
@@ -131,10 +131,10 @@ class PersonalDetailsValidationRepositorySpec
         )
 
         val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
-        result mustBe "id"
+        result mustBe "AB123456C"
 
-        val result2 = repository.updateCustomerValidityWithReason("id", validCustomer = true, "reason").futureValue
-        result2 mustBe "id"
+        val result2 = repository.updateCustomerValidityWithReason("AB123456C", validCustomer = true, "reason").futureValue
+        result2 mustBe "AB123456C"
       }
     }
 
@@ -156,7 +156,7 @@ class PersonalDetailsValidationRepositorySpec
         )
 
         val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
-        result mustBe "id"
+        result mustBe "AB123456C"
 
         val result2 = repository.updatePDVDataWithNPSPostCode("AB123456C", "npsPostCode").futureValue
         result2 mustBe "AB123456C"
@@ -181,7 +181,7 @@ class PersonalDetailsValidationRepositorySpec
           )
 
           val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
-          result mustBe "id"
+          result mustBe "AB123456C"
 
           val result2 = repository.findByValidationId("id").futureValue
           result2.value.personalDetails mustBe pdvResultData.personalDetails
@@ -213,7 +213,7 @@ class PersonalDetailsValidationRepositorySpec
           )
 
           val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
-          result mustBe "id"
+          result mustBe "AB123456C"
 
           val result2 = repository.findByNino("AB123456C").futureValue
           result2.value.personalDetails mustBe pdvResultData.personalDetails
