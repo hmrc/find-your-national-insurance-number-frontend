@@ -18,14 +18,14 @@ package connectors
 
 import config.FrontendAppConfig
 import models._
-import models.nps.{NPSFMNRequest}
+import models.nps.NPSFMNRequest
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.libs.json.Json
 import play.api.test.{DefaultAwaitTimeout, Injecting}
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.client.HttpClientV2
-import util.WireMockHelper
+import base.WireMockHelper
 
 import java.util.UUID
 import scala.util.Random
