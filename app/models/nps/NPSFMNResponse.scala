@@ -17,6 +17,7 @@
 package models.nps
 
 import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.http.HttpResponse
 
 case class AppStatusMessageList(appStatusMessage: List[String] = List.empty)
 case class JsonServiceError(
@@ -29,15 +30,33 @@ case class Response(jsonServiceError: JsonServiceError)
 
 case class NPSFMNResponse(origin: String, response: Response)
 
+
+case class Failure(`type`: String, reason: String)
+object Failure {
+  implicit val format: Format[Failure] = Json.format[Failure]
+}
+
+case class ResponseWithFailures(failures: List[Failure])
+object ResponseWithFailures {
+  implicit val format: Format[ResponseWithFailures] = Json.format[ResponseWithFailures]
+}
+
+case class NPSFMNResponseWithFailures(origin: String, response: ResponseWithFailures)
+object NPSFMNResponseWithFailures {
+  implicit val format: Format[NPSFMNResponseWithFailures] = Json.format[NPSFMNResponseWithFailures]
+}
+
+
 object NPSFMNResponse {
   implicit val appStatusMessageListformat: Format[AppStatusMessageList] = Json.format[AppStatusMessageList]
   implicit val jsonServiceErrorformat: Format[JsonServiceError] = Json.format[JsonServiceError]
   implicit val jsonResponse: Format[Response] = Json.format[Response]
   implicit val npsFMNResponseformat: Format[NPSFMNResponse] = Json.format[NPSFMNResponse]
+  implicit val failureFormat: Format[Failure] = Json.format[Failure]
 }
 
 sealed trait NPSFMNServiceResponse
 final case class LetterIssuedResponse() extends NPSFMNServiceResponse
 final case class RLSDLONFAResponse(status: Int, message: String) extends NPSFMNServiceResponse
 final case class TechnicalIssueResponse(status: Int, message: String) extends NPSFMNServiceResponse
-
+final case class FailureResponse(failures: List[Failure]) extends NPSFMNServiceResponse
