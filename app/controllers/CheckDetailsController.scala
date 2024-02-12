@@ -16,30 +16,19 @@
 
 package controllers
 
-import config.FrontendAppConfig
-import connectors.IndividualDetailsConnector
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
-import models.errors.{ConnectorError, IndividualDetailsError}
-import models.individualdetails.AccountStatusType._
-import models.individualdetails.AddressStatus._
-import models.individualdetails.AddressType._
-import models.individualdetails.CrnIndicator._
-import models.individualdetails.{Address, AddressList, IndividualDetails, ResolveMerge}
-import models.pdv.{PDVRequest, PDVResponseData}
-import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode}
+import models.errors.ConnectorError
+import models.pdv.PDVRequest
+import models.Mode
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import services.{AuditService, PersonalDetailsValidationService}
+import services.{AuditService, CheckDetailsService, PersonalDetailsValidationService}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
-import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.AuditUtils
 import util.FMNHelper.comparePostCode
 
-import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -51,10 +40,10 @@ class CheckDetailsController @Inject()(
                                         requireData: DataRequiredAction,
                                         personalDetailsValidationService: PersonalDetailsValidationService,
                                         auditService: AuditService,
-                                        individualDetailsConnector: IndividualDetailsConnector,
+                                        checkDetailsService: CheckDetailsService,
                                         val controllerComponents: MessagesControllerComponents,
                                         val authConnector: AuthConnector
-                                      )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
+                                      )(implicit ec: ExecutionContext)
   extends FrontendBaseController with AuthorisedFunctions with I18nSupport with Logging {
   
   def onPageLoad(origin: Option[String], mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -71,8 +60,8 @@ class CheckDetailsController @Inject()(
 
           val result: Try[Future[Result]] = Try {
             val processData = for {
-              pdvData <- getPDVData(pdvRequest)
-              idData <- getIdData(pdvData)
+              pdvData <- checkDetailsService.getPDVData(pdvRequest)
+              idData <- checkDetailsService.getIdData(pdvData)
             } yield (pdvData, idData) match {
 
               case (pdvData, Left(idData)) =>
@@ -103,11 +92,11 @@ class CheckDetailsController @Inject()(
                 auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
                   pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
 
-                val api1694Checks = checkConditions(idData)
+                val api1694Checks = checkDetailsService.checkConditions(idData)
                 personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.getNino, api1694Checks._1, api1694Checks._2)
 
                 if (api1694Checks._1) {
-                  val idPostCode = getNPSPostCode(idData)
+                  val idPostCode = checkDetailsService.getNPSPostCode(idData)
                   if (pdvData.getPostCode.nonEmpty) {
                     if (comparePostCode(idPostCode,pdvData.getPostCode)) {
                       logger.info(s"PDV and API 1694 postcodes matched")
@@ -152,78 +141,6 @@ class CheckDetailsController @Inject()(
 
       }
     }
-  }
-
-
-
-
-  private def getIdData(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
-    getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
-      case Some(data) => data.nino.nino
-      case None =>
-        logger.warn("No Personal Details found in PDV data, likely validation failed")
-        ""
-    })).value
-  }
-
-  private def getIndividualDetails(nino: IndividualDetailsNino
-                          )(implicit ec: ExecutionContext, hc: HeaderCarrier): IndividualDetailsResponseEnvelope[IndividualDetails] = {
-    implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
-    implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
-    IndividualDetailsResponseEnvelope.fromEitherF(individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y')).value)
-  }
-
-  /**
-   * This method will create a PDV data row from the PDV Match data and return the rowId and PDV data
-   *
-   * @param validationId
-   * @param hc
-   * @returns Future (rowdId and PDV data)
-   */
-  private def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponseData] = {
-    val p = for {
-      pdvData <- personalDetailsValidationService.createPDVDataFromPDVMatch(body)
-    } yield pdvData match {
-      case data: PDVResponseData => data //returning a tuple of rowId and PDV data
-      case _ => throw new Exception("No PDV data found")
-    }
-    p.recover {
-      case ex: HttpException =>
-        auditService.audit(AuditUtils.buildAuditEvent(None, None, "FindYourNinoError",
-          "", "", None, None, None, Some("/checkDetails"), Some(ex.responseCode.toString), Some(ex.message)))
-        logger.debug(ex.getMessage)
-        throw ex
-    }
-  }
-
-  private def getNPSPostCode(idData: IndividualDetails): String =
-    getAddressTypeResidential(idData.addressList).addressPostcode.map(_.value).getOrElse("")
-
-  private def getAddressTypeResidential(addressList: AddressList): Address = {
-    val residentialAddress = addressList.getAddress.filter(_.addressType.equals(ResidentialAddress))
-    residentialAddress.head
-  }
-
-  private def checkConditions(idData: IndividualDetails): (Boolean, String) = {
-    var reason = ""
-
-    if (!idData.accountStatusType.exists(_.equals(FullLive))) {
-      reason += "AccountStatusType is not FullLive;"
-    }
-    if (idData.crnIndicator.equals(True)) {
-      reason += "CRN;"
-    }
-    if (!getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo))) {
-      reason += "ResidentialAddressStatus is Dlo or Nfa;"
-    }
-
-    val status = {
-      idData.accountStatusType.exists(_.equals(FullLive)) &&
-        idData.crnIndicator.equals(False) &&
-        getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo))
-    }
-
-    (status, reason)
   }
 
 }
