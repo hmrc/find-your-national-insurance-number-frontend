@@ -25,4 +25,9 @@ object FMNHelper {
   def comparePostCode(pdvPostCode:String, npsPostCode:String): Boolean = {
     removeSpaces(pdvPostCode).equalsIgnoreCase(removeSpaces(npsPostCode))
   }
+
+  def splitPostCode(postCode: String): String = {
+    val withoutSpaces = removeSpaces(postCode)
+    withoutSpaces.patch(withoutSpaces.length - 3, " ", 0)
+  }
 }

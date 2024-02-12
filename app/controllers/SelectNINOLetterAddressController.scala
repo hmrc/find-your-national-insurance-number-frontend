@@ -39,6 +39,7 @@ import play.api.data.Form
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
 import util.AuditUtils
+import util.FMNHelper.splitPostCode
 
 import java.util.UUID
 import javax.inject.Inject
@@ -195,7 +196,7 @@ class SelectNINOLetterAddressController @Inject()(
           pd.getFirstName,
           pd.getLastName,
           pd.getDateOfBirth,
-          pd.getPostCode
+          splitPostCode(pd.getPostCode)
         )
       case _ => NPSFMNRequest.empty
     }

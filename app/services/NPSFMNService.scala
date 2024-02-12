@@ -20,7 +20,7 @@ import com.google.inject.ImplementedBy
 import config.FrontendAppConfig
 import connectors.NPSFMNConnector
 import models.CorrelationId
-import models.nps.{LetterIssuedResponse, NPSFMNRequest, NPSFMNResponse, NPSFMNServiceResponse, RLSDLONFAResponse, TechnicalIssueResponse}
+import models.nps.{FailureResponse, LetterIssuedResponse, NPSFMNRequest, NPSFMNResponse, NPSFMNResponseWithFailures, NPSFMNServiceResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import play.api.Logging
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
@@ -45,10 +45,19 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
     connector.sendLetter(nino.take(8), npsFMNRequest)
       .map{ response =>
         response.status match {
-          case 202 =>
-            LetterIssuedResponse()
-          case 400 if check(response.body) =>
-            RLSDLONFAResponse(response.status, getMessage(response.body))
+          case 202 => LetterIssuedResponse()
+          case 400 =>
+            if(checkFailure(response.body) == true) {
+              val npsFMNResponse = Json.parse(response.body).as[NPSFMNResponseWithFailures]
+              logger.info("************************************  service postcode response 400  ************************************ response: " + response.body)
+              FailureResponse(npsFMNResponse.response.failures)
+            } else {
+              if (check(response.body)) {
+                logger.info("************************************  service postcode response 400  ************************************ response: " + response.body)
+                RLSDLONFAResponse(response.status, getMessage(response.body))
+              } else
+                TechnicalIssueResponse(response.status, getMessage(response.body))
+            }
           case _ =>
             TechnicalIssueResponse(response.status, getMessage(response.body))
         }
@@ -61,13 +70,18 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
       case _ => (Json.parse(responseBody) \ "jsonServiceError" \ "message").as[String]
     }
 
+
   private def check(responseBody: String):Boolean = {
-    val appStatusMessageList = config.npsFMNAppStatusMessageList.split(",").toList
-    val npsFMNResponse = Json.parse(responseBody).as[NPSFMNResponse]
-    npsFMNResponse.response.jsonServiceError.appStatusMessageList.appStatusMessage match {
-      case message :: Nil => appStatusMessageList.contains(message)
-      case _ => false
+      val appStatusMessageList = config.npsFMNAppStatusMessageList.split(",").toList
+      val npsFMNResponse = Json.parse(responseBody).as[NPSFMNResponse]
+      npsFMNResponse.response.jsonServiceError.appStatusMessageList.appStatusMessage match {
+        case message :: Nil => appStatusMessageList.contains(message)
+        case _ => false
+      }
     }
+  private def checkFailure(responseBody: String):Boolean = {
+    if(responseBody.contains("failures")) true else false
   }
+
 
 }

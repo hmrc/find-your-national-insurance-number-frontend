@@ -19,13 +19,13 @@ package services
 import config.FrontendAppConfig
 import connectors.DefaultNPSFMNConnector
 import models.CorrelationId
-import models.nps.{LetterIssuedResponse, NPSFMNRequest, TechnicalIssueResponse}
+import models.nps._
+import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar
+import org.mockito.MockitoSugar.mock
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
-import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.mock
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, NOT_IMPLEMENTED}
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -34,16 +34,17 @@ import util.AnyValueTypeMatcher.anyValueType
 import scala.concurrent.Future
 import scala.util.Random
 
-class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach{
+class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
 
   import NPSFMNServiceSpec._
+
   override def beforeEach(): Unit = {
     reset(mockConnector, mockFrontendAppConfig)
   }
 
   "NPSFMNServiceImpl.sendLetter" must {
 
-    "sendLetter return true when connector returns 202" in {
+    "return Letter issued response when connector returns 202" in {
       when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
         .thenReturn(Future.successful(HttpResponse(202, "")))
 
@@ -52,7 +53,7 @@ class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar wi
       }
     }
 
-    "sendLetter return false when connector returns 404" in {
+    "return TechnicalIssueResponse with NOT_FOUND when connector returns 404" in {
       when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
         .thenReturn(Future.successful(HttpResponse(NOT_FOUND, NotfoundObject)))
 
@@ -62,7 +63,7 @@ class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar wi
 
     }
 
-    "sendLetter return false when connector returns 500" in {
+    "return TechnicalIssueResponse with INTERNAL_SERVER_ERROR when connector returns 500" in {
       when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
         .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, InternalServerErrorObject)))
 
@@ -71,12 +72,51 @@ class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar wi
       }
     }
 
-    "sendLetter return false when connector returns 501" in {
+    "return TechnicalIssueResponse with NOT_IMPLEMENTED when connector returns 501" in {
       when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
         .thenReturn(Future.successful(HttpResponse(NOT_IMPLEMENTED, NotImplementedObject)))
 
       npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
         result mustBe TechnicalIssueResponse(NOT_IMPLEMENTED, "NOT_IMPLEMENTED")
+      }
+    }
+
+
+    "return FailureResponse when connector returns 400 and response body contains 'failures'" in {
+      when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
+        .thenReturn(Future.successful(HttpResponse(400, failureResponseBody)))
+
+      npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
+        result mustBe FailureResponse(List(Failure("some type", "some reason")))
+      }
+    }
+
+    "return RLSDLONFAResponse when connector returns 400 and response body does not contain 'failures' but passes check" in {
+      when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
+        .thenReturn(Future.successful(HttpResponse(400, RLSDLONFAResponseBody)))
+
+      npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
+        result mustBe TechnicalIssueResponse(400, "BAD_REQUEST")
+      }
+    }
+
+    "return TechnicalIssueResponse when connector returns 400 and response body does not contain 'failures' and does not pass check" in {
+      when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
+        .thenReturn(Future.successful(HttpResponse(400, someOtherErrorResponseBody)))
+
+      npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
+        result mustBe TechnicalIssueResponse(400, "SOME_OTHER_ERROR")
+      }
+    }
+
+
+
+    "return TechnicalIssueResponse when response body does not contain 'failures' and there are no messages" in {
+      when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
+        .thenReturn(Future.successful(HttpResponse(400, someOtherErrorResponseBody )))
+
+      npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
+        result mustBe TechnicalIssueResponse(400, "SOME_OTHER_ERROR")
       }
     }
 
@@ -148,4 +188,56 @@ object NPSFMNServiceSpec {
        |  }
        |}
        |""".stripMargin
+
+
+  val RLSDLONFAResponseBody =
+    """
+      {
+        "origin": "HoD",
+        "response": {
+          "jsonServiceError": {
+            "requestURL": "/itmp/find-my-nino/api/v1/individual/AA123456A",
+            "message": "BAD_REQUEST",
+            "appStatusMessageCount": 1,
+            "appStatusMessageList": {
+              "appStatusMessage": [
+                "63472"
+              ]
+            }
+          }
+        }
+      }
+    """
+
+  val someOtherErrorResponseBody =
+    """
+      {
+        "origin": "HIP",
+        "response": {
+          "jsonServiceError": {
+            "requestURL": "/itmp/find-my-nino/api/v1/individual/AA123456A",
+            "message": "SOME_OTHER_ERROR",
+            "appStatusMessageCount": 1,
+            "appStatusMessageList": {
+              "appStatusMessage": [
+
+              ]
+            }
+          }
+        }
+      }
+    """
+  val failureResponseBody =
+    """
+      {
+        "origin": "HIP",
+        "response": {
+          "failures": [
+            {
+              "type": "some type",
+              "reason": "some reason"
+            }
+          ]
+        }
+      } """
 }
