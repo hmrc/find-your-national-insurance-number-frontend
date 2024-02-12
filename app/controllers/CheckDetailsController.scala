@@ -104,7 +104,7 @@ class CheckDetailsController @Inject()(
                   pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
 
                 val api1694Checks = checkConditions(idData)
-                personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.id, api1694Checks._1, api1694Checks._2)
+                personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.getNino, api1694Checks._1, api1694Checks._2)
 
                 if (api1694Checks._1) {
                   val idPostCode = getNPSPostCode(idData)

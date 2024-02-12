@@ -68,7 +68,7 @@ class PDVResponseRepositoryISpec
 
         insert(encrypt(pdvResponseData, mockAppConfig.encryptionKey)).futureValue
 
-        repository.updateCustomerValidityWithReason(pdvResponseData.id, validCustomer = true, "Valid Reason").futureValue
+        repository.updateCustomerValidityWithReason(pdvResponseData.getNino, validCustomer = true, "Valid Reason").futureValue
 
         val result = repository.findByValidationId(pdvResponseData.id).futureValue
 
@@ -83,7 +83,7 @@ class PDVResponseRepositoryISpec
 
         insert(encrypt(pdvResponseData, mockAppConfig.encryptionKey)).futureValue
 
-        repository.updateCustomerValidityWithReason(pdvResponseData.id, validCustomer = false, "Invalid Reason").futureValue
+        repository.updateCustomerValidityWithReason(pdvResponseData.getNino, validCustomer = false, "Invalid Reason").futureValue
 
         val result = repository.findByValidationId(pdvResponseData.id).futureValue
 

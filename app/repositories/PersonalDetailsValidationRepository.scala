@@ -63,27 +63,27 @@ class PersonalDetailsValidationRepository @Inject()(
                                   (implicit ec: ExecutionContext): Future[String] = {
     logger.info(s"insert or update one in $collectionName table")
 
-    val filter = Filters.equal("id", personalDetailsValidation.id)
+    val filter = Filters.equal("personalDetails.nino", personalDetailsValidation.getNino)
     val options = ReplaceOptions().upsert(true)
     collection.replaceOne(filter, encrypt(personalDetailsValidation, appConfig.encryptionKey), options)
       .toFuture()
-      .map(_ => personalDetailsValidation.id) recover {
+      .map(_ => personalDetailsValidation.getNino) recover {
       case e: MongoWriteException if e.getCode == 11000 =>
         logger.warn(s"Error replacing or updating into $collectionName table")
         ""
     }
   }
 
-  def updateCustomerValidityWithReason(id: String, validCustomer: Boolean, reason: String)(implicit ec: ExecutionContext): Future[String] = {
+  def updateCustomerValidityWithReason(nino: String, validCustomer: Boolean, reason: String)(implicit ec: ExecutionContext): Future[String] = {
     logger.info(s"Updating one in $collectionName table")
 
-    collection.updateMany(Filters.equal("id", id),
+    collection.updateMany(Filters.equal("personalDetails.nino", nino),
         Updates.combine(
           Updates.set("validCustomer",  toBson(encryptField(validCustomer.toString, appConfig.encryptionKey))),
           Updates.set("reason",  toBson(encryptField(reason, appConfig.encryptionKey))),
           Updates.set("CRN", if (reason.contains("CRN;"))  toBson(encryptField("true", appConfig.encryptionKey)) else  toBson(encryptField("false", appConfig.encryptionKey)))))
       .toFuture()
-      .map(_ => id) recover {
+      .map(_ => nino) recover {
       case e: MongoWriteException if e.getCode == 11000 =>
         logger.warn(s"error updating $collectionName table")
         ""
