@@ -26,7 +26,7 @@ import org.mockito.MockitoSugar.mock
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
-import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, NOT_IMPLEMENTED}
+import play.api.http.Status.{ACCEPTED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, NOT_IMPLEMENTED}
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import util.AnyValueTypeMatcher.anyValueType
@@ -46,7 +46,7 @@ class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar wi
 
     "return Letter issued response when connector returns 202" in {
       when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
-        .thenReturn(Future.successful(HttpResponse(202, "")))
+        .thenReturn(Future.successful(HttpResponse(ACCEPTED, "")))
 
       npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
         result mustBe LetterIssuedResponse()
@@ -84,7 +84,7 @@ class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar wi
 
     "return FailureResponse when connector returns 400 and response body contains 'failures'" in {
       when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
-        .thenReturn(Future.successful(HttpResponse(400, failureResponseBody)))
+        .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, failureResponseBody)))
 
       npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
         result mustBe FailureResponse(List(Failure("some type", "some reason")))
@@ -93,19 +93,19 @@ class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar wi
 
     "return RLSDLONFAResponse when connector returns 400 and response body does not contain 'failures' but passes check" in {
       when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
-        .thenReturn(Future.successful(HttpResponse(400, RLSDLONFAResponseBody)))
+        .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, RLSDLONFAResponseBody)))
 
       npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
-        result mustBe TechnicalIssueResponse(400, "BAD_REQUEST")
+        result mustBe TechnicalIssueResponse(BAD_REQUEST, "BAD_REQUEST")
       }
     }
 
     "return TechnicalIssueResponse when connector returns 400 and response body does not contain 'failures' and does not pass check" in {
       when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
-        .thenReturn(Future.successful(HttpResponse(400, someOtherErrorResponseBody)))
+        .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, someOtherErrorResponseBody)))
 
       npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
-        result mustBe TechnicalIssueResponse(400, "SOME_OTHER_ERROR")
+        result mustBe TechnicalIssueResponse(BAD_REQUEST, "SOME_OTHER_ERROR")
       }
     }
 
@@ -113,10 +113,10 @@ class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar wi
 
     "return TechnicalIssueResponse when response body does not contain 'failures' and there are no messages" in {
       when(mockConnector.sendLetter(any(), any())(any(), anyValueType[CorrelationId], any()))
-        .thenReturn(Future.successful(HttpResponse(400, someOtherErrorResponseBody )))
+        .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, someOtherErrorResponseBody )))
 
       npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
-        result mustBe TechnicalIssueResponse(400, "SOME_OTHER_ERROR")
+        result mustBe TechnicalIssueResponse(BAD_REQUEST, "SOME_OTHER_ERROR")
       }
     }
 

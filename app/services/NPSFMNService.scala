@@ -22,6 +22,7 @@ import connectors.NPSFMNConnector
 import models.CorrelationId
 import models.nps.{FailureResponse, LetterIssuedResponse, NPSFMNRequest, NPSFMNResponse, NPSFMNResponseWithFailures, NPSFMNServiceResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import play.api.Logging
+import play.api.http.Status.{ACCEPTED, BAD_REQUEST}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -45,8 +46,8 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
     connector.sendLetter(nino.take(8), npsFMNRequest)
       .map{ response =>
         response.status match {
-          case 202 => LetterIssuedResponse()
-          case 400 =>
+          case ACCEPTED => LetterIssuedResponse()
+          case BAD_REQUEST =>
             if(checkFailure(response.body) == true) {
               val npsFMNResponse = Json.parse(response.body).as[NPSFMNResponseWithFailures]
               logger.info("************************************  service postcode response 400  ************************************ response: " + response.body)
