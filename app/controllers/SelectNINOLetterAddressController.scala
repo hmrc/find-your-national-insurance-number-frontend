@@ -196,7 +196,7 @@ class SelectNINOLetterAddressController @Inject()(
           pd.getFirstName,
           pd.getLastName,
           pd.getDateOfBirth,
-          splitPostCode(pd.getPostCode)
+          pd.getPostCode
         )
       case _ => NPSFMNRequest.empty
     }

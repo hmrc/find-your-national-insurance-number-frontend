@@ -20,6 +20,7 @@ import connectors.PersonalDetailsValidationConnector
 import models.pdv.{PDVRequest, PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.Mockito.when
 import org.mockito.MockitoSugar
 import org.mockito.MockitoSugar.mock
 import org.scalatest.BeforeAndAfterEach
@@ -139,6 +140,41 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.npsPostCode mustBe personalDetailsValidation.npsPostCode
         result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.validationStatus mustBe personalDetailsValidation.validationStatus
       }(ec)
+    }
+
+
+    "createPDVDataRow should reformat the postCode in PersonalDetails" in {
+      val mockRepository = mock[PersonalDetailsValidationRepository]
+      val service = new PersonalDetailsValidationService(null, mockRepository)
+
+      val originalPostCode = "Ab 12C d"
+      val expectedPostCode = "AB1 2CD" // assuming this is the expected format after splitPostCode
+
+      val personalDetails = PersonalDetails(
+        firstName = "John",
+        lastName = "Doe",
+        nino = Nino("AB123456C"),
+        postCode = Some(originalPostCode),
+        dateOfBirth = LocalDate.parse("1980-01-01")
+      )
+
+      val pdvResponseData: PDVResponseData = PDVResponseData(
+        id = "abcd01234",
+        validationStatus = "success",
+        personalDetails = Some(personalDetails),
+        reason = None,
+        validCustomer = None,
+        CRN = None,
+        npsPostCode = None
+      )
+
+      when(mockRepository.insertOrReplacePDVResultData(any())(any()))
+        .thenReturn(Future.successful("AB1 2CD"))
+
+      service.createPDVDataRow(PDVSuccessResponse(pdvResponseData)).map { result =>
+        result.personalDetails mustBe defined
+        result.personalDetails.get.postCode mustBe Some(expectedPostCode)
+      }
     }
 
   }
