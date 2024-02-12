@@ -65,10 +65,16 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
         pdvResponseData.personalDetails match {
           case Some(personalDetails) =>
             val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(""))
-            val newPersonalDetails = personalDetails.copy(postCode = Some(reformattedPostCode))
-            val newPDVResponseData = pdvResponseData.copy(personalDetails = Some(newPersonalDetails))
-            personalDetailsValidationRepository.insertOrReplacePDVResultData(newPDVResponseData)
-            Future.successful(newPDVResponseData)
+            if (!reformattedPostCode.strip().equals("")) {
+              val newPersonalDetails = personalDetails.copy(postCode = Some(reformattedPostCode))
+              val newPDVResponseData = pdvResponseData.copy(personalDetails = Some(newPersonalDetails))
+              personalDetailsValidationRepository.insertOrReplacePDVResultData(newPDVResponseData)
+              Future.successful(newPDVResponseData)
+            }
+            else {
+              personalDetailsValidationRepository.insertOrReplacePDVResultData(pdvResponseData)
+              Future.successful(pdvResponseData)
+            }
           case None =>
             Future.failed(new RuntimeException("PersonalDetails is None in PDVResponseData"))
         }
