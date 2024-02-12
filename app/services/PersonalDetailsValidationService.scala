@@ -24,6 +24,8 @@ import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
 import play.api.libs.json.Json
 import repositories.PersonalDetailsValidationRepository
 import uk.gov.hmrc.http.HeaderCarrier
+import util.FMNHelper
+import util.FMNHelper.splitPostCode
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -60,13 +62,22 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
   def createPDVDataRow(personalDetailsValidation: PDVResponse): Future[PDVResponseData] = {
     personalDetailsValidation match {
       case _ @ PDVSuccessResponse(pdvResponseData) =>
-        personalDetailsValidationRepository.insertOrReplacePDVResultData(pdvResponseData)
-        Future.successful(pdvResponseData)
+        pdvResponseData.personalDetails match {
+          case Some(personalDetails) =>
+            val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(""))
+            val newPersonalDetails = personalDetails.copy(postCode = Some(reformattedPostCode))
+            val newPDVResponseData = pdvResponseData.copy(personalDetails = Some(newPersonalDetails))
+            personalDetailsValidationRepository.insertOrReplacePDVResultData(newPDVResponseData)
+            Future.successful(newPDVResponseData)
+          case None =>
+            Future.failed(new RuntimeException("PersonalDetails is None in PDVResponseData"))
+        }
       case _ =>
         logger.warn(s"Failed creating PDV data row.")
         throw new RuntimeException(s"Failed creating PDV data row.")
     }
   }
+
 
   //add a function to update the PDV data row with the a validationStatus which is boolean value
   def updatePDVDataRowWithValidationStatus(nino: String, validationStatus: Boolean, reason:String): Future[Boolean] = {
