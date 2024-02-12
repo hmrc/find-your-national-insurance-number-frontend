@@ -62,10 +62,10 @@ class CheckDetailsController @Inject()(
             val processData = for {
               pdvData <- checkDetailsService.getPDVData(pdvRequest)
               idData <- checkDetailsService.getIdData(pdvData)
-            } yield (pdvData, idData) match {
+              sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
+            } yield (pdvData, idData, sessionWithNINO) match {
 
-              case (pdvData, Left(idData)) =>
-                val sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
+              case (pdvData, Left(idData), sessionWithNINO) =>
 
                 if (pdvData.validationStatus.equals("failure")) {
 
@@ -86,8 +86,7 @@ class CheckDetailsController @Inject()(
                   Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
                 }
 
-              case (pdvData, Right(idData)) =>
-                val sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
+              case (pdvData, Right(idData), sessionWithNINO) =>
 
                 auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
                   pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
