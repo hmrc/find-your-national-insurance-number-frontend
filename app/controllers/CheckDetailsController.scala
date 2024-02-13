@@ -56,12 +56,23 @@ class CheckDetailsController @Inject()(
                                         val authConnector: AuthConnector
                                       )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
   extends FrontendBaseController with AuthorisedFunctions with I18nSupport with Logging {
-  
+
   def onPageLoad(origin: Option[String], mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request => {
 
+      auditService.audit(
+        AuditUtils.buildAuditEvent(
+          auditType = "StartFindYourNino",
+          validationOutcome = "",
+          identifierType = "",
+          origin = origin
+        )
+      )
+
       origin.map(_.toUpperCase) match {
+
         case Some("PDV") | Some("IV") => {
+
           logger.info(s"Valid origin: $origin")
 
           val pdvRequest = PDVRequest(
@@ -81,8 +92,17 @@ class CheckDetailsController @Inject()(
                 if (pdvData.validationStatus.equals("failure")) {
 
                   logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
-                  auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
-                    pdvData.validationStatus, "", None, None, None, None, None, None))
+
+                  auditService.audit(
+                    AuditUtils.buildAuditEvent(
+                      personDetails = pdvData.personalDetails,
+                      auditType = "FindYourNinoPDVMatchFailed",
+                      validationOutcome = pdvData.validationStatus,
+                      identifierType = "",
+                      origin = origin
+                    )
+                  )
+
                   Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
                 } else {
 
@@ -91,8 +111,19 @@ class CheckDetailsController @Inject()(
                     case _ => None
                   }
 
-                  auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "FindYourNinoError",
-                    pdvData.validationStatus, "", None, None, None, Some("/checkDetails"), errorStatusCode, Some(idData.errorMessage)))
+                  auditService.audit(
+                    AuditUtils.buildAuditEvent(
+                      personDetails = pdvData.personalDetails,
+                      auditType = "FindYourNinoError",
+                    validationOutcome = pdvData.validationStatus,
+                      identifierType = "",
+                      pageErrorGeneratedFrom = Some("/checkDetails"),
+                      errorStatus = errorStatusCode,
+                      errorReason = Some(idData.errorMessage),
+                      origin = origin
+                    )
+                  )
+
                   logger.warn(s"Failed to retrieve Individual Details data: ${idData.errorMessage}")
                   Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
                 }
@@ -100,8 +131,15 @@ class CheckDetailsController @Inject()(
               case (pdvData, Right(idData)) =>
                 val sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
 
-                auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
-                  pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
+                auditService.audit(
+                  AuditUtils.buildAuditEvent(
+                    personDetails = pdvData.personalDetails,
+                    auditType = "FindYourNinoPDVMatched",
+                    validationOutcome = pdvData.validationStatus,
+                    identifierType = idData.crnIndicator.asString,
+                    origin = origin
+                  )
+                )
 
                 val api1694Checks = checkConditions(idData)
                 personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.getNino, api1694Checks._1, api1694Checks._2)
@@ -109,7 +147,7 @@ class CheckDetailsController @Inject()(
                 if (api1694Checks._1) {
                   val idPostCode = getNPSPostCode(idData)
                   if (pdvData.getPostCode.nonEmpty) {
-                    if (comparePostCode(idPostCode,pdvData.getPostCode)) {
+                    if (comparePostCode(idPostCode, pdvData.getPostCode)) {
                       logger.info(s"PDV and API 1694 postcodes matched")
                       Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
                     } else {
@@ -155,8 +193,6 @@ class CheckDetailsController @Inject()(
   }
 
 
-
-
   private def getIdData(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
     getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
       case Some(data) => data.nino.nino
@@ -167,7 +203,7 @@ class CheckDetailsController @Inject()(
   }
 
   private def getIndividualDetails(nino: IndividualDetailsNino
-                          )(implicit ec: ExecutionContext, hc: HeaderCarrier): IndividualDetailsResponseEnvelope[IndividualDetails] = {
+                                  )(implicit ec: ExecutionContext, hc: HeaderCarrier): IndividualDetailsResponseEnvelope[IndividualDetails] = {
     implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
     implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
     IndividualDetailsResponseEnvelope.fromEitherF(individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y')).value)
@@ -189,8 +225,16 @@ class CheckDetailsController @Inject()(
     }
     p.recover {
       case ex: HttpException =>
-        auditService.audit(AuditUtils.buildAuditEvent(None, None, "FindYourNinoError",
-          "", "", None, None, None, Some("/checkDetails"), Some(ex.responseCode.toString), Some(ex.message)))
+        auditService.audit(
+          AuditUtils.buildAuditEvent(
+            auditType = "FindYourNinoError",
+            validationOutcome = "",
+            identifierType = "",
+            pageErrorGeneratedFrom = Some("/checkDetails"),
+            errorStatus = Some(ex.responseCode.toString),
+            errorReason = Some(ex.message)
+          )
+        )
         logger.debug(ex.getMessage)
         throw ex
     }
