@@ -64,7 +64,6 @@ class CheckDetailsController @Inject()(
 
   private def validOriginJourney(origin: Option[String], request: DataRequest[AnyContent], mode: Mode)
                                 (implicit headerCarrier: HeaderCarrier): Future[Result] = {
-
     logger.info(s"Valid origin: $origin")
 
     val pdvRequest = PDVRequest(
@@ -78,9 +77,9 @@ class CheckDetailsController @Inject()(
         idData <- checkDetailsService.getIdData(pdvData)
         sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
       } yield (pdvData, idData, sessionWithNINO) match {
-        case (pdvData, Left(idData), sessionWithNINO)  => pdvFailureJourney(pdvData, idData, mode, sessionWithNINO)
-        case (pdvData, Right(idData), sessionWithNINO) => pdvSuccessJourney(pdvData, idData, mode, sessionWithNINO)
-        case _                                         => pdvMatchingFailedWithUnknownIssue(mode)
+        case (pdvData, Left(idData), sessionWithNINO)  => checkDetailsFailureJourney(pdvData, idData, mode, sessionWithNINO)
+        case (pdvData, Right(idData), sessionWithNINO) => checkDetailsSuccessJourney(pdvData, idData, mode, sessionWithNINO)
+        case _                                         => checkDetailsFailedWithUnknownIssue(mode)
 
       }
       processData.recover {
@@ -97,16 +96,16 @@ class CheckDetailsController @Inject()(
     }
   }
 
-  private def pdvFailureJourney(pdvData: PDVResponseData, idDataError: IndividualDetailsError, mode: Mode, sessionWithNINO: Session)
+  private def checkDetailsFailureJourney(pdvData: PDVResponseData, idDataError: IndividualDetailsError, mode: Mode, sessionWithNINO: Session)
                                (implicit headerCarrier: HeaderCarrier): Result = {
     if (pdvData.validationStatus.equals("failure")) {
-
       logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
+
       auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
         pdvData.validationStatus, "", None, None, None, None, None, None))
+
       Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
     } else {
-
       val errorStatusCode: Option[String] = idDataError match {
         case conError: ConnectorError => Some(conError.statusCode.toString)
         case _ => None
@@ -114,12 +113,13 @@ class CheckDetailsController @Inject()(
 
       auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "FindYourNinoError",
         pdvData.validationStatus, "", None, None, None, Some("/checkDetails"), errorStatusCode, Some(idDataError.errorMessage)))
+
       logger.warn(s"Failed to retrieve Individual Details data: ${idDataError.errorMessage}")
       Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
     }
   }
 
-  private def pdvSuccessJourney(pdvData: PDVResponseData, idData: IndividualDetails, mode: Mode, sessionWithNINO: Session)
+  private def checkDetailsSuccessJourney(pdvData: PDVResponseData, idData: IndividualDetails, mode: Mode, sessionWithNINO: Session)
                                (implicit  headerCarrier: HeaderCarrier): Result = {
     auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
       pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
@@ -147,7 +147,7 @@ class CheckDetailsController @Inject()(
     }
   }
 
-  private def pdvMatchingFailedWithUnknownIssue(mode: Mode): Result = {
+  private def checkDetailsFailedWithUnknownIssue(mode: Mode): Result = {
     logger.warn("No Personal Details found in PDV data, likely validation failed")
     Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
   }
