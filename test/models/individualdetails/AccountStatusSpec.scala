@@ -18,15 +18,10 @@ package models.individualdetails
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.Json
 import models.individualdetails.AccountStatusType.{writes, _}
-import models.json.WritesNumber
-
 
 class AccountStatusSpec extends AnyFlatSpec with Matchers {
-
-
-
 
   "AccountStatusType reads" should "correctly parse AccountStatusType from integer" in {
     val testData = Seq(
@@ -53,9 +48,6 @@ class AccountStatusSpec extends AnyFlatSpec with Matchers {
       result shouldBe expectedOutput
     }
   }
-
-
-
 
   "AccountStatusType writes" should "correctly write AccountStatusType to integer" in {
     val testData = Seq(

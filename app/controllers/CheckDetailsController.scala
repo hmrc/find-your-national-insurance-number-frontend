@@ -30,6 +30,7 @@ import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.AuditUtils
+import util.FMNConstants.EmptyString
 import util.FMNHelper.comparePostCode
 
 import javax.inject.Inject
@@ -68,8 +69,8 @@ class CheckDetailsController @Inject()(
     logger.info(s"Valid origin: $origin")
 
     val pdvRequest = PDVRequest(
-      request.credId.getOrElse(""),
-      request.session.data.getOrElse("sessionId", "")
+      request.credId.getOrElse(EmptyString),
+      request.session.data.getOrElse("sessionId", EmptyString)
     )
 
     val result: Try[Future[Result]] = Try {
@@ -78,9 +79,9 @@ class CheckDetailsController @Inject()(
         idData <- checkDetailsService.getIdData(pdvData)
         sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
       } yield (pdvData, idData, sessionWithNINO) match {
-        case (pdvData, Left(idData), sessionWithNINO)  => pdvFailureJourney(pdvData, idData, mode, sessionWithNINO)
-        case (pdvData, Right(idData), sessionWithNINO) => pdvSuccessJourney(pdvData, idData, mode, sessionWithNINO)
-        case _                                         => pdvMatchingFailedWithUnknownIssue(mode)
+        case (pdvData, Left(idData), sessionWithNINO)  => checkDetailsFailureJourney(pdvData, idData, mode, sessionWithNINO)
+        case (pdvData, Right(idData), sessionWithNINO) => checkDetailsSuccessJourney(pdvData, idData, mode, sessionWithNINO)
+        case _                                         => checkDetailsMatchingFailedWithUnknownIssue(mode)
 
       }
       processData.recover {
@@ -97,13 +98,13 @@ class CheckDetailsController @Inject()(
     }
   }
 
-  private def pdvFailureJourney(pdvData: PDVResponseData, idDataError: IndividualDetailsError, mode: Mode, sessionWithNINO: Session)
+  private def checkDetailsFailureJourney(pdvData: PDVResponseData, idDataError: IndividualDetailsError, mode: Mode, sessionWithNINO: Session)
                                (implicit headerCarrier: HeaderCarrier): Result = {
     if (pdvData.validationStatus.equals("failure")) {
 
       logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
       auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
-        pdvData.validationStatus, "", None, None, None, None, None, None))
+        pdvData.validationStatus, EmptyString, None, None, None, None, None, None))
       Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
     } else {
 
@@ -113,13 +114,13 @@ class CheckDetailsController @Inject()(
       }
 
       auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "FindYourNinoError",
-        pdvData.validationStatus, "", None, None, None, Some("/checkDetails"), errorStatusCode, Some(idDataError.errorMessage)))
+        pdvData.validationStatus, EmptyString, None, None, None, Some("/checkDetails"), errorStatusCode, Some(idDataError.errorMessage)))
       logger.warn(s"Failed to retrieve Individual Details data: ${idDataError.errorMessage}")
       Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
     }
   }
 
-  private def pdvSuccessJourney(pdvData: PDVResponseData, idData: IndividualDetails, mode: Mode, sessionWithNINO: Session)
+  private def checkDetailsSuccessJourney(pdvData: PDVResponseData, idData: IndividualDetails, mode: Mode, sessionWithNINO: Session)
                                (implicit  headerCarrier: HeaderCarrier): Result = {
     auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
       pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
@@ -147,7 +148,7 @@ class CheckDetailsController @Inject()(
     }
   }
 
-  private def pdvMatchingFailedWithUnknownIssue(mode: Mode): Result = {
+  private def checkDetailsMatchingFailedWithUnknownIssue(mode: Mode): Result = {
     logger.warn("No Personal Details found in PDV data, likely validation failed")
     Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
   }
