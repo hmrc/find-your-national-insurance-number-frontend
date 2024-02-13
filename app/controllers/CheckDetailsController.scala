@@ -17,14 +17,17 @@
 package controllers
 
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import models.errors.ConnectorError
-import models.pdv.PDVRequest
+import models.errors.{ConnectorError, IndividualDetailsError}
+import models.pdv.{PDVRequest, PDVResponseData}
 import models.Mode
+import models.individualdetails.IndividualDetails
+import models.requests.DataRequest
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result, Session}
 import services.{AuditService, CheckDetailsService, PersonalDetailsValidationService}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.AuditUtils
 import util.FMNHelper.comparePostCode
@@ -45,101 +48,107 @@ class CheckDetailsController @Inject()(
                                         val authConnector: AuthConnector
                                       )(implicit ec: ExecutionContext)
   extends FrontendBaseController with AuthorisedFunctions with I18nSupport with Logging {
-  
-  def onPageLoad(origin: Option[String], mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+
+  def onPageLoad(origin: Option[String], mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData).async {
     implicit request => {
-
       origin.map(_.toUpperCase) match {
-        case Some("PDV") | Some("IV") => {
-          logger.info(s"Valid origin: $origin")
-
-          val pdvRequest = PDVRequest(
-            request.credId.getOrElse(""),
-            request.session.data.getOrElse("sessionId", "")
-          )
-
-          val result: Try[Future[Result]] = Try {
-            val processData = for {
-              pdvData <- checkDetailsService.getPDVData(pdvRequest)
-              idData <- checkDetailsService.getIdData(pdvData)
-              sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
-            } yield (pdvData, idData, sessionWithNINO) match {
-
-              case (pdvData, Left(idData), sessionWithNINO) =>
-
-                if (pdvData.validationStatus.equals("failure")) {
-
-                  logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
-                  auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
-                    pdvData.validationStatus, "", None, None, None, None, None, None))
-                  Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
-                } else {
-
-                  val errorStatusCode: Option[String] = idData match {
-                    case conError: ConnectorError => Some(conError.statusCode.toString)
-                    case _ => None
-                  }
-
-                  auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "FindYourNinoError",
-                    pdvData.validationStatus, "", None, None, None, Some("/checkDetails"), errorStatusCode, Some(idData.errorMessage)))
-                  logger.warn(s"Failed to retrieve Individual Details data: ${idData.errorMessage}")
-                  Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
-                }
-
-              case (pdvData, Right(idData), sessionWithNINO) =>
-
-                auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
-                  pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
-
-                val api1694Checks = checkDetailsService.checkConditions(idData)
-                personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.getNino, api1694Checks._1, api1694Checks._2)
-
-                if (api1694Checks._1) {
-                  val idPostCode = checkDetailsService.getNPSPostCode(idData)
-                  if (pdvData.getPostCode.nonEmpty) {
-                    if (comparePostCode(idPostCode,pdvData.getPostCode)) {
-                      logger.info(s"PDV and API 1694 postcodes matched")
-                      Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
-                    } else {
-                      logger.warn(s"PDV and API 1694 postcodes not matched")
-                      Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-                    }
-                  } else { // Matched with NINO
-                    personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(pdvData.getNino, idPostCode)
-                    Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
-                  }
-                } else {
-                  logger.warn(s"API 1694 checks failed: ${api1694Checks._2}")
-                  Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-                }
-
-              case _ =>
-                logger.warn("No Personal Details found in PDV data, likely validation failed")
-                Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-
-            }
-
-            processData.recover {
-              case ex: Exception =>
-                logger.error(s"An error occurred in process data: ${ex.getMessage}")
-                Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-            }
-          }
-
-          result match {
-            case Success(res) => res
-            case Failure(ex) =>
-              logger.error(s"An error occurred, redirecting: ${ex.getMessage}")
-              Future(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
-          }
-        }
-
+        case Some("PDV") | Some("IV") =>
+          validOriginJourney(origin, request, mode)
         case _ =>
           logger.error(s"Invalid origin: $origin")
           Future(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
-
       }
     }
   }
 
+  private def validOriginJourney(origin: Option[String], request: DataRequest[AnyContent], mode: Mode)
+                                (implicit headerCarrier: HeaderCarrier): Future[Result] = {
+
+    logger.info(s"Valid origin: $origin")
+
+    val pdvRequest = PDVRequest(
+      request.credId.getOrElse(""),
+      request.session.data.getOrElse("sessionId", "")
+    )
+
+    val result: Try[Future[Result]] = Try {
+      val processData = for {
+        pdvData <- checkDetailsService.getPDVData(pdvRequest)
+        idData <- checkDetailsService.getIdData(pdvData)
+        sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
+      } yield (pdvData, idData, sessionWithNINO) match {
+        case (pdvData, Left(idData), sessionWithNINO)  => pdvFailureJourney(pdvData, idData, mode, sessionWithNINO)
+        case (pdvData, Right(idData), sessionWithNINO) => pdvSuccessJourney(pdvData, idData, mode, sessionWithNINO)
+        case _                                         => pdvMatchingFailedWithUnknownIssue(mode)
+
+      }
+      processData.recover {
+        case ex: Exception =>
+          logger.error(s"An error occurred in process data: ${ex.getMessage}")
+          Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+      }
+    }
+    result match {
+      case Success(res) => res
+      case Failure(ex) =>
+        logger.error(s"An error occurred, redirecting: ${ex.getMessage}")
+        Future(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
+    }
+  }
+
+  private def pdvFailureJourney(pdvData: PDVResponseData, idDataError: IndividualDetailsError, mode: Mode, sessionWithNINO: Session)
+                               (implicit headerCarrier: HeaderCarrier): Result = {
+    if (pdvData.validationStatus.equals("failure")) {
+
+      logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
+      auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
+        pdvData.validationStatus, "", None, None, None, None, None, None))
+      Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
+    } else {
+
+      val errorStatusCode: Option[String] = idDataError match {
+        case conError: ConnectorError => Some(conError.statusCode.toString)
+        case _ => None
+      }
+
+      auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "FindYourNinoError",
+        pdvData.validationStatus, "", None, None, None, Some("/checkDetails"), errorStatusCode, Some(idDataError.errorMessage)))
+      logger.warn(s"Failed to retrieve Individual Details data: ${idDataError.errorMessage}")
+      Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
+    }
+  }
+
+  private def pdvSuccessJourney(pdvData: PDVResponseData, idData: IndividualDetails, mode: Mode, sessionWithNINO: Session)
+                               (implicit  headerCarrier: HeaderCarrier): Result = {
+    auditService.audit(AuditUtils.buildAuditEvent(pdvData.personalDetails, None, "StartFindYourNino",
+      pdvData.validationStatus, idData.crnIndicator.asString, None, None, None, None, None, None))
+
+    val api1694Checks = checkDetailsService.checkConditions(idData)
+    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.getNino, api1694Checks._1, api1694Checks._2)
+
+    if (api1694Checks._1) {
+      val idPostCode = checkDetailsService.getNPSPostCode(idData)
+      if (pdvData.getPostCode.nonEmpty) {
+        if (comparePostCode(idPostCode, pdvData.getPostCode)) {
+          logger.info(s"PDV and API 1694 postcodes matched")
+          Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
+        } else {
+          logger.warn(s"PDV and API 1694 postcodes not matched")
+          Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+        }
+      } else { // Matched with NINO
+        personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(pdvData.getNino, idPostCode)
+        Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
+      }
+    } else {
+      logger.warn(s"API 1694 checks failed: ${api1694Checks._2}")
+      Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+    }
+  }
+
+  private def pdvMatchingFailedWithUnknownIssue(mode: Mode): Result = {
+    logger.warn("No Personal Details found in PDV data, likely validation failed")
+    Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+  }
 }
