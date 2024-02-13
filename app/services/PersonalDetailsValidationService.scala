@@ -24,6 +24,7 @@ import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
 import play.api.libs.json.Json
 import repositories.PersonalDetailsValidationRepository
 import uk.gov.hmrc.http.HeaderCarrier
+import util.FMNConstants.EmptyString
 import util.FMNHelper
 import util.FMNHelper.splitPostCode
 
@@ -64,8 +65,8 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
       case _ @ PDVSuccessResponse(pdvResponseData) =>
         pdvResponseData.personalDetails match {
           case Some(personalDetails) =>
-            val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(""))
-            if (!reformattedPostCode.strip().equals("")) {
+            val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(EmptyString))
+            if (reformattedPostCode.strip().nonEmpty) {
               val newPersonalDetails = personalDetails.copy(postCode = Some(reformattedPostCode))
               val newPDVResponseData = pdvResponseData.copy(personalDetails = Some(newPersonalDetails))
               personalDetailsValidationRepository.insertOrReplacePDVResultData(newPDVResponseData)
