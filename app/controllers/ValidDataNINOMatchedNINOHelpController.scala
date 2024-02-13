@@ -70,16 +70,10 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
           personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino","")).onComplete {
             case Success(pdv) =>
               auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
-                None,
-                "FindYourNinoOptionChosen",
-                pdv.map(_.validationStatus).getOrElse(""),
-                pdv.map(_.CRN.getOrElse("")).getOrElse(""),
-                Some(value.toString),
-                None,
-                None,
-                None,
-                None,
-                None
+                auditType = "FindYourNinoOptionChosen",
+                validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
+                identifierType = pdv.map(_.CRN.getOrElse("")).getOrElse(""),
+                findMyNinoOption = Some(value.toString)
               ))
             case Failure(ex) =>
               logger.warn(ex.getMessage)

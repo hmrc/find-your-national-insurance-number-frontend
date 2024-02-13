@@ -91,45 +91,31 @@ class ConfirmYourPostcodeController @Inject()(
                   idAddress match {
                     case Right(idAddr) =>
                       auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
-                        Some(idAddr),
-                        "FindYourNinoConfirmPostcode",
-                        pdvData.map(_.validationStatus).getOrElse(""),
-                        pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
-                        None,
-                        Some(userEnteredPostCode),
-                        Some("true"),
-                        None,
-                        None,
-                        None
+                        individualDetailsAddress = Some(idAddr),
+                        auditType = "FindYourNinoConfirmPostcode",
+                        validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+                        identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+                        findMyNinoPostcodeEntered = Some(userEnteredPostCode),
+                        findMyNinoPostcodeMatched = Some("true")
                       ))
                   }
                   npsLetterChecks(pdvValidData, npsPostCode, mode, updatedAnswers)
                 case None =>
                   auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
-                    None,
-                    "FindYourNinoConfirmPostcode",
-                    pdvData.map(_.validationStatus).getOrElse(""),
-                    pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
-                    None,
-                    Some(userEnteredPostCode),
-                    Some("false"),
-                    None,
-                    None,
-                    None
+                    auditType = "FindYourNinoConfirmPostcode",
+                    validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+                    identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+                    findMyNinoPostcodeEntered = Some(userEnteredPostCode),
+                    findMyNinoPostcodeMatched = Some("false")
                   ))
                   Future(Redirect(routes.TechnicalErrorController.onPageLoad()))
                 case _ =>
                   auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
-                    None,
-                    "FindYourNinoConfirmPostcode",
-                    pdvData.map(_.validationStatus).getOrElse(""),
-                    pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
-                    None,
-                    Some(userEnteredPostCode),
-                    Some("false"),
-                    None,
-                    None,
-                    None
+                    auditType = "FindYourNinoConfirmPostcode",
+                    validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+                    identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+                    findMyNinoPostcodeEntered = Some(userEnteredPostCode),
+                    findMyNinoPostcodeMatched = Some("false")
                   ))
                   Future(Redirect(routes.EnteredPostCodeNotFoundController.onPageLoad(mode = NormalMode)))
               }
@@ -150,30 +136,22 @@ class ConfirmYourPostcodeController @Inject()(
             Redirect(routes.NINOLetterPostedConfirmationController.onPageLoad())
           case RLSDLONFAResponse(responseStatus, responseMessage) =>
             auditService.audit(AuditUtils.buildAuditEvent(Some(personalDetails),
-              None,
-              "FindYourNinoError",
-              personalDetailsResponse.validationStatus,
-              personalDetailsResponse.CRN.getOrElse(""),
-              None,
-              None,
-              None,
-              Some("/confirm-your-postcode"),
-              Some(responseStatus.toString),
-              Some(responseMessage)
+              auditType = "FindYourNinoError",
+              validationOutcome = personalDetailsResponse.validationStatus,
+              identifierType = personalDetailsResponse.CRN.getOrElse(""),
+              pageErrorGeneratedFrom = Some("/confirm-your-postcode"),
+              errorStatus = Some(responseStatus.toString),
+              errorReason = Some(responseMessage)
             ))
             Redirect(routes.SendLetterErrorController.onPageLoad(mode))
           case TechnicalIssueResponse(responseStatus, responseMessage) =>
             auditService.audit(AuditUtils.buildAuditEvent(Some(personalDetails),
-              None,
-              "FindYourNinoError",
-              personalDetailsResponse.validationStatus,
-              personalDetailsResponse.CRN.getOrElse(""),
-              None,
-              None,
-              None,
-              Some("/confirm-your-postcode"),
-              Some(responseStatus.toString),
-              Some(responseMessage)
+              auditType = "FindYourNinoError",
+              validationOutcome = personalDetailsResponse.validationStatus,
+              identifierType = personalDetailsResponse.CRN.getOrElse(""),
+              pageErrorGeneratedFrom = Some("/confirm-your-postcode"),
+              errorStatus = Some(responseStatus.toString),
+              errorReason = Some(responseMessage)
             ))
             Redirect(routes.TechnicalErrorController.onPageLoad())
           case _ =>
