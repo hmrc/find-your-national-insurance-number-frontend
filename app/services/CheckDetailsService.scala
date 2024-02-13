@@ -32,11 +32,11 @@ import play.api.Logging
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 import util.AuditUtils
+import util.FMNConstants.EmptyString
 
 import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-
 
 @ImplementedBy(classOf[CheckDetailsServiceImpl])
 trait CheckDetailsService {
@@ -59,7 +59,7 @@ class CheckDetailsServiceImpl @Inject()(
                                        )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends CheckDetailsService with Logging {
 
    def checkConditions(idData: IndividualDetails): (Boolean, String) = {
-    var reason = ""
+    var reason = EmptyString
 
     if (!idData.accountStatusType.exists(_.equals(FullLive))) {
       reason += "AccountStatusType is not FullLive;"
@@ -87,13 +87,13 @@ class CheckDetailsServiceImpl @Inject()(
     val p = for {
       pdvData <- personalDetailsValidationService.createPDVDataFromPDVMatch(body)
     } yield pdvData match {
-      case data: PDVResponseData => data //returning a tuple of rowId and PDV data
+      case data: PDVResponseData => data
       case _ => throw new Exception("No PDV data found")
     }
     p.recover {
       case ex: HttpException =>
         auditService.audit(AuditUtils.buildAuditEvent(None, None, "FindYourNinoError",
-          "", "", None, None, None, Some("/checkDetails"), Some(ex.responseCode.toString), Some(ex.message)))
+          EmptyString, EmptyString, None, None, None, Some("/checkDetails"), Some(ex.responseCode.toString), Some(ex.message)))
         logger.debug(ex.getMessage)
         throw ex
     }
@@ -104,7 +104,7 @@ class CheckDetailsServiceImpl @Inject()(
       case Some(data) => data.nino.nino
       case None =>
         logger.warn("No Personal Details found in PDV data, likely validation failed")
-        ""
+        EmptyString
     })).value
   }
 
