@@ -31,7 +31,7 @@ import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import java.time.{Instant, LocalDate}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class PersonalDetailsValidationRepositorySpec
+class EncryptedPersonalDetailsValidationRepositorySpec
   extends AnyFreeSpec
   with Matchers
   with DefaultPlayMongoRepositorySupport[EncryptedPDVResponseData]
@@ -46,7 +46,7 @@ class PersonalDetailsValidationRepositorySpec
 
   private val instant = Instant.ofEpochSecond(1234567890)
 
-  protected override val repository = new PersonalDetailsValidationRepository(
+  protected override val repository = new EncryptedPersonalDetailsValidationRepository(
     mongoComponent = mongoComponent,
     appConfig      = mockAppConfig
   )

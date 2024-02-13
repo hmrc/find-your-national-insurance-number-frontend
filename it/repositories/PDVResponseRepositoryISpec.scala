@@ -52,7 +52,7 @@ class PDVResponseRepositoryISpec
   when(mockAppConfig.cacheTtl) thenReturn 1
   when(mockAppConfig.encryptionKey) thenReturn "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
 
-  protected override val repository = new PersonalDetailsValidationRepository(
+  protected override val repository = new EncryptedPersonalDetailsValidationRepository(
     mongoComponent = mongoComponent,
     appConfig = mockAppConfig,
   )

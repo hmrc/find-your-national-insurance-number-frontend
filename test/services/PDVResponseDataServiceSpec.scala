@@ -27,7 +27,7 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
 import play.api.libs.json.Json
-import repositories.PersonalDetailsValidationRepository
+import repositories.EncryptedPersonalDetailsValidationRepository
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -144,7 +144,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
 
 
     "createPDVDataRow should reformat the postCode in PersonalDetails" in {
-      val mockRepository = mock[PersonalDetailsValidationRepository]
+      val mockRepository = mock[EncryptedPersonalDetailsValidationRepository]
       val service = new PersonalDetailsValidationService(null, mockRepository)
 
       val originalPostCode = "Ab 12C d"
@@ -183,7 +183,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
 
 object PDVResponseDataServiceSpec {
   private val mockConnector = mock[PersonalDetailsValidationConnector]
-  private val mockPersonalDetailsValidationRepository = mock[PersonalDetailsValidationRepository]
+  private val mockPersonalDetailsValidationRepository = mock[EncryptedPersonalDetailsValidationRepository]
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
   implicit val hc: HeaderCarrier = HeaderCarrier()
