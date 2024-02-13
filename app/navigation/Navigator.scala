@@ -71,7 +71,6 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
 
   private def navigateTechnicalErrorService(userAnswers: UserAnswers): Call =
     userAnswers.get(TechnicalErrorPage) match {
-      case Some(TechnicalErrorService.TryAgain)  => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
       case Some(TechnicalErrorService.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
       case Some(TechnicalErrorService.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}$getNINOByPost")
       case _                                     => routes.JourneyRecoveryController.onPageLoad()
