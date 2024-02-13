@@ -30,7 +30,7 @@ import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.AuditUtils
-import util.FMNConstants.EmptyString
+import util.FMNConstants.{EmptyString, IVOrigin, PDVOrigin}
 import util.FMNHelper.comparePostCode
 
 import javax.inject.Inject
@@ -54,7 +54,7 @@ class CheckDetailsController @Inject()(
     (identify andThen getData andThen requireData).async {
     implicit request => {
       origin.map(_.toUpperCase) match {
-        case Some("PDV") | Some("IV") =>
+        case Some(PDVOrigin) | Some(IVOrigin) =>
           validOriginJourney(origin, request, mode)
         case _ =>
           logger.error(s"Invalid origin: $origin")
@@ -131,6 +131,7 @@ class CheckDetailsController @Inject()(
     if (api1694Checks._1) {
       val idPostCode = checkDetailsService.getNPSPostCode(idData)
       if (pdvData.getPostCode.nonEmpty) {
+        // Matched with PostCode
         if (comparePostCode(idPostCode, pdvData.getPostCode)) {
           logger.info(s"PDV and API 1694 postcodes matched")
           Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)

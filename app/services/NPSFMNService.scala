@@ -48,7 +48,7 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
         response.status match {
           case ACCEPTED => LetterIssuedResponse()
           case BAD_REQUEST =>
-            if(checkFailure(response.body) == true) {
+            if(checkFailure(response.body)) {
               val npsFMNResponse = Json.parse(response.body).as[NPSFMNResponseWithFailures]
               logger.info("************************************  service postcode response 400  ************************************ response: " + response.body)
               FailureResponse(npsFMNResponse.response.failures)
@@ -71,7 +71,6 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
       case _ => (Json.parse(responseBody) \ "jsonServiceError" \ "message").as[String]
     }
 
-
   private def check(responseBody: String):Boolean = {
       val appStatusMessageList = config.npsFMNAppStatusMessageList.split(",").toList
       val npsFMNResponse = Json.parse(responseBody).as[NPSFMNResponse]
@@ -83,6 +82,5 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
   private def checkFailure(responseBody: String):Boolean = {
     if(responseBody.contains("failures")) true else false
   }
-
 
 }
