@@ -24,8 +24,8 @@ import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
 import play.api.libs.json.Json
 import repositories.PersonalDetailsValidationRepository
 import uk.gov.hmrc.http.HeaderCarrier
+import util.FMNConstants.EmptyString
 import util.FMNHelper
-import util.FMNHelper.splitPostCode
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -41,7 +41,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     } yield pdvResponseData
 
 
-  //get a PDV match result
+  // Get a PDV match result
   def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponse] =
     connector.retrieveMatchingDetails(pdvRequest) map { response =>
         response.status match {
@@ -58,14 +58,14 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
       }
     }
 
-  //create a PDV data row
+  // Create a PDV data row
   def createPDVDataRow(personalDetailsValidation: PDVResponse): Future[PDVResponseData] = {
     personalDetailsValidation match {
       case _ @ PDVSuccessResponse(pdvResponseData) =>
         pdvResponseData.personalDetails match {
           case Some(personalDetails) =>
-            val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(""))
-            if (!reformattedPostCode.strip().equals("")) {
+            val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(EmptyString))
+            if (reformattedPostCode.strip().nonEmpty) {
               val newPersonalDetails = personalDetails.copy(postCode = Some(reformattedPostCode))
               val newPDVResponseData = pdvResponseData.copy(personalDetails = Some(newPersonalDetails))
               personalDetailsValidationRepository.insertOrReplacePDVResultData(newPDVResponseData)
@@ -84,16 +84,13 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     }
   }
 
-
-  //add a function to update the PDV data row with the a validationStatus which is boolean value
+  // Update the PDV data row with the a validationStatus which is boolean value
   def updatePDVDataRowWithValidationStatus(nino: String, validationStatus: Boolean, reason:String): Future[Boolean] = {
     personalDetailsValidationRepository.updateCustomerValidityWithReason(nino, validationStatus, reason) map {
       case str:String =>if(str.length > 8) true else false
       case _ => false
     } recover {
-      case e: MongoException => {
-        false
-      }
+      case _: MongoException => false
     }
   }
 
@@ -124,7 +121,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
       case Some(pdvData) => pdvData.validCustomer.getOrElse("false")
       case None => "false"
     } recover {
-      case e: Exception => "false"
+      case _: Exception => "false"
     }
   }
 
