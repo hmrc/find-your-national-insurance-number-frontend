@@ -20,7 +20,6 @@ import connectors.PersonalDetailsValidationConnector
 import models.pdv.{PDVRequest, PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
-import org.mockito.Mockito.when
 import org.mockito.MockitoSugar
 import org.mockito.MockitoSugar.mock
 import org.scalatest.BeforeAndAfterEach

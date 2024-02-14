@@ -25,6 +25,7 @@ import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
 import play.api.libs.json.Json
 import repositories.{EncryptedPersonalDetailsValidationRepository, PersonalDetailsValidationRepository}
 import uk.gov.hmrc.http.HeaderCarrier
+import util.FMNConstants.EmptyString
 import util.FMNHelper
 
 import javax.inject.Inject
@@ -42,7 +43,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     } yield pdvResponseData
 
 
-  // get a PDV match result
+  // Get a PDV match result
   def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponse] =
     connector.retrieveMatchingDetails(pdvRequest) map { response =>
         response.status match {
@@ -59,13 +60,13 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
       }
     }
 
-  // create a PDV data row
+  // Create a PDV data row
   def createPDVDataRow(personalDetailsValidation: PDVResponse): Future[PDVResponseData] = {
     personalDetailsValidation match {
       case _ @ PDVSuccessResponse(pdvResponseData) =>
         pdvResponseData.personalDetails match {
           case Some(personalDetails) =>
-            val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(""))
+            val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(EmptyString))
             if (reformattedPostCode.strip().nonEmpty) {
               val newPersonalDetails = personalDetails.copy(postCode = Some(reformattedPostCode))
               val newPDVResponseData = pdvResponseData.copy(personalDetails = Some(newPersonalDetails))
@@ -87,8 +88,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     }
   }
 
-
-  // To update the PDV data row with the a validationStatus which is boolean value
+  // Update the PDV data row with the a validationStatus which is boolean value
   def updatePDVDataRowWithValidationStatus(nino: String, validationStatus: Boolean, reason:String): Future[Boolean] = {
     (if(appConfig.encryptionEnabled) encryptedPDVRepository.updateCustomerValidityWithReason(nino, validationStatus, reason)
       else pdvRepository.updateCustomerValidityWithReason(nino, validationStatus, reason)
