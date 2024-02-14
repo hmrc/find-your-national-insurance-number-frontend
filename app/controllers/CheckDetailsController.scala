@@ -81,7 +81,6 @@ class CheckDetailsController @Inject()(
         case (pdvData, Left(idData), sessionWithNINO)  => checkDetailsFailureJourney(pdvData, idData, mode, sessionWithNINO, origin)
         case (pdvData, Right(idData), sessionWithNINO) => checkDetailsSuccessJourney(pdvData, idData, mode, sessionWithNINO, origin)
         case _                                         => checkDetailsMatchingFailedWithUnknownIssue(mode)
-
       }
       processData.recover {
         case ex: Exception =>
