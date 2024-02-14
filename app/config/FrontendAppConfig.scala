@@ -126,5 +126,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
 
   val npsFMNAppStatusMessageList:String = configuration.get[String]("npsfmn.app-status-message-list")
 
+  val encryptionEnabled: Boolean = configuration.get[Boolean]("mongodb.encryption.enabled")
   val encryptionKey: String = configuration.get[String]("mongodb.encryption.key")
 }

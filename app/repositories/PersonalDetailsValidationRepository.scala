@@ -31,9 +31,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PersonalDetailsValidationRepository @Inject()(
-                                                     mongoComponent: MongoComponent,
-                                                     appConfig: FrontendAppConfig
-                                                   )(implicit ec: ExecutionContext) extends PlayMongoRepository[PDVResponseData](
+       mongoComponent: MongoComponent,
+       appConfig: FrontendAppConfig
+     )(implicit ec: ExecutionContext)
+  extends PlayMongoRepository[PDVResponseData](
   collectionName = "personal-details-validation",
   mongoComponent = mongoComponent,
   domainFormat = PDVResponseData.format,
