@@ -90,10 +90,10 @@ class TechnicalErrorController @Inject()(
           } yield {
             val personalDetails = pdvData.flatMap(_.personalDetails)
             val postcode: String = personalDetails.map(_.postCode.getOrElse(StringUtils.EMPTY)).getOrElse(StringUtils.EMPTY)
-            auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
+            auditService.audit(AuditUtils.buildAuditEvent(personalDetails,
               auditType = "FindYourNinoOptionChosen",
-              validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
-              identifierType = pdv.map(_.CRN.getOrElse("")).getOrElse(""),
+              validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+              identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
               findMyNinoOption = Some(value.toString)
             ))
             if (value.toString == "tryAgain") {
