@@ -18,6 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.TechnicalErrorServiceFormProvider
+import models.pdv.{PDVResponseData, PersonalDetails}
 import models.{NormalMode, TechnicalErrorService, TryAgainCount, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
@@ -30,8 +31,11 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.{SessionRepository, TryAgainCountRepository}
+import services.PersonalDetailsValidationService
+import uk.gov.hmrc.domain.Nino
 import views.html.TechnicalErrorView
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
@@ -44,6 +48,40 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
   val formProvider = new TechnicalErrorServiceFormProvider()
   val form: Form[TechnicalErrorService] = formProvider()
+
+  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+
+  val fakePDVResponseDataWithPostcode: PDVResponseData = PDVResponseData(
+    id = "fakeId",
+    validationStatus = "success",
+    personalDetails = Some(PersonalDetails(
+      firstName = "John",
+      lastName = "Doe",
+      nino = Nino("AB123456C"),
+      postCode = Some("AA1 1AA"),
+      dateOfBirth = LocalDate.of(1990, 1, 1)
+    )),
+    validCustomer = Some("true"),
+    CRN = Some("fakeCRN"),
+    npsPostCode = Some("AA1 1AA"),
+    reason = None
+  )
+
+  val fakePDVResponseDataWithoutPostcode: PDVResponseData = PDVResponseData(
+    id = "fakeId",
+    validationStatus = "success",
+    personalDetails = Some(PersonalDetails(
+      firstName = "John",
+      lastName = "Doe",
+      nino = Nino("AB123456C"),
+      postCode = None,
+      dateOfBirth = LocalDate.of(1990, 1, 1)
+    )),
+    validCustomer = Some("true"),
+    CRN = Some("fakeCRN"),
+    npsPostCode = Some("AA1 1AA"),
+    reason = None
+  )
 
   "TechnicalErrorController" - {
 
@@ -109,7 +147,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, technicalErrorRoute)
-            .withFormUrlEncodedBody(("value", TechnicalErrorService.values.head.toString))
+            .withFormUrlEncodedBody(("value", TechnicalErrorService.PhoneHmrc.toString))
 
         val result = route(application, request).value
 
@@ -118,14 +156,20 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "redirect to SelectNINOLetterAddress page for a POST if user selects Try again option" in {
+    "redirect to SelectNINOLetterAddress page for a POST if user selects Try again option with a postcode" in {
 
       val mockTryAgainCountRepository = mock[TryAgainCountRepository]
+      val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
+
       when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseDataWithPostcode)))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
-          bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository))
+          bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository),
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
         .build()
 
       running(application) {
@@ -141,7 +185,36 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "redirect to SelectNINOLetterAddress page for a POST if user selects Phone HMRC option" in {
+    "redirect to ConfirmYourPostcode page for a POST if user selects Try again option without a postcode" in {
+
+      val mockTryAgainCountRepository = mock[TryAgainCountRepository]
+      val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
+
+      when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseDataWithoutPostcode)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository),
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, technicalErrorRoute)
+            .withFormUrlEncodedBody(("value", TechnicalErrorService.TryAgain.toString))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+
+        redirectLocation(result).value mustEqual routes.ConfirmYourPostcodeController.onPageLoad(NormalMode).url
+      }
+    }
+
+    "redirect to PhoneHMRCDetails page for a POST if user selects Phone HMRC option" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -158,7 +231,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "redirect to SelectNINOLetterAddress page for a POST if user selects P&P Service option" in {
+    "redirect to Print and Post page for a POST if user selects P&P Service option" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 

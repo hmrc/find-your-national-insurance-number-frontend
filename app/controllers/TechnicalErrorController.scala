@@ -33,7 +33,6 @@ import views.html.TechnicalErrorView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class TechnicalErrorController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -70,7 +69,7 @@ class TechnicalErrorController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-    form.bindFromRequest().fold(
+      form.bindFromRequest().fold(
         formWithErrors =>
           for {
             retryAllowed <- tryAgainCountRepository.findById(request.userId).map {
@@ -84,21 +83,30 @@ class TechnicalErrorController @Inject()(
           } yield BadRequest(view(formWithErrors, mode, retryAllowed)),
 
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY)).onComplete {
-            case Success(pdv) =>
-              auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
-                auditType = "FindYourNinoOptionChosen",
-                validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
-                identifierType = pdv.map(_.CRN.getOrElse("")).getOrElse(""),
-                findMyNinoOption = Some(value.toString)
-              ))
-            case Failure(ex) => logger.warn(ex.getMessage)
-          }
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(TechnicalErrorPage, value))
             _ <- sessionRepository.set(updatedAnswers)
-            _ = if (value.toString == "tryAgain") tryAgainCountRepository.insertOrIncrement(request.userId)
-          } yield Redirect(navigator.nextPage(TechnicalErrorPage, mode, updatedAnswers))
+            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY))
+          } yield {
+            val personalDetails = pdvData.flatMap(_.personalDetails)
+            val postcode: String = personalDetails.flatMap(_.postCode).getOrElse(StringUtils.EMPTY)
+            auditService.audit(AuditUtils.buildAuditEvent(personalDetails,
+              auditType = "FindYourNinoOptionChosen",
+              validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+              identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+              findMyNinoOption = Some(value.toString)
+            ))
+            if (value.toString == "tryAgain") {
+              tryAgainCountRepository.insertOrIncrement(request.userId)
+              if (postcode.nonEmpty) {
+                Redirect(routes.SelectNINOLetterAddressController.onPageLoad())
+              } else {
+                Redirect(routes.ConfirmYourPostcodeController.onPageLoad())
+              }
+            } else {
+              Redirect(navigator.nextPage(TechnicalErrorPage, mode, updatedAnswers))
+            }
+          }
         }
       )
   }
