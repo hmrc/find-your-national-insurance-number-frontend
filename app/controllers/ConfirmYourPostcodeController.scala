@@ -22,7 +22,7 @@ import controllers.actions._
 import forms.ConfirmYourPostcodeFormProvider
 import models.errors.IndividualDetailsError
 import models.individualdetails.AddressType.ResidentialAddress
-import models.individualdetails.{Address, ResolveMerge}
+import models.individualdetails.{Address, IndividualDetailsDataCache, ResolveMerge}
 import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.{PDVResponseData, PersonalDetails}
 
@@ -34,7 +34,6 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
-import repositories.id.IndividualDetailsData
 import services.{AuditService, IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -167,7 +166,7 @@ class ConfirmYourPostcodeController @Inject()(
     }
   }
 
-  private def getNPSFMNRequest(idData: Option[IndividualDetailsData]): NPSFMNRequest =
+  private def getNPSFMNRequest(idData: Option[IndividualDetailsDataCache]): NPSFMNRequest =
     idData match {
       case Some(id) if id.individualDetails.isDefined =>
         NPSFMNRequest(

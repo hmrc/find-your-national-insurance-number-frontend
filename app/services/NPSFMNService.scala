@@ -51,11 +51,9 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
           case BAD_REQUEST =>
             if(checkFailure(response.body)) {
               val npsFMNResponse = Json.parse(response.body).as[NPSFMNResponseWithFailures]
-              logger.info("************************************  service postcode response 400  ************************************ response: " + response.body)
               FailureResponse(npsFMNResponse.response.failures)
             } else {
               if (check(response.body)) {
-                logger.info("************************************  service postcode response 400  ************************************ response: " + response.body)
                 RLSDLONFAResponse(response.status, getMessage(response.body))
               } else
                 TechnicalIssueResponse(response.status, getMessage(response.body))

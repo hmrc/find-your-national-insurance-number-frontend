@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package repositories.encryption
+package models.encryption
 
 import models.pdv.{PDVResponseData, PersonalDetails}
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{OFormat, __}
 import uk.gov.hmrc.crypto.{EncryptedValue, SymmetricCryptoFactory}
-import repositories.encryption.EncryptedValueFormat._
+import EncryptedValueFormat._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
 

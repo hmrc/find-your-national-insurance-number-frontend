@@ -17,27 +17,25 @@
 package repositories
 
 import com.google.inject.{Inject, Singleton}
-import com.mongodb.client.model.Updates
 import config.FrontendAppConfig
+import models.individualdetails.IndividualDetailsDataCache
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.model._
 import play.api.Logging
-import repositories.id.IndividualDetailsData
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.Codecs.toBson
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
-import repositories.id.IndividualDetailsData._
+import IndividualDetailsDataCache._
 
 @Singleton
 class IndividualDetailsRepository @Inject()(mongoComponent: MongoComponent,
                                             appConfig: FrontendAppConfig
-                                            )(implicit ec: ExecutionContext) extends PlayMongoRepository[IndividualDetailsData](
+                                            )(implicit ec: ExecutionContext) extends PlayMongoRepository[IndividualDetailsDataCache](
   collectionName = "individual-details",
   mongoComponent = mongoComponent,
-  domainFormat = IndividualDetailsData.formatIndividualDetailsData,
+  domainFormat = IndividualDetailsDataCache.formatIndividualDetailsData,
   indexes = Seq(
     IndexModel(
       Indexes.ascending("id"),
@@ -56,7 +54,7 @@ class IndividualDetailsRepository @Inject()(mongoComponent: MongoComponent,
   ),
   replaceIndexes = true
 ) with Logging {
-  def insertOrReplaceIndividualDetailsData(individualDetailsData: IndividualDetailsData)
+  def insertOrReplaceIndividualDetailsData(individualDetailsData: IndividualDetailsDataCache)
                                   (implicit ec: ExecutionContext): Future[String] = {
     logger.info(s"insert or update one in $collectionName table")
 
@@ -72,7 +70,7 @@ class IndividualDetailsRepository @Inject()(mongoComponent: MongoComponent,
   }
 
   def findIndividualDetailsDataByNino(nino: String)
-                               (implicit ec: ExecutionContext): Future[Option[IndividualDetailsData]] = {
+                               (implicit ec: ExecutionContext): Future[Option[IndividualDetailsDataCache]] = {
     logger.info(s"find one in $collectionName table")
     val filter = Filters.equal("individualDetails.nino", nino)
     collection.find(filter)

@@ -22,7 +22,7 @@ import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
 import models.errors.IndividualDetailsError
 import models.individualdetails.AddressType.ResidentialAddress
-import models.individualdetails.{Address, ResolveMerge}
+import models.individualdetails.{Address, IndividualDetailsDataCache, ResolveMerge}
 import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.PDVResponseData
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, SelectNINOLetterAddress}
@@ -37,7 +37,6 @@ import views.html.SelectNINOLetterAddressView
 import org.apache.commons.lang3.StringUtils
 import play.api.Logging
 import play.api.data.Form
-import repositories.id.IndividualDetailsData
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
 import util.AuditUtils
@@ -174,7 +173,7 @@ class SelectNINOLetterAddressController @Inject()(
       case _ => StringUtils.EMPTY
     }
 
-  private def getNPSFMNRequest(idData: Option[IndividualDetailsData]): NPSFMNRequest =
+  private def getNPSFMNRequest(idData: Option[IndividualDetailsDataCache]): NPSFMNRequest =
     idData match {
       case Some(id) if id.individualDetails.isDefined =>
         NPSFMNRequest(

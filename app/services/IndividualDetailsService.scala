@@ -17,11 +17,8 @@
 package services
 
 import com.google.inject.ImplementedBy
-import models.individualdetails.IndividualDetails
+import models.individualdetails.{IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache}
 import repositories.IndividualDetailsRepository
-import repositories.id.{IndividualDetailsCache, IndividualDetailsData}
-import uk.gov.hmrc.http.HeaderCarrier
-import util.FMNConstants.EmptyString
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,7 +27,7 @@ import scala.concurrent.{ExecutionContext, Future}
 trait IndividualDetailsService {
   def createIndividualDetailsData(sessionId: String, individualDetails: IndividualDetails): Future[String]
 
-  def getIndividualDetailsData(nino: String): Future[Option[IndividualDetailsData]]
+  def getIndividualDetailsData(nino: String): Future[Option[IndividualDetailsDataCache]]
 
 }
 
@@ -44,18 +41,18 @@ class IndividualDetailsServiceImpl @Inject()(
     )
   }
 
-  override def getIndividualDetailsData(nino: String): Future[Option[IndividualDetailsData]] =
+  override def getIndividualDetailsData(nino: String): Future[Option[IndividualDetailsDataCache]] =
     individualDetailsRepository.findIndividualDetailsDataByNino(nino)
 
-  private def getIndividualDetailsData(sessionId: String, individualDetails: IndividualDetails): IndividualDetailsData = {
-    val iDetails = IndividualDetailsCache(
+  private def getIndividualDetailsData(sessionId: String, individualDetails: IndividualDetails): IndividualDetailsDataCache = {
+    val iDetails = IndividualDetailsData(
       individualDetails.getFirstForename,
       individualDetails.getLastName,
       individualDetails.dateOfBirth.toString,
       individualDetails.getPostCode,
       individualDetails.getNino
     )
-    IndividualDetailsData(
+    IndividualDetailsDataCache(
       sessionId,
       Some(iDetails)
     )

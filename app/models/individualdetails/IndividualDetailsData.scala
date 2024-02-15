@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package repositories.id
+package models.individualdetails
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.domain.Nino
 import util.FMNConstants.EmptyString
 
 import java.time.{Instant, LocalDateTime, ZoneId, ZoneOffset}
 
-case class IndividualDetailsCache(
+case class IndividualDetailsData(
                               firstForename: String,
                               surname: String,
                               dateOfBirth: String,
@@ -30,17 +29,17 @@ case class IndividualDetailsCache(
                               nino: String
                             )
 
-case class IndividualDetailsData(
-                                  id: String,
-                                  individualDetails: Option[IndividualDetailsCache],
-                                  lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC)
+case class IndividualDetailsDataCache(
+                                       id: String,
+                                       individualDetails: Option[IndividualDetailsData],
+                                       lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC)
                                 )
 
-object IndividualDetailsData {
-  implicit val formatIndividualDetailsCache: OFormat[IndividualDetailsCache] = Json.format[IndividualDetailsCache]
-  implicit val formatIndividualDetailsData: OFormat[IndividualDetailsData] = Json.format[IndividualDetailsData]
+object IndividualDetailsDataCache {
+  implicit val formatIndividualDetailsCache: OFormat[IndividualDetailsData] = Json.format[IndividualDetailsData]
+  implicit val formatIndividualDetailsData: OFormat[IndividualDetailsDataCache] = Json.format[IndividualDetailsDataCache]
 
-  implicit class IndividualDetailsDataOps(private val individualDetailsData:IndividualDetailsData) extends AnyVal {
+  implicit class IndividualDetailsDataOps(private val individualDetailsData:IndividualDetailsDataCache) extends AnyVal {
 
     def getNino: String = individualDetailsData.individualDetails match {
       case Some(id) => id.nino
