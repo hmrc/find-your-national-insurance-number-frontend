@@ -72,6 +72,8 @@ class CheckDetailsController @Inject()(
       request.session.data.getOrElse("sessionId", EmptyString)
     )
 
+    println("ACHI: " + pdvRequest)
+
     val result: Try[Future[Result]] = Try {
       val processData = for {
         pdvData <- checkDetailsService.getPDVData(pdvRequest)
@@ -84,6 +86,7 @@ class CheckDetailsController @Inject()(
       }
       processData.recover {
         case ex: Exception =>
+          println("ACHI: processData.recover")
           logger.error(s"An error occurred in process data: ${ex.getMessage}")
           Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
       }
@@ -91,6 +94,7 @@ class CheckDetailsController @Inject()(
     result match {
       case Success(res) => res
       case Failure(ex) =>
+        println("ACHI: result match")
         logger.error(s"An error occurred, redirecting: ${ex.getMessage}")
         Future(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
     }
@@ -102,6 +106,7 @@ class CheckDetailsController @Inject()(
     if (pdvData.validationStatus.equals("failure")) {
       logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
 
+      println("ACHI: checkDetailsFailureJourney")
       auditService.findYourNinoPDVMatchFailed(pdvData, origin)
       Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
     } else {

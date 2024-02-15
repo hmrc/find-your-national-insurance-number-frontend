@@ -17,10 +17,10 @@
 package controllers
 
 import base.SpecBase
-import connectors.IndividualDetailsConnector
+import connectors.{IndividualDetailsConnector, PersonalDetailsValidationConnector}
 import models.errors.ConnectorError
 import models.individualdetails._
-import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails}
+import models.pdv.{PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import models.{AddressLine, CorrelationId, IndividualDetailsResponseEnvelope, NormalMode, individualdetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
@@ -95,12 +95,20 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
     addressList = AddressList(Some(List(fakeAddress)))
   )
 
-  val mockPDVResponseDataSuccess = PDVResponseData(
+  val mockPDVResponseDataSuccess: PDVResponseData = PDVResponseData(
     "01234",
     "success",
     Some(fakePersonDetails),
     LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
   )
+  val mockPDVResponseDataFailure: PDVResponseData = PDVResponseData(
+    "01234",
+    "failure",
+    None,
+    LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
+  )
+
+  val pvdResponse: PDVResponse = PDVSuccessResponse(mockPDVResponseDataFailure)
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
   val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
@@ -163,7 +171,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       }
 
       "when PDVResponseData validationStatus is failure" in {
-        val mockPDVResponseDataFailure = mockPDVResponseDataSuccess.copy(validationStatus = "failure")
 
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
@@ -172,8 +179,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           )
           .build()
 
-        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
-          .thenReturn(Future.successful(mockPDVResponseDataFailure))
+        when(mockPersonalDetailsValidationService.getPDVMatchResult(any())(any()))
+          .thenReturn(Future.successful(pvdResponse))
 
         running(app) {
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)

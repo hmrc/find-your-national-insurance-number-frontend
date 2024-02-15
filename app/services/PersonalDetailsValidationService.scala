@@ -38,7 +38,10 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     for {
       pdvResponse <- getPDVMatchResult(pdvRequest)
       pdvResponseData <-  createPDVDataRow(pdvResponse)
-    } yield pdvResponseData
+    } yield {
+      println("ACHI: " + pdvResponse)
+      pdvResponseData
+    }
 
 
   // Get a PDV match result
@@ -60,10 +63,12 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
 
   // Create a PDV data row
   def createPDVDataRow(personalDetailsValidation: PDVResponse): Future[PDVResponseData] = {
+    println("ACHI: " + personalDetailsValidation)
     personalDetailsValidation match {
-      case _ @ PDVSuccessResponse(pdvResponseData) =>
-        (pdvResponseData.validationStatus,pdvResponseData.personalDetails) match {
+      case _@PDVSuccessResponse(pdvResponseData) =>
+        (pdvResponseData.validationStatus.trim.toLowerCase, pdvResponseData.personalDetails) match {
           case ("success", Some(personalDetails)) =>
+            println("SUCCESS")
             val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(EmptyString))
             if (reformattedPostCode.strip().nonEmpty) {
               val newPersonalDetails = personalDetails.copy(postCode = Some(reformattedPostCode))
@@ -76,8 +81,10 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
               Future.successful(pdvResponseData)
             }
           case ("failure", None) =>
+            println("FAILURE")
             Future.successful(pdvResponseData)
           case (_, None) =>
+            println("NONE")
             Future.failed(new RuntimeException("PersonalDetails is None in PDVResponseData"))
         }
       case _ =>
