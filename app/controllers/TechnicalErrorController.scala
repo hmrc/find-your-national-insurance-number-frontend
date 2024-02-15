@@ -89,7 +89,7 @@ class TechnicalErrorController @Inject()(
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY))
           } yield {
             val personalDetails = pdvData.flatMap(_.personalDetails)
-            val postcode: String = personalDetails.map(_.postCode.getOrElse(StringUtils.EMPTY)).getOrElse(StringUtils.EMPTY)
+            val postcode: String = personalDetails.flatMap(_.postCode).getOrElse(StringUtils.EMPTY)
             auditService.audit(AuditUtils.buildAuditEvent(personalDetails,
               auditType = "FindYourNinoOptionChosen",
               validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
