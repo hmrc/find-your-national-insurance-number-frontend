@@ -88,9 +88,9 @@ class CheckDetailsServiceImpl @Inject()(
       pdvData <- personalDetailsValidationService.createPDVDataFromPDVMatch(body)
     } yield pdvData match {
       case data: PDVResponseData =>
-        println("ACHI data: " + data)
         data
-      case _ => throw new Exception("No PDV data found")
+      case _ =>
+        throw new Exception("No PDV data found")
     }
     p.recover {
       case ex: HttpException =>

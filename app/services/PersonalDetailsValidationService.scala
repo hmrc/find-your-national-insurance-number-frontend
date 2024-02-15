@@ -34,18 +34,18 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
                                                  personalDetailsValidationRepository: PersonalDetailsValidationRepository
                                                 )(implicit val ec: ExecutionContext) extends Logging{
 
-  def createPDVDataFromPDVMatch(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponseData] =
+  def createPDVDataFromPDVMatch(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponseData] = {
     for {
       pdvResponse <- getPDVMatchResult(pdvRequest)
-      pdvResponseData <-  createPDVDataRow(pdvResponse)
+      pdvResponseData <- createPDVDataRow(pdvResponse)
     } yield {
-      println("ACHI: " + pdvResponse)
       pdvResponseData
     }
+  }
 
 
   // Get a PDV match result
-  def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponse] =
+  def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponse] = {
     connector.retrieveMatchingDetails(pdvRequest) map { response =>
         response.status match {
         case OK =>
@@ -60,15 +60,14 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
           throw new RuntimeException(s"Failed getting PDV data.")
       }
     }
+  }
 
   // Create a PDV data row
   def createPDVDataRow(personalDetailsValidation: PDVResponse): Future[PDVResponseData] = {
-    println("ACHI: " + personalDetailsValidation)
     personalDetailsValidation match {
       case _@PDVSuccessResponse(pdvResponseData) =>
         (pdvResponseData.validationStatus.trim.toLowerCase, pdvResponseData.personalDetails) match {
           case ("success", Some(personalDetails)) =>
-            println("SUCCESS")
             val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(EmptyString))
             if (reformattedPostCode.strip().nonEmpty) {
               val newPersonalDetails = personalDetails.copy(postCode = Some(reformattedPostCode))
@@ -81,10 +80,8 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
               Future.successful(pdvResponseData)
             }
           case ("failure", None) =>
-            println("FAILURE")
             Future.successful(pdvResponseData)
           case (_, None) =>
-            println("NONE")
             Future.failed(new RuntimeException("PersonalDetails is None in PDVResponseData"))
         }
       case _ =>
