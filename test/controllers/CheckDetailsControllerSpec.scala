@@ -222,7 +222,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
           verify(auditService, times(1)).start(any())(any())
-          verify(auditService, times(1)).findYourNinoGetPdvDataHttpError(any())(any())
+          verify(auditService, times(1)).findYourNinoGetPdvDataHttpError(any(), any())(any())
         }
       }
 

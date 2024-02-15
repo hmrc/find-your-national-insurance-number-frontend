@@ -93,8 +93,7 @@ class CheckDetailsServiceImpl @Inject()(
         throw new Exception("No PDV data found")
     }
     p.recover {
-      case ex: HttpException =>
-        auditService.findYourNinoGetPdvDataHttpError(ex)
+      case ex: Exception =>
         logger.debug(ex.getMessage)
         throw ex
     }
