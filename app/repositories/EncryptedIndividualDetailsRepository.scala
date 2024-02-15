@@ -18,7 +18,10 @@ package repositories
 
 import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
+import models.encryption.id.EncryptedIndividualDetailsDataCache
+import models.encryption.id.EncryptedIndividualDetailsDataCache.{decrypt, encrypt}
 import models.individualdetails.IndividualDetailsDataCache
+import models.individualdetails.IndividualDetailsDataCache._
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.model._
 import play.api.Logging
@@ -27,15 +30,14 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
-import IndividualDetailsDataCache._
 
 @Singleton
-class IndividualDetailsRepository @Inject()(mongoComponent: MongoComponent,
-                                            appConfig: FrontendAppConfig
-                                            )(implicit ec: ExecutionContext) extends PlayMongoRepository[IndividualDetailsDataCache](
+class EncryptedIndividualDetailsRepository @Inject()(mongoComponent: MongoComponent,
+                                                     appConfig: FrontendAppConfig
+                                            )(implicit ec: ExecutionContext) extends PlayMongoRepository[EncryptedIndividualDetailsDataCache](
   collectionName = "individual-details",
   mongoComponent = mongoComponent,
-  domainFormat = IndividualDetailsDataCache.formatIndividualDetailsDataCache,
+  domainFormat = EncryptedIndividualDetailsDataCache.formatEncryptedIndividualDetailsDataCache,
   indexes = Seq(
     IndexModel(
       Indexes.ascending("id"),
@@ -60,7 +62,7 @@ class IndividualDetailsRepository @Inject()(mongoComponent: MongoComponent,
 
     val filter = Filters.equal("individualDetails.nino", individualDetailsData.getNino)
     val options = ReplaceOptions().upsert(true)
-    collection.replaceOne(filter, individualDetailsData, options)
+    collection.replaceOne(filter, encrypt(individualDetailsData, appConfig.encryptionKey), options)
       .toFuture()
       .map(_ => individualDetailsData.getNino) recover {
       case e: MongoWriteException if e.getCode == 11000 =>
@@ -74,8 +76,12 @@ class IndividualDetailsRepository @Inject()(mongoComponent: MongoComponent,
     logger.info(s"find one in $collectionName table")
     val filter = Filters.equal("individualDetails.nino", nino)
     collection.find(filter)
-      .toFuture()
-      .map(_.headOption)
+      .first()
+      .toFutureOption()
+      .map(optEncryptedIndividualDetailsDataCache =>
+        optEncryptedIndividualDetailsDataCache.map(encryptedIndividualDetailsDataCache =>
+          decrypt(encryptedIndividualDetailsDataCache, appConfig.encryptionKey))
+      )
   }
 
 }

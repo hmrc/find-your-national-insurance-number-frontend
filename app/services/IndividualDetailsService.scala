@@ -18,7 +18,7 @@ package services
 
 import com.google.inject.ImplementedBy
 import models.individualdetails.{IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache}
-import repositories.IndividualDetailsRepository
+import repositories.EncryptedIndividualDetailsRepository
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,7 +32,7 @@ trait IndividualDetailsService {
 }
 
 class IndividualDetailsServiceImpl @Inject()(
-                                              individualDetailsRepository: IndividualDetailsRepository
+                                              individualDetailsRepository: EncryptedIndividualDetailsRepository
                                             )(implicit ec: ExecutionContext) extends IndividualDetailsService {
 
   override def createIndividualDetailsData(sessionId: String, individualDetails: IndividualDetails): Future[String] = {

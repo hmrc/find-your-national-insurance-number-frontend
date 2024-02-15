@@ -17,7 +17,7 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.encryption.EncryptedPDVResponseData
+import models.encryption.pdv.EncryptedPDVResponseData
 import models.pdv.{PDVResponseData, PersonalDetails}
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues

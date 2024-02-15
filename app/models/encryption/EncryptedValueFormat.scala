@@ -17,7 +17,6 @@
 package models.encryption
 
 import play.api.libs.json.{Format, Json, OFormat}
-
 import uk.gov.hmrc.crypto.EncryptedValue
 
 object EncryptedValueFormat {

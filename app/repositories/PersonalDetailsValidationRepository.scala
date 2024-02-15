@@ -19,15 +19,15 @@ package repositories
 import com.google.inject.{Inject, Singleton}
 import com.mongodb.client.model.Updates
 import config.FrontendAppConfig
-import models.encryption.EncryptedPDVResponseData
 import models.pdv.PDVResponseData
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.model._
 import play.api.Logging
-import EncryptedPDVResponseData.{decrypt, encrypt, encryptField}
+import models.encryption.pdv.EncryptedPDVResponseData.{decrypt, encrypt, encryptField}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import models.encryption.EncryptedValueFormat._
+import models.encryption.pdv.EncryptedPDVResponseData
 import uk.gov.hmrc.mongo.play.json.Codecs.toBson
 
 import java.util.concurrent.TimeUnit

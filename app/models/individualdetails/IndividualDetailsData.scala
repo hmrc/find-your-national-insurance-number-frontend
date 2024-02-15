@@ -27,17 +27,17 @@ case class IndividualDetailsData(
                               dateOfBirth: String,
                               postCode: String,
                               nino: String
-                            )
+                              )
 
 case class IndividualDetailsDataCache(
                                        id: String,
                                        individualDetails: Option[IndividualDetailsData],
                                        lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC)
-                                )
+                                     )
 
 object IndividualDetailsDataCache {
   implicit val formatIndividualDetailsCache: OFormat[IndividualDetailsData] = Json.format[IndividualDetailsData]
-  implicit val formatIndividualDetailsData: OFormat[IndividualDetailsDataCache] = Json.format[IndividualDetailsDataCache]
+  implicit val formatIndividualDetailsDataCache: OFormat[IndividualDetailsDataCache] = Json.format[IndividualDetailsDataCache]
 
   implicit class IndividualDetailsDataOps(private val individualDetailsData:IndividualDetailsDataCache) extends AnyVal {
 
