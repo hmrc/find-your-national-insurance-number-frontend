@@ -22,12 +22,12 @@ import controllers.actions._
 import forms.ConfirmYourPostcodeFormProvider
 import models.errors.IndividualDetailsError
 import models.individualdetails.AddressType.ResidentialAddress
-import models.individualdetails.{Address, IndividualDetailsDataCache, ResolveMerge}
-import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
+import models.individualdetails.{Address, ResolveMerge}
+import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.{PDVResponseData, PersonalDetails}
 
 import javax.inject.Inject
-import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, NormalMode, UserAnswers}
+import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, NormalMode}
 import pages.ConfirmYourPostcodePage
 import play.api.Logging
 import play.api.data.Form
@@ -39,7 +39,7 @@ import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ConfirmYourPostcodeView
-import util.AuditUtils
+import util.{AuditUtils, FMNHelper}
 import util.FMNHelper.comparePostCode
 
 import java.util.UUID
@@ -134,7 +134,7 @@ class ConfirmYourPostcodeController @Inject()(
       case Some(personalDetails: PersonalDetails) =>
         for {
           idData <- individualDetailsService.getIndividualDetailsData(personalDetails.nino.nino)
-          status <- npsFMNService.sendLetter(personalDetails.nino.nino, getNPSFMNRequest(idData))
+          status <- npsFMNService.sendLetter(personalDetails.nino.nino, FMNHelper.createNPSFMNRequest(idData))
         } yield status match {
           case LetterIssuedResponse() =>
             Redirect(routes.NINOLetterPostedConfirmationController.onPageLoad())
@@ -165,18 +165,6 @@ class ConfirmYourPostcodeController @Inject()(
       case None => Future(Redirect(routes.TechnicalErrorController.onPageLoad()))
     }
   }
-
-  private def getNPSFMNRequest(idData: Option[IndividualDetailsDataCache]): NPSFMNRequest =
-    idData match {
-      case Some(id) if id.individualDetails.isDefined =>
-        NPSFMNRequest(
-          id.getFirstForename,
-          id.getLastName,
-          id.dateOfBirth,
-          id.getPostCode
-        )
-      case _ => NPSFMNRequest.empty
-    }
 
   def getIndividualDetailsAddress(nino: IndividualDetailsNino
                                  )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Either[IndividualDetailsError, Address]] = {

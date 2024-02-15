@@ -31,7 +31,6 @@ import models.pdv.{PDVRequest, PDVResponseData}
 import play.api.Logging
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
-import util.AuditUtils
 import util.FMNConstants.EmptyString
 
 import java.util.UUID

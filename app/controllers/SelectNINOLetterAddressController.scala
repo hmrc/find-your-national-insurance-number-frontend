@@ -22,8 +22,8 @@ import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
 import models.errors.IndividualDetailsError
 import models.individualdetails.AddressType.ResidentialAddress
-import models.individualdetails.{Address, IndividualDetailsDataCache, ResolveMerge}
-import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
+import models.individualdetails.{Address, ResolveMerge}
+import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.PDVResponseData
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, SelectNINOLetterAddress}
 import navigation.Navigator
@@ -39,7 +39,7 @@ import play.api.Logging
 import play.api.data.Form
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
-import util.AuditUtils
+import util.{AuditUtils, FMNHelper}
 
 import java.util.UUID
 import javax.inject.Inject
@@ -126,7 +126,7 @@ class SelectNINOLetterAddressController @Inject()(
                     ))
                 }
 
-                npsFMNService.sendLetter(nino, getNPSFMNRequest(idData)).map {
+                npsFMNService.sendLetter(nino, FMNHelper.createNPSFMNRequest(idData)).map {
                   case LetterIssuedResponse() =>
                     Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
                   case RLSDLONFAResponse(responseStatus, responseMessage) =>
@@ -171,18 +171,6 @@ class SelectNINOLetterAddressController @Inject()(
     pdvResponseData match {
       case Some(pd) => pd.getPostCode
       case _ => StringUtils.EMPTY
-    }
-
-  private def getNPSFMNRequest(idData: Option[IndividualDetailsDataCache]): NPSFMNRequest =
-    idData match {
-      case Some(id) if id.individualDetails.isDefined =>
-        NPSFMNRequest(
-          id.getFirstForename,
-          id.getLastName,
-          id.dateOfBirth,
-          id.getPostCode
-        )
-      case _ => NPSFMNRequest.empty
     }
 
   def getIndividualDetailsAddress(nino: IndividualDetailsNino)(
