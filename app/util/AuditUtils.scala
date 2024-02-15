@@ -43,7 +43,8 @@ object AuditUtils {
                                     findMyNinoPostcodeMatched: Option[String],
                                     pageErrorGeneratedFrom: Option[String],
                                     errorStatus: Option[String],
-                                    errorReason: Option[String]
+                                    errorReason: Option[String],
+                                    origin : Option[String]
                                   )
 
   object YourDetailsAuditEvent {
@@ -86,7 +87,8 @@ object AuditUtils {
                            findMyNinoPostcodeMatched: Option[String],
                            pageErrorGeneratedFrom: Option[String],
                            errorStatus: Option[String],
-                           errorReason: Option[String]): YourDetailsAuditEvent = {
+                           errorReason: Option[String],
+                           origin: Option[String]): YourDetailsAuditEvent = {
     YourDetailsAuditEvent(
       postcode,
       nino,
@@ -104,7 +106,8 @@ object AuditUtils {
       findMyNinoPostcodeMatched,
       pageErrorGeneratedFrom,
       errorStatus,
-      errorReason
+      errorReason,
+      origin
     )
   }
 
@@ -146,17 +149,18 @@ object AuditUtils {
   }
 
 
-  def buildAuditEvent(personDetails: Option[PersonalDetails],
-                      individualDetailsAddress: Option[Address],
+  def buildAuditEvent(personDetails: Option[PersonalDetails] = None,
+                      individualDetailsAddress: Option[Address] = None,
                       auditType: String,
                       validationOutcome: String,
                       identifierType: String,
-                      findMyNinoOption: Option[String],
-                      findMyNinoPostcodeEntered: Option[String],
-                      findMyNinoPostcodeMatched: Option[String],
-                      pageErrorGeneratedFrom: Option[String],
-                      errorStatus: Option[String],
-                      errorReason: Option[String]
+                      findMyNinoOption: Option[String] = None,
+                      findMyNinoPostcodeEntered: Option[String] = None,
+                      findMyNinoPostcodeMatched: Option[String] = None,
+                      pageErrorGeneratedFrom: Option[String] = None,
+                      errorStatus: Option[String] = None,
+                      errorReason: Option[String] = None,
+                      origin: Option[String] = None
                      )(implicit hc: HeaderCarrier): ExtendedDataEvent = {
     personDetails match {
       case Some(pd) =>
@@ -178,7 +182,8 @@ object AuditUtils {
             getFindMyNinoPostcodeMatched(findMyNinoPostcodeMatched),
             pageErrorGeneratedFrom,
             errorStatus,
-            errorReason)))
+            errorReason,
+            origin)))
       case None =>
         buildDataEvent(auditType, s"$auditType",
           Json.toJson(buildDetails(None,
@@ -197,7 +202,8 @@ object AuditUtils {
             getFindMyNinoPostcodeMatched(findMyNinoPostcodeMatched),
             pageErrorGeneratedFrom,
             errorStatus,
-            errorReason)))
+            errorReason,
+            origin)))
     }
   }
 }

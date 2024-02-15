@@ -102,16 +102,11 @@ class SelectNINOLetterAddressController @Inject()(
                 } yield idAddress match {
                   case Right(idAddr) =>
                     auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
-                      Some(idAddr),
-                      "FindYourNinoOnlineLetterOption",
-                      pdvData.map(_.validationStatus).getOrElse(""),
-                      pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
-                      Some(value.toString),
-                      None,
-                      None,
-                      None,
-                      None,
-                      None
+                      individualDetailsAddress = Some(idAddr),
+                      auditType = "FindYourNinoOnlineLetterOption",
+                      validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+                      identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+                      findMyNinoOption = Some(value.toString)
                     ))
                 }
                 Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers)))
@@ -121,16 +116,11 @@ class SelectNINOLetterAddressController @Inject()(
                 } yield idAddress match {
                   case Right(idAddr) =>
                     auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
-                      Some(idAddr),
-                      "FindYourNinoOnlineLetterOption",
-                      pdvData.map(_.validationStatus).getOrElse(""),
-                      pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
-                      Some(value.toString),
-                      None,
-                      None,
-                      None,
-                      None,
-                      None
+                      individualDetailsAddress = Some(idAddr),
+                      auditType = "FindYourNinoOnlineLetterOption",
+                      validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+                      identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+                      findMyNinoOption = Some(value.toString)
                     ))
                 }
 
@@ -141,16 +131,12 @@ class SelectNINOLetterAddressController @Inject()(
                     personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
                       case Success(pdv) =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
-                          None,
-                          "FindYourNinoError",
-                          pdv.map(_.validationStatus).getOrElse(""),
-                          pdv.map(_.CRN.getOrElse("")).getOrElse(""),
-                          None,
-                          None,
-                          None,
-                          Some("/postcode"),
-                          Some(responseStatus.toString),
-                          Some(responseMessage)
+                          auditType = "FindYourNinoError",
+                          validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
+                          identifierType = pdv.map(_.CRN.getOrElse("")).getOrElse(""),
+                          pageErrorGeneratedFrom = Some("/postcode"),
+                          errorStatus = Some(responseStatus.toString),
+                          errorReason = Some(responseMessage)
                         ))
                       case Failure(ex) => logger.warn(ex.getMessage)
                     }
@@ -159,16 +145,12 @@ class SelectNINOLetterAddressController @Inject()(
                     personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
                       case Success(pdv) =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
-                          None,
-                          "FindYourNinoError",
-                          pdv.map(_.validationStatus).getOrElse(""),
-                          pdv.map(_.CRN.getOrElse("")).getOrElse(""),
-                          None,
-                          None,
-                          None,
-                          Some("/postcode"),
-                          Some(responseStatus.toString),
-                          Some(responseMessage)
+                          auditType = "FindYourNinoError",
+                          validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
+                          identifierType = pdv.map(_.CRN.getOrElse("")).getOrElse(""),
+                          pageErrorGeneratedFrom = Some("/postcode"),
+                          errorStatus = Some(responseStatus.toString),
+                          errorReason = Some(responseMessage)
                         ))
                       case Failure(ex) => logger.warn(ex.getMessage)
                     }

@@ -92,8 +92,7 @@ class CheckDetailsServiceImpl @Inject()(
     }
     p.recover {
       case ex: HttpException =>
-        auditService.audit(AuditUtils.buildAuditEvent(None, None, "FindYourNinoError",
-          EmptyString, EmptyString, None, None, None, Some("/checkDetails"), Some(ex.responseCode.toString), Some(ex.message)))
+        auditService.findYourNinoGetPdvDataHttpError(ex)
         logger.debug(ex.getMessage)
         throw ex
     }

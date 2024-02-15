@@ -110,7 +110,12 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockAuthConnector, mockIndividualDetailsConnector, mockPersonalDetailsValidationService)
+    reset(
+      mockAuthConnector,
+      mockIndividualDetailsConnector,
+      mockPersonalDetailsValidationService,
+      auditService
+    )
   }
 
   val pdvOrigin: Option[String] = Some("PDV")
@@ -121,23 +126,40 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
     "must redirect to InvalidDataNINOHelpController" - {
       
       "when invalid origin" in {
+
+        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            inject.bind[AuditService].toInstance(auditService)
+          )
+          .build()
+
         val invalidOrigin: Option[String] = Some("test")
 
-
         val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(invalidOrigin, NormalMode).url)
-        val result = route(application, request).value
+        val result = route(app, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+
+        verify(auditService, times(1)).start(any())(any())
       }
 
       "when credentialId is empty" in {
+
+        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            inject.bind[AuditService].toInstance(auditService)
+          )
+          .build()
+
         val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
           .withSession("sessionId" -> "", "credentialId" -> "")
-        val result = route(application, request).value
+        val result = route(app, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+
+        verify(auditService, times(1)).start(any())(any())
       }
 
       "when PDVResponseData validationStatus is failure" in {
@@ -145,7 +167,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
-            inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+            inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+            inject.bind[AuditService].toInstance(auditService)
           )
           .build()
 
@@ -158,13 +181,17 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+
+          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).findYourNinoPDVMatchFailed(any(), any())(any())
         }
       }
 
       "when pdvData throws http exception" in {
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
-            inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+            inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+            inject.bind[AuditService].toInstance(auditService)
           )
           .build()
 
@@ -177,8 +204,12 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+
+          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).findYourNinoGetPdvDataHttpError(any())(any())
         }
       }
+
       "and audit the event when getIdData returns a Left with ConnectorError" in {
         when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
@@ -200,9 +231,11 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
-          verify(auditService, times(1)).audit(any())(any())
+          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
         }
       }
+
       "when idPostCode does not equal pdvData.getPostCode" in {
         val fakeIndividualDetailsWithMatchingPostcode = fakeIndividualDetails.copy(
           addressList = AddressList(Some(List(fakeAddress.copy(addressPostcode = Some(AddressPostcode("  A A1 2AA   "))))))
@@ -216,7 +249,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
-            inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+            inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+            inject.bind[AuditService].toInstance(auditService)
           )
           .build()
 
@@ -227,11 +261,11 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+
+          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).findYourNinoPDVMatched(any(),any(),any())(any())
         }
       }
-
-
-
 
       "when AccountStatusType is not FullLive" in {
         val fakeIndividualDetailsWithConditionsNotMet = fakeIndividualDetails.copy(
@@ -241,7 +275,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
-            inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector)
+            inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
+            inject.bind[AuditService].toInstance(auditService)
           )
           .build()
 
@@ -256,6 +291,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+
+          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
         }
       }
 
@@ -267,7 +305,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
-            inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector)
+            inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
+            inject.bind[AuditService].toInstance(auditService)
           )
           .build()
 
@@ -282,6 +321,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+
+          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
         }
       }
 
@@ -293,7 +335,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
-            inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector)
+            inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
+            inject.bind[AuditService].toInstance(auditService)
           )
           .build()
 
@@ -308,6 +351,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+
+          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
         }
       }
 
@@ -319,7 +365,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
-            inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector)
+            inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
+            inject.bind[AuditService].toInstance(auditService)
           )
           .build()
 
@@ -335,6 +382,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+
+          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
         }
       }
 
@@ -342,7 +392,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
-            inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector)
+            inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
+            inject.bind[AuditService].toInstance(auditService)
           )
           .build()
 
@@ -358,6 +409,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+
+          verify(auditService, times(1)).start(any())(any())
         }
       }
     }
@@ -375,7 +428,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
           inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
-          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+          inject.bind[AuditService].toInstance(auditService)
         )
         .build()
 
@@ -384,6 +438,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         val result = route(app, request).value
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(NormalMode).url
+
+        verify(auditService, times(1)).start(any())(any())
+        verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
       }
     }
 
@@ -396,7 +453,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
           inject.bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
-          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+          inject.bind[AuditService].toInstance(auditService)
         )
         .build()
 
@@ -406,6 +464,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.ValidDataNINOHelpController.onPageLoad(NormalMode).url
+
+        verify(auditService, times(1)).start(any())(any())
+        verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
       }
     }
   }
