@@ -174,8 +174,7 @@ class SelectNINOLetterAddressController @Inject()(
       case _ => StringUtils.EMPTY
     }
 
-  private def getNPSFMNRequest(idData: Option[IndividualDetailsData]): NPSFMNRequest = {
-
+  private def getNPSFMNRequest(idData: Option[IndividualDetailsData]): NPSFMNRequest =
     idData match {
       case Some(id) if id.individualDetails.isDefined =>
         NPSFMNRequest(
@@ -186,7 +185,6 @@ class SelectNINOLetterAddressController @Inject()(
         )
       case _ => NPSFMNRequest.empty
     }
-  }
 
   def getIndividualDetailsAddress(nino: IndividualDetailsNino)(
     implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Either[IndividualDetailsError, Address]] = {
