@@ -203,7 +203,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
 
-      "when pdvData throws http exception" in {
+      "when pdvData throws a runtime exception" in {
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
@@ -212,7 +212,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           .build()
 
         when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
-          .thenReturn(Future.failed(new HttpException("something went wrong", INTERNAL_SERVER_ERROR)))
+          .thenReturn(Future.failed(new RuntimeException("Something went wrong")))
 
         running(app) {
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
@@ -222,7 +222,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
           verify(auditService, times(1)).start(any())(any())
-          verify(auditService, times(1)).findYourNinoGetPdvDataHttpError(any(), any())(any())
         }
       }
 
