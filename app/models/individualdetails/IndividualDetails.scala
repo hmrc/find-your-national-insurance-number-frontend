@@ -16,6 +16,7 @@
 
 package models.individualdetails
 
+import models.individualdetails.AddressType.ResidentialAddress
 import models.json.WritesNumber
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -192,6 +193,18 @@ object IndividualDetails {
     (__ \ "details" \ "dateOfRegistration").formatNullable[LocalDate] ~
     (__ \ "details" \ "crnIndicator").format[CrnIndicator] ~
     (__ \ "nameList").format[NameList] ~
-    (__ \ "addressList").format[AddressList])(IndividualDetails.apply _, unlift(IndividualDetails.unapply))
+    (__ \ "addressList").format[AddressList])(IndividualDetails.apply, unlift(IndividualDetails.unapply))
+
+  implicit class IndividualDetailsOps(idData: IndividualDetails) {
+    def getAddressTypeResidential: Address = idData.addressList.getAddress.filter(_.addressType.equals(ResidentialAddress)).head
+
+    def getPostCode: String = getAddressTypeResidential.addressPostcode.map(_.value).getOrElse("")
+
+    def getNino: String = idData.ninoWithoutSuffix
+
+    def getFirstForename: String = idData.nameList.name.flatMap(_.headOption).map(_.firstForename.value).getOrElse("")
+    def getLastName: String = idData.nameList.name.flatMap(_.headOption).map(_.surname.value).getOrElse("")
+  }
+
 
 }
