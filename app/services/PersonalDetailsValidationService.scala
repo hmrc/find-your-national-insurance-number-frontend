@@ -16,14 +16,13 @@
 
 package services
 
-import config.FrontendAppConfig
 import connectors.PersonalDetailsValidationConnector
 import models.pdv.{PDVBadRequestResponse, PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse}
 import org.mongodb.scala.MongoException
 import play.api.Logging
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
 import play.api.libs.json.Json
-import repositories.{EncryptedPersonalDetailsValidationRepository, PersonalDetailsValidationRepository}
+import repositories.PersonalDetailsValidationRepoTrait
 import uk.gov.hmrc.http.HeaderCarrier
 import util.FMNConstants.EmptyString
 import util.FMNHelper
@@ -32,9 +31,8 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValidationConnector,
-                                                 encryptedPDVRepository: EncryptedPersonalDetailsValidationRepository,
-                                                 pdvRepository: PersonalDetailsValidationRepository
-                                                )(implicit val ec: ExecutionContext, appConfig: FrontendAppConfig) extends Logging{
+                                                 pdvRepository: PersonalDetailsValidationRepoTrait //,
+                                                )(implicit val ec: ExecutionContext) extends Logging{
 
   def createPDVDataFromPDVMatch(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponseData] =
     for {
@@ -70,13 +68,11 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
             if (reformattedPostCode.strip().nonEmpty) {
               val newPersonalDetails = personalDetails.copy(postCode = Some(reformattedPostCode))
               val newPDVResponseData = pdvResponseData.copy(personalDetails = Some(newPersonalDetails))
-              if (appConfig.encryptionEnabled) encryptedPDVRepository.insertOrReplacePDVResultData(newPDVResponseData)
-              else pdvRepository.insertOrReplacePDVResultData(newPDVResponseData)
+              pdvRepository.insertOrReplacePDVResultData(newPDVResponseData)
               Future.successful(newPDVResponseData)
             }
             else {
-              if(appConfig.encryptionEnabled) encryptedPDVRepository.insertOrReplacePDVResultData(pdvResponseData)
-              else pdvRepository.insertOrReplacePDVResultData(pdvResponseData)
+              pdvRepository.insertOrReplacePDVResultData(pdvResponseData)
               Future.successful(pdvResponseData)
             }
           case None =>
@@ -89,21 +85,16 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
   }
 
   // Update the PDV data row with the a validationStatus which is boolean value
-  def updatePDVDataRowWithValidationStatus(nino: String, validationStatus: Boolean, reason:String): Future[Boolean] = {
-    (if(appConfig.encryptionEnabled) encryptedPDVRepository.updateCustomerValidityWithReason(nino, validationStatus, reason)
-      else pdvRepository.updateCustomerValidityWithReason(nino, validationStatus, reason)
-      ) map {
+  def updatePDVDataRowWithValidationStatus(nino: String, validationStatus: Boolean, reason:String): Future[Boolean] =
+    pdvRepository.updateCustomerValidityWithReason(nino, validationStatus, reason) map {
       case str:String => if(str.length > 8) true else false
       case _ => false
     } recover {
       case _: MongoException => false
     }
-  }
 
-  def updatePDVDataRowWithNPSPostCode(nino: String, npsPostCode: String): Future[Boolean] = {
-    (if(appConfig.encryptionEnabled) encryptedPDVRepository.updatePDVDataWithNPSPostCode(nino, npsPostCode)
-    else pdvRepository.updatePDVDataWithNPSPostCode(nino, npsPostCode)
-    ) map {
+  def updatePDVDataRowWithNPSPostCode(nino: String, npsPostCode: String): Future[Boolean] =
+    pdvRepository.updatePDVDataWithNPSPostCode(nino, npsPostCode) map {
       case nino: String if nino.nonEmpty => true
       case _ => false
     } recover {
@@ -111,20 +102,16 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
         logger.warn(s"Failed updating PDV data row with NPS Postcode, ${e.getMessage}")
         false
     }
-  }
 
-  def getPersonalDetailsValidationByNino(nino: String): Future[Option[PDVResponseData]] = {
-    (if(appConfig.encryptionEnabled) encryptedPDVRepository.findByNino(nino)
-     else pdvRepository.findByNino(nino)
-    ) map {
+  def getPersonalDetailsValidationByNino(nino: String): Future[Option[PDVResponseData]] =
+    pdvRepository.findByNino(nino) map {
       case Some(pdvResponseData) => Some(pdvResponseData)
       case _ => None
-    } recover({
+    } recover {
       case e: MongoException =>
         logger.warn(s"Failed finding PDV data by NINO: $nino, ${e.getMessage}")
         None
-    })
-  }
+    }
 
   def getValidCustomerStatus(nino: String): Future[String] = {
     getPersonalDetailsValidationByNino(nino) map {

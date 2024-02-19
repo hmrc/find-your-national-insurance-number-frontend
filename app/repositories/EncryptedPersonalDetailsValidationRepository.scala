@@ -58,7 +58,7 @@ class EncryptedPersonalDetailsValidationRepository @Inject()(
     )
   ),
   replaceIndexes = true
-) with Logging {
+) with Logging with PersonalDetailsValidationRepoTrait {
   def insertOrReplacePDVResultData(personalDetailsValidation: PDVResponseData)
                                   (implicit ec: ExecutionContext): Future[String] = {
     logger.info(s"insert or update one in $collectionName table")

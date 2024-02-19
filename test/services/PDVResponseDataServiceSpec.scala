@@ -16,7 +16,6 @@
 
 package services
 
-import config.FrontendAppConfig
 import connectors.PersonalDetailsValidationConnector
 import models.pdv.{PDVRequest, PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import org.mockito.ArgumentMatchers.any
@@ -127,6 +126,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.validationStatus mustBe personalDetailsValidation2.validationStatus
       }(ec)
     }
+
     "return false when the PDV data row does NOT have a valid customer status" in {
       when(mockEncryptedPersonalDetailsValidationRepository.findByNino(any())(any()))
         .thenReturn(Future.successful(Option(personalDetailsValidation)))
@@ -140,11 +140,10 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
       }(ec)
     }
 
-
     "createPDVDataRow should reformat the postCode in PersonalDetails" in {
       val mockEncryptedRepository = mock[EncryptedPersonalDetailsValidationRepository]
       val mockRepository = mock[PersonalDetailsValidationRepository]
-      val service = new PersonalDetailsValidationService(null, mockEncryptedRepository,mockRepository)(ec, mockFrontendAppConfig)
+      val service = new PersonalDetailsValidationService(null, mockEncryptedRepository)(ec)
 
       val originalPostCode = "Ab 12C d"
       val expectedPostCode = "AB1 2CD" // assuming this is the expected format after splitPostCode
@@ -175,25 +174,20 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         result.personalDetails.get.postCode mustBe Some(expectedPostCode)
       }
     }
-
   }
 
 }
 
 object PDVResponseDataServiceSpec {
-  val mockFrontendAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
   private val mockConnector = mock[PersonalDetailsValidationConnector]
   private val mockEncryptedPersonalDetailsValidationRepository = mock[EncryptedPersonalDetailsValidationRepository]
-  private val mockPersonalDetailsValidationRepository = mock[PersonalDetailsValidationRepository]
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   val personalDetailsValidationService = new PersonalDetailsValidationService(
     mockConnector,
-    mockEncryptedPersonalDetailsValidationRepository,
-    mockPersonalDetailsValidationRepository
-  )(ec, mockFrontendAppConfig)
+    mockEncryptedPersonalDetailsValidationRepository)(ec)
 
   val validationId = "abcd01234"
   val fakeNino: Nino = Nino(new Generator(new Random()).nextNino.nino)

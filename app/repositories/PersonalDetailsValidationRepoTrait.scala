@@ -18,11 +18,11 @@ package repositories
 
 import models.pdv.PDVResponseData
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait PersonalDetailsValidationRepoTrait {
-  def insertOrReplacePDVResultData(pdvResponseData: PDVResponseData): Future[String]
-  def updateCustomerValidityWithReason(nino: String, validCustomer: Boolean, reason: String): Future[String]
-  def updatePDVDataWithNPSPostCode(nino: String, npsPostCode: String): Future[String]
-  def findByNino(nino: String): Future[Option[PDVResponseData]]
+  def insertOrReplacePDVResultData(pdvResponseData: PDVResponseData)(implicit ec: ExecutionContext): Future[String]
+  def updateCustomerValidityWithReason(nino: String, validCustomer: Boolean, reason: String)(implicit ec: ExecutionContext): Future[String]
+  def updatePDVDataWithNPSPostCode(nino: String, npsPostCode: String)(implicit ec: ExecutionContext): Future[String]
+  def findByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]]
 }
