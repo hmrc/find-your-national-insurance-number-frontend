@@ -25,6 +25,7 @@ import scala.concurrent.Future
 import models.individualdetails.{AccountStatusType, Address, AddressList, AddressPostcode, AddressSequenceNumber, AddressSource, AddressStatus, AddressType, CountryCode, CrnIndicator, DateOfBirthStatus, DateOfDeathStatus, DeliveryInfo, FirstForename, Honours, IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache, Name, NameEndDate, NameList, NameSequenceNumber, NameStartDate, NameType, NinoSuffix, OtherTitle, PafReference, RequestedName, SecondForename, Surname, TitleType, VpaMail}
 import models.AddressLine
 import org.mockito.ArgumentMatchers.any
+import org.mongodb.scala.MongoException
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import repositories.EncryptedIndividualDetailsRepository
 import services.IndividualDetailsServiceImpl
@@ -111,4 +112,30 @@ class IndividualDetailsServiceSpec extends AnyFlatSpec with Matchers with Mockit
 
     result.futureValue shouldBe Some(individualDetailsDataCache)
   }
+
+  "getIndividualDetailsData" should "return data when the repository returns some data" in {
+    val mockRepo = mock[EncryptedIndividualDetailsRepository]
+    val service = new IndividualDetailsServiceImpl(mockRepo)
+    val nino = "AB123456C"
+    val individualDetailsDataCache = Some(IndividualDetailsDataCache("12345", None))
+
+    when(mockRepo.findIndividualDetailsDataByNino(nino)).thenReturn(Future.successful(individualDetailsDataCache))
+
+    val result = service.getIndividualDetailsData(nino)
+
+    result.futureValue shouldBe individualDetailsDataCache
+  }
+
+  it should "return None when the repository throws a MongoException" in {
+    val mockRepo = mock[EncryptedIndividualDetailsRepository]
+    val service = new IndividualDetailsServiceImpl(mockRepo)
+    val nino = "AB123456C"
+
+    when(mockRepo.findIndividualDetailsDataByNino(nino)).thenReturn(Future.failed(new MongoException("Mongo exception")))
+
+    val result = service.getIndividualDetailsData(nino)
+
+    result.futureValue shouldBe None
+  }
+
 }
