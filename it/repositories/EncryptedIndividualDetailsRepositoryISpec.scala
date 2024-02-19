@@ -7,17 +7,27 @@ package repositories
 import config.FrontendAppConfig
 import models.encryption.id.EncryptedIndividualDetailsDataCache
 import models.individualdetails.{IndividualDetailsData, IndividualDetailsDataCache}
+import org.mockito.IdiomaticMockito.StubbingOps
 import org.mockito.Mockito.when
+import org.mongodb.scala.{MongoClient, MongoCollection, MongoDatabase}
+import org.mongodb.scala.model.Filters
 import org.scalatest.OptionValues
+import org.scalatest.RecoverMethods.recoverToExceptionIf
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+import org.mockito.Mockito.verify
+import org.mockito.MockitoSugar.doReturn
+import org.scalacheck.Prop.exception
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
-
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
+import play.api.Logging
+import uk.gov.hmrc.mongo.MongoComponent
 class EncryptedIndividualDetailsRepositoryISpec
   extends AnyFreeSpec
     with Matchers
@@ -25,11 +35,12 @@ class EncryptedIndividualDetailsRepositoryISpec
     with ScalaFutures
     with IntegrationPatience
     with OptionValues
-    with MockitoSugar {
+    with MockitoSugar with Logging {
 
-  private val mockAppConfig = mock[FrontendAppConfig]
+  val encKey:String = "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
+  val mockAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1
-  when(mockAppConfig.encryptionKey) thenReturn "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
+  when(mockAppConfig.encryptionKey) thenReturn encKey.toString
 
   protected override val repository = new EncryptedIndividualDetailsRepository(
     mongoComponent = mongoComponent,
@@ -68,5 +79,25 @@ class EncryptedIndividualDetailsRepositoryISpec
         }
       }
     }
+
+
+    "when an exception is thrown" - {
+
+      "must log an error and return a failed future" in {
+
+        val nonExistentNino = "ZZ999999Z"
+
+        recoverToExceptionIf[Exception] {
+          repository.findIndividualDetailsDataByNino(nonExistentNino)
+        } map { ex =>
+          ex.getMessage must include("Failed finding Individual Details Data by Nino")
+        }
+      }
+    }
+
+
   }
+
+
+
 }
