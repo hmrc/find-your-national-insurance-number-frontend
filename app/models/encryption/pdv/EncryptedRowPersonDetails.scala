@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package repositories.encryption
+package models.encryption.pdv
 
+import models.encryption.EncryptedValueFormat._
 import models.pdv.{PDVResponseData, PersonalDetails}
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{OFormat, __}
 import uk.gov.hmrc.crypto.{EncryptedValue, SymmetricCryptoFactory}
-import repositories.encryption.EncryptedValueFormat._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
 
-import java.time.{Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset}
+import java.time._
 
 case class EncryptedPDVResponseData(
                                      id: String,

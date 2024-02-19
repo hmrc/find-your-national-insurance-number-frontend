@@ -16,13 +16,16 @@
 
 package util
 
+import models.individualdetails.IndividualDetailsDataCache
+import models.nps.NPSFMNRequest
+
 object FMNHelper {
 
   private def removeSpaces(input: String): String = {
     input.replaceAll("\\s+", "")
   }
 
-  def comparePostCode(pdvPostCode:String, npsPostCode:String): Boolean = {
+  def comparePostCode(pdvPostCode: String, npsPostCode: String): Boolean = {
     removeSpaces(pdvPostCode).equalsIgnoreCase(removeSpaces(npsPostCode))
   }
 
@@ -30,4 +33,17 @@ object FMNHelper {
     val withoutSpaces = removeSpaces(postCode)
     withoutSpaces.patch(withoutSpaces.length - 3, " ", 0).toUpperCase
   }
+
+  def createNPSFMNRequest(idData: Option[IndividualDetailsDataCache]): NPSFMNRequest =
+    idData match {
+      case Some(id) if id.individualDetails.isDefined =>
+        NPSFMNRequest(
+          id.getFirstForename,
+          id.getLastName,
+          id.dateOfBirth,
+          id.getPostCode
+        )
+      case _ => NPSFMNRequest.empty
+    }
+
 }

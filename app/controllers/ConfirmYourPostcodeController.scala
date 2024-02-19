@@ -20,24 +20,26 @@ import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
 import controllers.actions._
 import forms.ConfirmYourPostcodeFormProvider
+import models.errors.IndividualDetailsError
 import models.individualdetails.AddressType.ResidentialAddress
-import models.individualdetails.ResolveMerge
-import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
+import models.individualdetails.{Address, ResolveMerge}
+import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.{PDVResponseData, PersonalDetails}
 
 import javax.inject.Inject
-import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, NormalMode, UserAnswers}
+import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, NormalMode}
 import pages.ConfirmYourPostcodePage
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
-import services.{AuditService, NPSFMNService, PersonalDetailsValidationService}
+import services.{AuditService, IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ConfirmYourPostcodeView
-import util.AuditUtils
+import util.{AuditUtils, FMNHelper}
 import util.FMNHelper.comparePostCode
 
 import java.util.UUID
@@ -53,13 +55,14 @@ class ConfirmYourPostcodeController @Inject()(
                                         val controllerComponents: MessagesControllerComponents,
                                         view: ConfirmYourPostcodeView,
                                         personalDetailsValidationService: PersonalDetailsValidationService,
+                                        individualDetailsService: IndividualDetailsService,
                                         npsFMNService: NPSFMNService,
                                         auditService: AuditService,
                                         individualDetailsConnector: IndividualDetailsConnector,
                                         appConfig: FrontendAppConfig
                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  val form = formProvider()
+  val form: Form[String] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -99,7 +102,7 @@ class ConfirmYourPostcodeController @Inject()(
                         findMyNinoPostcodeMatched = Some("true")
                       ))
                   }
-                  npsLetterChecks(pdvValidData, npsPostCode, mode, updatedAnswers)
+                  npsLetterChecks(pdvValidData, mode)
                 case None =>
                   auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
                     auditType = "FindYourNinoConfirmPostcode",
@@ -126,11 +129,12 @@ class ConfirmYourPostcodeController @Inject()(
       )
   }
 
-  def npsLetterChecks(personalDetailsResponse: PDVResponseData, npsPostCode: String, mode: Mode, updatedAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Result] = {
+  private def npsLetterChecks(personalDetailsResponse: PDVResponseData, mode: Mode)(implicit hc: HeaderCarrier): Future[Result] = {
     personalDetailsResponse.personalDetails match {
       case Some(personalDetails: PersonalDetails) =>
         for {
-          status <- npsFMNService.sendLetter(personalDetails.nino.nino, getNPSFMNRequest(personalDetails, npsPostCode))
+          idData <- individualDetailsService.getIndividualDetailsData(personalDetails.nino.nino)
+          status <- npsFMNService.sendLetter(personalDetails.nino.nino, FMNHelper.createNPSFMNRequest(idData))
         } yield status match {
           case LetterIssuedResponse() =>
             Redirect(routes.NINOLetterPostedConfirmationController.onPageLoad())
@@ -162,16 +166,8 @@ class ConfirmYourPostcodeController @Inject()(
     }
   }
 
-  private def getNPSFMNRequest(personDetails: PersonalDetails, npsPostCode: String): NPSFMNRequest =
-      NPSFMNRequest(
-        personDetails.firstName,
-        personDetails.lastName,
-        personDetails.dateOfBirth.toString,
-        npsPostCode
-      )
-
   def getIndividualDetailsAddress(nino: IndividualDetailsNino
-                                 )(implicit ec: ExecutionContext, hc: HeaderCarrier) = {
+                                 )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Either[IndividualDetailsError, Address]] = {
     implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
     implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
     val idAddress = for {

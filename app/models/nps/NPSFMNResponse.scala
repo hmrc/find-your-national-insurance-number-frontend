@@ -17,7 +17,6 @@
 package models.nps
 
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.http.HttpResponse
 
 case class AppStatusMessageList(appStatusMessage: List[String] = List.empty)
 case class JsonServiceError(

@@ -20,9 +20,10 @@ import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
+import models.errors.IndividualDetailsError
 import models.individualdetails.AddressType.ResidentialAddress
-import models.individualdetails.ResolveMerge
-import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
+import models.individualdetails.{Address, ResolveMerge}
+import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.PDVResponseData
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, SelectNINOLetterAddress}
 import navigation.Navigator
@@ -30,7 +31,7 @@ import pages.SelectNINOLetterAddressPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.{AuditService, NPSFMNService, PersonalDetailsValidationService}
+import services.{AuditService, IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SelectNINOLetterAddressView
 import org.apache.commons.lang3.StringUtils
@@ -38,8 +39,7 @@ import play.api.Logging
 import play.api.data.Form
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
-import util.AuditUtils
-import util.FMNHelper.splitPostCode
+import util.{AuditUtils, FMNHelper}
 
 import java.util.UUID
 import javax.inject.Inject
@@ -57,6 +57,7 @@ class SelectNINOLetterAddressController @Inject()(
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: SelectNINOLetterAddressView,
                                                    personalDetailsValidationService: PersonalDetailsValidationService,
+                                                   individualDetailsService: IndividualDetailsService,
                                                    auditService: AuditService,
                                                    npsFMNService: NPSFMNService,
                                                    individualDetailsConnector: IndividualDetailsConnector,
@@ -94,6 +95,7 @@ class SelectNINOLetterAddressController @Inject()(
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectNINOLetterAddressPage, value))
             _ <- sessionRepository.set(updatedAnswers)
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
+            idData <- individualDetailsService.getIndividualDetailsData(nino)
           } yield {
             updatedAnswers.get(SelectNINOLetterAddressPage) match {
               case Some(SelectNINOLetterAddress.NotThisAddress) =>
@@ -124,7 +126,7 @@ class SelectNINOLetterAddressController @Inject()(
                     ))
                 }
 
-                npsFMNService.sendLetter(nino, getNPSFMNRequest(pdvData)).map {
+                npsFMNService.sendLetter(nino, FMNHelper.createNPSFMNRequest(idData)).map {
                   case LetterIssuedResponse() =>
                     Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
                   case RLSDLONFAResponse(responseStatus, responseMessage) =>
@@ -171,20 +173,8 @@ class SelectNINOLetterAddressController @Inject()(
       case _ => StringUtils.EMPTY
     }
 
-  private def getNPSFMNRequest(pdvResponseData: Option[PDVResponseData]): NPSFMNRequest =
-    pdvResponseData match {
-      case Some(pd) if pd.personalDetails.isDefined =>
-        NPSFMNRequest(
-          pd.getFirstName,
-          pd.getLastName,
-          pd.getDateOfBirth,
-          pd.getPostCode
-        )
-      case _ => NPSFMNRequest.empty
-    }
-
-  def getIndividualDetailsAddress(nino: IndividualDetailsNino
-                                 )(implicit ec: ExecutionContext, hc: HeaderCarrier) = {
+  def getIndividualDetailsAddress(nino: IndividualDetailsNino)(
+    implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Either[IndividualDetailsError, Address]] = {
     implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
     implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
     val idAddress = for {

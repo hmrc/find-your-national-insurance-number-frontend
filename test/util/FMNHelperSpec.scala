@@ -16,6 +16,8 @@
 
 package util
 
+import models.individualdetails.{IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache}
+import models.nps.NPSFMNRequest
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import util.FMNHelper
@@ -42,4 +44,43 @@ class FMNHelperSpec extends AnyFlatSpec with Matchers {
     val result = FMNHelper.splitPostCode(postCode)
     result shouldEqual expected
   }
+
+  "createNPSFMNRequest" should "return NPSFMNRequest with data when idData is defined" in {
+    val idData = Some(IndividualDetailsDataCache(
+      id="id",
+      individualDetails = Some(IndividualDetailsData(
+        firstForename = "John",
+        surname = "Doe",
+        dateOfBirth = "1990-01-01",
+        postCode = "AB12CD",
+        nino = "AB123456C"
+      ))))
+
+    val expected = NPSFMNRequest(
+      firstForename = "John",
+      surname = "Doe",
+      dateOfBirth = "1990-01-01",
+      postCode = "AB12CD"
+    )
+    val result = FMNHelper.createNPSFMNRequest(idData)
+    result shouldEqual expected
+  }
+
+  it should "return empty NPSFMNRequest when idData is None" in {
+    val idData = None
+    val expected = NPSFMNRequest.empty
+    val result = FMNHelper.createNPSFMNRequest(idData)
+    result shouldEqual expected
+  }
+
+  it should "return empty NPSFMNRequest when individualDetails is None" in {
+    val idData = Some(IndividualDetailsDataCache(id="id",
+      individualDetails = None
+    ))
+    val expected = NPSFMNRequest.empty
+    val result = FMNHelper.createNPSFMNRequest(idData)
+    result shouldEqual expected
+  }
+
+
 }

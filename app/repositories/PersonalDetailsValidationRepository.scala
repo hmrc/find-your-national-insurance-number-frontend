@@ -23,11 +23,11 @@ import models.pdv.PDVResponseData
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.model._
 import play.api.Logging
-import repositories.encryption.EncryptedPDVResponseData
-import repositories.encryption.EncryptedPDVResponseData.{decrypt, encrypt, encryptField}
+import models.encryption.pdv.EncryptedPDVResponseData.{decrypt, encrypt, encryptField}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
-import repositories.encryption.EncryptedValueFormat._
+import models.encryption.EncryptedValueFormat._
+import models.encryption.pdv.EncryptedPDVResponseData
 import uk.gov.hmrc.mongo.play.json.Codecs.toBson
 
 import java.util.concurrent.TimeUnit

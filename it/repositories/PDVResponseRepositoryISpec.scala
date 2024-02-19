@@ -1,6 +1,7 @@
 package repositories
 
 import config.FrontendAppConfig
+import models.encryption.pdv.EncryptedPDVResponseData
 import models.pdv.{PDVResponseData, PersonalDetails}
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
@@ -8,8 +9,7 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import repositories.encryption.EncryptedPDVResponseData
-import repositories.encryption.EncryptedPDVResponseData.encrypt
+import EncryptedPDVResponseData.encrypt
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 

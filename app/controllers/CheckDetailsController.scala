@@ -25,7 +25,7 @@ import models.requests.DataRequest
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import services.{AuditService, CheckDetailsService, PersonalDetailsValidationService}
+import services.{AuditService, CheckDetailsService, IndividualDetailsService, PersonalDetailsValidationService}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -44,6 +44,7 @@ class CheckDetailsController @Inject()(
                                         personalDetailsValidationService: PersonalDetailsValidationService,
                                         auditService: AuditService,
                                         checkDetailsService: CheckDetailsService,
+                                        individualDetailsService: IndividualDetailsService,
                                         val controllerComponents: MessagesControllerComponents,
                                         val authConnector: AuthConnector
                                       )(implicit ec: ExecutionContext)
@@ -120,6 +121,8 @@ class CheckDetailsController @Inject()(
                                          mode: Mode, sessionWithNINO: Session, origin: Option[String])
                                         (implicit  headerCarrier: HeaderCarrier): Result = {
     auditService.findYourNinoPDVMatched(pdvData, origin, idData)
+
+    individualDetailsService.createIndividualDetailsData(sessionWithNINO.data.getOrElse("sessionId", EmptyString), idData)
 
     val api1694Checks = checkDetailsService.checkConditions(idData)
     personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.getNino, api1694Checks._1, api1694Checks._2)

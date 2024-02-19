@@ -43,6 +43,7 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
   def sendLetter(nino: String, npsFMNRequest: NPSFMNRequest
                    )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNServiceResponse] = {
     implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
+
     connector.sendLetter(nino.take(8), npsFMNRequest)
       .map{ response =>
         response.status match {
@@ -50,11 +51,9 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
           case BAD_REQUEST =>
             if(checkFailure(response.body)) {
               val npsFMNResponse = Json.parse(response.body).as[NPSFMNResponseWithFailures]
-              logger.info("************************************  service postcode response 400  ************************************ response: " + response.body)
               FailureResponse(npsFMNResponse.response.failures)
             } else {
               if (check(response.body)) {
-                logger.info("************************************  service postcode response 400  ************************************ response: " + response.body)
                 RLSDLONFAResponse(response.status, getMessage(response.body))
               } else
                 TechnicalIssueResponse(response.status, getMessage(response.body))
