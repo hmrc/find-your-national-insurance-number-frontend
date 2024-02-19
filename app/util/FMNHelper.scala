@@ -18,8 +18,9 @@ package util
 
 import models.individualdetails.IndividualDetailsDataCache
 import models.nps.NPSFMNRequest
+import play.api.Logging
 
-object FMNHelper {
+object FMNHelper extends Logging {
 
   private def removeSpaces(input: String): String = {
     input.replaceAll("\\s+", "")
@@ -37,6 +38,7 @@ object FMNHelper {
   def createNPSFMNRequest(idData: Option[IndividualDetailsDataCache]): NPSFMNRequest =
     idData match {
       case Some(id) if id.individualDetails.isDefined =>
+        logger.info(s"Creating NPSFMNRequest from IndividualDetailsDataCache using ${id.getFirstForename} ${id.getLastName}" + s" ${id.dateOfBirth}" + s" ${id.getPostCode}")
         NPSFMNRequest(
           id.getFirstForename,
           id.getLastName,
