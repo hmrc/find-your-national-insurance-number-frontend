@@ -76,6 +76,10 @@ class IndividualDetailsRepository @Inject()(mongoComponent: MongoComponent,
     collection.find(filter)
       .toFuture()
       .map(_.headOption)
+  } recoverWith {
+    case e: Throwable =>
+      logger.info(s"Failed finding Individual Details Data by Nino: $nino")
+      Future.failed(e)
   }
 
 }

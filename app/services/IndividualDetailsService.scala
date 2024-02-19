@@ -18,6 +18,8 @@ package services
 
 import com.google.inject.ImplementedBy
 import models.individualdetails.{IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache}
+import org.mongodb.scala.MongoException
+import play.api.Logging
 import repositories.EncryptedIndividualDetailsRepository
 
 import javax.inject.Inject
@@ -33,7 +35,8 @@ trait IndividualDetailsService {
 
 class IndividualDetailsServiceImpl @Inject()(
                                               individualDetailsRepository: EncryptedIndividualDetailsRepository
-                                            )(implicit ec: ExecutionContext) extends IndividualDetailsService {
+                                            )(implicit ec: ExecutionContext)
+  extends IndividualDetailsService with Logging {
 
   override def createIndividualDetailsData(sessionId: String, individualDetails: IndividualDetails): Future[String] = {
     individualDetailsRepository.insertOrReplaceIndividualDetailsData(
@@ -42,7 +45,14 @@ class IndividualDetailsServiceImpl @Inject()(
   }
 
   override def getIndividualDetailsData(nino: String): Future[Option[IndividualDetailsDataCache]] =
-    individualDetailsRepository.findIndividualDetailsDataByNino(nino)
+    individualDetailsRepository.findIndividualDetailsDataByNino(nino) map {
+      case Some(individualDetailsData) => Some(individualDetailsData)
+      case _ => None
+    } recover({
+      case e: MongoException =>
+        logger.warn(s"Failed finding Individual Details Data by NINO: $nino, ${e.getMessage}")
+        None
+    })
 
   private def getIndividualDetailsData(sessionId: String, individualDetails: IndividualDetails): IndividualDetailsDataCache = {
     val iDetails = IndividualDetailsData(

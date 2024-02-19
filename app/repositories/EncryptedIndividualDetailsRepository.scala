@@ -81,7 +81,11 @@ class EncryptedIndividualDetailsRepository @Inject()(mongoComponent: MongoCompon
       .map(optEncryptedIndividualDetailsDataCache =>
         optEncryptedIndividualDetailsDataCache.map(encryptedIndividualDetailsDataCache =>
           decrypt(encryptedIndividualDetailsDataCache, appConfig.encryptionKey))
-      )
+      ) recoverWith {
+      case e: Throwable =>
+        logger.info(s"Failed finding Individual Details Data by Nino: $nino")
+        Future.failed(e)
+      }
   }
 
 }
