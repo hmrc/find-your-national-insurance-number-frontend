@@ -37,7 +37,7 @@ class IndividualDetailsRepositoryISpec
 
   private val individualDetailsData = IndividualDetailsDataCache(
     "session-1f84da66-d49a-40d3-ad72-9142acb90000",
-    Some(IndividualDetailsData("John", "Doe", "1980-01-01", "AB12CD", "AB123456C"))
+    Some(IndividualDetailsData("John", "Doe", "1980-01-01", "AB12CD", "AB123456"))
   )
 
   "IndividualDetailsRepository" - {
