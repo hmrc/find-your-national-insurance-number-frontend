@@ -46,8 +46,14 @@ class IndividualDetailsServiceImpl @Inject()(
 
   override def getIndividualDetailsData(nino: String): Future[Option[IndividualDetailsDataCache]] =
     individualDetailsRepository.findIndividualDetailsDataByNino(nino) map {
-      case Some(individualDetailsData) => Some(individualDetailsData)
-      case _ => None
+      case Some(individualDetailsData) => {
+        logger.info(s"Found Individual Details Data by NINO: $nino")
+        Some(individualDetailsData)
+      }
+      case _ => {
+        logger.info(s"Failed finding Individual Details Data by NINO: $nino")
+        None
+      }
     } recover({
       case e: MongoException =>
         logger.warn(s"Failed finding Individual Details Data by NINO: $nino, ${e.getMessage}")

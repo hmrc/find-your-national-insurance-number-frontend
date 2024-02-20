@@ -47,9 +47,11 @@ class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2, appConfig: Fr
   def sendLetter(nino: String, body: NPSFMNRequest
                    )(implicit hc: HeaderCarrier,correlationId: CorrelationId, ec: ExecutionContext): Future[HttpResponse] = {
     val url = s"${appConfig.npsFMNAPIUrl}/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/$nino"
+    logger.info(s"Sending letter to NPS FMN API with url $url")
     val headers = Seq("correlationId" -> correlationId.value.toString,
       "gov-uk-originator-id" -> appConfig.npsFMNAPIOriginatorId)
 
+    logger.info("send letter post body: " + body.toString)
     httpClientV2
       .post(new URL(url))
       .withBody(body)

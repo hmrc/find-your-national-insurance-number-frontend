@@ -82,7 +82,7 @@ class SelectNINOLetterAddressController @Inject()(
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val nino = request.session.data.getOrElse("nino", StringUtils.EMPTY)
-
+      logger.info("SelectNINOLetterAddressController NINO: " + nino)
       form.bindFromRequest().fold(
         formWithErrors =>
           for {

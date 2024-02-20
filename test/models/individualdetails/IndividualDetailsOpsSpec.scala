@@ -82,7 +82,7 @@ class IndividualDetailsOpsSpec extends AnyFlatSpec with Matchers with OptionValu
     ops.getPostCode shouldEqual "AB12CD"
   }
 
-  it should "get NINO without suffix" in {
+  it should "get NINO with s suffix" in {
     val ops = new IndividualDetailsOps(individualDetails)
     ops.getNino shouldEqual "AB123456A"
   }

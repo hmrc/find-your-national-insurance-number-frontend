@@ -35,7 +35,8 @@ object FMNHelper extends Logging {
     withoutSpaces.patch(withoutSpaces.length - 3, " ", 0).toUpperCase
   }
 
-  def createNPSFMNRequest(idData: Option[IndividualDetailsDataCache]): NPSFMNRequest =
+  def createNPSFMNRequest(idData: Option[IndividualDetailsDataCache]): NPSFMNRequest ={
+    logger.info(s"Creating NPSFMNRequest from IndividualDetailsDataCache using ${idData}")
     idData match {
       case Some(id) if id.individualDetails.isDefined =>
         logger.info(s"Creating NPSFMNRequest from IndividualDetailsDataCache using ${id.getFirstForename} ${id.getLastName}" + s" ${id.dateOfBirth}" + s" ${id.getPostCode}")
@@ -45,7 +46,11 @@ object FMNHelper extends Logging {
           id.dateOfBirth,
           id.getPostCode
         )
-      case _ => NPSFMNRequest.empty
+      case _ => {
+        logger.info("Creating empty NPSFMNRequest")
+        NPSFMNRequest.empty
+      }
     }
+}
 
 }

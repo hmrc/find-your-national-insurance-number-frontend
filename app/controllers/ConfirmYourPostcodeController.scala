@@ -22,7 +22,8 @@ import controllers.actions._
 import forms.ConfirmYourPostcodeFormProvider
 import models.errors.IndividualDetailsError
 import models.individualdetails.AddressType.ResidentialAddress
-import models.individualdetails.{Address, ResolveMerge}
+import models.individualdetails.IndividualDetailsDataCache.IndividualDetailsDataOps
+import models.individualdetails.{Address, IndividualDetailsDataCache, ResolveMerge}
 import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.{PDVResponseData, PersonalDetails}
 
@@ -102,7 +103,7 @@ class ConfirmYourPostcodeController @Inject()(
                         findMyNinoPostcodeMatched = Some("true")
                       ))
                   }
-                  npsLetterChecks(pdvValidData, mode)
+                  processNPSLetter(pdvValidData, mode)
                 case None =>
                   auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
                     auditType = "FindYourNinoConfirmPostcode",
@@ -129,7 +130,12 @@ class ConfirmYourPostcodeController @Inject()(
       )
   }
 
-  private def npsLetterChecks(personalDetailsResponse: PDVResponseData, mode: Mode)(implicit hc: HeaderCarrier): Future[Result] = {
+  private def processNPSLetter(personalDetailsResponse: PDVResponseData, mode: Mode)(implicit hc: HeaderCarrier): Future[Result] = {
+    val t = personalDetailsResponse.personalDetails match {
+      case Some(personalDetails) => personalDetails.nino.nino
+      case None => "Not found"
+    }
+    logger.info(s"Sending letter to NPS FMN API with nino = $t")
     personalDetailsResponse.personalDetails match {
       case Some(personalDetails: PersonalDetails) =>
         for {
@@ -157,6 +163,11 @@ class ConfirmYourPostcodeController @Inject()(
               errorStatus = Some(responseStatus.toString),
               errorReason = Some(responseMessage)
             ))
+            val t:IndividualDetailsDataCache = idData match {
+              case Some(data) => data
+              case None => IndividualDetailsDataCache("",None)
+            }
+            logger.info(s"Failed to send letter to NPS FMN API with nino = ${t.toString}")
             Redirect(routes.TechnicalErrorController.onPageLoad())
           case _ =>
             logger.warn("Unknown NPS FMN API response")
