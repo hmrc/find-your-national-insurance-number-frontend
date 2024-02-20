@@ -70,16 +70,16 @@ class EncryptedIndividualDetailsRepositorySpec
 
       val individualDetailsDataCache: IndividualDetailsDataCache = IndividualDetailsDataCache(
         id = "id",
-        individualDetails = Some(IndividualDetailsData("John", "Doe", "1980-01-01", "AB12CD", "AB123456C")),
+        individualDetails = Some(IndividualDetailsData("John", "Doe", "1980-01-01", "AB12CD", "AB123456")),
         lastUpdated = Instant.EPOCH
       )
 
       "must return the IndividualDetailsData when it exists" in {
 
-        val nino = "AB123456C"
+        val nino = "AB123456"
 
         val result1 = repository.insertOrReplaceIndividualDetailsData(individualDetailsDataCache).futureValue
-        result1 mustBe "AB123456C"
+        result1 mustBe nino
 
         val result = repository.findIndividualDetailsDataByNino(nino).futureValue
         result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsDataCache.copy(lastUpdated = Instant.EPOCH)

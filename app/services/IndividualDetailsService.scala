@@ -40,7 +40,7 @@ class IndividualDetailsServiceImpl @Inject()(
 
   override def createIndividualDetailsData(sessionId: String, individualDetails: IndividualDetails): Future[String] = {
     individualDetailsRepository.insertOrReplaceIndividualDetailsData(
-      getIndividualDetailsData(sessionId, individualDetails)
+      createIndividualDetailsDataCache(sessionId, individualDetails)
     )
   }
 
@@ -60,17 +60,17 @@ class IndividualDetailsServiceImpl @Inject()(
         None
     })
 
-  private def getIndividualDetailsData(sessionId: String, individualDetails: IndividualDetails): IndividualDetailsDataCache = {
-    val iDetails = IndividualDetailsData(
+  private def createIndividualDetailsDataCache(sessionId: String, individualDetails: IndividualDetails): IndividualDetailsDataCache = {
+    val individualDetailsData = IndividualDetailsData(
       individualDetails.getFirstForename,
       individualDetails.getLastName,
       individualDetails.dateOfBirth.toString,
       individualDetails.getPostCode,
-      individualDetails.getNino
+      individualDetails.getNinoWithoutSuffix
     )
     IndividualDetailsDataCache(
       sessionId,
-      Some(iDetails)
+      Some(individualDetailsData)
     )
   }
 
