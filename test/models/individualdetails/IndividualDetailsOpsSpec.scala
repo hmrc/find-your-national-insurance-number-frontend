@@ -84,7 +84,7 @@ class IndividualDetailsOpsSpec extends AnyFlatSpec with Matchers with OptionValu
 
   it should "get NINO without suffix" in {
     val ops = new IndividualDetailsOps(individualDetails)
-    ops.getNino shouldEqual "AB123456"
+    ops.getNinoWithoutSuffix shouldEqual "AB123456"
   }
 
   it should "get first forename" in {

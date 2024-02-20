@@ -60,7 +60,7 @@ class IndividualDetailsServiceImpl @Inject()(
       individualDetails.getLastName,
       individualDetails.dateOfBirth.toString,
       individualDetails.getPostCode,
-      individualDetails.getNino
+      individualDetails.getNinoWithoutSuffix
     )
     IndividualDetailsDataCache(
       sessionId,
