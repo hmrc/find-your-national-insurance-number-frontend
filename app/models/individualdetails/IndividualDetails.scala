@@ -200,7 +200,7 @@ object IndividualDetails {
 
     def getPostCode: String = getAddressTypeResidential.addressPostcode.map(_.value).getOrElse("")
 
-    def getNino: String = idData.ninoWithoutSuffix
+    def getNino: String = idData.ninoWithoutSuffix + idData.ninoSuffix.map(_.value).getOrElse("")
 
     def getFirstForename: String = idData.nameList.name.flatMap(_.headOption).map(_.firstForename.value).getOrElse("")
     def getLastName: String = idData.nameList.name.flatMap(_.headOption).map(_.surname.value).getOrElse("")
