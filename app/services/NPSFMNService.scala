@@ -46,6 +46,7 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
 
     connector.sendLetter(nino.take(8), npsFMNRequest)
       .map{ response =>
+        logger.info(s"--Response from NPSFMNConnector: ${response.status} ${response.body}")
         response.status match {
           case ACCEPTED => LetterIssuedResponse()
           case BAD_REQUEST =>

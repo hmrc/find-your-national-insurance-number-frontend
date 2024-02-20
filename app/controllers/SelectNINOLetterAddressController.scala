@@ -128,8 +128,10 @@ class SelectNINOLetterAddressController @Inject()(
 
                 npsFMNService.sendLetter(nino, FMNHelper.createNPSFMNRequest(idData)).map {
                   case LetterIssuedResponse() =>
+                    logger.warn("NPS FMN API response: LetterIssuedResponse")
                     Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
                   case RLSDLONFAResponse(responseStatus, responseMessage) =>
+                    logger.warn("NPS FMN API response: RLSDLONFAResponse")
                     personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
                       case Success(pdv) =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
