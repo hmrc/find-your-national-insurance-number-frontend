@@ -86,12 +86,13 @@ class CheckDetailsServiceImpl @Inject()(
     val p = for {
       pdvData <- personalDetailsValidationService.createPDVDataFromPDVMatch(body)
     } yield pdvData match {
-      case data: PDVResponseData => data
-      case _ => throw new Exception("No PDV data found")
+      case data: PDVResponseData =>
+        data
+      case _ =>
+        throw new Exception("No PDV data found")
     }
     p.recover {
-      case ex: HttpException =>
-        auditService.findYourNinoGetPdvDataHttpError(ex)
+      case ex: Exception =>
         logger.debug(ex.getMessage)
         throw ex
     }

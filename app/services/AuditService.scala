@@ -69,15 +69,15 @@ class AuditService @Inject()(auditConnector: AuditConnector, implicit val ec: Ex
     )
   }
 
-  def findYourNinoGetPdvDataHttpError(ex: HttpException)(implicit headerCarrier: HeaderCarrier): Unit = {
+  def findYourNinoGetPdvDataHttpError(status: String, reason: String)(implicit headerCarrier: HeaderCarrier): Unit = {
     audit(
       AuditUtils.buildAuditEvent(
         auditType = "FindYourNinoError",
         validationOutcome = "",
         identifierType = "",
         pageErrorGeneratedFrom = Some("/checkDetails"),
-        errorStatus = Some(ex.responseCode.toString),
-        errorReason = Some(ex.message)
+        errorStatus = Some(status),
+        errorReason = Some(reason)
       )
     )
   }

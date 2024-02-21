@@ -17,10 +17,10 @@
 package controllers
 
 import base.SpecBase
-import connectors.IndividualDetailsConnector
+import connectors.{IndividualDetailsConnector, PersonalDetailsValidationConnector}
 import models.errors.ConnectorError
 import models.individualdetails._
-import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails}
+import models.pdv.{PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import models.{AddressLine, CorrelationId, IndividualDetailsResponseEnvelope, NormalMode, individualdetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.HttpException
+import uk.gov.hmrc.http.{HttpException, HttpResponse}
 import util.AnyValueTypeMatcher.anyValueType
 import viewmodels.govuk.SummaryListFluency
 
@@ -95,18 +95,34 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
     addressList = AddressList(Some(List(fakeAddress)))
   )
 
-  val mockPDVResponseDataSuccess = PDVResponseData(
+  val mockPDVResponseDataSuccess: PDVResponseData = PDVResponseData(
     "01234",
     "success",
     Some(fakePersonDetails),
     LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
   )
 
+  val headers: Map[String, Seq[String]] = Map(
+    "CorrelationId" -> Seq("1118057e-fbbc-47a8-a8b4-78d9f015c253"),
+    "Content-Type" -> Seq("application/json")
+  )
+
+  val body: String =
+    s"""
+       |{
+       |  "id": "Foo",
+       |  "validationStatus": "failure"
+       |}
+       |""".stripMargin
+
+  val httpResponse = HttpResponse(200, body, headers)
+
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
   val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
   val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
   val controller: CheckDetailsController = application.injector.instanceOf[CheckDetailsController]
   val auditService: AuditService = mock[AuditService]
+  val mockPersonalDetailsValidationConnector: PersonalDetailsValidationConnector = mock[PersonalDetailsValidationConnector]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -114,7 +130,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       mockAuthConnector,
       mockIndividualDetailsConnector,
       mockPersonalDetailsValidationService,
-      auditService
+      auditService,
+      mockPersonalDetailsValidationConnector
     )
   }
 
@@ -122,9 +139,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
   val ivOrigin: Option[String] = Some("IV")
 
   "CheckDetailsController" - {
-   
+
     "must redirect to InvalidDataNINOHelpController" - {
-      
+
       "when invalid origin" in {
 
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -163,17 +180,16 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       }
 
       "when PDVResponseData validationStatus is failure" in {
-        val mockPDVResponseDataFailure = mockPDVResponseDataSuccess.copy(validationStatus = "failure")
 
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
-            inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+            inject.bind[PersonalDetailsValidationConnector].toInstance(mockPersonalDetailsValidationConnector),
             inject.bind[AuditService].toInstance(auditService)
           )
           .build()
 
-        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
-          .thenReturn(Future.successful(mockPDVResponseDataFailure))
+        when(mockPersonalDetailsValidationConnector.retrieveMatchingDetails(any())(any(), any()))
+          .thenReturn(Future.successful(httpResponse))
 
         running(app) {
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
@@ -187,7 +203,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
 
-      "when pdvData throws http exception" in {
+      "when pdvData throws a runtime exception" in {
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
@@ -196,7 +212,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           .build()
 
         when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
-          .thenReturn(Future.failed(new HttpException("something went wrong", INTERNAL_SERVER_ERROR)))
+          .thenReturn(Future.failed(new RuntimeException("Something went wrong")))
 
         running(app) {
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
@@ -206,7 +222,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
           verify(auditService, times(1)).start(any())(any())
-          verify(auditService, times(1)).findYourNinoGetPdvDataHttpError(any())(any())
         }
       }
 

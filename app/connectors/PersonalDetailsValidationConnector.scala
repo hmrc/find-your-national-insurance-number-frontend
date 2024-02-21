@@ -23,13 +23,14 @@ import models.pdv.PDVRequest
 import play.api.Logging
 import uk.gov.hmrc.http.client.HttpClientV2
 import models.pdv.PDVRequest._
-import play.api.http.Status.{NOT_FOUND,BAD_REQUEST, INTERNAL_SERVER_ERROR}
+import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND}
+import services.AuditService
 
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PersonalDetailsValidationConnector @Inject()(val httpClientV2: HttpClientV2, config: FrontendAppConfig) extends Logging {
+class PersonalDetailsValidationConnector @Inject()(val httpClientV2: HttpClientV2, config: FrontendAppConfig, auditService: AuditService) extends Logging {
 
   def retrieveMatchingDetails(pdvRequest: PDVRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse] = {
     val url = s"${config.pdvBaseUrl}/personal-details-validation/retrieve-by-session"
@@ -41,9 +42,11 @@ class PersonalDetailsValidationConnector @Inject()(val httpClientV2: HttpClientV
         Future.successful(response)
       } recover {
         case e: HttpException if e.responseCode == NOT_FOUND || e.responseCode == BAD_REQUEST =>
-            HttpResponse(e.responseCode, e.message)
+          auditService.findYourNinoGetPdvDataHttpError(e.responseCode.toString, e.message)
+          HttpResponse(e.responseCode, e.message)
         case _ =>
-            HttpResponse(INTERNAL_SERVER_ERROR, "Service unavailable")
+          auditService.findYourNinoGetPdvDataHttpError(INTERNAL_SERVER_ERROR.toString, "Service unavailable")
+          HttpResponse(INTERNAL_SERVER_ERROR, "Service unavailable")
       }
   }
 

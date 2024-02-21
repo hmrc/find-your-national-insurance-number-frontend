@@ -102,7 +102,6 @@ class CheckDetailsController @Inject()(
                                         (implicit headerCarrier: HeaderCarrier): Result = {
     if (pdvData.validationStatus.equals("failure")) {
       logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
-
       auditService.findYourNinoPDVMatchFailed(pdvData, origin)
       Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
     } else {
