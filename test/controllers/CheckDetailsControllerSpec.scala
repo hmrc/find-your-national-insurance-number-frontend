@@ -20,7 +20,7 @@ import base.SpecBase
 import connectors.{IndividualDetailsConnector, PersonalDetailsValidationConnector}
 import models.errors.ConnectorError
 import models.individualdetails._
-import models.pdv.{PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
+import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails}
 import models.{AddressLine, CorrelationId, IndividualDetailsResponseEnvelope, NormalMode, individualdetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.{HttpException, HttpResponse}
+import uk.gov.hmrc.http.HttpResponse
 import util.AnyValueTypeMatcher.anyValueType
 import viewmodels.govuk.SummaryListFluency
 
@@ -115,7 +115,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
        |}
        |""".stripMargin
 
-  val httpResponse = HttpResponse(200, body, headers)
+  val httpResponse: HttpResponse = HttpResponse(200, body, headers)
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
   val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
@@ -429,8 +429,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
     }
-
-
 
     "must redirect to ValidDataNINOMatchedNINOHelpController when pdvData does not have a postcode" in {
       val mockPDVResponseDataSuccessWithoutNino = mockPDVResponseDataSuccess.copy(personalDetails = Some(fakePersonDetails.copy(postCode = None)))

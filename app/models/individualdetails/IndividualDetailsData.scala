@@ -16,7 +16,9 @@
 
 package models.individualdetails
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
+import play.api.libs.json.{OFormat, __}
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
 import util.FMNConstants.EmptyString
 
 import java.time.{Instant, LocalDateTime, ZoneId, ZoneOffset}
@@ -30,14 +32,27 @@ case class IndividualDetailsData(
                               )
 
 case class IndividualDetailsDataCache(
-                                       id: String,
-                                       individualDetails: Option[IndividualDetailsData],
-                                       lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC)
-                                     )
+   id: String,
+   individualDetails: Option[IndividualDetailsData],
+   lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC)
+ )
 
 object IndividualDetailsDataCache {
-  implicit val formatIndividualDetailsCache: OFormat[IndividualDetailsData] = Json.format[IndividualDetailsData]
-  implicit val formatIndividualDetailsDataCache: OFormat[IndividualDetailsDataCache] = Json.format[IndividualDetailsDataCache]
+  private val individualDetailsDataFormat: OFormat[IndividualDetailsData] = {
+    ((__ \ "firstForename").format[String]
+      ~ (__ \ "surname").format[String]
+      ~ (__ \ "dateOfBirth").format[String]
+      ~ (__ \ "postCode").format[String]
+      ~ (__ \ "nino").format[String]
+      )(IndividualDetailsData.apply, unlift(IndividualDetailsData.unapply))
+  }
+
+  val individualDetailsDataCacheFormat: OFormat[IndividualDetailsDataCache] = {
+    ((__ \ "id").format[String]
+      ~ (__ \ "individualDetails").formatNullable[IndividualDetailsData](individualDetailsDataFormat)
+      ~ (__ \ "lastUpdated").format[Instant](instantFormat)
+      )(IndividualDetailsDataCache.apply, unlift(IndividualDetailsDataCache.unapply))
+  }
 
   implicit class IndividualDetailsDataOps(private val individualDetailsData:IndividualDetailsDataCache) extends AnyVal {
 
