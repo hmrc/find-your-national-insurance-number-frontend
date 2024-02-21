@@ -125,13 +125,12 @@ class SelectNINOLetterAddressController @Inject()(
                       findMyNinoOption = Some(value.toString)
                     ))
                 }
-
                 npsFMNService.sendLetter(nino, FMNHelper.createNPSFMNRequest(idData)).map {
                   case LetterIssuedResponse() =>
                     Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
                   case RLSDLONFAResponse(responseStatus, responseMessage) =>
-                    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
-                      case Success(pdv) =>
+                    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).map(
+                      pdv =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                           auditType = "FindYourNinoError",
                           validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
@@ -140,12 +139,11 @@ class SelectNINOLetterAddressController @Inject()(
                           errorStatus = Some(responseStatus.toString),
                           errorReason = Some(responseMessage)
                         ))
-                      case Failure(ex) => logger.warn(ex.getMessage)
-                    }
+                    )
                     Redirect(routes.SendLetterErrorController.onPageLoad(mode))
                   case TechnicalIssueResponse(responseStatus, responseMessage) =>
-                    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
-                      case Success(pdv) =>
+                    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).map(
+                      pdv =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                           auditType = "FindYourNinoError",
                           validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
@@ -154,8 +152,7 @@ class SelectNINOLetterAddressController @Inject()(
                           errorStatus = Some(responseStatus.toString),
                           errorReason = Some(responseMessage)
                         ))
-                      case Failure(ex) => logger.warn(ex.getMessage)
-                    }
+                    )
                     Redirect(routes.TechnicalErrorController.onPageLoad())
                   case _ =>
                     logger.warn("Unknown NPS FMN API response")
