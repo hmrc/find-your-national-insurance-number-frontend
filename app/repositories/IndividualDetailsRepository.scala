@@ -35,7 +35,7 @@ class IndividualDetailsRepository @Inject()(mongoComponent: MongoComponent,
                                             )(implicit ec: ExecutionContext) extends PlayMongoRepository[IndividualDetailsDataCache](
   collectionName = "individual-details",
   mongoComponent = mongoComponent,
-  domainFormat = IndividualDetailsDataCache.formatIndividualDetailsDataCache,
+  domainFormat = IndividualDetailsDataCache.individualDetailsDataCacheFormat,
   indexes = Seq(
     IndexModel(
       Indexes.ascending("id"),

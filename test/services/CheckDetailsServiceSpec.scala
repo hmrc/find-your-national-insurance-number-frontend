@@ -184,7 +184,6 @@ class CheckDetailsServiceSpec extends AsyncWordSpec with Matchers with MockitoSu
 
     }
 
-
   }
 
 }
@@ -194,9 +193,8 @@ object CheckDetailsServiceSpec {
   implicit val hc: HeaderCarrier         = HeaderCarrier()
   private val mockFrontendAppConfig = mock[FrontendAppConfig]
   private val personalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
-  private val  auditService: AuditService = mock[AuditService]
   private val individualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
-  private val npsFMNService = new CheckDetailsServiceImpl(personalDetailsValidationService, auditService,
+  private val npsFMNService = new CheckDetailsServiceImpl(personalDetailsValidationService,
     individualDetailsConnector)(global, mockFrontendAppConfig)
 
   val fakeName: individualdetails.Name = models.individualdetails.Name(
