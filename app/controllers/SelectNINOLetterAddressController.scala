@@ -20,6 +20,7 @@ import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
+import helpers.AuditHelper
 import models.errors.IndividualDetailsError
 import models.individualdetails.AddressType.ResidentialAddress
 import models.individualdetails.{Address, ResolveMerge}
@@ -31,7 +32,7 @@ import pages.SelectNINOLetterAddressPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.{AuditService, IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
+import services.{IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SelectNINOLetterAddressView
 import org.apache.commons.lang3.StringUtils
@@ -39,7 +40,7 @@ import play.api.Logging
 import play.api.data.Form
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
-import util.{AuditUtils, FMNHelper}
+import util.FMNHelper
 
 import java.util.UUID
 import javax.inject.Inject
@@ -58,7 +59,7 @@ class SelectNINOLetterAddressController @Inject()(
                                                    view: SelectNINOLetterAddressView,
                                                    personalDetailsValidationService: PersonalDetailsValidationService,
                                                    individualDetailsService: IndividualDetailsService,
-                                                   auditService: AuditService,
+                                                   auditHelper: AuditHelper,
                                                    npsFMNService: NPSFMNService,
                                                    individualDetailsConnector: IndividualDetailsConnector,
                                                    appConfig: FrontendAppConfig
@@ -103,13 +104,7 @@ class SelectNINOLetterAddressController @Inject()(
                   idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
                 } yield idAddress match {
                   case Right(idAddr) =>
-                    auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
-                      individualDetailsAddress = Some(idAddr),
-                      auditType = "FindYourNinoOnlineLetterOption",
-                      validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
-                      identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
-                      findMyNinoOption = Some(value.toString)
-                    ))
+                    auditHelper.findYourNinoOnlineLetterOption(pdvData, idAddr, value.toString)
                 }
                 Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers)))
               case Some(SelectNINOLetterAddress.Postcode) =>
@@ -117,13 +112,7 @@ class SelectNINOLetterAddressController @Inject()(
                   idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
                 } yield idAddress match {
                   case Right(idAddr) =>
-                    auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
-                      individualDetailsAddress = Some(idAddr),
-                      auditType = "FindYourNinoOnlineLetterOption",
-                      validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
-                      identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
-                      findMyNinoOption = Some(value.toString)
-                    ))
+                    auditHelper.findYourNinoOnlineLetterOption(pdvData, idAddr, value.toString)
                 }
 
                 npsFMNService.sendLetter(nino, FMNHelper.createNPSFMNRequest(idData)).map {
@@ -132,28 +121,14 @@ class SelectNINOLetterAddressController @Inject()(
                   case RLSDLONFAResponse(responseStatus, responseMessage) =>
                     personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
                       case Success(pdv) =>
-                        auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
-                          auditType = "FindYourNinoError",
-                          validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
-                          identifierType = pdv.map(_.CRN.getOrElse("")).getOrElse(""),
-                          pageErrorGeneratedFrom = Some("/postcode"),
-                          errorStatus = Some(responseStatus.toString),
-                          errorReason = Some(responseMessage)
-                        ))
+                        auditHelper.findYourNinoError(pdv, responseStatus, responseMessage)
                       case Failure(ex) => logger.warn(ex.getMessage)
                     }
                     Redirect(routes.SendLetterErrorController.onPageLoad(mode))
                   case TechnicalIssueResponse(responseStatus, responseMessage) =>
                     personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
                       case Success(pdv) =>
-                        auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
-                          auditType = "FindYourNinoError",
-                          validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
-                          identifierType = pdv.map(_.CRN.getOrElse("")).getOrElse(""),
-                          pageErrorGeneratedFrom = Some("/postcode"),
-                          errorStatus = Some(responseStatus.toString),
-                          errorReason = Some(responseMessage)
-                        ))
+                        auditHelper.findYourNinoError(pdv, responseStatus, responseMessage)
                       case Failure(ex) => logger.warn(ex.getMessage)
                     }
                     Redirect(routes.TechnicalErrorController.onPageLoad())
