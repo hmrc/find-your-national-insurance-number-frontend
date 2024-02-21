@@ -106,7 +106,7 @@ class SelectNINOLetterAddressController @Inject()(
                     auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
                       individualDetailsAddress = Some(idAddr),
                       auditType = "FindYourNinoOnlineLetterOption",
-                      validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+                      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
                       identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
                       findMyNinoOption = Some(value.toString)
                     ))
@@ -120,7 +120,7 @@ class SelectNINOLetterAddressController @Inject()(
                     auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
                       individualDetailsAddress = Some(idAddr),
                       auditType = "FindYourNinoOnlineLetterOption",
-                      validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+                      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
                       identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
                       findMyNinoOption = Some(value.toString)
                     ))
@@ -133,7 +133,7 @@ class SelectNINOLetterAddressController @Inject()(
                       pdv =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                           auditType = "FindYourNinoError",
-                          validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
+                          validationOutcome = pdv.map(_.validationStatus).getOrElse("failure"),
                           identifierType = pdv.map(_.CRN.getOrElse("")).getOrElse(""),
                           pageErrorGeneratedFrom = Some("/postcode"),
                           errorStatus = Some(responseStatus.toString),
@@ -146,7 +146,7 @@ class SelectNINOLetterAddressController @Inject()(
                       pdv =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                           auditType = "FindYourNinoError",
-                          validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
+                          validationOutcome = pdv.map(_.validationStatus).getOrElse("failure"),
                           identifierType = pdv.map(_.CRN.getOrElse("")).getOrElse(""),
                           pageErrorGeneratedFrom = Some("/postcode"),
                           errorStatus = Some(responseStatus.toString),

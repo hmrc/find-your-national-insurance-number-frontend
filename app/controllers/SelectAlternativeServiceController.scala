@@ -71,7 +71,7 @@ class SelectAlternativeServiceController @Inject()(
             pdv =>
               auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                 auditType = "FindYourNinoOptionChosen",
-                validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
+                validationOutcome = pdv.map(_.validationStatus).getOrElse("failure"),
                 identifierType = pdv.map(_.CRN.getOrElse("")).getOrElse(""),
                 findMyNinoOption = Some(value.toString)
               ))
