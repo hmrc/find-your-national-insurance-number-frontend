@@ -48,6 +48,7 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
     new GuiceApplicationBuilder()
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[ExtendedDataRequiredAction].to[ExtendedDataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
       )
@@ -64,6 +65,7 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
       )
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[ExtendedDataRequiredAction].to[ExtendedDataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
       )

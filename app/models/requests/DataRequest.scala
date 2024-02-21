@@ -28,3 +28,9 @@ case class DataRequest[A] (request: Request[A],
                            userId: String,
                            userAnswers: UserAnswers,
                            credId: Option[String]) extends WrappedRequest[A](request)
+
+case class ExtendedDataRequest[A] (request: Request[A],
+                                   userId: String,
+                                   userAnswers: UserAnswers,
+                                   credId: Option[String],
+                                   postCode: String) extends WrappedRequest[A](request)

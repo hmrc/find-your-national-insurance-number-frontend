@@ -52,7 +52,7 @@ class SelectNINOLetterAddressController @Inject()(
                                                    navigator: Navigator,
                                                    identify: IdentifierAction,
                                                    getData: DataRetrievalAction,
-                                                   requireData: DataRequiredAction,
+                                                   requireData: ExtendedDataRequiredAction,
                                                    formProvider: SelectNINOLetterAddressFormProvider,
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: SelectNINOLetterAddressView,
@@ -73,10 +73,7 @@ class SelectNINOLetterAddressController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      for {
-        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", ""))
-        postCode = getPostCode(pdvData)
-      } yield Ok(view(preparedForm, mode, postCode))
+      Future.successful(Ok(view(preparedForm, mode, request.postCode)))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -85,11 +82,7 @@ class SelectNINOLetterAddressController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          for {
-            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
-            postCode = getPostCode(pdvData)
-          } yield BadRequest(view(formWithErrors, mode, postCode)),
-
+          Future.successful(BadRequest(view(formWithErrors, mode, request.postCode))),
         value => {
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectNINOLetterAddressPage, value))

@@ -125,12 +125,16 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
         .thenReturn(Future.successful(LetterIssuedResponse()))
 
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
+
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[NPSFMNService].toInstance(mockNPSFMNService),
-            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector)
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
           .build()
 
@@ -156,12 +160,16 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
         .thenReturn(Future.successful(LetterIssuedResponse()))
 
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
+
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[NPSFMNService].toInstance(mockNPSFMNService),
-            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector)
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
           .build()
 
@@ -187,12 +195,16 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
         .thenReturn(Future.successful(RLSDLONFAResponse(SEE_OTHER, "some message")))
 
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
+
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[NPSFMNService].toInstance(mockNPSFMNService),
-            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector)
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
           .build()
 
@@ -239,12 +251,16 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       val mockNPSFMNConnector = mock[NPSFMNConnector]
       val mockNPSFMNService = mock[NPSFMNService]
 
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
+
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[NPSFMNService].toInstance(mockNPSFMNService),
-            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector)
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
           .build()
 
