@@ -18,8 +18,10 @@ package models.encryption.id
 
 import models.encryption.EncryptedValueFormat._
 import models.individualdetails.{IndividualDetailsData, IndividualDetailsDataCache}
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{OFormat, __}
 import uk.gov.hmrc.crypto.{EncryptedValue, SymmetricCryptoFactory}
+import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
 import util.FMNConstants.EmptyString
 
 import java.time.{Instant, LocalDateTime, ZoneId, ZoneOffset}
@@ -34,15 +36,27 @@ case class EncryptedIndividualDetailsData(
                                 )
 
 case class EncryptedIndividualDetailsDataCache(
-                                                id: String,
-                                                individualDetails: Option[EncryptedIndividualDetailsData],
-                                                lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC)
-                                              )
+    id: String,
+    individualDetails: Option[EncryptedIndividualDetailsData],
+    lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC)
+  )
 
 object EncryptedIndividualDetailsDataCache {
-  implicit val formatEncryptedIndividualDetailsData: OFormat[EncryptedIndividualDetailsData] = Json.format[EncryptedIndividualDetailsData]
-  implicit val formatEncryptedIndividualDetailsDataCache: OFormat[EncryptedIndividualDetailsDataCache] = Json.format[EncryptedIndividualDetailsDataCache]
+  private val encryptedIndividualDetailsDataFormat: OFormat[EncryptedIndividualDetailsData] = {
+    ((__ \ "firstForename").format[EncryptedValue]
+      ~ (__ \ "surname").format[EncryptedValue]
+      ~ (__ \ "dateOfBirth").format[EncryptedValue]
+      ~ (__ \ "postCode").format[EncryptedValue]
+      ~ (__ \ "nino").format[String]
+      )(EncryptedIndividualDetailsData.apply, unlift(EncryptedIndividualDetailsData.unapply))
+  }
 
+  val encryptedIndividualDetailsDataCacheFormat: OFormat[EncryptedIndividualDetailsDataCache] = {
+    ((__ \ "id").format[String]
+      ~ (__ \ "individualDetails").formatNullable[EncryptedIndividualDetailsData](encryptedIndividualDetailsDataFormat)
+      ~ (__ \ "lastUpdated").format[Instant](instantFormat)
+      )(EncryptedIndividualDetailsDataCache.apply, unlift(EncryptedIndividualDetailsDataCache.unapply))
+  }
   def encryptField(fieldValue: String, key: String): EncryptedValue = {
     SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(fieldValue, key)
   }

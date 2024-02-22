@@ -16,11 +16,10 @@
 
 package util
 
-import models.individualdetails.{IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache}
+import models.individualdetails.{IndividualDetailsData, IndividualDetailsDataCache}
 import models.nps.NPSFMNRequest
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import util.FMNHelper
 
 class FMNHelperSpec extends AnyFlatSpec with Matchers {
 

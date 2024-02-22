@@ -19,7 +19,9 @@ package config
 import com.google.inject.AbstractModule
 import play.api.{Configuration, Environment}
 import controllers.actions._
-import repositories.{EncryptedPersonalDetailsValidationRepository, PersonalDetailsValidationRepoTrait, PersonalDetailsValidationRepository}
+import repositories.{EncryptedIndividualDetailsRepository, EncryptedPersonalDetailsValidationRepository,
+  IndividualDetailsRepoTrait, IndividualDetailsRepository,
+  PersonalDetailsValidationRepoTrait, PersonalDetailsValidationRepository}
 import views.html.templates.{LayoutProvider, NewLayoutProvider, OldLayoutProvider}
 
 import java.time.{Clock, ZoneOffset}
@@ -47,9 +49,13 @@ class Module(environment: Environment, config: Configuration) extends AbstractMo
     }
 
     if (encryptionEnabled) {
+      bind(classOf[IndividualDetailsRepoTrait])
+        .to(classOf[EncryptedIndividualDetailsRepository]).asEagerSingleton()
       bind(classOf[PersonalDetailsValidationRepoTrait])
         .to(classOf[EncryptedPersonalDetailsValidationRepository]).asEagerSingleton()
     } else {
+      bind(classOf[IndividualDetailsRepoTrait])
+        .to(classOf[IndividualDetailsRepository]).asEagerSingleton()
       bind(classOf[PersonalDetailsValidationRepoTrait])
         .to(classOf[PersonalDetailsValidationRepository]).asEagerSingleton()
     }

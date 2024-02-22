@@ -20,7 +20,7 @@ import com.google.inject.ImplementedBy
 import models.individualdetails.{IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache}
 import org.mongodb.scala.MongoException
 import play.api.Logging
-import repositories.EncryptedIndividualDetailsRepository
+import repositories.IndividualDetailsRepoTrait
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,7 +34,7 @@ trait IndividualDetailsService {
 }
 
 class IndividualDetailsServiceImpl @Inject()(
-                                              individualDetailsRepository: EncryptedIndividualDetailsRepository
+                                              individualDetailsRepository: IndividualDetailsRepoTrait
                                             )(implicit ec: ExecutionContext)
   extends IndividualDetailsService with Logging {
 
