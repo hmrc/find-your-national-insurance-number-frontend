@@ -31,7 +31,7 @@ class AuditHelper@Inject()(auditService: AuditService) {
     auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
       individualDetailsAddress = Some(idAddress),
       auditType = "FindYourNinoOnlineLetterOption",
-      validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
       identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
       findMyNinoOption = Some(value)
     ))
@@ -41,7 +41,7 @@ class AuditHelper@Inject()(auditService: AuditService) {
                        (implicit headerCarrier: HeaderCarrier): Unit = {
     auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
       auditType = "FindYourNinoError",
-      validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
       identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
       pageErrorGeneratedFrom = Some("/postcode"),
       errorStatus = Some(responseStatus.toString),
