@@ -53,7 +53,7 @@ class IndividualDetailsRepository @Inject()(mongoComponent: MongoComponent,
     )
   ),
   replaceIndexes = true
-) with Logging {
+) with Logging with IndividualDetailsRepoTrait {
   def insertOrReplaceIndividualDetailsData(individualDetailsData: IndividualDetailsDataCache)
                                   (implicit ec: ExecutionContext): Future[String] = {
     logger.info(s"insert or update one in $collectionName table")

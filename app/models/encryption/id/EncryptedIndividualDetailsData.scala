@@ -51,6 +51,7 @@ object EncryptedIndividualDetailsDataCache {
       )(EncryptedIndividualDetailsData.apply, unlift(EncryptedIndividualDetailsData.unapply))
   }
 
+
   val encryptedIndividualDetailsDataCacheFormat: OFormat[EncryptedIndividualDetailsDataCache] = {
     ((__ \ "id").format[String]
       ~ (__ \ "individualDetails").formatNullable[EncryptedIndividualDetailsData](encryptedIndividualDetailsDataFormat)
@@ -58,6 +59,7 @@ object EncryptedIndividualDetailsDataCache {
       )(EncryptedIndividualDetailsDataCache.apply, unlift(EncryptedIndividualDetailsDataCache.unapply))
   }
 
+  
   def encryptField(fieldValue: String, key: String): EncryptedValue = {
     SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(fieldValue, key)
   }
