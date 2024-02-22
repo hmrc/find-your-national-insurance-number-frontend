@@ -20,7 +20,6 @@ import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
-import helpers.AuditHelper
 import models.errors.IndividualDetailsError
 import models.individualdetails.AddressType.ResidentialAddress
 import models.individualdetails.{Address, ResolveMerge}
@@ -32,7 +31,7 @@ import pages.SelectNINOLetterAddressPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
-import services.{IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
+import services.{AuditService, NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SelectNINOLetterAddressView
 import org.apache.commons.lang3.StringUtils
@@ -40,7 +39,6 @@ import play.api.Logging
 import play.api.data.Form
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
-import util.FMNHelper
 
 import java.util.UUID
 import javax.inject.Inject
@@ -58,8 +56,7 @@ class SelectNINOLetterAddressController @Inject()(
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: SelectNINOLetterAddressView,
                                                    personalDetailsValidationService: PersonalDetailsValidationService,
-                                                   individualDetailsService: IndividualDetailsService,
-                                                   auditHelper: AuditHelper,
+                                                   auditService: AuditService,
                                                    npsFMNService: NPSFMNService,
                                                    individualDetailsConnector: IndividualDetailsConnector,
                                                    appConfig: FrontendAppConfig
@@ -109,18 +106,16 @@ class SelectNINOLetterAddressController @Inject()(
                         (implicit headerCarrier: HeaderCarrier): Future[Result] = {
     npsFMNService.sendLetter(nino, getNPSFMNRequest(pdvData)) map {
       case LetterIssuedResponse() =>
-        for {
-          idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
-        } yield idAddress match {
-          case Right(idAddress) =>
-            auditHelper.findYourNinoOnlineLetterOption(pdvData, idAddress, value)
+        getIndividualDetailsAddress(IndividualDetailsNino(nino)) map {
+          case Right(idAddress) => auditService.findYourNinoOnlineLetterOption(pdvData, idAddress, value)
+          case _                => throw new IllegalArgumentException("Could not get individuals address")
         }
         Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA))
       case RLSDLONFAResponse(responseStatus, responseMessage) =>
-        auditHelper.findYourNinoError(pdvData, responseStatus, responseMessage)
+        auditService.findYourNinoError(pdvData, responseStatus, responseMessage)
         Redirect(routes.SendLetterErrorController.onPageLoad(mode))
       case TechnicalIssueResponse(responseStatus, responseMessage) =>
-        auditHelper.findYourNinoError(pdvData, responseStatus, responseMessage)
+        auditService.findYourNinoError(pdvData, responseStatus, responseMessage)
         Redirect(routes.TechnicalErrorController.onPageLoad())
       case _ =>
         logger.warn("Unknown NPS FMN API response")
