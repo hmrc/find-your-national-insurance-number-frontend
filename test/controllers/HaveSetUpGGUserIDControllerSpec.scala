@@ -18,12 +18,13 @@ package controllers
 
 import base.SpecBase
 import forms.HaveSetUpGGUserIDFormProvider
-import models.{NormalMode, HaveSetUpGGUserID, UserAnswers}
+import models.{HaveSetUpGGUserID, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.HaveSetUpGGUserIDPage
+import play.api.data.Form
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -35,12 +36,12 @@ import scala.concurrent.Future
 
 class HaveSetUpGGUserIDControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute = Call("GET", "/foo")
+  def onwardRoute: Call = Call("GET", "/foo")
 
-  lazy val haveSetUpGGUserIDRoute = routes.HaveSetUpGGUserIDController.onPageLoad(NormalMode).url
+  lazy val haveSetUpGGUserIDRoute: String = routes.HaveSetUpGGUserIDController.onPageLoad(NormalMode).url
 
   val formProvider = new HaveSetUpGGUserIDFormProvider()
-  val form = formProvider()
+  val form: Form[HaveSetUpGGUserID] = formProvider()
 
   "HaveSetUpGGUserID Controller" - {
 

@@ -74,7 +74,7 @@ class EncryptedIndividualDetailsRepository @Inject()(mongoComponent: MongoCompon
   def findIndividualDetailsDataByNino(nino: String)
                                (implicit ec: ExecutionContext): Future[Option[IndividualDetailsDataCache]] = {
     logger.info(s"find one in $collectionName table")
-    val filter = Filters.equal("individualDetails.nino", nino)
+    val filter = Filters.equal("individualDetails.nino", nino.take(8))
     collection.find(filter)
       .first()
       .toFutureOption()

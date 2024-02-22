@@ -20,7 +20,7 @@ import models.errors.IndividualDetailsError
 import models.individualdetails.IndividualDetails
 import models.pdv.PDVResponseData
 import play.api.Logging
-import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import util.AuditUtils
@@ -69,15 +69,15 @@ class AuditService @Inject()(auditConnector: AuditConnector, implicit val ec: Ex
     )
   }
 
-  def findYourNinoGetPdvDataHttpError(ex: HttpException)(implicit headerCarrier: HeaderCarrier): Unit = {
+  def findYourNinoGetPdvDataHttpError(status: String, reason: String)(implicit headerCarrier: HeaderCarrier): Unit = {
     audit(
       AuditUtils.buildAuditEvent(
         auditType = "FindYourNinoError",
         validationOutcome = "",
         identifierType = "",
         pageErrorGeneratedFrom = Some("/checkDetails"),
-        errorStatus = Some(ex.responseCode.toString),
-        errorReason = Some(ex.message)
+        errorStatus = Some(status),
+        errorReason = Some(reason)
       )
     )
   }

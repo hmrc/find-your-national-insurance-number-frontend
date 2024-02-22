@@ -27,6 +27,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.ConfirmYourPostcodePage
+import play.api.data.Form
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -42,15 +43,15 @@ import util.AnyValueTypeMatcher.anyValueType
 
 class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute = Call("GET", "/foo")
+  def onwardRoute: Call = Call("GET", "/foo")
 
   implicit val correlationId: models.CorrelationId = models.CorrelationId.random
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val formProvider = new ConfirmYourPostcodeFormProvider()
-  val form = formProvider()
+  val form: Form[String] = formProvider()
 
-  lazy val confirmYourPostcodeRoute = routes.ConfirmYourPostcodeController.onPageLoad(NormalMode).url
+  lazy val confirmYourPostcodeRoute: String = routes.ConfirmYourPostcodeController.onPageLoad(NormalMode).url
   val controller: ConfirmYourPostcodeController = application.injector.instanceOf[ConfirmYourPostcodeController]
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(

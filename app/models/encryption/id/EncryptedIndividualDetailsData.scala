@@ -26,7 +26,6 @@ import util.FMNConstants.EmptyString
 
 import java.time.{Instant, LocalDateTime, ZoneId, ZoneOffset}
 
-
 case class EncryptedIndividualDetailsData(
                                   firstForename: EncryptedValue,
                                   surname: EncryptedValue,
@@ -36,12 +35,13 @@ case class EncryptedIndividualDetailsData(
                                 )
 
 case class EncryptedIndividualDetailsDataCache(
-    id: String,
-    individualDetails: Option[EncryptedIndividualDetailsData],
-    lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC)
-  )
+  id: String,
+  individualDetails: Option[EncryptedIndividualDetailsData],
+  lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC)
+)
 
 object EncryptedIndividualDetailsDataCache {
+
   private val encryptedIndividualDetailsDataFormat: OFormat[EncryptedIndividualDetailsData] = {
     ((__ \ "firstForename").format[EncryptedValue]
       ~ (__ \ "surname").format[EncryptedValue]
@@ -51,12 +51,15 @@ object EncryptedIndividualDetailsDataCache {
       )(EncryptedIndividualDetailsData.apply, unlift(EncryptedIndividualDetailsData.unapply))
   }
 
+
   val encryptedIndividualDetailsDataCacheFormat: OFormat[EncryptedIndividualDetailsDataCache] = {
     ((__ \ "id").format[String]
       ~ (__ \ "individualDetails").formatNullable[EncryptedIndividualDetailsData](encryptedIndividualDetailsDataFormat)
       ~ (__ \ "lastUpdated").format[Instant](instantFormat)
       )(EncryptedIndividualDetailsDataCache.apply, unlift(EncryptedIndividualDetailsDataCache.unapply))
   }
+
+  
   def encryptField(fieldValue: String, key: String): EncryptedValue = {
     SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(fieldValue, key)
   }

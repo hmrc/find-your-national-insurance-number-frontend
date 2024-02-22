@@ -30,7 +30,7 @@ import models.individualdetails.{Address, AddressList, IndividualDetails, Resolv
 import models.pdv.{PDVRequest, PDVResponseData}
 import play.api.Logging
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
+import uk.gov.hmrc.http.HeaderCarrier
 import util.FMNConstants.EmptyString
 
 import java.util.UUID
@@ -53,7 +53,6 @@ trait CheckDetailsService {
 
 class CheckDetailsServiceImpl @Inject()(
                                          personalDetailsValidationService: PersonalDetailsValidationService,
-                                         auditService: AuditService,
                                          individualDetailsConnector: IndividualDetailsConnector
                                        )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends CheckDetailsService with Logging {
 
@@ -86,12 +85,13 @@ class CheckDetailsServiceImpl @Inject()(
     val p = for {
       pdvData <- personalDetailsValidationService.createPDVDataFromPDVMatch(body)
     } yield pdvData match {
-      case data: PDVResponseData => data
-      case _ => throw new Exception("No PDV data found")
+      case data: PDVResponseData =>
+        data
+      case _ =>
+        throw new Exception("No PDV data found")
     }
     p.recover {
-      case ex: HttpException =>
-        auditService.findYourNinoGetPdvDataHttpError(ex)
+      case ex: Exception =>
         logger.debug(ex.getMessage)
         throw ex
     }

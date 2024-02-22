@@ -53,6 +53,7 @@ object IndividualDetailsDataCache {
       ~ (__ \ "lastUpdated").format[Instant](instantFormat)
       )(IndividualDetailsDataCache.apply, unlift(IndividualDetailsDataCache.unapply))
   }
+  
   implicit class IndividualDetailsDataOps(private val individualDetailsData:IndividualDetailsDataCache) extends AnyVal {
 
     def getNino: String = individualDetailsData.individualDetails match {
