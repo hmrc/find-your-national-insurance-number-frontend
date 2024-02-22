@@ -96,7 +96,7 @@ class ConfirmYourPostcodeController @Inject()(
                       auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
                         individualDetailsAddress = Some(idAddr),
                         auditType = "FindYourNinoConfirmPostcode",
-                        validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+                        validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
                         identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
                         findMyNinoPostcodeEntered = Some(userEnteredPostCode),
                         findMyNinoPostcodeMatched = Some("true")
@@ -106,7 +106,7 @@ class ConfirmYourPostcodeController @Inject()(
                 case None =>
                   auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
                     auditType = "FindYourNinoConfirmPostcode",
-                    validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+                    validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
                     identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
                     findMyNinoPostcodeEntered = Some(userEnteredPostCode),
                     findMyNinoPostcodeMatched = Some("false")
@@ -115,7 +115,7 @@ class ConfirmYourPostcodeController @Inject()(
                 case _ =>
                   auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
                     auditType = "FindYourNinoConfirmPostcode",
-                    validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+                    validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
                     identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
                     findMyNinoPostcodeEntered = Some(userEnteredPostCode),
                     findMyNinoPostcodeMatched = Some("false")

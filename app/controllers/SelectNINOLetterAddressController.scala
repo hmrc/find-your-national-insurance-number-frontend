@@ -106,7 +106,7 @@ class SelectNINOLetterAddressController @Inject()(
                     auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
                       individualDetailsAddress = Some(idAddr),
                       auditType = "FindYourNinoOnlineLetterOption",
-                      validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+                      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
                       identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
                       findMyNinoOption = Some(value.toString)
                     ))
@@ -120,42 +120,39 @@ class SelectNINOLetterAddressController @Inject()(
                     auditService.audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
                       individualDetailsAddress = Some(idAddr),
                       auditType = "FindYourNinoOnlineLetterOption",
-                      validationOutcome = pdvData.map(_.validationStatus).getOrElse(""),
+                      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
                       identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
                       findMyNinoOption = Some(value.toString)
                     ))
                 }
-
                 npsFMNService.sendLetter(nino, FMNHelper.createNPSFMNRequest(idData)).map {
                   case LetterIssuedResponse() =>
                     Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
                   case RLSDLONFAResponse(responseStatus, responseMessage) =>
-                    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
-                      case Success(pdv) =>
+                    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).map(
+                      pdv =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                           auditType = "FindYourNinoError",
-                          validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
+                          validationOutcome = pdv.map(_.validationStatus).getOrElse("failure"),
                           identifierType = pdv.map(_.CRN.getOrElse("")).getOrElse(""),
                           pageErrorGeneratedFrom = Some("/postcode"),
                           errorStatus = Some(responseStatus.toString),
                           errorReason = Some(responseMessage)
                         ))
-                      case Failure(ex) => logger.warn(ex.getMessage)
-                    }
+                    )
                     Redirect(routes.SendLetterErrorController.onPageLoad(mode))
                   case TechnicalIssueResponse(responseStatus, responseMessage) =>
-                    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).onComplete {
-                      case Success(pdv) =>
+                    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).map(
+                      pdv =>
                         auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                           auditType = "FindYourNinoError",
-                          validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
+                          validationOutcome = pdv.map(_.validationStatus).getOrElse("failure"),
                           identifierType = pdv.map(_.CRN.getOrElse("")).getOrElse(""),
                           pageErrorGeneratedFrom = Some("/postcode"),
                           errorStatus = Some(responseStatus.toString),
                           errorReason = Some(responseMessage)
                         ))
-                      case Failure(ex) => logger.warn(ex.getMessage)
-                    }
+                    )
                     Redirect(routes.TechnicalErrorController.onPageLoad())
                   case _ =>
                     logger.warn("Unknown NPS FMN API response")

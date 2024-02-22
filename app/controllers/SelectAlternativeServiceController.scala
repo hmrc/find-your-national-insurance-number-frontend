@@ -66,18 +66,16 @@ class SelectAlternativeServiceController @Inject()(
       form.bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode))),
-
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).onComplete {
-            case Success(pdv) =>
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map(
+            pdv =>
               auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
                 auditType = "FindYourNinoOptionChosen",
-                validationOutcome = pdv.map(_.validationStatus).getOrElse(""),
+                validationOutcome = pdv.map(_.validationStatus).getOrElse("failure"),
                 identifierType = pdv.map(_.CRN.getOrElse("")).getOrElse(""),
                 findMyNinoOption = Some(value.toString)
               ))
-            case Failure(ex) => logger.warn(ex.getMessage)
-          }
+          )
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectAlternativeServicePage, value))
             _ <- sessionRepository.set(updatedAnswers)
