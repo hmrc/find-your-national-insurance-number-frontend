@@ -19,7 +19,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import play.api.libs.json.Json
-import play.api.libs.json.Reads._
 import java.time.LocalDate
 
 class AddressSpec extends AnyFlatSpec with Matchers {

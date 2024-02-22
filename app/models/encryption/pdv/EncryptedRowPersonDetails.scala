@@ -47,7 +47,7 @@ case class EncryptedPersonalDetails(
 
 object EncryptedPDVResponseData {
 
-  val encryptedPersonalDetailsFormat: OFormat[EncryptedPersonalDetails] = {
+  private val encryptedPersonalDetailsFormat: OFormat[EncryptedPersonalDetails] = {
     ((__ \ "firstName").format[EncryptedValue]
       ~ (__ \ "lastName").format[EncryptedValue]
       ~ (__ \ "nino").format[String]

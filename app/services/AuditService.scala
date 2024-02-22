@@ -20,7 +20,7 @@ import models.errors.IndividualDetailsError
 import models.individualdetails.IndividualDetails
 import models.pdv.PDVResponseData
 import play.api.Logging
-import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import util.AuditUtils

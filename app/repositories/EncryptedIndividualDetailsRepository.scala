@@ -37,7 +37,7 @@ class EncryptedIndividualDetailsRepository @Inject()(mongoComponent: MongoCompon
                                             )(implicit ec: ExecutionContext) extends PlayMongoRepository[EncryptedIndividualDetailsDataCache](
   collectionName = "individual-details",
   mongoComponent = mongoComponent,
-  domainFormat = EncryptedIndividualDetailsDataCache.formatEncryptedIndividualDetailsDataCache,
+  domainFormat = EncryptedIndividualDetailsDataCache.encryptedIndividualDetailsDataCacheFormat,
   indexes = Seq(
     IndexModel(
       Indexes.ascending("id"),
@@ -55,7 +55,7 @@ class EncryptedIndividualDetailsRepository @Inject()(mongoComponent: MongoCompon
     )
   ),
   replaceIndexes = true
-) with Logging {
+) with Logging with IndividualDetailsRepoTrait {
   def insertOrReplaceIndividualDetailsData(individualDetailsData: IndividualDetailsDataCache)
                                   (implicit ec: ExecutionContext): Future[String] = {
     logger.info(s"insert or update one in $collectionName table")
