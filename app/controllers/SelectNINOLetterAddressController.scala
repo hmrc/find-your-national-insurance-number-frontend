@@ -20,7 +20,7 @@ import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
-import models.errors.IndividualDetailsError
+import models.errors._
 import models.individualdetails.AddressType.ResidentialAddress
 import models.individualdetails.{Address, ResolveMerge}
 import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
@@ -108,14 +108,21 @@ class SelectNINOLetterAddressController @Inject()(
       case LetterIssuedResponse() =>
         getIndividualDetailsAddress(IndividualDetailsNino(nino)) map {
           case Right(idAddress) => auditService.findYourNinoOnlineLetterOption(pdvData, idAddress, value)
-          case _                => throw new IllegalArgumentException("Could not get individuals address")
+          case Left(individualDetailsError)                =>
+            val statusCode = individualDetailsError match {
+              case conError: ConnectorError => Some(conError.statusCode.toString)
+              case _ => None
+            }
+            val responseMessage = "Could not get individuals address"
+            auditService.findYourNinoError(pdvData, statusCode, responseMessage)
+            throw new IllegalArgumentException(responseMessage)
         }
         Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA))
       case RLSDLONFAResponse(responseStatus, responseMessage) =>
-        auditService.findYourNinoError(pdvData, responseStatus, responseMessage)
+        auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage)
         Redirect(routes.SendLetterErrorController.onPageLoad(mode))
       case TechnicalIssueResponse(responseStatus, responseMessage) =>
-        auditService.findYourNinoError(pdvData, responseStatus, responseMessage)
+        auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage)
         Redirect(routes.TechnicalErrorController.onPageLoad())
       case _ =>
         logger.warn("Unknown NPS FMN API response")

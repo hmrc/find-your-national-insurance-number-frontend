@@ -106,14 +106,14 @@ class AuditService @Inject()(auditConnector: AuditConnector, implicit val ec: Ex
     ))
   }
 
-  def findYourNinoError(pdvData: Option[PDVResponseData], responseStatus: Int, responseMessage: String)
+  def findYourNinoError(pdvData: Option[PDVResponseData], responseStatus: Option[String], responseMessage: String)
                        (implicit headerCarrier: HeaderCarrier): Unit = {
     audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
       auditType = "FindYourNinoError",
       validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
       identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
       pageErrorGeneratedFrom = Some("/postcode"),
-      errorStatus = Some(responseStatus.toString),
+      errorStatus = responseStatus,
       errorReason = Some(responseMessage)
     ))
   }
