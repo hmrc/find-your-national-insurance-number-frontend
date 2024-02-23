@@ -87,11 +87,12 @@ class SelectNINOLetterAddressController @Inject()(
             Future.successful(BadRequest(view(formWithErrors, mode, getPostCode(pdvData)))),
           value => {
             request.userAnswers.set(SelectNINOLetterAddressPage, value) match {
-              case Failure(_) => Future.successful(Redirect(routes.TechnicalErrorController.onPageLoad()))
+              case Failure(_) => Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
               case Success(uA) =>
                 sessionRepository.set(uA)
                 uA.get(SelectNINOLetterAddressPage) match {
                   case Some(SelectNINOLetterAddress.NotThisAddress) =>
+                    auditAddress(pdvData, nino, value.toString)
                     Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA)))
                   case Some(SelectNINOLetterAddress.Postcode) =>
                     sendLetter(nino, pdvData, value.toString, uA, mode)
@@ -106,17 +107,7 @@ class SelectNINOLetterAddressController @Inject()(
                         (implicit headerCarrier: HeaderCarrier): Future[Result] = {
     npsFMNService.sendLetter(nino, getNPSFMNRequest(pdvData)) map {
       case LetterIssuedResponse() =>
-        getIndividualDetailsAddress(IndividualDetailsNino(nino)) map {
-          case Right(idAddress) => auditService.findYourNinoOnlineLetterOption(pdvData, idAddress, value)
-          case Left(individualDetailsError) =>
-            val statusCode = individualDetailsError match {
-              case conError: ConnectorError => Some(conError.statusCode.toString)
-              case _ => None
-            }
-            val responseMessage = "Could not get individuals address"
-            auditService.findYourNinoError(pdvData, statusCode, responseMessage)
-            throw new IllegalArgumentException(responseMessage)
-        }
+        auditAddress(pdvData, nino, value)
         Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA))
       case RLSDLONFAResponse(responseStatus, responseMessage) =>
         auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage)
@@ -157,5 +148,20 @@ class SelectNINOLetterAddressController @Inject()(
       idDataAddress = idData.addressList.getAddress.filter(_.addressType.equals(ResidentialAddress)).head
     } yield idDataAddress
     idAddress.value
+  }
+
+  private def auditAddress(pdvData: Option[PDVResponseData], nino: String, value: String)(
+    implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Unit] = {
+    getIndividualDetailsAddress(IndividualDetailsNino(nino)) map {
+      case Right(idAddress) => auditService.findYourNinoOnlineLetterOption(pdvData, idAddress, value)
+      case Left(individualDetailsError) =>
+        val statusCode = individualDetailsError match {
+          case conError: ConnectorError => Some(conError.statusCode.toString)
+          case _ => None
+        }
+        val responseMessage = "Could not get individuals address"
+        auditService.findYourNinoError(pdvData, statusCode, responseMessage)
+        throw new IllegalArgumentException(responseMessage)
+    }
   }
 }
