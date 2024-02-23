@@ -105,9 +105,9 @@ class SelectNINOLetterAddressController @Inject()(
 
   private def sendLetter(nino: String, pdvData: Option[PDVResponseData], value: String, uA: UserAnswers, mode: Mode)
                         (implicit headerCarrier: HeaderCarrier): Future[Result] = {
+    auditAddress(pdvData, nino, value)
     npsFMNService.sendLetter(nino, getNPSFMNRequest(pdvData)) map {
       case LetterIssuedResponse() =>
-        auditAddress(pdvData, nino, value)
         Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA))
       case RLSDLONFAResponse(responseStatus, responseMessage) =>
         auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage)
