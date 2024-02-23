@@ -18,6 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.EnteredPostCodeNotFoundFormProvider
+import models.pdv.{PDVResponseData, PersonalDetails}
 import models.{EnteredPostCodeNotFound, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
@@ -30,8 +31,11 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
+import services.PersonalDetailsValidationService
+import uk.gov.hmrc.domain.Nino
 import views.html.EnteredPostCodeNotFoundView
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
@@ -39,6 +43,27 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
   def onwardRoute: Call = Call("GET", "/foo")
 
   lazy val enteredPostCodeNotFoundRoute: String = routes.EnteredPostCodeNotFoundController.onPageLoad(NormalMode).url
+  val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
+
+  val fakePDVResponseData: PDVResponseData = PDVResponseData(
+    id = "fakeId",
+    validationStatus = "success",
+    personalDetails = Some(PersonalDetails(
+      firstName = "John",
+      lastName = "Doe",
+      nino = Nino("AA000003B"),
+      postCode = Some("AA1 1AA"),
+      dateOfBirth = LocalDate.of(1990, 1, 1)
+    )),
+    validCustomer = Some("true"),
+    CRN = Some("fakeCRN"),
+    npsPostCode = Some("AA1 1AA"),
+    reason = None
+  )
+
+  val fakePDVResponseDataInvalidCustomer: PDVResponseData = fakePDVResponseData.copy(
+    validCustomer = Some("false")
+  )
 
   val formProvider = new EnteredPostCodeNotFoundFormProvider()
   val form: Form[EnteredPostCodeNotFound] = formProvider()
@@ -46,8 +71,14 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
   "EnteredPostCodeNotFound Controller" - {
 
     "must return OK and the correct view for a GET" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, enteredPostCodeNotFoundRoute)
@@ -62,10 +93,15 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
-
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseData)))
       val userAnswers = UserAnswers(userAnswersId).set(EnteredPostCodeNotFoundPage, EnteredPostCodeNotFound.values.head).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, enteredPostCodeNotFoundRoute)
@@ -84,12 +120,15 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
       val mockSessionRepository = mock[SessionRepository]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[SessionRepository].toInstance(mockSessionRepository)
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
           .build()
 
@@ -106,8 +145,14 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
 
       running(application) {
         val request =
@@ -122,6 +167,44 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to unauthorised controller when the user is not a valid customer" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseDataInvalidCustomer)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, enteredPostCodeNotFoundRoute)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+      }
+    }
+
+    "must redirect to unauthorised controller when there is no PDV data" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(None))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, enteredPostCodeNotFoundRoute)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
       }
     }
   }

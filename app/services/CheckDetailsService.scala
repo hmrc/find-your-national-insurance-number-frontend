@@ -69,13 +69,13 @@ class CheckDetailsServiceImpl @Inject()(
       reason += "ResidentialAddressStatus is Dlo or Nfa;"
     }
 
-    val status = {
+    val isValidCustomer = {
       idData.accountStatusType.exists(_.equals(FullLive)) &&
         idData.crnIndicator.equals(False) &&
         getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo))
     }
 
-    (status, reason)
+    (isValidCustomer, reason)
   }
 
   def getNPSPostCode(idData: IndividualDetails): String =

@@ -64,6 +64,26 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
     reason = None
   )
 
+  val fakePDVResponseDataWithoutPostcode: PDVResponseData = PDVResponseData(
+    id = "fakeId",
+    validationStatus = "success",
+    personalDetails = Some(PersonalDetails(
+      firstName = "John",
+      lastName = "Doe",
+      nino = Nino("AB123456C"),
+      postCode = None,
+      dateOfBirth = LocalDate.of(1990, 1, 1)
+    )),
+    validCustomer = Some("true"),
+    CRN = Some("fakeCRN"),
+    npsPostCode = Some("AA1 1AA"),
+    reason = None
+  )
+
+  val fakePDVResponseDataInvalidCustomer: PDVResponseData = fakePDVResponseData.copy(
+    validCustomer = Some("false")
+  )
+
   val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
 
 
@@ -100,7 +120,8 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
-        bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService))
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
           .build()
 
       running(application) {
@@ -124,13 +145,16 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
       when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
         .thenReturn(Future.successful(LetterIssuedResponse()))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[NPSFMNService].toInstance(mockNPSFMNService),
-            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector)
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
           .build()
 
@@ -155,13 +179,16 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
       when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
         .thenReturn(Future.successful(LetterIssuedResponse()))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[NPSFMNService].toInstance(mockNPSFMNService),
-            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector)
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
           .build()
 
@@ -186,13 +213,16 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
       when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
         .thenReturn(Future.successful(RLSDLONFAResponse(SEE_OTHER, "some message")))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[NPSFMNService].toInstance(mockNPSFMNService),
-            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector)
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
           .build()
 
@@ -239,12 +269,16 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       val mockNPSFMNConnector = mock[NPSFMNConnector]
       val mockNPSFMNService = mock[NPSFMNService]
 
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
+
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[NPSFMNService].toInstance(mockNPSFMNService),
-            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector)
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
           .build()
 
@@ -261,6 +295,63 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.TechnicalErrorController.onPageLoad().url
+      }
+    }
+
+    "must redirect to unauthorised controller when the user is not a valid customer" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseDataInvalidCustomer)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, selectNINOLetterAddressRoute)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+      }
+    }
+
+    "must redirect to unauthorised controller when there is no PDV data" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(None))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, selectNINOLetterAddressRoute)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+      }
+    }
+
+    "must throw IllegalArgumentException when there is no postcode present in PDV data" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseDataWithoutPostcode)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, selectNINOLetterAddressRoute)
+
+        a[IllegalArgumentException] should be thrownBy {
+          await(route(application, request).value)
+        }
       }
     }
   }

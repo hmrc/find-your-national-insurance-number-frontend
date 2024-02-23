@@ -41,7 +41,7 @@ class TechnicalErrorController @Inject()(
                                        navigator: Navigator,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
+                                       requireValidData: ValidCustomerDataRequiredAction,
                                        formProvider: TechnicalErrorServiceFormProvider,
                                        personalDetailsValidationService: PersonalDetailsValidationService,
                                        auditService: AuditService,
@@ -51,7 +51,7 @@ class TechnicalErrorController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) async {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) async {
     implicit request =>
 
       val preparedForm = request.userAnswers.get(TechnicalErrorPage) match {
@@ -67,7 +67,7 @@ class TechnicalErrorController @Inject()(
       } yield Ok(view(preparedForm, mode, retryAllowed))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>

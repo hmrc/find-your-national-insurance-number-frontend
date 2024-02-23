@@ -52,7 +52,7 @@ class SelectNINOLetterAddressController @Inject()(
                                                    navigator: Navigator,
                                                    identify: IdentifierAction,
                                                    getData: DataRetrievalAction,
-                                                   requireData: DataRequiredAction,
+                                                   requireValidData: ValidCustomerDataRequiredAction,
                                                    formProvider: SelectNINOLetterAddressFormProvider,
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: SelectNINOLetterAddressView,
@@ -66,7 +66,7 @@ class SelectNINOLetterAddressController @Inject()(
 
   val form: Form[SelectNINOLetterAddress] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
       val preparedForm = request.userAnswers.get(SelectNINOLetterAddressPage) match {
         case None => form
@@ -76,10 +76,15 @@ class SelectNINOLetterAddressController @Inject()(
       for {
         pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", ""))
         postCode = getPostCode(pdvData)
-      } yield Ok(view(preparedForm, mode, postCode))
+      } yield {
+        if (postCode.isEmpty) {
+          throw new IllegalArgumentException("PDV data not found")
+        }
+        Ok(view(preparedForm, mode, postCode))
+      }
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
       val nino = request.session.data.getOrElse("nino", StringUtils.EMPTY)
 
