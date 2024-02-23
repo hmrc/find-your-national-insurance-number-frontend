@@ -108,7 +108,7 @@ class SelectNINOLetterAddressController @Inject()(
       case LetterIssuedResponse() =>
         getIndividualDetailsAddress(IndividualDetailsNino(nino)) map {
           case Right(idAddress) => auditService.findYourNinoOnlineLetterOption(pdvData, idAddress, value)
-          case Left(individualDetailsError)                =>
+          case Left(individualDetailsError) =>
             val statusCode = individualDetailsError match {
               case conError: ConnectorError => Some(conError.statusCode.toString)
               case _ => None
