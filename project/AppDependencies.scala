@@ -9,7 +9,7 @@ object AppDependencies {
     play.sbt.PlayImport.ws,
     "uk.gov.hmrc"       %% "play-conditional-form-mapping"      % s"1.12.0-$playVersion",
     "uk.gov.hmrc.mongo" %% s"hmrc-mongo-$playVersion"           % "0.71.0",
-    "uk.gov.hmrc"       %% "sca-wrapper"                        % "1.0.38",
+    "uk.gov.hmrc"       %% s"sca-wrapper-$playVersion"          % "1.1.0",
     "org.typelevel"     %% "cats-core"                          % "2.7.0",
     "uk.gov.hmrc"       %% "crypto-json-play-28"                % "7.6.0"
 )

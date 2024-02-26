@@ -31,7 +31,6 @@ import javax.inject.Inject
 trait LayoutProvider {
 
   lazy val defaultBannerConfig: BannerConfig = BannerConfig(
-    showChildBenefitBanner = false,
     showAlphaBanner = false,
     showBetaBanner = false,
     showHelpImproveBanner = true
@@ -77,7 +76,6 @@ class NewLayoutProvider @Inject()(wrapperService: WrapperService, additionalScri
                                   headBlock: HeadBlock, appConfig: FrontendAppConfig) extends LayoutProvider with Logging {
 
   lazy val newLayoutBannerConfig: BannerConfig = BannerConfig(
-    showChildBenefitBanner = appConfig.showChildBenefitBanner,
     showAlphaBanner = appConfig.showAlphaBanner,
     showBetaBanner = appConfig.showBetaBanner,
     showHelpImproveBanner = appConfig.showHelpImproveBanner
