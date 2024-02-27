@@ -25,8 +25,6 @@ import models.individualdetails.AddressType.ResidentialAddress
 import models.individualdetails.{Address, ResolveMerge}
 import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.{PDVResponseData, PersonalDetails}
-
-import javax.inject.Inject
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, NormalMode}
 import pages.ConfirmYourPostcodePage
 import play.api.Logging
@@ -35,14 +33,14 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
 import services.{AuditService, IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
-import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.ConfirmYourPostcodeView
-import util.{AuditUtils, FMNHelper}
 import util.FMNHelper.comparePostCode
+import util.{AuditUtils, FMNHelper}
+import views.html.ConfirmYourPostcodeView
 
 import java.util.UUID
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmYourPostcodeController @Inject()(
@@ -168,7 +166,6 @@ class ConfirmYourPostcodeController @Inject()(
 
   def getIndividualDetailsAddress(nino: IndividualDetailsNino
                                  )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Either[IndividualDetailsError, Address]] = {
-    implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
     implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
     val idAddress = for {
       idData <- IndividualDetailsResponseEnvelope.fromEitherF(individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y')).value)

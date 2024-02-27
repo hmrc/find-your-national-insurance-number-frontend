@@ -33,7 +33,6 @@ import views.html.InvalidDataNINOHelpView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class InvalidDataNINOHelpController @Inject()(
                                                override val messagesApi: MessagesApi,

@@ -17,15 +17,13 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.{TryAgainCount, UserAnswers}
+import models.TryAgainCount
 import org.mockito.Mockito.when
-import org.mongodb.scala.model.Filters
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.libs.json.Json
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.temporal.ChronoUnit
@@ -71,9 +69,9 @@ class TryAgainCountRepositoryISpec
 
     "must update count if count exists when retry is repeatedly attempted" in {
 
-      val expectedResult = tryAgainCount copy (lastUpdated = instant, count = 2)
+      val expectedResult = tryAgainCount.copy(lastUpdated = instant, count = 2)
 
-      repository.insertOrIncrement(tryAgainCount.id).futureValue
+      repository.insertOrIncrement(id = tryAgainCount.id).futureValue
 
       val setResult = repository.insertOrIncrement(tryAgainCount.id).futureValue
 

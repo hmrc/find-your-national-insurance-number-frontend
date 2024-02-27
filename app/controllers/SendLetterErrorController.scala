@@ -34,7 +34,6 @@ import views.html.SendLetterErrorView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class SendLetterErrorController @Inject()(
                                            override val messagesApi: MessagesApi,

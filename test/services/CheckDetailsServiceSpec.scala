@@ -195,7 +195,7 @@ object CheckDetailsServiceSpec {
   private val personalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
   private val individualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
   private val npsFMNService = new CheckDetailsServiceImpl(personalDetailsValidationService,
-    individualDetailsConnector)(global, mockFrontendAppConfig)
+    individualDetailsConnector)(global)
 
   val fakeName: individualdetails.Name = models.individualdetails.Name(
     nameSequenceNumber = NameSequenceNumber(1),

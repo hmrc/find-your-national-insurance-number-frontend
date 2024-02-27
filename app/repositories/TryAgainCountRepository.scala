@@ -63,7 +63,7 @@ class TryAgainCountRepository @Inject()(
          (implicit ec: ExecutionContext): Future[Boolean] = {
     logger.info(s"Updating one in $collectionName table")
 
-    val updatedCount = tryAgainCount copy(count = tryAgainCount.count + 1, lastUpdated = Instant.now(clock))
+    val updatedCount = tryAgainCount.copy(count = tryAgainCount.count + 1, lastUpdated = Instant.now(clock))
 
     collection
       .replaceOne(
