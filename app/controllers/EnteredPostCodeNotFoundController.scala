@@ -20,10 +20,11 @@ import controllers.actions._
 import forms.EnteredPostCodeNotFoundFormProvider
 
 import javax.inject.Inject
-import models.Mode
+import models.{EnteredPostCodeNotFound, Mode}
 import navigation.Navigator
 import pages.EnteredPostCodeNotFoundPage
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -33,7 +34,6 @@ import views.html.EnteredPostCodeNotFoundView
 import util.AuditUtils
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class EnteredPostCodeNotFoundController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -49,7 +49,7 @@ class EnteredPostCodeNotFoundController @Inject()(
                                        auditService: AuditService
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  val form = formProvider()
+  val form: Form[EnteredPostCodeNotFound] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>

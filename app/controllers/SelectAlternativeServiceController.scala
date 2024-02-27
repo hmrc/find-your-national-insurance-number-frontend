@@ -18,10 +18,11 @@ package controllers
 
 import controllers.actions._
 import forms.SelectAlternativeServiceFormProvider
-import models.Mode
+import models.{Mode, SelectAlternativeService}
 import navigation.Navigator
 import pages.SelectAlternativeServicePage
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -32,7 +33,6 @@ import views.html.SelectAlternativeServiceView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class SelectAlternativeServiceController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -48,7 +48,7 @@ class SelectAlternativeServiceController @Inject()(
                                        view: SelectAlternativeServiceView
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging{
 
-  val form = formProvider()
+  val form: Form[SelectAlternativeService] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>

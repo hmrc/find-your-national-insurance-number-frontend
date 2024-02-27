@@ -17,13 +17,13 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions.{ValidCustomerDataRequiredAction, DataRetrievalAction, IdentifierAction}
+import controllers.actions.{DataRetrievalAction, IdentifierAction, ValidCustomerDataRequiredAction}
 import forms.ValidDataNINOHelpFormProvider
 import models.{Mode, NormalMode}
 import navigation.Navigator
-import org.apache.commons.lang3.StringUtils
 import pages.ValidDataNINOHelpPage
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -35,7 +35,6 @@ import play.api.mvc.Codec.utf_8
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class ValidDataNINOHelpController @Inject()(
                                              override val messagesApi: MessagesApi,
@@ -51,7 +50,7 @@ class ValidDataNINOHelpController @Inject()(
                                              val controllerComponents: MessagesControllerComponents
                                   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
-  val form = formProvider()
+  val form: Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>
