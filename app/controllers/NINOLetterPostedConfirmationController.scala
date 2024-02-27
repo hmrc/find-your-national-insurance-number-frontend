@@ -28,12 +28,12 @@ class NINOLetterPostedConfirmationController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
+                                       requireValidData: ValidCustomerDataRequiredAction,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: NINOLetterPostedConfirmationView
                                      ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>
       Ok(view())
   }

@@ -17,7 +17,7 @@
 package services
 
 import models.errors.IndividualDetailsError
-import models.individualdetails.IndividualDetails
+import models.individualdetails.{Address, IndividualDetails}
 import models.pdv.PDVResponseData
 import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
@@ -93,6 +93,29 @@ class AuditService @Inject()(auditConnector: AuditConnector, implicit val ec: Ex
         origin = origin
       )
     )
+  }
+
+  def findYourNinoOnlineLetterOption(pdvData: Option[PDVResponseData], idAddress: Address, value: String)
+                                    (implicit headerCarrier: HeaderCarrier): Unit = {
+    audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
+      individualDetailsAddress = Some(idAddress),
+      auditType = "FindYourNinoOnlineLetterOption",
+      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
+      identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+      findMyNinoOption = Some(value)
+    ))
+  }
+
+  def findYourNinoError(pdvData: Option[PDVResponseData], responseStatus: Option[String], responseMessage: String)
+                       (implicit headerCarrier: HeaderCarrier): Unit = {
+    audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
+      auditType = "FindYourNinoError",
+      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
+      identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
+      pageErrorGeneratedFrom = Some("/postcode"),
+      errorStatus = responseStatus,
+      errorReason = Some(responseMessage)
+    ))
   }
 
   def audit(evt: ExtendedDataEvent)(implicit

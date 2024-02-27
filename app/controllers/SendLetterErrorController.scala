@@ -41,7 +41,7 @@ class SendLetterErrorController @Inject()(
                                            navigator: Navigator,
                                            identify: IdentifierAction,
                                            getData: DataRetrievalAction,
-                                           requireData: DataRequiredAction,
+                                           requireValidData: ValidCustomerDataRequiredAction,
                                            view: SendLetterErrorView,
                                            formProvider: SelectAlternativeServiceFormProvider,
                                            personalDetailsValidationService: PersonalDetailsValidationService,
@@ -51,7 +51,7 @@ class SendLetterErrorController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>
       val preparedForm = request.userAnswers.get(SelectAlternativeServicePage) match {
         case None => form
@@ -61,7 +61,7 @@ class SendLetterErrorController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>

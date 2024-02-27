@@ -39,7 +39,7 @@ class EnteredPostCodeNotFoundController @Inject()(
                                        navigator: Navigator,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
+                                       requireValidData: ValidCustomerDataRequiredAction,
                                        formProvider: EnteredPostCodeNotFoundFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: EnteredPostCodeNotFoundView,
@@ -49,7 +49,7 @@ class EnteredPostCodeNotFoundController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>
 
       val preparedForm = request.userAnswers.get(EnteredPostCodeNotFoundPage) match {
@@ -60,7 +60,7 @@ class EnteredPostCodeNotFoundController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
 
       form.bindFromRequest().fold(

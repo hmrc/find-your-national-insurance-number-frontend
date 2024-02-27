@@ -18,6 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.SelectAlternativeServiceFormProvider
+import models.pdv.{PDVResponseData, PersonalDetails}
 import models.{NormalMode, SelectAlternativeService, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
@@ -28,8 +29,11 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
+import services.PersonalDetailsValidationService
+import uk.gov.hmrc.domain.Nino
 import views.html.SendLetterErrorView
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class SendLetterErrorControllerSpec extends SpecBase {
@@ -37,6 +41,27 @@ class SendLetterErrorControllerSpec extends SpecBase {
   def onwardRoute = Call("GET", "/foo")
 
   lazy val sendLetterErrorRoute = routes.SendLetterErrorController.onPageLoad(mode = NormalMode).url
+  val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
+
+  val fakePDVResponseData: PDVResponseData = PDVResponseData(
+    id = "fakeId",
+    validationStatus = "success",
+    personalDetails = Some(PersonalDetails(
+      firstName = "John",
+      lastName = "Doe",
+      nino = Nino("AA000003B"),
+      postCode = Some("AA1 1AA"),
+      dateOfBirth = LocalDate.of(1990, 1, 1)
+    )),
+    validCustomer = Some("true"),
+    CRN = Some("fakeCRN"),
+    npsPostCode = Some("AA1 1AA"),
+    reason = None
+  )
+
+  val fakePDVResponseDataInvalidCustomer: PDVResponseData = fakePDVResponseData.copy(
+    validCustomer = Some("false")
+  )
 
   val formProvider = new SelectAlternativeServiceFormProvider()
   val form = formProvider()
@@ -44,8 +69,14 @@ class SendLetterErrorControllerSpec extends SpecBase {
   "SendLetterError Controller" - {
 
     "must return OK and the correct view for a GET" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, sendLetterErrorRoute)
@@ -60,10 +91,16 @@ class SendLetterErrorControllerSpec extends SpecBase {
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
       val userAnswers = UserAnswers(userAnswersId).set(SelectAlternativeServicePage, SelectAlternativeService.values.head).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, sendLetterErrorRoute)
@@ -78,6 +115,8 @@ class SendLetterErrorControllerSpec extends SpecBase {
     }
 
     "must redirect to the next page when valid data is submitted" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
       val mockSessionRepository = mock[SessionRepository]
 
@@ -87,7 +126,8 @@ class SendLetterErrorControllerSpec extends SpecBase {
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[SessionRepository].toInstance(mockSessionRepository)
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
           .build()
 
@@ -104,8 +144,14 @@ class SendLetterErrorControllerSpec extends SpecBase {
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
 
       running(application) {
         val request =
@@ -120,6 +166,44 @@ class SendLetterErrorControllerSpec extends SpecBase {
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application), config).toString
+      }
+    }
+
+    "must redirect to unauthorised controller when the user is not a valid customer" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseDataInvalidCustomer)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, sendLetterErrorRoute)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+      }
+    }
+
+    "must redirect to unauthorised controller when there is no PDV data" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(None))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, sendLetterErrorRoute)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
       }
     }
   }

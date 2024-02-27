@@ -17,7 +17,7 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import controllers.actions.{ValidCustomerDataRequiredAction, DataRetrievalAction, IdentifierAction}
 import forms.ValidDataNINOHelpFormProvider
 import models.{Mode, NormalMode}
 import navigation.Navigator
@@ -42,7 +42,7 @@ class ValidDataNINOHelpController @Inject()(
                                              navigator: Navigator,
                                              identify: IdentifierAction,
                                              getData: DataRetrievalAction,
-                                             requireData: DataRequiredAction,
+                                             requireValidData: ValidCustomerDataRequiredAction,
                                              formProvider: ValidDataNINOHelpFormProvider,
                                              view: ValidDataNINOHelpView,
                                              auditService: AuditService,
@@ -52,31 +52,16 @@ class ValidDataNINOHelpController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireData) async {
+  def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>
-      val nino = request.session.data.get("nino")
-      val resp = personalDetailsValidationService.getValidCustomerStatus(nino.getOrElse(StringUtils.EMPTY)).map(
-        validCustomer =>
-          if (validCustomer == "true") {
-            val preparedForm = request.userAnswers.get(ValidDataNINOHelpPage) match {
-              case None => form
-              case Some(value) => form.fill(value)
-            }
-
-            Ok(view(preparedForm, mode))
-          } else {
-            logger.warn("User is not authorised to access this page, redirecting ..... ")
-            Redirect(controllers.routes.UnauthorisedController.onPageLoad)
-          }
-      )
-      // TODO combine this block with previous block with case nino match { case some(nino) => ??? case _ => ??? }
-      nino match {
-        case Some(_) => resp
-        case None => Future.successful(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
-      }
+        val preparedForm = request.userAnswers.get(ValidDataNINOHelpPage) match {
+          case None => form
+          case Some(value) => form.fill(value)
+        }
+        Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>

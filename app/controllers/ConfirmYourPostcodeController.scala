@@ -48,7 +48,7 @@ class ConfirmYourPostcodeController @Inject()(
                                         sessionRepository: SessionRepository,
                                         identify: IdentifierAction,
                                         getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
+                                        requireValidData: ValidCustomerDataRequiredAction,
                                         formProvider: ConfirmYourPostcodeFormProvider,
                                         val controllerComponents: MessagesControllerComponents,
                                         view: ConfirmYourPostcodeView,
@@ -62,7 +62,7 @@ class ConfirmYourPostcodeController @Inject()(
 
   val form: Form[String] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>
 
       val preparedForm = request.userAnswers.get(ConfirmYourPostcodePage) match {
@@ -73,7 +73,7 @@ class ConfirmYourPostcodeController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
