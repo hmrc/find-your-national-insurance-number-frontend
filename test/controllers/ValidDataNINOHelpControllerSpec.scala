@@ -83,6 +83,10 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
     reason = None
   )
 
+  val fakePDVResponseDataInvalidCustomer: PDVResponseData = fakePDVResponseData.copy(
+    validCustomer = Some("false")
+  )
+
   "ValidDataNINOHelpController" - {
 
     "must return OK and the correct view for a GET" in {
@@ -92,8 +96,8 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
         any[Retrieval[Option[CredentialRole] ~ Option[String]]])(any[HeaderCarrier], any[ExecutionContext]))
         .thenReturn(fakeRetrievalResult)
 
-      when(mockPersonalDetailsValidationService.getValidCustomerStatus(any[String]))
-        .thenReturn(Future.successful("true"))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
@@ -117,15 +121,45 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to UnauthorisedController when the user is not logged in" in {
+    "must redirect to unauthorised controller when the user is not a valid customer" in {
 
       when(mockAuthConnector.authorise[Option[CredentialRole] ~ Option[String]](
         any[Predicate],
         any[Retrieval[Option[CredentialRole] ~ Option[String]]])(any[HeaderCarrier], any[ExecutionContext]))
         .thenReturn(fakeRetrievalResult)
 
-      when(mockPersonalDetailsValidationService.getValidCustomerStatus(any[String]))
-        .thenReturn(Future.successful("false"))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseDataInvalidCustomer)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          inject.bind[AuthConnector].toInstance(mockAuthConnector),
+          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        ).build()
+
+      running(application) {
+        val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
+          Helpers.GET,
+          controllers.routes.ValidDataNINOHelpController.onPageLoad(NormalMode).url
+        ).withSession(
+          SessionKeys.sessionId -> "id",
+          "UserAnswers" -> userAnswersJson.toString())
+
+        val result = route(application, fakeRequest).value
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+      }
+    }
+
+    "must redirect to unauthorised controller when there is no PDV data" in {
+
+      when(mockAuthConnector.authorise[Option[CredentialRole] ~ Option[String]](
+        any[Predicate],
+        any[Retrieval[Option[CredentialRole] ~ Option[String]]])(any[HeaderCarrier], any[ExecutionContext]))
+        .thenReturn(fakeRetrievalResult)
+
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(None))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
@@ -175,8 +209,6 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.SelectNINOLetterAddressController.onPageLoad(NormalMode).url
       }
-
     }
-
   }
 }

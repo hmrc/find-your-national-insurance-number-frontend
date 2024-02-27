@@ -91,8 +91,8 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
   }
 
   // Update the PDV data row with the a validationStatus which is boolean value
-  def updatePDVDataRowWithValidationStatus(nino: String, validationStatus: Boolean, reason:String): Future[Boolean] =
-    pdvRepository.updateCustomerValidityWithReason(nino, validationStatus, reason) map {
+  def updatePDVDataRowWithValidCustomer(nino: String, isValidCustomer: Boolean, reason:String): Future[Boolean] =
+    pdvRepository.updateCustomerValidityWithReason(nino, isValidCustomer, reason) map {
       case str:String => if(str.length > 8) true else false
       case _ => false
     } recover {

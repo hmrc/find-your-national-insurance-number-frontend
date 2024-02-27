@@ -48,6 +48,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
   val formProvider = new TechnicalErrorServiceFormProvider()
   val form: Form[TechnicalErrorService] = formProvider()
+  val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
@@ -83,15 +84,23 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     reason = None
   )
 
+  val fakePDVResponseDataInvalidCustomer: PDVResponseData = fakePDVResponseDataWithPostcode.copy(
+    validCustomer = Some("false")
+  )
+
   "TechnicalErrorController" - {
 
     "must return OK and the correct view for a GET" in {
       val mockTryAgainCountRepository = mock[TryAgainCountRepository]
       when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseDataWithPostcode)))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
-          bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository))
+          bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository),
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
         .build()
 
       running(application) {
@@ -112,10 +121,14 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       val mockTryAgainCountRepository = mock[TryAgainCountRepository]
 
       when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseDataWithPostcode)))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
-          bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository))
+          bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository),
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
         .build()
 
       running(application) {
@@ -135,12 +148,15 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       val mockSessionRepository = mock[SessionRepository]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseDataWithPostcode)))
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[SessionRepository].toInstance(mockSessionRepository)
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
           .build()
 
@@ -159,7 +175,6 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     "redirect to SelectNINOLetterAddress page for a POST if user selects Try again option with a postcode" in {
 
       val mockTryAgainCountRepository = mock[TryAgainCountRepository]
-      val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
 
       when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
@@ -188,7 +203,6 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     "redirect to ConfirmYourPostcode page for a POST if user selects Try again option without a postcode" in {
 
       val mockTryAgainCountRepository = mock[TryAgainCountRepository]
-      val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
 
       when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
@@ -215,8 +229,14 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "redirect to PhoneHMRCDetails page for a POST if user selects Phone HMRC option" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseDataWithPostcode)))
 
-      val application = applicationBuilder(userAnswers = None).build()
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
 
       running(application) {
         val request =
@@ -232,8 +252,14 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "redirect to Print and Post page for a POST if user selects P&P Service option" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseDataWithPostcode)))
 
-      val application = applicationBuilder(userAnswers = None).build()
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
 
       running(application) {
         val request =
@@ -245,6 +271,44 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         status(result) mustEqual SEE_OTHER
 
         redirectLocation(result).value mustEqual getNINOByPostUrl
+      }
+    }
+
+    "must redirect to unauthorised controller when the user is not a valid customer" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseDataInvalidCustomer)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, technicalErrorRoute)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+      }
+    }
+
+    "must redirect to unauthorised controller when there is no PDV data" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(None))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, technicalErrorRoute)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
       }
     }
   }

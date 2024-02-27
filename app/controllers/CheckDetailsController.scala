@@ -124,7 +124,7 @@ class CheckDetailsController @Inject()(
     individualDetailsService.createIndividualDetailsData(sessionWithNINO.data.getOrElse("sessionId", EmptyString), idData)
 
     val api1694Checks = checkDetailsService.checkConditions(idData)
-    personalDetailsValidationService.updatePDVDataRowWithValidationStatus(pdvData.getNino, api1694Checks._1, api1694Checks._2)
+    personalDetailsValidationService.updatePDVDataRowWithValidCustomer(pdvData.getNino, api1694Checks._1, api1694Checks._2)
 
     if (api1694Checks._1) {
       val idPostCode = checkDetailsService.getNPSPostCode(idData)

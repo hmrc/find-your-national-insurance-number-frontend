@@ -41,7 +41,7 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
                                          navigator: Navigator,
                                          identify: IdentifierAction,
                                          getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
+                                         requireValidData: ValidCustomerDataRequiredAction,
                                          formProvider: ValidDataNINOMatchedNINOHelpFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
                                          view: ValidDataNINOMatchedNINOHelpView,
@@ -51,7 +51,7 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>
       val preparedForm = request.userAnswers.get(ValidDataNINOMatchedNINOHelpPage) match {
         case None => form
@@ -61,7 +61,7 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>

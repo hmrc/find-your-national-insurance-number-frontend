@@ -69,7 +69,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockEncryptedPersonalDetailsValidationRepository.updateCustomerValidityWithReason(any(), any(), any())(any()))
           .thenReturn(Future.successful(validationId))
 
-        personalDetailsValidationService.updatePDVDataRowWithValidationStatus(validationId, validationStatus = true, "success").map { result =>
+        personalDetailsValidationService.updatePDVDataRowWithValidCustomer(validationId, isValidCustomer = true, "success").map { result =>
           result mustBe true
         }(ec)
       }
@@ -208,7 +208,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockPersonalDetailsValidationRepository.updateCustomerValidityWithReason(any(), any(), any())(any()))
           .thenReturn(Future.successful(validationId))
 
-        personalDetailsValidationService.updatePDVDataRowWithValidationStatus(validationId, validationStatus = true, "success").map { result =>
+        personalDetailsValidationService.updatePDVDataRowWithValidCustomer(validationId, isValidCustomer = true, "success").map { result =>
           result mustBe true
         }(ec)
       }
