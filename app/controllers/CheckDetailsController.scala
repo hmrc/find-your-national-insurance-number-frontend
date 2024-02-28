@@ -135,7 +135,7 @@ class CheckDetailsController @Inject()(
           Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
         } else {
           logger.warn(s"PDV and API 1694 postcodes not matched")
-          Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+          Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
         }
       } else { // Matched with NINO
         personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(pdvData.getNino, idPostCode)
@@ -143,7 +143,7 @@ class CheckDetailsController @Inject()(
       }
     } else {
       logger.warn(s"API 1694 checks failed: ${api1694Checks._2}")
-      Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
+      Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
     }
   }
 
