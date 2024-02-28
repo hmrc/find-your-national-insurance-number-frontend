@@ -18,8 +18,6 @@ package controllers
 
 import controllers.actions._
 import forms.ValidDataNINOMatchedNINOHelpFormProvider
-
-import javax.inject.Inject
 import models.{Mode, NormalMode}
 import navigation.Navigator
 import pages.ValidDataNINOMatchedNINOHelpPage
@@ -32,8 +30,8 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.AuditUtils
 import views.html.ValidDataNINOMatchedNINOHelpView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class ValidDataNINOMatchedNINOHelpController @Inject()(
                                          override val messagesApi: MessagesApi,

@@ -32,7 +32,6 @@ import views.html.SelectAlternativeServiceView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class SelectAlternativeServiceController @Inject()(
                                        override val messagesApi: MessagesApi,

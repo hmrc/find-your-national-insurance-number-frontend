@@ -19,15 +19,15 @@ package connectors
 import cats.data.EitherT
 import cats.syntax.all._
 import com.google.inject.ImplementedBy
-import com.kenshoo.play.metrics.Metrics
 import config.FrontendAppConfig
 import connectors.HttpReadsWrapper.Recovered
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
-import models.errors.{IndividualDetailsError, ConnectorError}
-import models.{IndividualDetailsIdentifier, CorrelationId}
+import models.errors.{ConnectorError, IndividualDetailsError}
+import models.{CorrelationId, IndividualDetailsIdentifier}
 import models.individualdetails.{IndividualDetails, ResolveMerge}
 import models.upstreamfailure.{Failure, UpstreamFailures}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext

@@ -16,7 +16,6 @@
 
 package controllers
 
-import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
@@ -27,23 +26,23 @@ import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, Techn
 import models.pdv.PDVResponseData
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, SelectNINOLetterAddress, UserAnswers}
 import navigation.Navigator
+import org.apache.commons.lang3.StringUtils
 import pages.SelectNINOLetterAddressPage
+import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
 import services.{AuditService, NPSFMNService, PersonalDetailsValidationService}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SelectNINOLetterAddressView
-import org.apache.commons.lang3.StringUtils
-import play.api.Logging
-import play.api.data.Form
-import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
-import uk.gov.hmrc.http.HeaderCarrier
 
 import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
+
 
 class SelectNINOLetterAddressController @Inject()(
                                                    override val messagesApi: MessagesApi,
@@ -58,8 +57,7 @@ class SelectNINOLetterAddressController @Inject()(
                                                    personalDetailsValidationService: PersonalDetailsValidationService,
                                                    auditService: AuditService,
                                                    npsFMNService: NPSFMNService,
-                                                   individualDetailsConnector: IndividualDetailsConnector,
-                                                   appConfig: FrontendAppConfig
+                                                   individualDetailsConnector: IndividualDetailsConnector
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[SelectNINOLetterAddress] = formProvider()
@@ -146,7 +144,6 @@ class SelectNINOLetterAddressController @Inject()(
 
   def getIndividualDetailsAddress(nino: IndividualDetailsNino)(
     implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Either[IndividualDetailsError, Address]] = {
-    implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
     implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
     val idAddress = for {
       idData <- IndividualDetailsResponseEnvelope.fromEitherF(individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y')).value)

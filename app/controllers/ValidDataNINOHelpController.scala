@@ -25,17 +25,16 @@ import org.apache.commons.lang3.StringUtils
 import pages.ValidDataNINOHelpPage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.Codec.utf_8
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.AuditUtils
 import views.html.ValidDataNINOHelpView
-import play.api.mvc.Codec.utf_8
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class ValidDataNINOHelpController @Inject()(
                                              override val messagesApi: MessagesApi,
