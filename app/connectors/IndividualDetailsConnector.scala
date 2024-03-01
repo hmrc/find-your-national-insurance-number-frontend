@@ -23,7 +23,7 @@ import config.FrontendAppConfig
 import connectors.HttpReadsWrapper.Recovered
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
 import models.errors.{ConnectorError, IndividualDetailsError}
-import models.{CorrelationId, IndividualDetailsIdentifier}
+import models.{CorrelationId, IndividualDetailsIdentifier, IndividualDetailsResponseEnvelope}
 import models.individualdetails.{IndividualDetails, ResolveMerge}
 import models.upstreamfailure.{Failure, UpstreamFailures}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
@@ -47,6 +47,12 @@ class DefaultIndividualDetailsConnector @Inject() (httpClient: HttpClient,
   def getIndividualDetails(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge
                           )(implicit ec: ExecutionContext,hc: HeaderCarrier, correlationId: CorrelationId
   ): IndividualDetailsResponseEnvelope[IndividualDetails] = {
+
+    if (identifier.value.isEmpty) {
+      return IndividualDetailsResponseEnvelope(Left(ConnectorError(400, "Cannot call getIndividualDetails with an empty identifier")))
+    }
+
+
     val url = s"${appConfig.individualDetailsServiceUrl}/individuals/details/NINO/${identifier.value}/${resolveMerge.value}"
     val connectorName     = "individual-details-connector"
     val additionalLogInfo = Some(AdditionalLogInfo(Map("correlation-id" -> correlationId.value.toString)))
