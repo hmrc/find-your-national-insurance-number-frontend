@@ -33,9 +33,10 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
-import services.{AuditService, NPSFMNService, PersonalDetailsValidationService}
+import services.{AuditService, IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import util.FMNHelper
 import views.html.SelectNINOLetterAddressView
 
 import java.util.UUID
@@ -51,6 +52,7 @@ class SelectNINOLetterAddressController @Inject()(
                                                    identify: IdentifierAction,
                                                    getData: DataRetrievalAction,
                                                    requireValidData: ValidCustomerDataRequiredAction,
+                                                   individualDetailsService: IndividualDetailsService,
                                                    formProvider: SelectNINOLetterAddressFormProvider,
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: SelectNINOLetterAddressView,
@@ -109,18 +111,22 @@ class SelectNINOLetterAddressController @Inject()(
   private def sendLetter(nino: String, pdvData: Option[PDVResponseData], value: String, uA: UserAnswers, mode: Mode)
                         (implicit headerCarrier: HeaderCarrier): Future[Result] = {
     auditAddress(pdvData, nino, value)
-    npsFMNService.sendLetter(nino, getNPSFMNRequest(pdvData)) map {
-      case LetterIssuedResponse() =>
-        Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA))
-      case RLSDLONFAResponse(responseStatus, responseMessage) =>
-        auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage)
-        Redirect(routes.SendLetterErrorController.onPageLoad(mode))
-      case TechnicalIssueResponse(responseStatus, responseMessage) =>
-        auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage)
-        Redirect(routes.TechnicalErrorController.onPageLoad())
-      case _ =>
-        logger.warn("Unknown NPS FMN API response")
-        Redirect(routes.TechnicalErrorController.onPageLoad())
+    individualDetailsService.getIndividualDetailsData(nino) flatMap {
+      idData => {
+        npsFMNService.sendLetter(nino, FMNHelper.createNPSFMNRequest(idData)) map {
+          case LetterIssuedResponse() =>
+            Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA))
+          case RLSDLONFAResponse(responseStatus, responseMessage) =>
+            auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage)
+            Redirect(routes.SendLetterErrorController.onPageLoad(mode))
+          case TechnicalIssueResponse(responseStatus, responseMessage) =>
+            auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage)
+            Redirect(routes.TechnicalErrorController.onPageLoad())
+          case _ =>
+            logger.warn("Unknown NPS FMN API response")
+            Redirect(routes.TechnicalErrorController.onPageLoad())
+        }
+      }
     }
   }
 
@@ -128,18 +134,6 @@ class SelectNINOLetterAddressController @Inject()(
     pdvResponseData match {
       case Some(pd) => pd.getPostCode
       case _ => StringUtils.EMPTY
-    }
-
-  private def getNPSFMNRequest(pdvData: Option[PDVResponseData]): NPSFMNRequest =
-    pdvData match {
-      case Some(pd) if pd.personalDetails.isDefined =>
-        NPSFMNRequest(
-          pd.getFirstName,
-          pd.getLastName,
-          pd.getDateOfBirth,
-          pd.getPostCode
-        )
-      case _ => NPSFMNRequest.empty
     }
 
   def getIndividualDetailsAddress(nino: IndividualDetailsNino)(
