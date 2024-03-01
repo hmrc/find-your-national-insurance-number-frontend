@@ -49,23 +49,22 @@ class DefaultIndividualDetailsConnector @Inject() (httpClient: HttpClient,
   ): IndividualDetailsResponseEnvelope[IndividualDetails] = {
 
     if (identifier.value.isEmpty) {
-      return IndividualDetailsResponseEnvelope(Left(ConnectorError(400, "Cannot call getIndividualDetails with an empty identifier")))
-    }
-
-
-    val url = s"${appConfig.individualDetailsServiceUrl}/individuals/details/NINO/${identifier.value}/${resolveMerge.value}"
-    val connectorName     = "individual-details-connector"
-    val additionalLogInfo = Some(AdditionalLogInfo(Map("correlation-id" -> correlationId.value.toString)))
-    withHttpReads(
-      connectorName,
-      metrics.defaultRegistry,
-      additionalLogInfo
-    ) { implicit httpReads =>
-      EitherT(
-        httpClient
-          .GET(url)(httpReads, desApiHeaders(appConfig.individualDetails), ec)
-          .recovered(logger, connectorName, metrics.defaultRegistry, additionalLogInfo)
-      )
+      IndividualDetailsResponseEnvelope(Left(ConnectorError(400, "Cannot call getIndividualDetails with an empty identifier")))
+    } else {
+      val url = s"${appConfig.individualDetailsServiceUrl}/individuals/details/NINO/${identifier.value}/${resolveMerge.value}"
+      val connectorName     = "individual-details-connector"
+      val additionalLogInfo = Some(AdditionalLogInfo(Map("correlation-id" -> correlationId.value.toString)))
+      withHttpReads(
+        connectorName,
+        metrics.defaultRegistry,
+        additionalLogInfo
+      ) { implicit httpReads =>
+        EitherT(
+          httpClient
+            .GET(url)(httpReads, desApiHeaders(appConfig.individualDetails), ec)
+            .recovered(logger, connectorName, metrics.defaultRegistry, additionalLogInfo)
+        )
+      }
     }
   }
 
