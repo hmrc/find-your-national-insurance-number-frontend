@@ -38,10 +38,6 @@ class DefaultIndividualDetailsConnectorSpec
   val metrics: Metrics = mock[Metrics]
 
 
-  // Create a mock instance of DesApiServiceConfig
-  val mockDesApiServiceConfig = MockitoSugar.mock[DesApiServiceConfig]
-
-
 
   override implicit lazy val app: play.api.Application = new GuiceApplicationBuilder()
     .overrides(
@@ -49,7 +45,6 @@ class DefaultIndividualDetailsConnectorSpec
       bind[FrontendAppConfig].toInstance(config),
       bind[Metrics].toInstance(metrics)
     )
-    // Bind the mock HttpClient
     .configure("external-url.individual-details-service.port" -> server.port())
     .build()
 
@@ -76,18 +71,6 @@ class DefaultIndividualDetailsConnectorSpec
 
     "return IndividualDetails when called with a valid identifier and resolveMerge" in new LocalSetup {
 
-      when(mockDesApiServiceConfig.token).thenReturn("yourToken")
-      when(mockDesApiServiceConfig.environment).thenReturn("yourEnvironment")
-      when(mockDesApiServiceConfig.originatorId).thenReturn("yourOriginatorId")
-
-      // Create an instance of HeaderCarrier
-      implicit val hc: HeaderCarrier = HeaderCarrier()
-
-
-
-      // Call the desApiHeaders function
-      val headers: HeaderCarrier = connectors.desApiHeaders(mockDesApiServiceConfig)(hc, correlationId)
-
 
       when(config.individualDetailsServiceUrl)
         .thenReturn(s"http://localhost:${server.port()}")
@@ -100,6 +83,5 @@ class DefaultIndividualDetailsConnectorSpec
       result mustBe a[IndividualDetailsResponseEnvelope[IndividualDetails]]
     }
 
-    // Add more test cases as needed
   }
 }
