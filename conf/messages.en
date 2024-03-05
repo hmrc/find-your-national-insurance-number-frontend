@@ -164,3 +164,9 @@ confirmYourPostcode.h2 = Enter your postcode
 confirmYourPostcode.hint = For example SW1A 2AA
 confirmYourPostcode.error.required = Enter your postcode
 confirmYourPostcode.error.invalid = Enter a valid UK postcode
+
+onlineOrLetter.title = How would you like to view your National Insurance number?
+onlineOrLetter.heading = How would you like to view your National Insurance number?
+onlineOrLetter.online = I would like to view my National Insurance number online
+onlineOrLetter.letter = I would like my National Insurance number posted to me on a letter
+onlineOrLetter.error.required = You must select an option

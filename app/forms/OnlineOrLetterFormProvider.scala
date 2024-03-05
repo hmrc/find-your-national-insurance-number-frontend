@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package util
+package forms
 
-import org.apache.commons.lang3.StringUtils
+import javax.inject.Inject
 
-object FMNConstants {
-  val EmptyString: String = StringUtils.EMPTY
-  val PDVOrigin: String = "PDV"
-  val IVOrigin: String = "IV"
-  val FMNOrigin: String = "FMN"
+import forms.mappings.Mappings
+import play.api.data.Form
+import models.OnlineOrLetter
+
+class OnlineOrLetterFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[OnlineOrLetter] =
+    Form(
+      "value" -> enumerable[OnlineOrLetter]("onlineOrLetter.error.required")
+    )
 }

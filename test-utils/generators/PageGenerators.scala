@@ -21,6 +21,9 @@ import pages._
 
 trait PageGenerators {
 
+  implicit lazy val arbitraryOnlineOrLetterPage: Arbitrary[OnlineOrLetterPage.type] =
+    Arbitrary(OnlineOrLetterPage)
+
   implicit lazy val arbitraryEnteredPostCodeNotFoundPage: Arbitrary[EnteredPostCodeNotFoundPage.type] =
     Arbitrary(EnteredPostCodeNotFoundPage)
 

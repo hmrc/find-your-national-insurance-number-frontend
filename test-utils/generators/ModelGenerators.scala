@@ -21,6 +21,11 @@ import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
 
+  implicit lazy val arbitraryOnlineOrLetter: Arbitrary[OnlineOrLetter] =
+    Arbitrary {
+      Gen.oneOf(OnlineOrLetter.values.toSeq)
+    }
+
   implicit lazy val arbitraryEnteredPostCodeNotFound: Arbitrary[EnteredPostCodeNotFound] =
     Arbitrary {
       Gen.oneOf(EnteredPostCodeNotFound.values.toSeq)

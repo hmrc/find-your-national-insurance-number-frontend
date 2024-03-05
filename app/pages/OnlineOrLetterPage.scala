@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package util
+package pages
 
-import org.apache.commons.lang3.StringUtils
+import models.OnlineOrLetter
+import play.api.libs.json.JsPath
 
-object FMNConstants {
-  val EmptyString: String = StringUtils.EMPTY
-  val PDVOrigin: String = "PDV"
-  val IVOrigin: String = "IV"
-  val FMNOrigin: String = "FMN"
+case object OnlineOrLetterPage extends QuestionPage[OnlineOrLetter] {
+
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "onlineOrLetter"
 }

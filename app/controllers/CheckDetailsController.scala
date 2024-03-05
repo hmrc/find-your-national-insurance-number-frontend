@@ -29,7 +29,7 @@ import services.{AuditService, CheckDetailsService, IndividualDetailsService, Pe
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import util.FMNConstants.{EmptyString, IVOrigin, PDVOrigin}
+import util.FMNConstants.{EmptyString, FMNOrigin, IVOrigin, PDVOrigin}
 import util.FMNHelper.comparePostCode
 
 import javax.inject.Inject
@@ -53,11 +53,14 @@ class CheckDetailsController @Inject()(
   def onPageLoad(origin: Option[String], mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async {
       implicit request => {
+        println("ACHI1")
         auditService.start(origin)
         origin.map(_.toUpperCase) match {
-          case Some(PDVOrigin) | Some(IVOrigin) =>
+          case Some(PDVOrigin) | Some(IVOrigin) | Some(FMNOrigin) =>
+            println("ACHI2")
             validOriginJourney(origin, request, mode)
           case _ =>
+            println("ACHI3")
             logger.error(s"Invalid origin: $origin")
             Future(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
         }

@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package util
+package pages
 
-import org.apache.commons.lang3.StringUtils
+import models.OnlineOrLetter
+import pages.behaviours.PageBehaviours
 
-object FMNConstants {
-  val EmptyString: String = StringUtils.EMPTY
-  val PDVOrigin: String = "PDV"
-  val IVOrigin: String = "IV"
-  val FMNOrigin: String = "FMN"
+class OnlineOrLetterSpec extends PageBehaviours {
+
+  "OnlineOrLetterPage" - {
+
+    beRetrievable[OnlineOrLetter](OnlineOrLetterPage)
+
+    beSettable[OnlineOrLetter](OnlineOrLetterPage)
+
+    beRemovable[OnlineOrLetter](OnlineOrLetterPage)
+  }
 }
