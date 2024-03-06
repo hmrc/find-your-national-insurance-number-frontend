@@ -41,19 +41,11 @@ class AuditService @Inject()(auditConnector: AuditConnector
       case _                                    => ()
     }
 
-  def start(origin: Option[String])(implicit hc: HeaderCarrier): Unit = {
-    audit(
-      AuditUtils.buildAuditEvent(
-        auditType = "StartFindYourNino",
-        validationOutcome = EmptyString,
-        identifierType = EmptyString,
-        origin = origin
-      )
-    )
-  }
-
-  def findYourNinoPDVMatchFailed(pdvData: PDVResponseData,
-                                 origin: Option[String])(implicit hc: HeaderCarrier): Unit = {
+  def start()(implicit hc: HeaderCarrier): Unit =
+    audit(AuditUtils.buildBasicEvent(auditType = "StartFindYourNino"))
+  
+  def findYourNinoPDVMatchFailed(pdvData: PDVResponseData, origin: Option[String])
+                                (implicit headerCarrier: HeaderCarrier): Unit = {
     audit(
       AuditUtils.buildAuditEvent(
         personDetails = pdvData.personalDetails,

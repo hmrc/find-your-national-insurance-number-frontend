@@ -1,5 +1,6 @@
 # microservice specific routes
 
+->          /sca-wrapper                                    sca.Routes
 ->          /hmrc-frontend                                  hmrcfrontend.Routes
 
 GET         /how-to-find-online                             controllers.IndexController.onPageLoad

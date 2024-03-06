@@ -69,9 +69,9 @@ class TryAgainCountRepositoryISpec
 
     "must update count if count exists when retry is repeatedly attempted" in {
 
-      val expectedResult = tryAgainCount copy (lastUpdated = instant, count = 2)
+      val expectedResult = tryAgainCount.copy(lastUpdated = instant, count = 2)
 
-      repository.insertOrIncrement(tryAgainCount.id).futureValue
+      repository.insertOrIncrement(id = tryAgainCount.id).futureValue
 
       val setResult = repository.insertOrIncrement(tryAgainCount.id).futureValue
 

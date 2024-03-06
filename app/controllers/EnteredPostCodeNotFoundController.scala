@@ -18,8 +18,6 @@ package controllers
 
 import controllers.actions._
 import forms.EnteredPostCodeNotFoundFormProvider
-
-import javax.inject.Inject
 import models.{EnteredPostCodeNotFound, Mode}
 import navigation.Navigator
 import pages.EnteredPostCodeNotFoundPage
@@ -30,9 +28,10 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.EnteredPostCodeNotFoundView
 import util.AuditUtils
+import views.html.EnteredPostCodeNotFoundView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class EnteredPostCodeNotFoundController @Inject()(

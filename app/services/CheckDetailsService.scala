@@ -17,19 +17,17 @@
 package services
 
 import com.google.inject.ImplementedBy
-import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
 import models.errors.IndividualDetailsError
-import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope}
 import models.individualdetails.AccountStatusType.FullLive
 import models.individualdetails.AddressStatus.NotDlo
 import models.individualdetails.AddressType.ResidentialAddress
 import models.individualdetails.CrnIndicator.{False, True}
 import models.individualdetails.{Address, AddressList, IndividualDetails, ResolveMerge}
 import models.pdv.{PDVRequest, PDVResponseData}
+import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope}
 import play.api.Logging
-import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
 import util.FMNConstants.EmptyString
 
@@ -54,7 +52,7 @@ trait CheckDetailsService {
 class CheckDetailsServiceImpl @Inject()(
                                          personalDetailsValidationService: PersonalDetailsValidationService,
                                          individualDetailsConnector: IndividualDetailsConnector
-                                       )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends CheckDetailsService with Logging {
+                                       )(implicit ec: ExecutionContext) extends CheckDetailsService with Logging {
 
    def checkConditions(idData: IndividualDetails): (Boolean, String) = {
     var reason = EmptyString
@@ -108,7 +106,6 @@ class CheckDetailsServiceImpl @Inject()(
 
   def getIndividualDetails(nino: IndividualDetailsNino
                                   )(implicit ec: ExecutionContext, hc: HeaderCarrier): IndividualDetailsResponseEnvelope[IndividualDetails] = {
-    implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cacheSecretKey)
     implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
     IndividualDetailsResponseEnvelope.fromEitherF(individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y')).value)
   }
