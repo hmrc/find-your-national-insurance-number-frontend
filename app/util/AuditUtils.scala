@@ -206,4 +206,21 @@ object AuditUtils {
             origin)))
     }
   }
+  def buildBasicEvent(auditType: String)
+                     (implicit hc: HeaderCarrier): ExtendedDataEvent = {
+    val strPath = hc.otherHeaders.toMap.get("path")
+    ExtendedDataEvent(
+      auditSource = auditSource,
+      auditType = auditType,
+      tags = Map(
+        "transactionName" -> Some(s"$auditType"),
+        "X-Session-ID" -> hc.sessionId.map(_.value),
+        "X-Request-ID" -> hc.requestId.map(_.value),
+        "clientIP" -> hc.trueClientIp,
+        "clientPort" -> hc.trueClientPort,
+        "deviceID" -> hc.deviceID,
+        "path" -> strPath
+      ).map(x => x._2.map((x._1, _))).flatten.toMap
+    )
+  }
 }
