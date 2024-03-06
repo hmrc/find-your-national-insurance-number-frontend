@@ -18,21 +18,32 @@ package services
 
 import models.errors.IndividualDetailsError
 import models.individualdetails.{Address, IndividualDetails}
-import models.pdv.PDVResponseData
+import models.pdv.{PDVResponseData, PersonalDetails}
 import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import util.AuditUtils
+import util.FMNConstants.EmptyString
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
-class AuditService @Inject()(auditConnector: AuditConnector, implicit val ec: ExecutionContext) extends Logging {
+class AuditService @Inject()(auditConnector: AuditConnector
+                            )(implicit val ec: ExecutionContext) extends Logging {
+
+  def audit(evt: ExtendedDataEvent)(implicit hc: HeaderCarrier): Unit =
+    auditConnector.sendExtendedEvent(evt).onComplete {
+      case Success(AuditResult.Success)         => logger.debug(s"Sent audit event: ${evt.toString}")
+      case Failure(AuditResult.Failure(msg, _)) => logger.warn(s"Could not audit ${evt.auditType}: $msg")
+      case Failure(ex)                          => logger.warn(s"Could not audit ${evt.auditType}: ${ex.getMessage}")
+      case _                                    => ()
+    }
 
   def start()(implicit hc: HeaderCarrier): Unit =
     audit(AuditUtils.buildBasicEvent(auditType = "StartFindYourNino"))
+  
   def findYourNinoPDVMatchFailed(pdvData: PDVResponseData, origin: Option[String])
                                 (implicit headerCarrier: HeaderCarrier): Unit = {
     audit(
@@ -40,19 +51,22 @@ class AuditService @Inject()(auditConnector: AuditConnector, implicit val ec: Ex
         personDetails = pdvData.personalDetails,
         auditType = "FindYourNinoPDVMatchFailed",
         validationOutcome = pdvData.validationStatus,
-        identifierType = "",
+        identifierType = EmptyString,
         origin = origin
       )
     )
   }
-  def findYourNinoIdDataError(pdvData: PDVResponseData, errorStatusCode: Option[String],
-                              idDataError: IndividualDetailsError, origin: Option[String])(implicit headerCarrier: HeaderCarrier): Unit = {
+
+  def findYourNinoIdDataError(pdvData: PDVResponseData,
+                              errorStatusCode: Option[String],
+                              idDataError: IndividualDetailsError,
+                              origin: Option[String])(implicit hc: HeaderCarrier): Unit = {
     audit(
       AuditUtils.buildAuditEvent(
         personDetails = pdvData.personalDetails,
         auditType = "FindYourNinoError",
         validationOutcome = pdvData.validationStatus,
-        identifierType = "",
+        identifierType = EmptyString,
         pageErrorGeneratedFrom = Some("/checkDetails"),
         errorStatus = errorStatusCode,
         errorReason = Some(idDataError.errorMessage),
@@ -61,12 +75,13 @@ class AuditService @Inject()(auditConnector: AuditConnector, implicit val ec: Ex
     )
   }
 
-  def findYourNinoGetPdvDataHttpError(status: String, reason: String)(implicit headerCarrier: HeaderCarrier): Unit = {
+  def findYourNinoGetPdvDataHttpError(status: String,
+                                      reason: String)(implicit hc: HeaderCarrier): Unit = {
     audit(
       AuditUtils.buildAuditEvent(
         auditType = "FindYourNinoError",
-        validationOutcome = "",
-        identifierType = "",
+        validationOutcome = EmptyString,
+        identifierType = EmptyString,
         pageErrorGeneratedFrom = Some("/checkDetails"),
         errorStatus = Some(status),
         errorReason = Some(reason)
@@ -74,8 +89,9 @@ class AuditService @Inject()(auditConnector: AuditConnector, implicit val ec: Ex
     )
   }
 
-  def findYourNinoPDVMatched(pdvData: PDVResponseData, origin: Option[String], idData: IndividualDetails)
-                            (implicit headerCarrier: HeaderCarrier): Unit = {
+  def findYourNinoPDVMatched(pdvData: PDVResponseData,
+                             origin: Option[String],
+                             idData: IndividualDetails)(implicit hc: HeaderCarrier): Unit = {
     audit(
       AuditUtils.buildAuditEvent(
         personDetails = pdvData.personalDetails,
@@ -87,8 +103,38 @@ class AuditService @Inject()(auditConnector: AuditConnector, implicit val ec: Ex
     )
   }
 
-  def findYourNinoOnlineLetterOption(pdvData: Option[PDVResponseData], idAddress: Address, value: String)
-                                    (implicit headerCarrier: HeaderCarrier): Unit = {
+  def findYourNinoTechnicalError(personalDetailsResponse: PDVResponseData,
+                                 personalDetails: PersonalDetails,
+                                 responseStatus: Int,
+                                 responseMessage: String)(implicit hc: HeaderCarrier): Unit = {
+    audit(AuditUtils.buildAuditEvent(Some(personalDetails),
+      auditType = "FindYourNinoError",
+      validationOutcome = personalDetailsResponse.validationStatus,
+      identifierType = personalDetailsResponse.CRN.getOrElse(EmptyString),
+      pageErrorGeneratedFrom = Some("/confirm-your-postcode"),
+      errorStatus = Some(responseStatus.toString),
+      errorReason = Some(responseMessage)
+    ))
+  }
+
+  def findYourNinoConfirmPostcode(userEnteredPostCode: String,
+                                  individualDetailsAddress: Option[Address],
+                                  pdvData: Option[PDVResponseData],
+                                  findMyNinoPostcodeMatched: Option[String])(implicit hc: HeaderCarrier): Unit = {
+    audit(AuditUtils.buildAuditEvent(
+      pdvData.flatMap(_.personalDetails),
+      individualDetailsAddress = individualDetailsAddress,
+      auditType = "FindYourNinoConfirmPostcode",
+      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
+      identifierType = pdvData.map(_.CRN.getOrElse(EmptyString)).getOrElse(EmptyString),
+      findMyNinoPostcodeEntered = Some(userEnteredPostCode),
+      findMyNinoPostcodeMatched = findMyNinoPostcodeMatched
+    ))
+  }
+
+  def findYourNinoOnlineLetterOption(pdvData: Option[PDVResponseData],
+                                     idAddress: Address,
+                                     value: String)(implicit headerCarrier: HeaderCarrier): Unit = {
     audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
       individualDetailsAddress = Some(idAddress),
       auditType = "FindYourNinoOnlineLetterOption",
@@ -98,8 +144,9 @@ class AuditService @Inject()(auditConnector: AuditConnector, implicit val ec: Ex
     ))
   }
 
-  def findYourNinoError(pdvData: Option[PDVResponseData], responseStatus: Option[String], responseMessage: String)
-                       (implicit headerCarrier: HeaderCarrier): Unit = {
+  def findYourNinoError(pdvData: Option[PDVResponseData],
+                        responseStatus: Option[String],
+                        responseMessage: String)(implicit headerCarrier: HeaderCarrier): Unit = {
     audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
       auditType = "FindYourNinoError",
       validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
@@ -110,13 +157,4 @@ class AuditService @Inject()(auditConnector: AuditConnector, implicit val ec: Ex
     ))
   }
 
-  def audit(evt: ExtendedDataEvent)(implicit
-                                    hc: HeaderCarrier
-  ): Unit =
-    auditConnector.sendExtendedEvent(evt).onComplete {
-      case Success(AuditResult.Success)         => logger.debug(s"Sent audit event: ${evt.toString}")
-      case Failure(AuditResult.Failure(msg, _)) => logger.warn(s"Could not audit ${evt.auditType}: $msg")
-      case Failure(ex)                          => logger.warn(s"Could not audit ${evt.auditType}: ${ex.getMessage}")
-      case _                                    => ()
-    }
 }
