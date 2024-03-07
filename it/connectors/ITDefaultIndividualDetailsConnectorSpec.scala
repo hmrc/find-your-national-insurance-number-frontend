@@ -2,21 +2,18 @@
 
 package connectors
 
-import connectors._
+import base.WireMockHelper
+import config.FrontendAppConfig
+import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
 import models._
 import models.individualdetails._
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.test.{DefaultAwaitTimeout, Injecting}
-import uk.gov.hmrc.http.client.HttpClientV2
-import base.WireMockHelper
-import config.{DesApiServiceConfig, FrontendAppConfig}
-import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
-import org.mockito.MockitoSugar.{mock, when}
 import org.mockito.MockitoSugar.when
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.domain.{Generator, Nino}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import play.api.test.{DefaultAwaitTimeout, Injecting}
+import uk.gov.hmrc.domain.Generator
+import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import java.util.UUID
@@ -25,7 +22,7 @@ import scala.util.Random
 
 
 
-class DefaultIndividualDetailsConnectorSpec
+class ITDefaultIndividualDetailsConnectorSpec
   extends ConnectorSpec
     with WireMockHelper
     with MockitoSugar
@@ -63,7 +60,7 @@ class DefaultIndividualDetailsConnectorSpec
     }
   }
 
-  "DefaultIndividualDetailsConnector" must {
+  "ITDefaultIndividualDetailsConnector" must {
 
     trait LocalSetup extends SpecSetup {
       def url(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge) = s"/individuals/details/NINO/${identifier.value}/${resolveMerge.value}"
@@ -71,11 +68,8 @@ class DefaultIndividualDetailsConnectorSpec
 
     "return IndividualDetails when called with a valid identifier and resolveMerge" in new LocalSetup {
 
-
       when(config.individualDetailsServiceUrl)
         .thenReturn(s"http://localhost:${server.port()}")
-
-
 
       implicit val correlationId = CorrelationId(UUID.randomUUID())
       stubGet(url(identifier, resolveMerge), OK, Some(""))
