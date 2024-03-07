@@ -186,8 +186,7 @@ object HttpReadsWrapper {
         ec: ExecutionContext
     ): Future[Either[IndividualDetailsError, T]] = {
       val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse("")
-      println("httpResult************************************")
-      println(httpResult)
+
       httpResult.recover {
         case e: HttpException => {
           logger.debug(
