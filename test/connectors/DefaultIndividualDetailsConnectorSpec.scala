@@ -1,3 +1,19 @@
+/*
+ * Copyright 2024 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package connectors
 import com.codahale.metrics.MetricRegistry
 import com.typesafe.config.ConfigFactory
@@ -29,21 +45,11 @@ class IndividualDetailsConnectorSpec
     "make an http call to query master API to retrieve the correct response" in {
       val connector = new DefaultIndividualDetailsConnector(httpClient, appConfig, metrics)
 
-      (
-        httpClient
-          .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(
+      (httpClient.GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(
             _: HttpReads[Either[IndividualDetailsError, IndividualDetails]],
-            _: HeaderCarrier,
-            _: ExecutionContext
-          )
-        ).expects(
+            _: HeaderCarrier, _: ExecutionContext)).expects(
           s"$individualDetailsUrl${nino.value}/${resolveMerge.value}",
-          *,
-          *,
-          *,
-          *,
-          *
-        )
+          *, *, *, *, *)
         .returning(Future successful Right(individualDetailsResponse))
         .once()
 
@@ -51,34 +57,14 @@ class IndividualDetailsConnectorSpec
         r mustBe Right(individualDetailsResponse)
       }
     }
-  }
-
-  "IndividualDetailsConnector " should {
     "return a ConnectorError " in {
-
       val connector = new DefaultIndividualDetailsConnector(httpClient, appConfig, metrics)
 
-      (
-        httpClient
-          .GET(
-            _: String,
-            _: Seq[(String, String)],
-            _: Seq[(String, String)]
-          )
-          (
-            _: HttpReads[Either[IndividualDetailsError, IndividualDetails]],
-            _: HeaderCarrier,
-            _: ExecutionContext
-          )
-        )
-        .expects(
+      (httpClient.GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])
+          (_: HttpReads[Either[IndividualDetailsError, IndividualDetails]],
+            _: HeaderCarrier, _: ExecutionContext)).expects(
           s"$individualDetailsUrl${nino.value}/${resolveMerge.value}",
-          *,
-          *,
-          *,
-          *,
-          *
-        )
+          *, *, *, *, *)
         .returning(Future successful Left(ConnectorError(NOT_FOUND, "something not found")))
         .once()
 
@@ -100,28 +86,6 @@ trait IndividualDetailsConnectorFixture extends MockFactory {
   private val myconfig = Configuration(config)
   private val myServicesConfig = new ServicesConfig(myconfig)
 
-
-  //  private val myconfig = Configuration(
-  //    ConfigFactory.parseString(
-  //      """
-  //        |host = host
-  //        |appName = appName
-  //        |appUrl = appUrl
-  //        |microservice {
-  //        |  services {
-  //        |    address-lookup {
-  //        |      protocol = https
-  //        |      host     = host
-  //        |      port     = 123
-  //        |      user-agent = agent
-  //        |    }
-  //        |  }
-  //        |}
-  //        |""".stripMargin
-  //    )
-  //  )
-
-
   val nino                 = IndividualDetailsNino("12345")
   val resolveMerge         = ResolveMerge('Y')
   val individualDetailsUrl = "http://localhost:14022/find-your-national-insurance-number/individuals/details/NINO/"
@@ -129,12 +93,6 @@ trait IndividualDetailsConnectorFixture extends MockFactory {
   val httpClient: HttpClient       = mock[HttpClient]
   val appConfig:  FrontendAppConfig  = new FrontendAppConfig(myconfig, myServicesConfig)
   val ec:         ExecutionContext = implicitly[ExecutionContext]
-
-
-  //  def appConfigMock(): CallHandler0[String] = {
-  //    (() => appConfig.individualDetails).expects().returning(individualDetailsConfig).anyNumberOfTimes()
-  //    (() => appConfig.individualDetailsServiceUrl).expects().returning("http://localhost:9000").anyNumberOfTimes()
-  //  }
 
 
   val name = Name(
