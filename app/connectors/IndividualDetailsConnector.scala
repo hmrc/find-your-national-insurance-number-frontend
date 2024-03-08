@@ -50,7 +50,7 @@ class DefaultIndividualDetailsConnector @Inject() (httpClient: HttpClient,
   ): IndividualDetailsResponseEnvelope[IndividualDetails] = {
 
     if (identifier.value.isEmpty) {
-      IndividualDetailsResponseEnvelope(Left(InvalidIdentifier(identifier.asInstanceOf[IndividualDetailsNino])))
+      IndividualDetailsResponseEnvelope(Left(InvalidIdentifier(identifier)))
     } else {
       val url = s"${appConfig.individualDetailsServiceUrl}/individuals/details/NINO/${identifier.value}/${resolveMerge.value}"
       val connectorName     = "individual-details-connector"
