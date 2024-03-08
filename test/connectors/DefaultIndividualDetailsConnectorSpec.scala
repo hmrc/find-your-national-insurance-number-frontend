@@ -18,9 +18,9 @@ package connectors
 import com.codahale.metrics.MetricRegistry
 import com.typesafe.config.ConfigFactory
 import config.{DesApiServiceConfig, FrontendAppConfig}
-import models.errors.{ConnectorError, IndividualDetailsError}
+import models.errors.{ConnectorError, IndividualDetailsError, InvalidIdentifier}
 import models.individualdetails._
-import models.{AddressLine, CorrelationId, IndividualDetailsNino}
+import models.{AddressLine, CorrelationId, IndividualDetailsIdentifier, IndividualDetailsNino}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers
@@ -72,6 +72,17 @@ class IndividualDetailsConnectorSpec
         r mustBe Left(ConnectorError(NOT_FOUND, "something not found"))
       }
     }
+
+    "return a Invalid identifier error " in {
+      val connector = new DefaultIndividualDetailsConnector(httpClient, appConfig, metrics)
+
+      val emptyNino:IndividualDetailsIdentifier = IndividualDetailsNino("")
+
+      whenReady(connector.getIndividualDetails(emptyNino, resolveMerge).value) { r =>
+        r mustBe Left(InvalidIdentifier(emptyNino))
+      }
+    }
+
   }
 }
 trait IndividualDetailsConnectorFixture extends MockFactory {
