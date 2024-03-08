@@ -22,10 +22,11 @@ import com.google.inject.ImplementedBy
 import config.FrontendAppConfig
 import connectors.HttpReadsWrapper.Recovered
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
-import models.errors.{ConnectorError, IndividualDetailsError}
-import models.{CorrelationId, IndividualDetailsIdentifier, IndividualDetailsResponseEnvelope}
+import models.errors.{ConnectorError, IndividualDetailsError, InvalidIdentifier}
+import models.{CorrelationId, IndividualDetailsIdentifier, IndividualDetailsNino, IndividualDetailsResponseEnvelope}
 import models.individualdetails.{IndividualDetails, ResolveMerge}
 import models.upstreamfailure.{Failure, UpstreamFailures}
+import play.api.http.Status.BAD_REQUEST
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
@@ -49,7 +50,7 @@ class DefaultIndividualDetailsConnector @Inject() (httpClient: HttpClient,
   ): IndividualDetailsResponseEnvelope[IndividualDetails] = {
 
     if (identifier.value.isEmpty) {
-      IndividualDetailsResponseEnvelope(Left(ConnectorError(400, "Cannot call getIndividualDetails with an empty identifier")))
+      IndividualDetailsResponseEnvelope(Left(InvalidIdentifier(identifier.asInstanceOf[IndividualDetailsNino])))
     } else {
       val url = s"${appConfig.individualDetailsServiceUrl}/individuals/details/NINO/${identifier.value}/${resolveMerge.value}"
       val connectorName     = "individual-details-connector"
