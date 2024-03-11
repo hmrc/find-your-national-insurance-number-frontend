@@ -19,7 +19,7 @@ package services
 import com.google.inject.ImplementedBy
 import connectors.IndividualDetailsConnector
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
-import models.errors.IndividualDetailsError
+import models.errors.{ConnectorError, IndividualDetailsError, InvalidIdentifier}
 import models.individualdetails.AccountStatusType.FullLive
 import models.individualdetails.AddressStatus.NotDlo
 import models.individualdetails.AddressType.ResidentialAddress
@@ -43,10 +43,15 @@ trait CheckDetailsService {
 
   def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponseData]
 
-  def getIdData(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]]
+  def getIdData(pdvData: PDVResponseData
+               )(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]]
 
   def getIndividualDetails(nino: IndividualDetailsNino
                           )(implicit ec: ExecutionContext, hc: HeaderCarrier): IndividualDetailsResponseEnvelope[IndividualDetails]
+
+  def getIndividualDetailsAddress(nino: IndividualDetailsNino
+                                 )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Either[IndividualDetailsError, Address]]
+
 }
 
 class CheckDetailsServiceImpl @Inject()(
@@ -102,6 +107,23 @@ class CheckDetailsServiceImpl @Inject()(
         logger.warn("No Personal Details found in PDV data, likely validation failed")
         EmptyString
     })).value
+  }
+
+  def getIndividualDetailsAddress(nino: IndividualDetailsNino)(
+    implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Either[IndividualDetailsError, Address]] = {
+    val idAddress = for {
+      idData <- getIndividualDetails(nino)
+      idDataAddress = idData.addressList.getAddress.filter(_.addressType.equals(ResidentialAddress)).head
+    } yield idDataAddress
+
+    idAddress.value.flatMap {
+      case Right(address) => Future.successful(Right(address))
+      case Left(error) => Future.successful(Left(error))
+    }.recover {
+      case ex =>
+        logger.warn(s"Error while fetching Individual Details Address for $nino", ex)
+        Left(InvalidIdentifier(nino))
+    }
   }
 
   def getIndividualDetails(nino: IndividualDetailsNino

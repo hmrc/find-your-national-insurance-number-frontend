@@ -438,5 +438,6 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
       }
     }
+
   }
 }
