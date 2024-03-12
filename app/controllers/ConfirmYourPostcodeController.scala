@@ -80,7 +80,7 @@ class ConfirmYourPostcodeController @Inject()(
             _ <- sessionRepository.set(updatedAnswers)
             nino = request.session.data.getOrElse("nino", EmptyString)
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
-            idAddress <- checkDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino))
+            idAddress <- individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino))
             redirectBasedOnMatch <- pdvData match {
               case Some(pdvValidData) =>
                 checkUserEnteredPostcodeMatchWithNPSPostCode(mode, userEnteredPostCode, pdvData, idAddress, pdvValidData)

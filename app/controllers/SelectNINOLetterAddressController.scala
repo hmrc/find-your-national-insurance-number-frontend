@@ -136,7 +136,7 @@ class SelectNINOLetterAddressController @Inject()(
 
   private def auditAddress(pdvData: Option[PDVResponseData], nino: String, value: String)(
     implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Unit] = {
-    checkDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino)) map {
+    individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino)) map {
       case Right(idAddress) => auditService.findYourNinoOnlineLetterOption(pdvData, idAddress, value)
       case Left(individualDetailsError) =>
         val statusCode = individualDetailsError match {

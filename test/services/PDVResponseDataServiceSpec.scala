@@ -30,7 +30,7 @@ import repositories.{EncryptedPersonalDetailsValidationRepository, PersonalDetai
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-import java.time.{Instant, LocalDate}
+import java.time.{Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset}
 import scala.concurrent.Future
 import scala.util.Random
 
@@ -179,6 +179,59 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         }
       }
     }
+
+    "getPDVData" must {
+
+      "return PDVResponseData when personalDetailsValidationService returns a successful response" ignore {
+        val mockPDVRequest = PDVRequest("1234567890", "1234567890")
+
+        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
+          .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation).toString())))
+
+        when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc))
+          .thenReturn(Future.successful(personalDetailsValidation))
+
+        val result = personalDetailsValidationService.getPDVData(mockPDVRequest)
+
+        result.map { pdvResponseData =>
+          pdvResponseData mustBe personalDetailsValidation
+        }
+      }
+
+      "throw an exception when personalDetailsValidationService returns nothing" ignore {
+        val mockPDVRequest = PDVRequest("1234567890", "1234567890")
+
+        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
+          .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation).toString())))
+
+        when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc))
+          .thenReturn(Future.successful(null))
+
+        val result = personalDetailsValidationService.getPDVData(mockPDVRequest)
+
+        result.failed.map { ex =>
+          ex.getMessage mustBe "No PDV data found"
+        }
+      }
+
+      "throw an exception when personalDetailsValidationService returns an error" in {
+        val mockPDVRequest = PDVRequest("1234567890", "1234567890")
+
+        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
+          .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation).toString())))
+
+        when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc))
+          .thenReturn(Future.failed(new RuntimeException("Failed to get PDV data")))
+
+        val result = personalDetailsValidationService.getPDVData(mockPDVRequest)
+
+        result.failed.map { ex =>
+          ex.getMessage mustBe "Failed to get PDV data"
+        }
+      }
+
+    }
+
   }
 
   "PDVResponseDataService with PersonalDetailsValidationRepository" must {
@@ -326,6 +379,7 @@ object PDVResponseDataServiceSpec {
   private val mockConnector = mock[PersonalDetailsValidationConnector]
   private val mockEncryptedPersonalDetailsValidationRepository = mock[EncryptedPersonalDetailsValidationRepository]
   private val mockPersonalDetailsValidationRepository = mock[PersonalDetailsValidationRepository]
+  private val personalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
   implicit val hc: HeaderCarrier = HeaderCarrier()

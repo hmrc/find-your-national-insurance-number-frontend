@@ -76,8 +76,8 @@ class CheckDetailsController @Inject()(
 
     val result: Try[Future[Result]] = Try {
       val processData = for {
-        pdvData <- checkDetailsService.getPDVData(pdvRequest)
-        idData  <- checkDetailsService.getIdData(pdvData)
+        pdvData <- personalDetailsValidationService.getPDVData(pdvRequest)
+        idData  <- individualDetailsService.getIdData(pdvData)
         sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
       } yield (pdvData, idData, sessionWithNINO) match {
         case (pdvData, Left(idData), sessionWithNINO)  => checkDetailsFailureJourney(pdvData, idData, mode, sessionWithNINO, origin)
@@ -101,6 +101,7 @@ class CheckDetailsController @Inject()(
   private def checkDetailsFailureJourney(pdvData: PDVResponseData, idDataError: IndividualDetailsError,
                                          mode: Mode, sessionWithNINO: Session, origin: Option[String])
                                         (implicit headerCarrier: HeaderCarrier): Result = {
+    println(s"\n\n\n checkDetailsFailureJourney \n\n\n")
     if (pdvData.validationStatus.equals("failure")) {
       logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
       auditService.findYourNinoPDVMatchFailed(pdvData, origin)
@@ -120,15 +121,17 @@ class CheckDetailsController @Inject()(
   private def checkDetailsSuccessJourney(pdvData: PDVResponseData, idData: IndividualDetails,
                                          mode: Mode, sessionWithNINO: Session, origin: Option[String])
                                         (implicit  headerCarrier: HeaderCarrier): Result = {
+    println(s"\n\n\n checkDetailsSuccessJourney \n\n\n")
     auditService.findYourNinoPDVMatched(pdvData, origin, idData)
 
     individualDetailsService.createIndividualDetailsData(sessionWithNINO.data.getOrElse("sessionId", EmptyString), idData)
 
     val api1694Checks = checkDetailsService.checkConditions(idData)
     personalDetailsValidationService.updatePDVDataRowWithValidCustomer(pdvData.getNino, api1694Checks._1, api1694Checks._2)
-
+    println(s"\n\n\n api1694Checks = $api1694Checks \n\n\n")
     if (api1694Checks._1) {
-      val idPostCode = checkDetailsService.getNPSPostCode(idData)
+      println("\n\n\n API 1694 checks passed\n\n\n")
+      val idPostCode = individualDetailsService.getNPSPostCode(idData)
       if (pdvData.getPostCode.nonEmpty) {
         // Matched with PostCode
         if (comparePostCode(idPostCode, pdvData.getPostCode)) {
@@ -149,6 +152,7 @@ class CheckDetailsController @Inject()(
   }
 
   private def checkDetailsMatchingFailedWithUnknownIssue(mode: Mode): Result = {
+    println(s"\n\n\n checkDetailsMatchingFailedWithUnknownIssue \n\n\n")
     logger.warn("No Personal Details found in PDV data, likely validation failed")
     Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
   }

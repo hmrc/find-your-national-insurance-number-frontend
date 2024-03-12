@@ -18,23 +18,16 @@ package services
 
 import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
-import models.errors.ConnectorError
-import models.{AddressLine, CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, individualdetails}
+import models.{AddressLine, individualdetails}
 import models.individualdetails._
-import models.pdv.{PDVRequest, PDVResponseData}
-import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.mock
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
 import org.mockito.MockitoSugar
-import play.api.http.Status.INTERNAL_SERVER_ERROR
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import util.AnyValueTypeMatcher.anyValueType
 
-import java.time.{LocalDate, LocalDateTime, ZoneId, ZoneOffset}
-import scala.concurrent.Future
+import java.time.LocalDate
 
 class CheckDetailsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
 
@@ -109,137 +102,6 @@ class CheckDetailsServiceSpec extends AsyncWordSpec with Matchers with MockitoSu
 
     }
 
-    "CheckDetailsService.getNPSPostCode" must {
-
-        "return the post code from the residential address" in {
-          val result = npsFMNService.getNPSPostCode(fakeIndividualDetails)
-          result mustBe "AA1 1AA"
-        }
-
-    }
-
-    "CheckDetailsService.getIdData" must {
-      "return IndividualDetails when IndividualDetailsConnector returns a successful response" in {
-        val mockPDVResponseData = PDVResponseData(
-          "1234567890",
-          "success",
-          Some(models.pdv.PersonalDetails("Abc", "Pqr", Nino("AA123456D"), None, LocalDate.now())),
-          LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
-        )
-
-        when(individualDetailsConnector.getIndividualDetails(
-          IndividualDetailsNino(any[String]), anyValueType[ResolveMerge]
-        )(any(), any(), anyValueType[CorrelationId]))
-          .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
-
-        val result = npsFMNService.getIdData(mockPDVResponseData)(hc)
-
-        result.map {
-          case Right(individualDetails) => individualDetails mustBe fakeIndividualDetails
-          case _ => fail("Expected a Right with IndividualDetails, but got a Left")
-        }
-      }
-
-      "return IndividualDetailsError when IndividualDetailsConnector returns an error" in {
-        val mockPDVResponseData = PDVResponseData(
-          "1234567890",
-          "success",
-          Some(models.pdv.PersonalDetails("Abc", "Pqr", Nino("AA123456D"), None, LocalDate.now())),
-          LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
-        )
-
-        when(individualDetailsConnector.getIndividualDetails(IndividualDetailsNino(any[String]), anyValueType[ResolveMerge])
-        (any(), any(), anyValueType[CorrelationId]))
-          .thenReturn(IndividualDetailsResponseEnvelope(Left(ConnectorError(INTERNAL_SERVER_ERROR, "error"))))
-
-        val result = npsFMNService.getIdData(mockPDVResponseData)
-
-        result.map {
-          case Left(individualDetailsError) => individualDetailsError mustBe ConnectorError(INTERNAL_SERVER_ERROR, "error")
-          case _ => fail("Expected a Left with IndividualDetailsError, but got a Right")
-        }
-      }
-    }
-
-    "CheckDetailsService.getPDVData" must {
-
-      "return PDVResponseData when personalDetailsValidationService returns a successful response" in {
-        val mockPDVRequest = PDVRequest("1234567890", "1234567890")
-
-        val pdvResData = PDVResponseData(
-          "1234567890",
-          "success",
-          Some(models.pdv.PersonalDetails("Abc", "Pqr", Nino("AA123456D"), None, LocalDate.now())),
-          LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
-        )
-        when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc))
-          .thenReturn(Future.successful(pdvResData))
-
-        val result = npsFMNService.getPDVData(mockPDVRequest)
-
-        result.map { pdvResponseData =>
-          pdvResponseData mustBe pdvResData
-        }
-      }
-
-      "throw an exception when personalDetailsValidationService returns nothing" in {
-        val mockPDVRequest = PDVRequest("1234567890", "1234567890")
-
-        when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc))
-          .thenReturn(Future.successful(null))
-
-        val result = npsFMNService.getPDVData(mockPDVRequest)
-
-        result.failed.map { ex =>
-          ex.getMessage mustBe "No PDV data found"
-        }
-      }
-
-      "throw an exception when personalDetailsValidationService returns an error" in {
-        val mockPDVRequest = PDVRequest("1234567890", "1234567890")
-
-        when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc))
-          .thenReturn(Future.failed(new Exception("No PDV data found")))
-
-        val result = npsFMNService.getPDVData(mockPDVRequest)
-
-        result.failed.map { ex =>
-          ex.getMessage mustBe "No PDV data found"
-        }
-      }
-
-    }
-
-    "CheckDetailsService.getIndividualDetailsAddress" must {
-
-      "return Address when getIndividualDetails returns a successful response" in {
-        when(individualDetailsConnector.getIndividualDetails(IndividualDetailsNino(any[String]), anyValueType[ResolveMerge])
-        (any(), any(), anyValueType[CorrelationId]))
-          .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
-
-        val result = npsFMNService.getIndividualDetailsAddress(IndividualDetailsNino("AB123456C"))
-
-        result.map {
-          case Right(address) => address mustBe fakeAddress
-          case _ => fail("Expected a Right with Address, but got a Left")
-        }
-      }
-
-      "return IndividualDetailsError when getIndividualDetails returns an error" in {
-        when(individualDetailsConnector.getIndividualDetails(IndividualDetailsNino(any[String]), anyValueType[ResolveMerge])
-        (any(), any(), anyValueType[CorrelationId]))
-          .thenReturn(IndividualDetailsResponseEnvelope(Left(ConnectorError(INTERNAL_SERVER_ERROR, "error"))))
-
-        val result = npsFMNService.getIndividualDetailsAddress(IndividualDetailsNino("AB123456C"))
-
-        result.map {
-          case Left(individualDetailsError) => individualDetailsError mustBe ConnectorError(INTERNAL_SERVER_ERROR, "error")
-          case _ => fail("Expected a Left with IndividualDetailsError, but got a Right")
-        }
-      }
-
-    }
-
   }
 
 }
@@ -250,8 +112,7 @@ object CheckDetailsServiceSpec {
   private val mockFrontendAppConfig = mock[FrontendAppConfig]
   private val personalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
   private val individualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
-  private val npsFMNService = new CheckDetailsServiceImpl(personalDetailsValidationService,
-    individualDetailsConnector)(global)
+  private val npsFMNService = new CheckDetailsServiceImpl()(global)
 
   val fakeName: individualdetails.Name = models.individualdetails.Name(
     nameSequenceNumber = NameSequenceNumber(1),
