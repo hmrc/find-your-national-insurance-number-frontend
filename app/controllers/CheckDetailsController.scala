@@ -53,7 +53,8 @@ class CheckDetailsController @Inject()(
   def onPageLoad(origin: Option[String], mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async {
       implicit request => {
-        auditService.start(origin)
+        auditService.start()
+
         origin.map(_.toUpperCase) match {
           case Some(PDVOrigin) | Some(IVOrigin) | Some(FMNOrigin) =>
             validOriginJourney(origin, request, mode)

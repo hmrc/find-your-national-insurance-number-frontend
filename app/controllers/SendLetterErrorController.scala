@@ -19,11 +19,12 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import forms.SelectAlternativeServiceFormProvider
-import models.Mode
+import models.{Mode, SelectAlternativeService}
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
 import pages.SelectAlternativeServicePage
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -49,7 +50,7 @@ class SendLetterErrorController @Inject()(
                                            val controllerComponents: MessagesControllerComponents
                                          )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
-  val form = formProvider()
+  val form: Form[SelectAlternativeService] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>

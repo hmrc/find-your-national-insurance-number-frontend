@@ -18,10 +18,11 @@ package controllers
 
 import controllers.actions._
 import forms.EnteredPostCodeNotFoundFormProvider
-import models.Mode
+import models.{EnteredPostCodeNotFound, Mode}
 import navigation.Navigator
 import pages.EnteredPostCodeNotFoundPage
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -47,7 +48,7 @@ class EnteredPostCodeNotFoundController @Inject()(
                                        auditService: AuditService
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  val form = formProvider()
+  val form: Form[EnteredPostCodeNotFound] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>

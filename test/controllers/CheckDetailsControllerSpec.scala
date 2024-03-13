@@ -158,7 +158,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
-        verify(auditService, times(1)).start(any())(any())
+        verify(auditService, times(1)).start()(any())
       }
 
       "when credentialId is empty" in {
@@ -176,7 +176,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
-        verify(auditService, times(1)).start(any())(any())
+        verify(auditService, times(1)).start()(any())
       }
 
       "when PDVResponseData validationStatus is failure" in {
@@ -198,7 +198,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
-          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).start()(any())
           verify(auditService, times(1)).findYourNinoPDVMatchFailed(any(), any())(any())
         }
       }
@@ -221,7 +221,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
-          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).start()(any())
         }
       }
 
@@ -246,7 +246,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
-          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).start()(any())
           verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
         }
       }
@@ -277,7 +277,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
-          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).start()(any())
           verify(auditService, times(1)).findYourNinoPDVMatched(any(),any(),any())(any())
         }
       }
@@ -307,7 +307,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
-          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).start()(any())
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
         }
       }
@@ -337,7 +337,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
-          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).start()(any())
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
         }
       }
@@ -367,7 +367,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
-          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).start()(any())
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
         }
       }
@@ -398,7 +398,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
-          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).start()(any())
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
         }
       }
@@ -425,7 +425,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
-          verify(auditService, times(1)).start(any())(any())
+          verify(auditService, times(1)).start()(any())
         }
       }
     }
@@ -452,7 +452,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(NormalMode).url
 
-        verify(auditService, times(1)).start(any())(any())
+        verify(auditService, times(1)).start()(any())
         verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
       }
     }
@@ -478,7 +478,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.ValidDataNINOHelpController.onPageLoad(NormalMode).url
 
-        verify(auditService, times(1)).start(any())(any())
+        verify(auditService, times(1)).start()(any())
         verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
       }
     }

@@ -22,6 +22,7 @@ import models.{Mode, NormalMode}
 import navigation.Navigator
 import pages.ValidDataNINOMatchedNINOHelpPage
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -47,7 +48,7 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
                                          personalDetailsValidationService: PersonalDetailsValidationService
                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  val form = formProvider()
+  val form: Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>

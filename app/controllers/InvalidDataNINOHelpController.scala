@@ -19,10 +19,11 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import forms.InvalidDataNINOHelpFormProvider
-import models.Mode
+import models.{InvalidDataNINOHelp, Mode}
 import navigation.Navigator
 import pages.InvalidDataNINOHelpPage
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -48,7 +49,7 @@ class InvalidDataNINOHelpController @Inject()(
                                                val controllerComponents: MessagesControllerComponents
                                   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
-  val form = formProvider()
+  val form: Form[InvalidDataNINOHelp] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
