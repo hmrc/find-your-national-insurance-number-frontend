@@ -16,31 +16,27 @@
 
 package controllers
 
-import config.FrontendAppConfig
-import connectors.IndividualDetailsConnector
 import controllers.actions._
 import forms.ConfirmYourPostcodeFormProvider
 import models.errors.IndividualDetailsError
-import models.individualdetails.AddressType.ResidentialAddress
-import models.individualdetails.{Address, ResolveMerge}
+import models.individualdetails.Address
 import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.{PDVResponseData, PersonalDetails}
-import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, NormalMode}
+import models.{IndividualDetailsNino, Mode, NormalMode}
 import pages.ConfirmYourPostcodePage
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
-import services.{AuditService, IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
+import services.{AuditService, CheckDetailsService, IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.FMNConstants.EmptyString
 import util.FMNHelper.comparePostCode
-import util.{AuditUtils, FMNHelper}
+import util.FMNHelper
 import views.html.ConfirmYourPostcodeView
 
-import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -57,8 +53,7 @@ class ConfirmYourPostcodeController @Inject()(
                                         individualDetailsService: IndividualDetailsService,
                                         npsFMNService: NPSFMNService,
                                         auditService: AuditService,
-                                        individualDetailsConnector: IndividualDetailsConnector,
-                                        appConfig: FrontendAppConfig
+                                        checkDetailsService: CheckDetailsService
                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[String] = formProvider()
@@ -85,7 +80,7 @@ class ConfirmYourPostcodeController @Inject()(
             _ <- sessionRepository.set(updatedAnswers)
             nino = request.session.data.getOrElse("nino", EmptyString)
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
-            idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
+            idAddress <- individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino))
             redirectBasedOnMatch <- pdvData match {
               case Some(pdvValidData) =>
                 checkUserEnteredPostcodeMatchWithNPSPostCode(mode, userEnteredPostCode, pdvData, idAddress, pdvValidData)
@@ -137,16 +132,6 @@ class ConfirmYourPostcodeController @Inject()(
         }
       case None => Future(Redirect(routes.TechnicalErrorController.onPageLoad()))
     }
-  }
-
-  def getIndividualDetailsAddress(nino: IndividualDetailsNino
-                                 )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Either[IndividualDetailsError, Address]] = {
-    implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
-    val idAddress = for {
-      idData <- IndividualDetailsResponseEnvelope.fromEitherF(individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y')).value)
-      idDataAddress = idData.addressList.getAddress.filter(_.addressType.equals(ResidentialAddress)).head
-    } yield idDataAddress
-    idAddress.value
   }
 
 }

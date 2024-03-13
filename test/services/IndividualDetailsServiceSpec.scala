@@ -16,26 +16,172 @@
 
 package services
 
-import org.scalatest.flatspec.AnyFlatSpec
+import connectors.DefaultIndividualDetailsConnector
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito._
 
 import scala.concurrent.Future
-import models.individualdetails.{AccountStatusType, Address, AddressList, AddressPostcode, AddressSequenceNumber, AddressSource, AddressStatus, AddressType, CountryCode, CrnIndicator, DateOfBirthStatus, DateOfDeathStatus, DeliveryInfo, FirstForename, Honours, IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache, Name, NameEndDate, NameList, NameSequenceNumber, NameStartDate, NameType, NinoSuffix, OtherTitle, PafReference, RequestedName, SecondForename, Surname, TitleType, VpaMail}
-import models.AddressLine
+import models.individualdetails.{AccountStatusType, Address, AddressList, AddressPostcode, AddressSequenceNumber, AddressSource, AddressStatus, AddressType, CountryCode, CrnIndicator, DateOfBirthStatus, DateOfDeathStatus, DeliveryInfo, FirstForename, Honours, IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache, Name, NameEndDate, NameList, NameSequenceNumber, NameStartDate, NameType, NinoSuffix, OtherTitle, PafReference, RequestedName, ResolveMerge, SecondForename, Surname, TitleType, VpaMail}
+import models.{AddressLine, CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope}
+import models.errors.ConnectorError
+import models.pdv.PDVResponseData
 import org.mockito.ArgumentMatchers.any
+import org.mockito.MockitoSugar.mock
 import org.mongodb.scala.MongoException
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
+import org.scalatest.wordspec.AsyncWordSpec
+import play.api.http.Status.INTERNAL_SERVER_ERROR
 import repositories.EncryptedIndividualDetailsRepository
-import services.IndividualDetailsServiceImpl
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.HeaderCarrier
+import util.AnyValueTypeMatcher.anyValueType
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime, ZoneId, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class IndividualDetailsServiceSpec extends AnyFlatSpec with Matchers with MockitoSugar {
+class IndividualDetailsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar {
 
-  val fakeName = Name(
+  import IndividualDetailsServiceSpec._
+
+  "IndividualDetailsService" should {
+
+    "create individual details data" in {
+      val individualDetails = fakeIndividualDetails
+      val sessionId = "12345"
+
+      when(individualDetailsRepository.insertOrReplaceIndividualDetailsData(any())(any()))
+        .thenReturn(Future.successful("Success"))
+
+      val result = service.createIndividualDetailsData(sessionId, individualDetails)
+
+      result.futureValue shouldBe "Success"
+    }
+
+    "get individual details data" in {
+
+      val nino = "AB123456C"
+      val individualDetailsDataCache = IndividualDetailsDataCache("12345", Some(IndividualDetailsData("John", "Doe", "1980-01-01", "AB12CD", "AB123456C")))
+
+      when(individualDetailsRepository.findIndividualDetailsDataByNino(any())(any()))
+        .thenReturn(Future.successful(Some(individualDetailsDataCache)))
+
+      val result = service.getIndividualDetailsData(nino)
+
+      result.futureValue shouldBe Some(individualDetailsDataCache)
+    }
+
+    "getIndividualDetailsData should return data when the repository returns some data" in {
+      val nino = "AB123456C"
+      val individualDetailsDataCache = Some(IndividualDetailsDataCache("12345", None))
+
+      when(individualDetailsRepository.findIndividualDetailsDataByNino(nino)(global)).thenReturn(Future.successful(individualDetailsDataCache))
+
+      val result = service.getIndividualDetailsData(nino)
+
+      result.futureValue shouldBe individualDetailsDataCache
+    }
+
+    "return None when the repository throws a MongoException" in {
+      val nino = "AB123456C"
+
+      when(individualDetailsRepository.findIndividualDetailsDataByNino(nino)(global)).thenReturn(Future.failed(new MongoException("Mongo exception")))
+
+      val result = service.getIndividualDetailsData(nino)
+
+      result.futureValue shouldBe None
+    }
+
+  }
+
+  "IndividualDetailsService.getNPSPostCode" must {
+
+    "return the post code from the residential address" in {
+      val result = service.getNPSPostCode(fakeIndividualDetails)
+      result shouldBe "FakePostcode"
+    }
+
+  }
+
+  "IndividualDetailsService.getIdData" must {
+    "return IndividualDetails when IndividualDetailsConnector returns a successful response" in {
+      val mockPDVResponseData = PDVResponseData(
+        "1234567890",
+        "success",
+        Some(models.pdv.PersonalDetails("Abc", "Pqr", Nino("AA123456D"), None, LocalDate.now())),
+        LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
+      )
+
+      when(individualDetailsConnector.getIndividualDetails(
+        IndividualDetailsNino(any[String]), anyValueType[ResolveMerge]
+      )(any(), any(), anyValueType[CorrelationId]))
+        .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
+
+      val result = service.getIdData(mockPDVResponseData)
+
+      result.map {
+        case Right(individualDetails) => individualDetails shouldBe fakeIndividualDetails
+        case _ => fail("Expected a Right with IndividualDetails, but got a Left")
+      }(global)
+    }
+
+    "return IndividualDetailsError when IndividualDetailsConnector returns an error" in {
+      val mockPDVResponseData = PDVResponseData(
+        "1234567890",
+        "success",
+        Some(models.pdv.PersonalDetails("Abc", "Pqr", Nino("AA123456D"), None, LocalDate.now())),
+        LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
+      )
+
+      when(individualDetailsConnector.getIndividualDetails(IndividualDetailsNino(any[String]), anyValueType[ResolveMerge])
+      (any(), any(), anyValueType[CorrelationId]))
+        .thenReturn(IndividualDetailsResponseEnvelope(Left(ConnectorError(INTERNAL_SERVER_ERROR, "error"))))
+
+      val result = service.getIdData(mockPDVResponseData)
+
+      result.map {
+        case Left(individualDetailsError) => individualDetailsError shouldBe ConnectorError(INTERNAL_SERVER_ERROR, "error")
+        case _ => fail("Expected a Left with IndividualDetailsError, but got a Right")
+      }(global)
+    }
+  }
+
+  "IndividualDetailsService.getIndividualDetailsAddress" must {
+
+    "return Address when getIndividualDetails returns a successful response" in {
+      when(individualDetailsConnector.getIndividualDetails(IndividualDetailsNino(any[String]), anyValueType[ResolveMerge])
+      (any(), any(), anyValueType[CorrelationId]))
+        .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
+
+      val result = service.getIndividualDetailsAddress(IndividualDetailsNino("AB123456C"))(global, hc)
+
+      result.map {
+        case Right(address) => address shouldBe fakeAddress
+        case _ => fail("Expected a Right with Address, but got a Left")
+      }(global)
+    }
+
+    "return IndividualDetailsError when getIndividualDetails returns an error" in {
+      when(individualDetailsConnector.getIndividualDetails(IndividualDetailsNino(any[String]), anyValueType[ResolveMerge])
+      (any(), any(), anyValueType[CorrelationId]))
+        .thenReturn(IndividualDetailsResponseEnvelope(Left(ConnectorError(INTERNAL_SERVER_ERROR, "error"))))
+
+      val result = service.getIndividualDetailsAddress(IndividualDetailsNino("AB123456C"))(global, hc)
+
+      result.map {
+        case Left(individualDetailsError) => individualDetailsError shouldBe ConnectorError(INTERNAL_SERVER_ERROR, "error")
+        case _ => fail("Expected a Left with IndividualDetailsError, but got a Right")
+      }(global)
+    }
+
+  }
+
+}
+
+object IndividualDetailsServiceSpec {
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+
+  val fakeName: Name = Name(
     NameSequenceNumber(1),
     NameType.RealName,
     Some(TitleType.Mr),
@@ -48,7 +194,7 @@ class IndividualDetailsServiceSpec extends AnyFlatSpec with Matchers with Mockit
     Some(SecondForename("FakeSecondName")),
     Surname("FakeLastName"))
 
-  val fakeAddress = Address(
+  val fakeAddress: Address = Address(
     AddressSequenceNumber(1),
     Some(AddressSource.Customer),
     CountryCode(826),
@@ -68,7 +214,7 @@ class IndividualDetailsServiceSpec extends AnyFlatSpec with Matchers with Mockit
     Some(AddressPostcode("FakePostcode"))
   )
 
-  val fakeIndividualDetails = IndividualDetails(
+  val fakeIndividualDetails: IndividualDetails = IndividualDetails(
     "FakeNinoWithoutSuffix",
     Some(NinoSuffix("A")),
     Some(AccountStatusType.FullLive),
@@ -83,59 +229,7 @@ class IndividualDetailsServiceSpec extends AnyFlatSpec with Matchers with Mockit
     AddressList(Some(List(fakeAddress)))
   )
 
-  "IndividualDetailsService" should "create individual details data" in {
-    val mockRepo = mock[EncryptedIndividualDetailsRepository]
-    val service = new IndividualDetailsServiceImpl(mockRepo)
-
-    val individualDetails = fakeIndividualDetails
-    val sessionId = "12345"
-
-    when(mockRepo.insertOrReplaceIndividualDetailsData(any())(any()))
-      .thenReturn(Future.successful("Success"))
-
-    val result = service.createIndividualDetailsData(sessionId, individualDetails)
-
-    result.futureValue shouldBe "Success"
-  }
-
-  it should "get individual details data" in {
-    val mockRepo = mock[EncryptedIndividualDetailsRepository]
-    val service = new IndividualDetailsServiceImpl(mockRepo)
-
-    val nino = "AB123456C"
-    val individualDetailsDataCache = IndividualDetailsDataCache("12345", Some(IndividualDetailsData("John", "Doe", "1980-01-01", "AB12CD", "AB123456C")))
-
-    when(mockRepo.findIndividualDetailsDataByNino(any())(any()))
-      .thenReturn(Future.successful(Some(individualDetailsDataCache)))
-
-    val result = service.getIndividualDetailsData(nino)
-
-    result.futureValue shouldBe Some(individualDetailsDataCache)
-  }
-
-  "getIndividualDetailsData" should "return data when the repository returns some data" in {
-    val mockRepo = mock[EncryptedIndividualDetailsRepository]
-    val service = new IndividualDetailsServiceImpl(mockRepo)
-    val nino = "AB123456C"
-    val individualDetailsDataCache = Some(IndividualDetailsDataCache("12345", None))
-
-    when(mockRepo.findIndividualDetailsDataByNino(nino)).thenReturn(Future.successful(individualDetailsDataCache))
-
-    val result = service.getIndividualDetailsData(nino)
-
-    result.futureValue shouldBe individualDetailsDataCache
-  }
-
-  it should "return None when the repository throws a MongoException" in {
-    val mockRepo = mock[EncryptedIndividualDetailsRepository]
-    val service = new IndividualDetailsServiceImpl(mockRepo)
-    val nino = "AB123456C"
-
-    when(mockRepo.findIndividualDetailsDataByNino(nino)).thenReturn(Future.failed(new MongoException("Mongo exception")))
-
-    val result = service.getIndividualDetailsData(nino)
-
-    result.futureValue shouldBe None
-  }
-
+  val individualDetailsRepository: EncryptedIndividualDetailsRepository = mock[EncryptedIndividualDetailsRepository]
+  val individualDetailsConnector: DefaultIndividualDetailsConnector = mock[DefaultIndividualDetailsConnector]
+  val service = new IndividualDetailsServiceImpl(individualDetailsConnector, individualDetailsRepository)
 }

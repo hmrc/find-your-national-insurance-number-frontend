@@ -39,13 +39,16 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
   import PDVResponseDataServiceSpec._
 
   override def beforeEach(): Unit = {
-    reset(mockConnector, mockEncryptedPersonalDetailsValidationRepository, mockPersonalDetailsValidationRepository)
+    reset(mockConnector, mockEncryptedPersonalDetailsValidationRepository, mockPersonalDetailsValidationRepository,
+    )
   }
 
   "PDVResponseDataService with EncryptedPersonalDetailsValidationRepository" must {
+
     val personalDetailsValidationService = new PersonalDetailsValidationService(
       mockConnector,
       mockEncryptedPersonalDetailsValidationRepository)(ec)
+
     "getPersonalDetailsValidationByNino" must {
       "return the details when nino exists" in {
         when(mockEncryptedPersonalDetailsValidationRepository.findByNino(eqTo(fakeNino.nino))(any()))
@@ -179,12 +182,51 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         }
       }
     }
+
+    "getPDVData" must {
+
+      "return PDVResponseData when personalDetailsValidationService returns a successful response" ignore {
+        val mockPDVRequest = PDVRequest("1234567890", "1234567890")
+
+        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
+          .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation).toString())))
+
+        when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc))
+          .thenReturn(Future.successful(personalDetailsValidation))
+
+        val result = personalDetailsValidationService.getPDVData(mockPDVRequest)
+
+        result.map { pdvResponseData =>
+          pdvResponseData mustBe personalDetailsValidation
+        }
+      }
+
+      "throw an exception when personalDetailsValidationService returns an error" in {
+        val mockPDVRequest = PDVRequest("1234567890", "1234567890")
+
+        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
+          .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation).toString())))
+
+        when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc))
+          .thenReturn(Future.failed(new RuntimeException("Failed to get PDV data")))
+
+        val result = personalDetailsValidationService.getPDVData(mockPDVRequest)
+
+        result.failed.map { ex =>
+          ex.getMessage mustBe "Failed to get PDV data"
+        }
+      }
+
+    }
+
   }
 
   "PDVResponseDataService with PersonalDetailsValidationRepository" must {
+
     val personalDetailsValidationService = new PersonalDetailsValidationService(
       mockConnector,
       mockPersonalDetailsValidationRepository)(ec)
+
     "getPersonalDetailsValidationByNino" must {
       "return the details when nino exists" in {
         when(mockPersonalDetailsValidationRepository.findByNino(eqTo(fakeNino.nino))(any()))
@@ -318,6 +360,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         }
       }
     }
+
   }
 
 }
