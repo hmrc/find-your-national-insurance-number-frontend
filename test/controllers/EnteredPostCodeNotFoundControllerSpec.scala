@@ -189,7 +189,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to unauthorised controller when there is no PDV data" in {
+    "must redirect to journey recovery controller when there is no PDV data" in {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 
@@ -204,7 +204,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }

@@ -88,8 +88,8 @@ class ConfirmYourPostcodeController @Inject()(
             idAddress <- getIndividualDetailsAddress(IndividualDetailsNino(nino))
             redirectBasedOnMatch <- pdvData match {
               case Some(pdvValidData) =>
-                checkUserEnteredPostcodeMatchWithNPSPostCode(mode, userEnteredPostCode, pdvData, idAddress, pdvValidData)
-              case None => Future(Redirect(routes.TechnicalErrorController.onPageLoad()))
+                checkUserEnteredPostcodeMatchWithNPSPostCode(mode, userEnteredPostCode, idAddress, pdvValidData)
+              case None => throw new IllegalArgumentException("No pdv data found")
             }
           } yield redirectBasedOnMatch
         }
@@ -98,21 +98,19 @@ class ConfirmYourPostcodeController @Inject()(
 
   private def checkUserEnteredPostcodeMatchWithNPSPostCode(mode: Mode,
                                                            userEnteredPostCode: String,
-                                                           pdvData: Option[PDVResponseData],
                                                            idAddress: Either[IndividualDetailsError, Address],
                                                            pdvValidData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Result] =
     pdvValidData.npsPostCode match {
       case Some(npsPostCode) if comparePostCode(npsPostCode, userEnteredPostCode) =>
         idAddress match {
           case Right(idAddr) =>
-            auditService.findYourNinoConfirmPostcode(userEnteredPostCode, Some(idAddr), pdvData, Some("true"))
+            auditService.findYourNinoConfirmPostcode(userEnteredPostCode, Some(idAddr), Some(pdvValidData), Some("true"))
         }
         npsLetterChecks(pdvValidData, mode)
       case None =>
-        auditService.findYourNinoConfirmPostcode(userEnteredPostCode, None, pdvData, Some("false"))
-        Future(Redirect(routes.TechnicalErrorController.onPageLoad()))
+        throw new IllegalArgumentException("nps postcode missing")
       case _ =>
-        auditService.findYourNinoConfirmPostcode(userEnteredPostCode, None, pdvData, Some("false"))
+        auditService.findYourNinoConfirmPostcode(userEnteredPostCode, None, Some(pdvValidData), Some("false"))
         Future(Redirect(routes.EnteredPostCodeNotFoundController.onPageLoad(mode = NormalMode)))
     }
 
@@ -130,12 +128,13 @@ class ConfirmYourPostcodeController @Inject()(
             Redirect(routes.SendLetterErrorController.onPageLoad(mode))
           case TechnicalIssueResponse(responseStatus, responseMessage) =>
             auditService.findYourNinoTechnicalError(personalDetailsResponse, personalDetails, responseStatus, responseMessage)
-            Redirect(routes.TechnicalErrorController.onPageLoad())
+            Redirect(routes.TechnicalLetterErrorController.onPageLoad())
           case _ =>
             logger.warn("Unknown NPS FMN API response")
-            Redirect(routes.TechnicalErrorController.onPageLoad())
+            Redirect(routes.TechnicalLetterErrorController.onPageLoad())
         }
-      case None => Future(Redirect(routes.TechnicalErrorController.onPageLoad()))
+      case None =>
+        throw new IllegalArgumentException("No personal details data found")
     }
   }
 

@@ -35,7 +35,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     case HaveSetUpGGUserIDPage              => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
     case SelectNINOLetterAddressPage        => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
     case SelectAlternativeServicePage       => userAnswers => navigateSelectAlternativeService(userAnswers)
-    case TechnicalErrorPage                 => userAnswers => navigateTechnicalErrorService(userAnswers)
+    case TechnicalLetterErrorPage           => userAnswers => navigateTechnicalLetterError(userAnswers)
     case InvalidDataNINOHelpPage            => userAnswers => navigateInvalidDataNINOHelp(userAnswers)
     case ValidDataNINOHelpPage              => userAnswers => navigateValidDataNINOHelp(userAnswers)
     case EnteredPostCodeNotFoundPage        => userAnswers => navigateEnteredPostCodeNotFound(userAnswers)
@@ -69,10 +69,10 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
       case _                                        => routes.JourneyRecoveryController.onPageLoad()
     }
 
-  private def navigateTechnicalErrorService(userAnswers: UserAnswers): Call =
-    userAnswers.get(TechnicalErrorPage) match {
-      case Some(TechnicalErrorService.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
-      case Some(TechnicalErrorService.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}$getNINOByPost")
+  private def navigateTechnicalLetterError(userAnswers: UserAnswers): Call =
+    userAnswers.get(TechnicalLetterErrorPage) match {
+      case Some(TechnicalLetterError.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
+      case Some(TechnicalLetterError.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}$getNINOByPost")
       case _                                     => routes.JourneyRecoveryController.onPageLoad()
     }
 

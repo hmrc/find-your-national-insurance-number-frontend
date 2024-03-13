@@ -23,16 +23,15 @@ import play.api.test.Helpers.stubMessagesApi
 import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
-import models.TechnicalErrorService
 
-class TechnicalErrorServiceSpec extends AnyFlatSpec with Matchers {
+class TechnicalLetterErrorSpec extends AnyFlatSpec with Matchers {
 
-  "TechnicalErrorService options" should "correctly create a sequence of RadioItems" in {
+  "TechnicalLetterError options" should "correctly create a sequence of RadioItems" in {
     implicit val lang: Lang = Lang("en")
     implicit val messagesApi: MessagesApi = stubMessagesApi()
     implicit val messages: Messages = MessagesImpl(lang, messagesApi)
 
-    val result = TechnicalErrorService.options
+    val result = TechnicalLetterError.options
 
     result shouldBe Seq(
       RadioItem(

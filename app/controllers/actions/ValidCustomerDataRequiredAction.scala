@@ -47,7 +47,7 @@ class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationSer
                 Right(DataRequest(request.request, request.userId, data, request.credId))
             }
         }
-      case _ => Left(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
+      case _ => Left(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
     }
   }
 }

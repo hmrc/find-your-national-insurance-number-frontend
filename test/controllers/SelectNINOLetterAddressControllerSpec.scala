@@ -294,7 +294,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.TechnicalErrorController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.TechnicalLetterErrorController.onPageLoad().url
       }
     }
 
@@ -317,7 +317,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to unauthorised controller when there is no PDV data" in {
+    "must redirect to journey recovery controller when there is no PDV data" in {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 
@@ -332,7 +332,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
