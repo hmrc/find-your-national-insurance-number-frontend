@@ -22,10 +22,11 @@ import com.google.inject.ImplementedBy
 import config.FrontendAppConfig
 import connectors.HttpReadsWrapper.Recovered
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
-import models.errors.{ConnectorError, IndividualDetailsError}
-import models.{CorrelationId, IndividualDetailsIdentifier}
+import models.errors.{ConnectorError, IndividualDetailsError, InvalidIdentifier}
+import models.{CorrelationId, IndividualDetailsIdentifier, IndividualDetailsNino, IndividualDetailsResponseEnvelope}
 import models.individualdetails.{IndividualDetails, ResolveMerge}
 import models.upstreamfailure.{Failure, UpstreamFailures}
+import play.api.http.Status.BAD_REQUEST
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
@@ -47,19 +48,24 @@ class DefaultIndividualDetailsConnector @Inject() (httpClient: HttpClient,
   def getIndividualDetails(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge
                           )(implicit ec: ExecutionContext,hc: HeaderCarrier, correlationId: CorrelationId
   ): IndividualDetailsResponseEnvelope[IndividualDetails] = {
-    val url = s"${appConfig.individualDetailsServiceUrl}/individuals/details/NINO/${identifier.value}/${resolveMerge.value}"
-    val connectorName     = "individual-details-connector"
-    val additionalLogInfo = Some(AdditionalLogInfo(Map("correlation-id" -> correlationId.value.toString)))
-    withHttpReads(
-      connectorName,
-      metrics.defaultRegistry,
-      additionalLogInfo
-    ) { implicit httpReads =>
-      EitherT(
-        httpClient
-          .GET(url)(httpReads, desApiHeaders(appConfig.individualDetails), ec)
-          .recovered(logger, connectorName, metrics.defaultRegistry, additionalLogInfo)
-      )
+
+    if (identifier.value.isEmpty) {
+      IndividualDetailsResponseEnvelope(Left(InvalidIdentifier(identifier)))
+    } else {
+      val url = s"${appConfig.individualDetailsServiceUrl}/individuals/details/NINO/${identifier.value}/${resolveMerge.value}"
+      val connectorName     = "individual-details-connector"
+      val additionalLogInfo = Some(AdditionalLogInfo(Map("correlation-id" -> correlationId.value.toString)))
+      withHttpReads(
+        connectorName,
+        metrics.defaultRegistry,
+        additionalLogInfo
+      ) { implicit httpReads =>
+        EitherT(
+          httpClient
+            .GET(url)(httpReads, desApiHeaders(appConfig.individualDetails), ec)
+            .recovered(logger, connectorName, metrics.defaultRegistry, additionalLogInfo)
+        )
+      }
     }
   }
 

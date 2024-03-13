@@ -37,23 +37,20 @@ trait CheckDetailsService {
 class CheckDetailsServiceImpl @Inject()(implicit ec: ExecutionContext) extends CheckDetailsService with Logging {
 
    def checkConditions(idData: IndividualDetails): (Boolean, String) = {
-    var reason = EmptyString
+     var reason = EmptyString
+     val isValidNino:Boolean = idData.crnIndicator.equals(False)
+     val isValidAccountStatus:Boolean = idData.accountStatusType.exists(_.equals(FullLive))
+     val isValidAddressStatus:Boolean =  getAddressTypeResidential(idData.addressList).addressStatus match {
+       case Some(NotDlo) => true
+       case None => true
+       case _ => false
+     }
 
-    if (!idData.accountStatusType.exists(_.equals(FullLive))) {
-      reason += "AccountStatusType is not FullLive;"
-    }
-    if (idData.crnIndicator.equals(True)) {
-      reason += "CRN;"
-    }
-    if (!getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo))) {
-      reason += "ResidentialAddressStatus is Dlo or Nfa;"
-    }
+     if (!isValidAccountStatus) reason += "AccountStatus is not FullLive;"
+     if (!isValidNino) reason += "CRN;"
+     if (!isValidAddressStatus) reason += "AddressStatus is Dlo or NFa;"
 
-    val isValidCustomer = {
-      idData.accountStatusType.exists(_.equals(FullLive)) &&
-        idData.crnIndicator.equals(False) &&
-        getAddressTypeResidential(idData.addressList).addressStatus.exists(_.equals(NotDlo))
-    }
+    val isValidCustomer = isValidAccountStatus && isValidNino && isValidAddressStatus
 
     (isValidCustomer, reason)
   }

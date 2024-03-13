@@ -75,7 +75,7 @@ class PDVResponseDataConnectorSpec
     .as("application/json")
     .withHeaders(headers: _*)
 
-  val body =
+  val body: String =
     s"""
        |{
        |  "id": $id,
@@ -90,11 +90,11 @@ class PDVResponseDataConnectorSpec
        |}
        |""".stripMargin
 
-  val httpResponse = HttpResponse(200, body, headers2)
+  val httpResponse: HttpResponse = HttpResponse(200, body, headers2)
 
   trait SpecSetup {
     def url: String
-    val fakeNino = Nino(new Generator(new Random()).nextNino.nino)
+    val fakeNino: Nino = Nino(new Generator(new Random()).nextNino.nino)
 
     val personalDetails: PersonalDetails =
       PersonalDetails(
@@ -116,7 +116,7 @@ class PDVResponseDataConnectorSpec
         npsPostCode = None
       )
 
-    val mockAuditService = mock[AuditService]
+    val mockAuditService: AuditService = mock[AuditService]
 
     lazy val connector: PersonalDetailsValidationConnector = {
       val httpClient2 = app.injector.instanceOf[HttpClientV2]
@@ -140,7 +140,7 @@ class PDVResponseDataConnectorSpec
 
     "return NOT_FOUND when called with an unknown validationId" in new LocalSetup {
 
-      val body =
+      val body: String =
         s"""
            |{
            |  "error": "No association found"
