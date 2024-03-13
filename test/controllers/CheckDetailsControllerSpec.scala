@@ -330,17 +330,21 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
     }
 
-    "must redirect to ValidDataNINOMatchedNINOHelpController when pdvData does not have a postcode" ignore {
+    "must redirect to ValidDataNINOMatchedNINOHelpController when pdvData does not have a postcode" in {
 
+      import scala.concurrent.ExecutionContext.Implicits.global
       val mockPDVResponseDataSuccessWithoutNino = mockPDVResponseDataSuccess.copy(
         personalDetails = Some(fakePersonDetails.copy(postCode = None))
       )
 
-      when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+      when(mockPersonalDetailsValidationService.getPDVData(any())(any()))
         .thenReturn(Future.successful(mockPDVResponseDataSuccessWithoutNino))
 
+      when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
+        .thenReturn(Future(Right(fakeIndividualDetails)))
+
       when(mockIndividualDetailsService.getNPSPostCode(any()))
-        .thenReturn("")
+        .thenReturn("AA1 1AA")
 
       when(mockCheckDetailsService.checkConditions(any()))
         .thenReturn((true,""))
@@ -365,13 +369,28 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "must redirect to ValidDataNINOHelpController when idPostCode equals pdvData.getPostCode" ignore {
+    "must redirect to ValidDataNINOHelpController when idPostCode equals pdvData.getPostCode" in {
+      import scala.concurrent.ExecutionContext.Implicits.global
+      when(mockPersonalDetailsValidationService.getPDVData(any())(any()))
+        .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
+      when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
+        .thenReturn(Future(Right(fakeIndividualDetails)))
+
+      when(mockIndividualDetailsService.getNPSPostCode(any()))
+        .thenReturn("AA1 1AA")
+
+      when(mockCheckDetailsService.checkConditions(any()))
+        .thenReturn((true,""))
+
       when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
         .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
 
       val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
           inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
+          inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService),
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
           inject.bind[AuditService].toInstance(auditService)
         )
@@ -390,6 +409,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
     }
 
   }
+
 }
 
 object CheckDetailsControllerSpec {

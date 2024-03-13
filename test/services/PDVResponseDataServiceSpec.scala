@@ -30,22 +30,25 @@ import repositories.{EncryptedPersonalDetailsValidationRepository, PersonalDetai
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-import java.time.{Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset}
+import java.time.{Instant, LocalDate}
 import scala.concurrent.Future
-import scala.util.Random
+import scala.util.{Failure, Random, Success}
 
 class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach{
 
   import PDVResponseDataServiceSpec._
 
   override def beforeEach(): Unit = {
-    reset(mockConnector, mockEncryptedPersonalDetailsValidationRepository, mockPersonalDetailsValidationRepository)
+    reset(mockConnector, mockEncryptedPersonalDetailsValidationRepository, mockPersonalDetailsValidationRepository,
+    )
   }
 
   "PDVResponseDataService with EncryptedPersonalDetailsValidationRepository" must {
+
     val personalDetailsValidationService = new PersonalDetailsValidationService(
       mockConnector,
       mockEncryptedPersonalDetailsValidationRepository)(ec)
+
     "getPersonalDetailsValidationByNino" must {
       "return the details when nino exists" in {
         when(mockEncryptedPersonalDetailsValidationRepository.findByNino(eqTo(fakeNino.nino))(any()))
@@ -198,22 +201,6 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         }
       }
 
-      "throw an exception when personalDetailsValidationService returns nothing" ignore {
-        val mockPDVRequest = PDVRequest("1234567890", "1234567890")
-
-        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
-          .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation).toString())))
-
-        when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc))
-          .thenReturn(Future.successful(null))
-
-        val result = personalDetailsValidationService.getPDVData(mockPDVRequest)
-
-        result.failed.map { ex =>
-          ex.getMessage mustBe "No PDV data found"
-        }
-      }
-
       "throw an exception when personalDetailsValidationService returns an error" in {
         val mockPDVRequest = PDVRequest("1234567890", "1234567890")
 
@@ -235,9 +222,11 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
   }
 
   "PDVResponseDataService with PersonalDetailsValidationRepository" must {
+
     val personalDetailsValidationService = new PersonalDetailsValidationService(
       mockConnector,
       mockPersonalDetailsValidationRepository)(ec)
+
     "getPersonalDetailsValidationByNino" must {
       "return the details when nino exists" in {
         when(mockPersonalDetailsValidationRepository.findByNino(eqTo(fakeNino.nino))(any()))
@@ -371,6 +360,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         }
       }
     }
+
   }
 
 }
@@ -379,7 +369,6 @@ object PDVResponseDataServiceSpec {
   private val mockConnector = mock[PersonalDetailsValidationConnector]
   private val mockEncryptedPersonalDetailsValidationRepository = mock[EncryptedPersonalDetailsValidationRepository]
   private val mockPersonalDetailsValidationRepository = mock[PersonalDetailsValidationRepository]
-  private val personalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
   implicit val hc: HeaderCarrier = HeaderCarrier()
