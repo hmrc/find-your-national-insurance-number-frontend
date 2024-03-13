@@ -20,7 +20,7 @@ import com.google.inject.ImplementedBy
 import models.individualdetails.AccountStatusType.FullLive
 import models.individualdetails.AddressStatus.NotDlo
 import models.individualdetails.AddressType.ResidentialAddress
-import models.individualdetails.CrnIndicator.{False, True}
+import models.individualdetails.CrnIndicator.False
 import models.individualdetails.{Address, AddressList, IndividualDetails}
 import play.api.Logging
 import util.FMNConstants.EmptyString

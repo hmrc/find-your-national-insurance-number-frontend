@@ -19,8 +19,6 @@ package controllers
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
 import models.errors._
-import models.individualdetails.AddressType.ResidentialAddress
-import models.individualdetails.Address
 import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.PDVResponseData
 import models.{IndividualDetailsNino, Mode, SelectNINOLetterAddress, UserAnswers}

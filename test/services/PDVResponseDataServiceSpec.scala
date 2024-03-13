@@ -32,7 +32,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import java.time.{Instant, LocalDate}
 import scala.concurrent.Future
-import scala.util.{Failure, Random, Success}
+import scala.util.Random
 
 class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach{
 
