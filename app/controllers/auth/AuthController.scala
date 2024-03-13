@@ -36,7 +36,7 @@ class AuthController @Inject()(
 
   def signout(continueUrl: Option[RedirectUrl], origin: Option[Origin]): Action[AnyContent] =
     Action {
-      val safeUrl = wrapperService.safeSignoutUrl()
+      val safeUrl = wrapperService.safeSignoutUrl(continueUrl)
       safeUrl
         .orElse(origin.map(config.getFeedbackSurveyUrl))
         .fold(BadRequest("Missing origin")) { url: String =>
@@ -52,10 +52,15 @@ class AuthController @Inject()(
     Redirect(config.storeMyNinoUrl)
   }
 
-  def redirectToRegister(continueUrl: String): Action[AnyContent] = Action { _ =>
-    Redirect(
-      config.registerUrl,
-      Map("origin" -> Seq(config.appName), "continueUrl" -> Seq(continueUrl), "accountType" -> Seq("Individual"))
-    )
+  def redirectToRegister(continueUrl: Option[RedirectUrl]): Action[AnyContent] = Action {
+    val safeUrl = wrapperService.safeSignoutUrl(continueUrl)
+    safeUrl
+      .getOrElse(config.registerUrl)
+      .fold(BadRequest("Missing origin")) { url: String =>
+        Redirect(
+          config.registerUrl,
+          Map("origin" -> Seq(config.appName), "continueUrl" -> Seq(url), "accountType" -> Seq("Individual"))
+        )
+      }
   }
 }
