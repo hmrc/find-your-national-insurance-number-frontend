@@ -136,11 +136,14 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
     "redirectToRegister" - {
 
       "must redirect to the register page" in new LocalSetup {
+        
+        val redirectUrl: Option[RedirectUrl] = Some(RedirectUrl("http://localhost:9553/feedback-survey?origin=FIND_MY_NINO"))
 
-        val result: Future[Result] = controller.redirectToRegister("http://localhost:9553/feedback-survey?origin=FIND_MY_NINO")(FakeRequest("GET", ""))
+        val result: Future[Result] = controller.redirectToRegister(redirectUrl)(FakeRequest("GET", ""))
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe "http://localhost:9553/bas-gateway/register?origin=find-your-national-insurance-number-frontend&continueUrl=http%3A%2F%2Flocalhost%3A9553%2Ffeedback-survey%3Forigin%3DFIND_MY_NINO&accountType=Individual"
+        val expectedResult = "http://localhost:9553/bas-gateway/register?origin=find-your-national-insurance-number-frontend&continueUrl=Some%28RedirectUrl%28http%3A%2F%2Flocalhost%3A9553%2Ffeedback-survey%3Forigin%3DFIND_MY_NINO%29%29&accountType=Individual"
+        redirectLocation(result).value mustBe expectedResult
       }
 
     }
