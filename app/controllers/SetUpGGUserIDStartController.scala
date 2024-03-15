@@ -22,7 +22,7 @@ import controllers.actions._
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
+import uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SetUpGGUserIDStartView
 
@@ -42,7 +42,7 @@ class SetUpGGUserIDStartController @Inject()(
 
   def onContinue: Action[AnyContent] = (unauthenticatedIdentifierAction andThen getData) { _ =>
       Redirect(controllers.auth.routes.AuthController.redirectToRegister(
-        Some(RedirectUrl(frontendAppConfig.storeMyNinoUrl)))
-      )
+        Some(SafeRedirectUrl(frontendAppConfig.storeMyNinoUrl))
+      ))
   }
 }

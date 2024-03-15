@@ -26,7 +26,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
+import uk.gov.hmrc.play.bootstrap.binders.{RedirectUrl, SafeRedirectUrl}
 
 import scala.concurrent.Future
 
@@ -137,12 +137,12 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
 
       "must redirect to the register page" in new LocalSetup {
         
-        val redirectUrl: Option[RedirectUrl] = Some(RedirectUrl("http://localhost:9553/feedback-survey?origin=FIND_MY_NINO"))
+        val redirectUrl: Option[SafeRedirectUrl] = Some(SafeRedirectUrl("http://localhost:9553/feedback-survey?origin=FIND_MY_NINO"))
 
         val result: Future[Result] = controller.redirectToRegister(redirectUrl)(FakeRequest("GET", ""))
 
         status(result) mustBe SEE_OTHER
-        val expectedResult = "http://localhost:9553/bas-gateway/register?origin=find-your-national-insurance-number-frontend&continueUrl=Some%28RedirectUrl%28http%3A%2F%2Flocalhost%3A9553%2Ffeedback-survey%3Forigin%3DFIND_MY_NINO%29%29&accountType=Individual"
+        val expectedResult = "http://localhost:9553/bas-gateway/register?origin=find-your-national-insurance-number-frontend&continueUrl=http%3A%2F%2Flocalhost%3A9553%2Ffeedback-survey%3Forigin%3DFIND_MY_NINO&accountType=Individual"
         redirectLocation(result).value mustBe expectedResult
       }
 

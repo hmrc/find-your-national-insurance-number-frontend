@@ -37,7 +37,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.FMNConstants.EmptyString
 import util.FMNHelper.comparePostCode
-import util.{AuditUtils, FMNHelper}
+import util.FMNHelper
 import views.html.ConfirmYourPostcodeView
 
 import java.util.UUID

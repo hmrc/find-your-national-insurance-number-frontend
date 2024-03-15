@@ -13,7 +13,7 @@ GET         /refresh-session                                controllers.KeepAliv
 
 GET         /there-is-a-problem                             controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
-GET         /account/register                               controllers.auth.AuthController.redirectToRegister(continueUrl: Option[RedirectUrl])
+GET         /account/register                               controllers.auth.AuthController.redirectToRegister(continueUrl: Option[SafeRedirectUrl])
 GET         /redirect-to-save                               controllers.auth.AuthController.redirectToSMN
 GET         /account/signin                                 controllers.auth.SignedOutController.onPageLoad
 GET         /account/signout                                controllers.auth.AuthController.signout(continueUrl: Option[RedirectUrl], origin: Option[controllers.bindable.Origin])

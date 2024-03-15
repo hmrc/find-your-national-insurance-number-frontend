@@ -21,7 +21,7 @@ import controllers.actions.IdentifierAction
 import controllers.bindable.Origin
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
+import uk.gov.hmrc.play.bootstrap.binders.{RedirectUrl, SafeRedirectUrl}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.sca.services.WrapperService
 
@@ -36,7 +36,7 @@ class AuthController @Inject()(
 
   def signout(continueUrl: Option[RedirectUrl], origin: Option[Origin]): Action[AnyContent] =
     Action {
-      val safeUrl = wrapperService.safeSignoutUrl()
+      val safeUrl = wrapperService.safeSignoutUrl(continueUrl)
       safeUrl
         .orElse(origin.map(config.getFeedbackSurveyUrl))
         .fold(BadRequest("Missing origin")) { url: String =>
@@ -52,22 +52,18 @@ class AuthController @Inject()(
     Redirect(config.storeMyNinoUrl)
   }
 
-  def redirectToRegister(continueUrl: Option[RedirectUrl]): Action[AnyContent] = {
+  def redirectToRegister(continueUrl: Option[SafeRedirectUrl]): Action[AnyContent] = {
+    val url = continueUrl.map(_.url).getOrElse(config.registerUrl)
+
     val params: Map[String, Seq[Serializable]] = Map(
       "origin" -> Seq(config.appName),
-      "continueUrl" -> Seq(continueUrl),
+      "continueUrl" -> Seq(url),
       "accountType" -> Seq("Individual")
     )
-
     val stringParams: Map[String, Seq[String]] = params.view.mapValues(_.map(_.toString)).toMap
 
     Action {
-      val safeUrl = wrapperService.safeSignoutUrl(continueUrl)
-      safeUrl
-        .orElse(Some(config.registerUrl))
-        .fold(BadRequest("Bad registration url")) { url: String =>
-          Redirect(config.registerUrl, stringParams)
-        }
+      Redirect(config.registerUrl, stringParams)
     }
   }
 

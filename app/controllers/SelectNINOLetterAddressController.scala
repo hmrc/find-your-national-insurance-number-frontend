@@ -22,7 +22,7 @@ import forms.SelectNINOLetterAddressFormProvider
 import models.errors._
 import models.individualdetails.AddressType.ResidentialAddress
 import models.individualdetails.{Address, ResolveMerge}
-import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
+import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.PDVResponseData
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, SelectNINOLetterAddress, UserAnswers}
 import navigation.Navigator
@@ -43,7 +43,6 @@ import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-
 
 class SelectNINOLetterAddressController @Inject()(
                                                    override val messagesApi: MessagesApi,
