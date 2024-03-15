@@ -17,15 +17,15 @@
 package forms
 
 import forms.mappings.Mappings
-import models.TechnicalLetterError
+import models.LetterTechnicalError
 import play.api.data.Form
 
 import javax.inject.Inject
 
-class TechnicalLetterErrorFormProvider @Inject() extends Mappings {
+class LetterTechnicalErrorFormProvider @Inject() extends Mappings {
 
-  def apply(): Form[TechnicalLetterError] =
+  def apply(): Form[LetterTechnicalError] =
     Form(
-      "value" -> enumerable[TechnicalLetterError]("technicalError.error.required")
+      "value" -> enumerable[LetterTechnicalError]("technicalError.error.required")
     )
 }

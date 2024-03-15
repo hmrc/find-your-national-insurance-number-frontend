@@ -294,7 +294,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.TechnicalLetterErrorController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.LetterTechnicalErrorController.onPageLoad().url
       }
     }
 

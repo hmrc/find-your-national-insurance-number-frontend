@@ -24,14 +24,14 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
 
-class TechnicalLetterErrorSpec extends AnyFlatSpec with Matchers {
+class LetterTechnicalErrorSpec extends AnyFlatSpec with Matchers {
 
-  "TechnicalLetterError options" should "correctly create a sequence of RadioItems" in {
+  "TLetterTechnicalError options" should "correctly create a sequence of RadioItems" in {
     implicit val lang: Lang = Lang("en")
     implicit val messagesApi: MessagesApi = stubMessagesApi()
     implicit val messages: Messages = MessagesImpl(lang, messagesApi)
 
-    val result = TechnicalLetterError.options
+    val result = LetterTechnicalError.options
 
     result shouldBe Seq(
       RadioItem(

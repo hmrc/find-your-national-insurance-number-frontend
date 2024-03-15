@@ -17,11 +17,11 @@
 package controllers
 
 import controllers.actions._
-import forms.TechnicalLetterErrorFormProvider
+import forms.LetterTechnicalErrorFormProvider
 import models.Mode
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
-import pages.TechnicalLetterErrorPage
+import pages.LetterTechnicalErrorPage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -29,12 +29,12 @@ import repositories.{SessionRepository, TryAgainCountRepository}
 import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.AuditUtils
-import views.html.TechnicalLetterErrorView
+import views.html.LetterTechnicalErrorView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TechnicalLetterErrorController @Inject()(
+class LetterTechnicalErrorController @Inject()(
                                                 override val messagesApi: MessagesApi,
                                                 sessionRepository: SessionRepository,
                                                 tryAgainCountRepository: TryAgainCountRepository,
@@ -42,11 +42,11 @@ class TechnicalLetterErrorController @Inject()(
                                                 identify: IdentifierAction,
                                                 getData: DataRetrievalAction,
                                                 requireValidData: ValidCustomerDataRequiredAction,
-                                                formProvider: TechnicalLetterErrorFormProvider,
+                                                formProvider: LetterTechnicalErrorFormProvider,
                                                 personalDetailsValidationService: PersonalDetailsValidationService,
                                                 auditService: AuditService,
                                                 val controllerComponents: MessagesControllerComponents,
-                                                view: TechnicalLetterErrorView
+                                                view: LetterTechnicalErrorView
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
@@ -54,7 +54,7 @@ class TechnicalLetterErrorController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) async {
     implicit request =>
 
-      val preparedForm = request.userAnswers.get(TechnicalLetterErrorPage) match {
+      val preparedForm = request.userAnswers.get(LetterTechnicalErrorPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
@@ -84,7 +84,7 @@ class TechnicalLetterErrorController @Inject()(
 
         value => {
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(TechnicalLetterErrorPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(LetterTechnicalErrorPage, value))
             _ <- sessionRepository.set(updatedAnswers)
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY))
           } yield {
@@ -104,7 +104,7 @@ class TechnicalLetterErrorController @Inject()(
                 Redirect(routes.ConfirmYourPostcodeController.onPageLoad())
               }
             } else {
-              Redirect(navigator.nextPage(TechnicalLetterErrorPage, mode, updatedAnswers))
+              Redirect(navigator.nextPage(LetterTechnicalErrorPage, mode, updatedAnswers))
             }
           }
         }

@@ -16,10 +16,10 @@
 
 package pages
 
-import models.TechnicalLetterError
+import models.LetterTechnicalError
 import play.api.libs.json.JsPath
 
-case object TechnicalLetterErrorPage extends QuestionPage[TechnicalLetterError] {
+case object LetterTechnicalErrorPage extends QuestionPage[LetterTechnicalError] {
 
   override def path: JsPath = JsPath \ toString
 

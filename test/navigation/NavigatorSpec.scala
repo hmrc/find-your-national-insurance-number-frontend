@@ -96,11 +96,11 @@ class NavigatorSpec extends SpecBase {
       }
     }
 
-    "When on TechnicalLetterErrorPage" - {
+    "When on LetterTechnicalErrorPage" - {
 
       "must go to JourneyRecoveryController" in {
         val userAnswers = UserAnswers("id")
-        navigator.nextPage(TechnicalLetterErrorPage, NormalMode, userAnswers) mustBe routes.JourneyRecoveryController.onPageLoad()
+        navigator.nextPage(LetterTechnicalErrorPage, NormalMode, userAnswers) mustBe routes.JourneyRecoveryController.onPageLoad()
       }
 
     }

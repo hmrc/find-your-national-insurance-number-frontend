@@ -21,15 +21,15 @@ import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
 import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 
-sealed trait TechnicalLetterError
+sealed trait LetterTechnicalError
 
-object TechnicalLetterError extends Enumerable.Implicits {
+object LetterTechnicalError extends Enumerable.Implicits {
 
-  case object TryAgain extends WithName("tryAgain") with TechnicalLetterError
-  case object PrintForm extends WithName("printForm") with TechnicalLetterError
-  case object PhoneHmrc extends WithName("phoneHMRC") with TechnicalLetterError
+  case object TryAgain extends WithName("tryAgain") with LetterTechnicalError
+  case object PrintForm extends WithName("printForm") with LetterTechnicalError
+  case object PhoneHmrc extends WithName("phoneHMRC") with LetterTechnicalError
 
-  val values: Seq[TechnicalLetterError] = Seq(
+  val values: Seq[LetterTechnicalError] = Seq(
     TryAgain, PrintForm, PhoneHmrc
   )
 
@@ -45,6 +45,6 @@ object TechnicalLetterError extends Enumerable.Implicits {
       )
   }
 
-  implicit val enumerable: Enumerable[TechnicalLetterError] =
+  implicit val enumerable: Enumerable[LetterTechnicalError] =
     Enumerable(values.map(v => v.toString -> v): _*)
 }

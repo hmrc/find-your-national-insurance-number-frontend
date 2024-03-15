@@ -128,10 +128,10 @@ class ConfirmYourPostcodeController @Inject()(
             Redirect(routes.SendLetterErrorController.onPageLoad(mode))
           case TechnicalIssueResponse(responseStatus, responseMessage) =>
             auditService.findYourNinoTechnicalError(personalDetailsResponse, personalDetails, responseStatus, responseMessage)
-            Redirect(routes.TechnicalLetterErrorController.onPageLoad())
+            Redirect(routes.LetterTechnicalErrorController.onPageLoad())
           case _ =>
             logger.warn("Unknown NPS FMN API response")
-            Redirect(routes.TechnicalLetterErrorController.onPageLoad())
+            Redirect(routes.LetterTechnicalErrorController.onPageLoad())
         }
       case None =>
         throw new IllegalArgumentException("No personal details data found")

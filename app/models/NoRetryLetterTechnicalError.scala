@@ -21,13 +21,13 @@ import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
 import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 
-sealed trait NoRetryTechnicalLetterError
+sealed trait NoRetryLetterTechnicalError
 
-object NoRetryTechnicalLetterError extends Enumerable.Implicits {
-  case object PrintForm extends WithName("printForm") with NoRetryTechnicalLetterError
-  case object PhoneHmrc extends WithName("phoneHMRC") with NoRetryTechnicalLetterError
+object NoRetryLetterTechnicalError extends Enumerable.Implicits {
+  case object PrintForm extends WithName("printForm") with NoRetryLetterTechnicalError
+  case object PhoneHmrc extends WithName("phoneHMRC") with NoRetryLetterTechnicalError
 
-  val values: Seq[NoRetryTechnicalLetterError] = Seq(
+  val values: Seq[NoRetryLetterTechnicalError] = Seq(
     PrintForm, PhoneHmrc
   )
 
@@ -43,6 +43,6 @@ object NoRetryTechnicalLetterError extends Enumerable.Implicits {
       )
   }
 
-  implicit val enumerable: Enumerable[NoRetryTechnicalLetterError] =
+  implicit val enumerable: Enumerable[NoRetryLetterTechnicalError] =
     Enumerable(values.map(v => v.toString -> v): _*)
 }
