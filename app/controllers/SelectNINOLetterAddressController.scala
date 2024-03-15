@@ -117,10 +117,10 @@ class SelectNINOLetterAddressController @Inject()(
             Redirect(routes.SendLetterErrorController.onPageLoad(mode))
           case TechnicalIssueResponse(responseStatus, responseMessage) =>
             auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage)
-            Redirect(routes.TechnicalErrorController.onPageLoad())
+            Redirect(routes.LetterTechnicalErrorController.onPageLoad())
           case _ =>
             logger.warn("Unknown NPS FMN API response")
-            Redirect(routes.TechnicalErrorController.onPageLoad())
+            Redirect(routes.LetterTechnicalErrorController.onPageLoad())
         }
       }
     }

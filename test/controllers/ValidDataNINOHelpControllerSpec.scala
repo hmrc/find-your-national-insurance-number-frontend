@@ -151,7 +151,7 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to unauthorised controller when there is no PDV data" in {
+    "must redirect to journey recovery controller when there is no PDV data" in {
 
       when(mockAuthConnector.authorise[Option[CredentialRole] ~ Option[String]](
         any[Predicate],
@@ -177,7 +177,7 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
 
         val result = route(application, fakeRequest).value
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 

@@ -236,7 +236,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Technical error page when PDV details missing" in {
+    "must throw an exception when PDV details missing" in {
       val mockSessionRepository = mock[SessionRepository]
       val mockNPSFMNConnector = mock[NPSFMNConnector]
       val mockNPSFMNService = mock[NPSFMNService]
@@ -266,10 +266,9 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
           FakeRequest(POST, confirmYourPostcodeRoute)
             .withFormUrlEncodedBody(("value", "AA1 1AA"))
 
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.TechnicalErrorController.onPageLoad().url
+        assertThrows[IllegalArgumentException] {
+          await(route(application, request).value)
+        }
       }
     }
 
@@ -345,7 +344,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.TechnicalErrorController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.LetterTechnicalErrorController.onPageLoad().url
       }
     }
 
@@ -420,7 +419,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to unauthorised controller when there is no PDV data" in {
+    "must redirect to journey recovery controller when there is no PDV data" in {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 
@@ -435,7 +434,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
