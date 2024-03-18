@@ -17,16 +17,38 @@
 package services
 
 import com.google.inject.ImplementedBy
-import models.individualdetails.{IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache}
+import connectors.IndividualDetailsConnector
+import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
+import models.errors.{IndividualDetailsError, InvalidIdentifier}
+import models.individualdetails.AddressType.ResidentialAddress
+import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope}
+import models.individualdetails.{Address, AddressList, IndividualDetails,
+  IndividualDetailsData, IndividualDetailsDataCache, ResolveMerge}
+import models.pdv.PDVResponseData
 import org.mongodb.scala.MongoException
 import play.api.Logging
 import repositories.IndividualDetailsRepoTrait
+import uk.gov.hmrc.http.HeaderCarrier
+import util.FMNConstants.EmptyString
 
+import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[IndividualDetailsServiceImpl])
 trait IndividualDetailsService {
+
+  def getNPSPostCode(idData: IndividualDetails): String
+
+  def getIdData(pdvData: PDVResponseData)(
+    implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]]
+
+  def getIndividualDetailsAddress(nino: IndividualDetailsNino)(
+    implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Either[IndividualDetailsError, Address]]
+
+  def getIndividualDetails(nino: IndividualDetailsNino)(
+    implicit ec: ExecutionContext, hc: HeaderCarrier): IndividualDetailsResponseEnvelope[IndividualDetails]
+
   def createIndividualDetailsData(sessionId: String, individualDetails: IndividualDetails): Future[String]
 
   def getIndividualDetailsData(nino: String): Future[Option[IndividualDetailsDataCache]]
@@ -34,9 +56,47 @@ trait IndividualDetailsService {
 }
 
 class IndividualDetailsServiceImpl @Inject()(
+                                              individualDetailsConnector: IndividualDetailsConnector,
                                               individualDetailsRepository: IndividualDetailsRepoTrait
                                             )(implicit ec: ExecutionContext)
   extends IndividualDetailsService with Logging {
+
+  override def getNPSPostCode(idData: IndividualDetails): String =
+    getAddressTypeResidential(idData.addressList).addressPostcode.map(_.value).getOrElse("")
+
+  override def getIdData(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
+    getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
+      case Some(data) => data.nino.nino
+      case None =>
+        logger.warn("No Personal Details found in PDV data, likely validation failed")
+        EmptyString
+    })).value
+  }
+
+  override def getIndividualDetailsAddress(nino: IndividualDetailsNino)(
+    implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Either[IndividualDetailsError, Address]] = {
+    val idAddress = for {
+      idData <- getIndividualDetails(nino)
+      idDataAddress = idData.addressList.getAddress.filter(_.addressType.equals(ResidentialAddress)).head
+    } yield idDataAddress
+
+    idAddress.value.flatMap {
+      case Right(address) => Future.successful(Right(address))
+      case Left(error) => Future.successful(Left(error))
+    }.recover {
+      case ex =>
+        logger.warn(s"Error while fetching Individual Details Address for $nino", ex)
+        Left(InvalidIdentifier(nino))
+    }
+  }
+
+  override def getIndividualDetails(nino: IndividualDetailsNino
+                          )(implicit ec: ExecutionContext, hc: HeaderCarrier): IndividualDetailsResponseEnvelope[IndividualDetails] = {
+    implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
+    IndividualDetailsResponseEnvelope.fromEitherF(
+      individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y')).value
+    )
+  }
 
   override def createIndividualDetailsData(sessionId: String, individualDetails: IndividualDetails): Future[String] = {
     individualDetailsRepository.insertOrReplaceIndividualDetailsData(
@@ -48,11 +108,11 @@ class IndividualDetailsServiceImpl @Inject()(
     individualDetailsRepository.findIndividualDetailsDataByNino(nino) map {
       case Some(individualDetailsData) => Some(individualDetailsData)
       case _ => None
-    } recover({
+    } recover {
       case e: MongoException =>
         logger.warn(s"Failed finding Individual Details Data by NINO: $nino, ${e.getMessage}")
         None
-    })
+    }
 
   private def getIndividualDetailsData(sessionId: String, individualDetails: IndividualDetails): IndividualDetailsDataCache = {
     val iDetails = IndividualDetailsData(
@@ -66,6 +126,11 @@ class IndividualDetailsServiceImpl @Inject()(
       sessionId,
       Some(iDetails)
     )
+  }
+
+  private def getAddressTypeResidential(addressList: AddressList): Address = {
+    val residentialAddress = addressList.getAddress.filter(_.addressType.equals(ResidentialAddress))
+    residentialAddress.head
   }
 
 }

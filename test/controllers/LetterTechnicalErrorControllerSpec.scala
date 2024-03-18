@@ -17,14 +17,14 @@
 package controllers
 
 import base.SpecBase
-import forms.TechnicalErrorServiceFormProvider
+import forms.LetterTechnicalErrorFormProvider
 import models.pdv.{PDVResponseData, PersonalDetails}
-import models.{NormalMode, TechnicalErrorService, TryAgainCount, UserAnswers}
+import models.{NormalMode, LetterTechnicalError, TryAgainCount, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.TechnicalErrorPage
+import pages.LetterTechnicalErrorPage
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.mvc.Call
@@ -33,21 +33,21 @@ import play.api.test.Helpers._
 import repositories.{SessionRepository, TryAgainCountRepository}
 import services.PersonalDetailsValidationService
 import uk.gov.hmrc.domain.Nino
-import views.html.TechnicalErrorView
+import views.html.LetterTechnicalErrorView
 
 import java.time.LocalDate
 import scala.concurrent.Future
 
-class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
+class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute: Call = Call("GET", "/foo")
 
   val getNINOByPostUrl = "http://localhost:11300/fill-online/get-your-national-insurance-number-by-post"
 
-  lazy val technicalErrorRoute: String = routes.TechnicalErrorController.onPageLoad().url
+  lazy val letterTechnicalErrorRoute: String = routes.LetterTechnicalErrorController.onPageLoad().url
 
-  val formProvider = new TechnicalErrorServiceFormProvider()
-  val form: Form[TechnicalErrorService] = formProvider()
+  val formProvider = new LetterTechnicalErrorFormProvider()
+  val form: Form[LetterTechnicalError] = formProvider()
   val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
@@ -88,7 +88,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     validCustomer = Some("false")
   )
 
-  "TechnicalErrorController" - {
+  "LetterTechnicalErrorController" - {
 
     "must return OK and the correct view for a GET" in {
       val mockTryAgainCountRepository = mock[TryAgainCountRepository]
@@ -104,11 +104,11 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, technicalErrorRoute)
+        val request = FakeRequest(GET, letterTechnicalErrorRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[TechnicalErrorView]
+        val view = application.injector.instanceOf[LetterTechnicalErrorView]
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, NormalMode, true)(request, messages(application)).toString
@@ -117,7 +117,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(TechnicalErrorPage, TechnicalErrorService.values.head).success.value
+      val userAnswers = UserAnswers(userAnswersId).set(LetterTechnicalErrorPage, LetterTechnicalError.values.head).success.value
       val mockTryAgainCountRepository = mock[TryAgainCountRepository]
 
       when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
@@ -132,14 +132,14 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, technicalErrorRoute)
+        val request = FakeRequest(GET, letterTechnicalErrorRoute)
 
-        val view = application.injector.instanceOf[TechnicalErrorView]
+        val view = application.injector.instanceOf[LetterTechnicalErrorView]
 
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(TechnicalErrorService.values.head), NormalMode, true)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(LetterTechnicalError.values.head), NormalMode, true)(request, messages(application)).toString
       }
     }
 
@@ -162,8 +162,8 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, technicalErrorRoute)
-            .withFormUrlEncodedBody(("value", TechnicalErrorService.PhoneHmrc.toString))
+          FakeRequest(POST, letterTechnicalErrorRoute)
+            .withFormUrlEncodedBody(("value", LetterTechnicalError.PhoneHmrc.toString))
 
         val result = route(application, request).value
 
@@ -189,8 +189,8 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, technicalErrorRoute)
-            .withFormUrlEncodedBody(("value", TechnicalErrorService.TryAgain.toString))
+          FakeRequest(POST, letterTechnicalErrorRoute)
+            .withFormUrlEncodedBody(("value", LetterTechnicalError.TryAgain.toString))
 
         val result = route(application, request).value
 
@@ -217,8 +217,8 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, technicalErrorRoute)
-            .withFormUrlEncodedBody(("value", TechnicalErrorService.TryAgain.toString))
+          FakeRequest(POST, letterTechnicalErrorRoute)
+            .withFormUrlEncodedBody(("value", LetterTechnicalError.TryAgain.toString))
 
         val result = route(application, request).value
 
@@ -240,8 +240,8 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, technicalErrorRoute)
-            .withFormUrlEncodedBody(("value", TechnicalErrorService.PhoneHmrc.toString))
+          FakeRequest(POST, letterTechnicalErrorRoute)
+            .withFormUrlEncodedBody(("value", LetterTechnicalError.PhoneHmrc.toString))
 
         val result = route(application, request).value
 
@@ -263,8 +263,8 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, technicalErrorRoute)
-            .withFormUrlEncodedBody(("value", TechnicalErrorService.PrintForm.toString))
+          FakeRequest(POST, letterTechnicalErrorRoute)
+            .withFormUrlEncodedBody(("value", LetterTechnicalError.PrintForm.toString))
 
         val result = route(application, request).value
 
@@ -285,7 +285,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, technicalErrorRoute)
+        val request = FakeRequest(GET, letterTechnicalErrorRoute)
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
@@ -293,7 +293,7 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to unauthorised controller when there is no PDV data" in {
+    "must redirect to journey recovery controller when there is no PDV data" in {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 
@@ -304,11 +304,11 @@ class TechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, technicalErrorRoute)
+        val request = FakeRequest(GET, letterTechnicalErrorRoute)
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }

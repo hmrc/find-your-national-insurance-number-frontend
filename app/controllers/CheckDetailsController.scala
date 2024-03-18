@@ -76,8 +76,8 @@ class CheckDetailsController @Inject()(
 
     val result: Try[Future[Result]] = Try {
       val processData = for {
-        pdvData <- checkDetailsService.getPDVData(pdvRequest)
-        idData  <- checkDetailsService.getIdData(pdvData)
+        pdvData <- personalDetailsValidationService.getPDVData(pdvRequest)
+        idData  <- individualDetailsService.getIdData(pdvData)
         sessionWithNINO = request.session + ("nino" -> pdvData.getNino)
       } yield (pdvData, idData, sessionWithNINO) match {
         case (pdvData, Left(idData), sessionWithNINO)  => checkDetailsFailureJourney(pdvData, idData, mode, sessionWithNINO, origin)
@@ -126,9 +126,8 @@ class CheckDetailsController @Inject()(
 
     val api1694Checks = checkDetailsService.checkConditions(idData)
     personalDetailsValidationService.updatePDVDataRowWithValidCustomer(pdvData.getNino, api1694Checks._1, api1694Checks._2)
-
     if (api1694Checks._1) {
-      val idPostCode = checkDetailsService.getNPSPostCode(idData)
+      val idPostCode = individualDetailsService.getNPSPostCode(idData)
       if (pdvData.getPostCode.nonEmpty) {
         // Matched with PostCode
         if (comparePostCode(idPostCode, pdvData.getPostCode)) {

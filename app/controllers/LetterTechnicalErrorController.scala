@@ -17,11 +17,11 @@
 package controllers
 
 import controllers.actions._
-import forms.TechnicalErrorServiceFormProvider
+import forms.LetterTechnicalErrorFormProvider
 import models.Mode
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
-import pages.TechnicalErrorPage
+import pages.LetterTechnicalErrorPage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -29,24 +29,24 @@ import repositories.{SessionRepository, TryAgainCountRepository}
 import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.AuditUtils
-import views.html.TechnicalErrorView
+import views.html.LetterTechnicalErrorView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TechnicalErrorController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       sessionRepository: SessionRepository,
-                                       tryAgainCountRepository: TryAgainCountRepository,
-                                       navigator: Navigator,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireValidData: ValidCustomerDataRequiredAction,
-                                       formProvider: TechnicalErrorServiceFormProvider,
-                                       personalDetailsValidationService: PersonalDetailsValidationService,
-                                       auditService: AuditService,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: TechnicalErrorView
+class LetterTechnicalErrorController @Inject()(
+                                                override val messagesApi: MessagesApi,
+                                                sessionRepository: SessionRepository,
+                                                tryAgainCountRepository: TryAgainCountRepository,
+                                                navigator: Navigator,
+                                                identify: IdentifierAction,
+                                                getData: DataRetrievalAction,
+                                                requireValidData: ValidCustomerDataRequiredAction,
+                                                formProvider: LetterTechnicalErrorFormProvider,
+                                                personalDetailsValidationService: PersonalDetailsValidationService,
+                                                auditService: AuditService,
+                                                val controllerComponents: MessagesControllerComponents,
+                                                view: LetterTechnicalErrorView
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
@@ -54,7 +54,7 @@ class TechnicalErrorController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) async {
     implicit request =>
 
-      val preparedForm = request.userAnswers.get(TechnicalErrorPage) match {
+      val preparedForm = request.userAnswers.get(LetterTechnicalErrorPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
@@ -84,7 +84,7 @@ class TechnicalErrorController @Inject()(
 
         value => {
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(TechnicalErrorPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(LetterTechnicalErrorPage, value))
             _ <- sessionRepository.set(updatedAnswers)
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY))
           } yield {
@@ -104,7 +104,7 @@ class TechnicalErrorController @Inject()(
                 Redirect(routes.ConfirmYourPostcodeController.onPageLoad())
               }
             } else {
-              Redirect(navigator.nextPage(TechnicalErrorPage, mode, updatedAnswers))
+              Redirect(navigator.nextPage(LetterTechnicalErrorPage, mode, updatedAnswers))
             }
           }
         }

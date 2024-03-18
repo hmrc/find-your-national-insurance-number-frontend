@@ -49,8 +49,8 @@ GET         /checkDetails                                   controllers.CheckDet
 GET         /issue                                          controllers.SendLetterErrorController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /issue                                          controllers.SendLetterErrorController.onSubmit(mode: Mode ?= NormalMode)
 
-GET         /service-issue                                  controllers.TechnicalErrorController.onPageLoad(mode: Mode ?= NormalMode)
-POST        /service-issue                                  controllers.TechnicalErrorController.onSubmit(mode: Mode ?= NormalMode)
+GET         /service-issue                                  controllers.LetterTechnicalErrorController.onPageLoad(mode: Mode ?= NormalMode)
+POST        /service-issue                                  controllers.LetterTechnicalErrorController.onSubmit(mode: Mode ?= NormalMode)
 
 GET         /postcode-issue                                 controllers.EnteredPostCodeNotFoundController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /postcode-issue                                 controllers.EnteredPostCodeNotFoundController.onSubmit(mode: Mode ?= NormalMode)

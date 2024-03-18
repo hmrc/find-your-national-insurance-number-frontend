@@ -128,4 +128,20 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     }
   }
 
+  def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponseData] = {
+    val p = for {
+      pdvData <- createPDVDataFromPDVMatch(body)
+    } yield pdvData match {
+      case data: PDVResponseData =>
+        data
+      case _ =>
+        throw new Exception("No PDV data found")
+    }
+    p.recover {
+      case ex: Exception =>
+        logger.debug(ex.getMessage)
+        throw ex
+    }
+  }
+
 }

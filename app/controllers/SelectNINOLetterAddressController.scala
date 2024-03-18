@@ -16,15 +16,12 @@
 
 package controllers
 
-import connectors.IndividualDetailsConnector
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
 import models.errors._
-import models.individualdetails.AddressType.ResidentialAddress
-import models.individualdetails.{Address, ResolveMerge}
-import models.nps.{LetterIssuedResponse, NPSFMNRequest, RLSDLONFAResponse, TechnicalIssueResponse}
+import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.PDVResponseData
-import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, Mode, SelectNINOLetterAddress, UserAnswers}
+import models.{IndividualDetailsNino, Mode, SelectNINOLetterAddress, UserAnswers}
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
 import pages.SelectNINOLetterAddressPage
@@ -33,17 +30,16 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
-import services.{AuditService, IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
+import services.{AuditService, CheckDetailsService, IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import util.FMNConstants.EmptyString
 import util.FMNHelper
 import views.html.SelectNINOLetterAddressView
 
-import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-
 
 class SelectNINOLetterAddressController @Inject()(
                                                    override val messagesApi: MessagesApi,
@@ -59,7 +55,7 @@ class SelectNINOLetterAddressController @Inject()(
                                                    personalDetailsValidationService: PersonalDetailsValidationService,
                                                    auditService: AuditService,
                                                    npsFMNService: NPSFMNService,
-                                                   individualDetailsConnector: IndividualDetailsConnector
+                                                   checkDetailsService: CheckDetailsService
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[SelectNINOLetterAddress] = formProvider()
@@ -72,7 +68,7 @@ class SelectNINOLetterAddressController @Inject()(
       }
 
       for {
-        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", ""))
+        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", EmptyString))
         postCode = getPostCode(pdvData)
       } yield {
         if (postCode.isEmpty) {
@@ -84,7 +80,7 @@ class SelectNINOLetterAddressController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
-      val nino = request.session.data.getOrElse("nino", StringUtils.EMPTY)
+      val nino = request.session.data.getOrElse("nino", EmptyString)
 
       personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).flatMap(pdvData =>
         form.bindFromRequest().fold(
@@ -121,10 +117,10 @@ class SelectNINOLetterAddressController @Inject()(
             Redirect(routes.SendLetterErrorController.onPageLoad(mode))
           case TechnicalIssueResponse(responseStatus, responseMessage) =>
             auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage)
-            Redirect(routes.TechnicalErrorController.onPageLoad())
+            Redirect(routes.LetterTechnicalErrorController.onPageLoad())
           case _ =>
             logger.warn("Unknown NPS FMN API response")
-            Redirect(routes.TechnicalErrorController.onPageLoad())
+            Redirect(routes.LetterTechnicalErrorController.onPageLoad())
         }
       }
     }
@@ -136,19 +132,9 @@ class SelectNINOLetterAddressController @Inject()(
       case _ => StringUtils.EMPTY
     }
 
-  def getIndividualDetailsAddress(nino: IndividualDetailsNino)(
-    implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Either[IndividualDetailsError, Address]] = {
-    implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
-    val idAddress = for {
-      idData <- IndividualDetailsResponseEnvelope.fromEitherF(individualDetailsConnector.getIndividualDetails(nino, ResolveMerge('Y')).value)
-      idDataAddress = idData.addressList.getAddress.filter(_.addressType.equals(ResidentialAddress)).head
-    } yield idDataAddress
-    idAddress.value
-  }
-
   private def auditAddress(pdvData: Option[PDVResponseData], nino: String, value: String)(
     implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Unit] = {
-    getIndividualDetailsAddress(IndividualDetailsNino(nino)) map {
+    individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino)) map {
       case Right(idAddress) => auditService.findYourNinoOnlineLetterOption(pdvData, idAddress, value)
       case Left(individualDetailsError) =>
         val statusCode = individualDetailsError match {
