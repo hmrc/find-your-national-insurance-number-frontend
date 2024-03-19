@@ -40,5 +40,20 @@ class SetUpGGUserIDStartControllerSpec extends SpecBase {
         contentAsString(result) mustEqual view()(request, messages(application)).toString
       }
     }
+
+    "must redirect to the store my nino page when the user clicks continue" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.SetUpGGUserIDStartController.onContinue.url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual "/find-your-national-insurance-number/account/register?continueUrl=http%3A%2F%2Flocalhost%3A14006%2Fsave-your-national-insurance-number"
+      }
+    }
+
   }
 }
