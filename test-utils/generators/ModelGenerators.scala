@@ -21,6 +21,11 @@ import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
 
+  implicit lazy val arbitraryUpliftOrLetter: Arbitrary[UpliftOrLetter] =
+    Arbitrary {
+      Gen.oneOf(UpliftOrLetter.values)
+    }
+
   implicit lazy val arbitraryOnlineOrLetter: Arbitrary[OnlineOrLetter] =
     Arbitrary {
       Gen.oneOf(OnlineOrLetter.values.toSeq)

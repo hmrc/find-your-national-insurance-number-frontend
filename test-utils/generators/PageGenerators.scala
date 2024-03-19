@@ -21,6 +21,9 @@ import pages._
 
 trait PageGenerators {
 
+  implicit lazy val arbitraryUpliftOrLetterPage: Arbitrary[UpliftOrLetterPage.type] =
+    Arbitrary(UpliftOrLetterPage)
+
   implicit lazy val arbitraryOnlineOrLetterPage: Arbitrary[OnlineOrLetterPage.type] =
     Arbitrary(OnlineOrLetterPage)
 

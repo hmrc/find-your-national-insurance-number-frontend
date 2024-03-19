@@ -1,0 +1,67 @@
+@*
+ * Copyright 2024 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@this(
+    layout: templates.Layout,
+    formHelper: FormWithCSRF,
+    govukErrorSummary: GovukErrorSummary,
+    govukCheckboxes: GovukCheckboxes,
+    govukButton: GovukButton
+)
+
+@(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = title(form, messages("upliftOrLetter.title"))) {
+
+    @formHelper(action = routes.UpliftOrLetterController.onSubmit(mode), 'autoComplete -> "off") {
+
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
+        }
+
+        <h1 class="govuk-heading-xl">@messages("upliftOrLetter.heading")</h1>
+
+        <p class="govuk-body">@messages("upliftOrLetter.p1")</p>
+        <p class="govuk-body">@messages("upliftOrLetter.p2")</p>
+
+        <p class="govuk-body"><b>@messages("upliftOrLetter.h2")</b></p>
+        <div class="govuk-form-group">
+            <fieldset class="govuk-fieldset" aria-describedby="countries-hint">
+                <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                    @UpliftOrLetter.ivOptions.zipWithIndex.map { case (item, index) =>
+                    <div class="govuk-checkboxes__item">
+                        <input class="govuk-checkboxes__input" id="value_@index" name="value[@index]" type="checkbox" value="@item">
+                        <label class="govuk-label govuk-checkboxes__label" for="value_@index">
+                            @messages(s"upliftOrLetter.${item.toString()}")
+                        </label>
+                    </div>
+                    }
+                    <div class="govuk-checkboxes__divider">or</div>
+                    <div class="govuk-checkboxes__item">
+                        <input class="govuk-checkboxes__input" id="value_5" name="value[5]" type="checkbox" value="noneOfTheAbove" data-behaviour="exclusive">
+                        <label class="govuk-label govuk-checkboxes__label" for="value_5">
+                            @messages(s"upliftOrLetter.noneOfTheAbove")
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+        @govukButton(
+            ButtonViewModel(messages("site.continue")).withAttribute(("id", "submit"))
+        )
+    }
+}
