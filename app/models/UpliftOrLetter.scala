@@ -39,7 +39,8 @@ object UpliftOrLetter extends Enumerable.Implicits {
     UkOrInternationalPassport,
     UkPhotocardDrivingLicence,
     CreditReferenceQuestions,
-    UkBiometricResidencePermit
+    UkBiometricResidencePermit,
+    NoneOfTheAbove
   )
 
   val ivOptions: Seq[UpliftOrLetter] = values.filter(_ != NoneOfTheAbove)

@@ -27,6 +27,8 @@ class UpliftOrLetterFormProvider @Inject() extends Mappings {
 
   def apply(): Form[Set[UpliftOrLetter]] =
     Form(
-      "value" -> set(enumerable[UpliftOrLetter]("upliftOrLetter.error.required")).verifying(nonEmptySet("upliftOrLetter.error.required"))
+      "value" -> set(enumerable[UpliftOrLetter]("upliftOrLetter.error.required"))
+        .verifying(nonEmptySet("upliftOrLetter.error.required"))
+        .verifying(invalidMultiSelectUpliftOrLetter("upliftOrLetter.error.required"))
     )
 }
