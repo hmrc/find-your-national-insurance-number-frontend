@@ -19,7 +19,6 @@ package navigation
 import config.FrontendAppConfig
 import controllers.routes
 import models.HaveSetUpGGUserID.{No, Yes}
-import models.OnlineOrLetter.{Letter, Online}
 import models.UpliftOrLetter.NoneOfTheAbove
 import models._
 import pages._
@@ -38,7 +37,6 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
   private lazy val pdvStart      = s"/personal-details-validation/start?completionUrl=$redirectUrl&origin=$origin&failureUrl=$redirectUrl"
 
   private val normalRoutes: Page => UserAnswers => Call = {
-    case OnlineOrLetterPage                 => userAnswers => navigateOnlineOrLetter(userAnswers)
     case UpliftOrLetterPage                 => userAnswers => navigateUpliftOrLetter(userAnswers)
     case HaveSetUpGGUserIDPage              => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
     case SelectNINOLetterAddressPage        => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
@@ -55,13 +53,6 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     case _ =>
       normalRoutes(page)(userAnswers)
   }
-
-  private def navigateOnlineOrLetter(userAnswers: UserAnswers): Call =
-    userAnswers.get(OnlineOrLetterPage)match {
-      case Some(Online) => controllers.auth.routes.AuthController.redirectToSMN
-      case Some(Letter) => Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart")
-      case _            => routes.JourneyRecoveryController.onPageLoad()
-    }
 
   private def navigateUpliftOrLetter(userAnswers: UserAnswers): Call =
     userAnswers.get(UpliftOrLetterPage) match {
