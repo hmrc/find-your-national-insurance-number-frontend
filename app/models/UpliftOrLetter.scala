@@ -21,25 +21,27 @@ sealed trait UpliftOrLetter
 object UpliftOrLetter extends Enumerable.Implicits {
 
   // select
-  case object PayslipOrP60 extends WithName("payslipOrP60") with UpliftOrLetter
-  case object TaxCredits extends WithName("taxCredits") with UpliftOrLetter
-  case object SelfAssessment extends WithName("selfAssessment") with UpliftOrLetter
   case object UkOrInternationalPassport extends WithName("ukOrInternationalPassport") with UpliftOrLetter
   case object UkPhotocardDrivingLicence extends WithName("ukPhotocardDrivingLicence") with UpliftOrLetter
-  case object CreditReferenceQuestions extends WithName("creditReferenceQuestions") with UpliftOrLetter
   case object UkBiometricResidencePermit extends WithName("ukBiometricResidencePermit") with UpliftOrLetter
+  case object UkBiometricResidenceCard extends WithName("ukBiometricResidenceCard") with UpliftOrLetter
+  case object PayslipOrP60 extends WithName("payslipOrP60") with UpliftOrLetter
+  case object SelfAssessment extends WithName("selfAssessment") with UpliftOrLetter
+  case object TaxCredits extends WithName("taxCredits") with UpliftOrLetter
+  case object CreditRecord extends WithName("creditRecord") with UpliftOrLetter
 
   // or
   case object NoneOfTheAbove extends WithName("noneOfTheAbove") with UpliftOrLetter
 
   val values: Seq[UpliftOrLetter] = Seq(
-    PayslipOrP60,
-    TaxCredits,
-    SelfAssessment,
     UkOrInternationalPassport,
     UkPhotocardDrivingLicence,
-    CreditReferenceQuestions,
     UkBiometricResidencePermit,
+    UkBiometricResidenceCard,
+    PayslipOrP60,
+    SelfAssessment,
+    TaxCredits,
+    CreditRecord,
     NoneOfTheAbove
   )
 

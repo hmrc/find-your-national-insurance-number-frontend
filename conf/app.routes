@@ -61,5 +61,8 @@ POST        /number-letter                                  controllers.ValidDat
 GET         /confirm-your-postcode                          controllers.ConfirmYourPostcodeController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /confirm-your-postcode                          controllers.ConfirmYourPostcodeController.onSubmit(mode: Mode ?= NormalMode)
 
-GET         /uplift-or-letter                               controllers.UpliftOrLetterController.onPageLoad(mode: Mode ?= NormalMode)
-POST        /uplift-or-letter                               controllers.UpliftOrLetterController.onSubmit(mode: Mode ?= NormalMode)
+GET         /service-iv                                     controllers.UpliftOrLetterController.onPageLoad(mode: Mode ?= NormalMode)
+POST        /service-iv                                     controllers.UpliftOrLetterController.onSubmit(mode: Mode ?= NormalMode)
+
+GET         /service-iv-app                                 controllers.ServiceIvAppController.onPageLoad(mode: Mode ?= NormalMode)
+POST        /service-iv-app                                 controllers.ServiceIvAppController.onSubmit(mode: Mode ?= NormalMode)

@@ -17,37 +17,37 @@
 package controllers
 
 import controllers.actions._
-import forms.UpliftOrLetterFormProvider
-import models.{Mode, UpliftOrLetter}
+import forms.ServiceIvAppFormProvider
+import javax.inject.Inject
+import models.Mode
 import navigation.Navigator
-import pages.UpliftOrLetterPage
-import play.api.data.Form
+import pages.ServiceIvAppPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.UpliftOrLetterView
+import views.html.ServiceIvAppView
 
-import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class UpliftOrLetterController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        sessionRepository: SessionRepository,
-                                        navigator: Navigator,
-                                        identify: IdentifierAction,
-                                        getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
-                                        formProvider: UpliftOrLetterFormProvider,
-                                        val controllerComponents: MessagesControllerComponents,
-                                        view: UpliftOrLetterView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+class ServiceIvAppController @Inject()(
+                                         override val messagesApi: MessagesApi,
+                                         sessionRepository: SessionRepository,
+                                         navigator: Navigator,
+                                         identify: IdentifierAction,
+                                         getData: DataRetrievalAction,
+                                         requireData: DataRequiredAction,
+                                         formProvider: ServiceIvAppFormProvider,
+                                         val controllerComponents: MessagesControllerComponents,
+                                         view: ServiceIvAppView
+                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  val form: Form[Set[UpliftOrLetter]] = formProvider()
+  val form = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      val preparedForm = request.userAnswers.get(UpliftOrLetterPage) match {
+
+      val preparedForm = request.userAnswers.get(ServiceIvAppPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
@@ -64,9 +64,9 @@ class UpliftOrLetterController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(UpliftOrLetterPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(ServiceIvAppPage, value))
             _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(UpliftOrLetterPage, mode, updatedAnswers))
+          } yield Redirect(navigator.nextPage(ServiceIvAppPage, mode, updatedAnswers))
       )
   }
 }

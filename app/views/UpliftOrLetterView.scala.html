@@ -14,19 +14,26 @@
  * limitations under the License.
  *@
 
+@import models.UpliftOrLetter._
+
 @this(
-    layout: templates.Layout,
+    layout: templates.LayoutProvider,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
-    govukCheckboxes: GovukCheckboxes,
     govukButton: GovukButton
 )
 
-@(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+@(form: Form[Set[UpliftOrLetter]], mode: Mode)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("upliftOrLetter.title"))) {
+  @checked(item: UpliftOrLetter) = {
+    @if(form.value.getOrElse(Set.empty).contains(item)) {
+      checked
+    }
+  }
 
-    @formHelper(action = routes.UpliftOrLetterController.onSubmit(mode), 'autoComplete -> "off") {
+@layout(pageTitle = title(form, messages("upliftOrLetter.title")), showBackLinkJS = true, fullWidth = false) {
+
+    @formHelper(action = routes.UpliftOrLetterController.onSubmit(mode)) {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
@@ -57,7 +64,7 @@
                     <div class="govuk-checkboxes" data-module="govuk-checkboxes">
                         @UpliftOrLetter.ivOptions.zipWithIndex.map { case (item, index) =>
                         <div class="govuk-checkboxes__item">
-                            <input class="govuk-checkboxes__input" id="value_@index" name="value[@index]" type="checkbox" value="@item">
+                            <input class="govuk-checkboxes__input" id="value_@index" name="value[@index]" type="checkbox" value="@item" @checked(item)>
                             <label class="govuk-label govuk-checkboxes__label" for="value_@index">
                                 @messages(s"upliftOrLetter.${item}")
                             </label>
@@ -68,7 +75,7 @@
                         }
                         <div class="govuk-checkboxes__divider">or</div>
                         <div class="govuk-checkboxes__item">
-                            <input class="govuk-checkboxes__input" id="value_7" name="value[7]" type="checkbox" value="noneOfTheAbove" data-behaviour="exclusive">
+                            <input class="govuk-checkboxes__input" id="value_7" name="value[7]" type="checkbox" value="noneOfTheAbove" data-behaviour="exclusive" @checked(NoneOfTheAbove)>
                             <label class="govuk-label govuk-checkboxes__label" for="value_7">
                                 @messages(s"upliftOrLetter.noneOfTheAbove")
                             </label>

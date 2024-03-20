@@ -174,20 +174,26 @@ upliftOrLetter.h2 = Select the items you have nearby:
 upliftOrLetter.error.required = Please make a valid selection
 
 # Options
-upliftOrLetter.payslipOrP60 = Payslip or P60
-upliftOrLetter.hint.payslipOrP60 = You need a payslip dated after 23 January 2023 or your most recent P60
-upliftOrLetter.taxCredits = Tax Credits
-upliftOrLetter.hint.taxCredits = You need your claim details, and you can use Voice ID
-upliftOrLetter.selfAssessment = Self Assessment
-upliftOrLetter.hint.selfAssessment = You need details from your recent Self Assessment returns
 upliftOrLetter.ukOrInternationalPassport = UK or International Passport
 upliftOrLetter.hint.ukOrInternationalPassport = You need a valid passport
 upliftOrLetter.ukPhotocardDrivingLicence = UK photocard driving licence (including provisional licences)
 upliftOrLetter.hint.ukPhotocardDrivingLicence = You need a driving licence issued by the DVA or DVLA
-upliftOrLetter.creditReferenceQuestions = Credit reference questions
-upliftOrLetter.hint.creditReferenceQuestions = For example, the year you took out a credit card or phone contract
 upliftOrLetter.ukBiometricResidencePermit = UK biometric residence permit
 upliftOrLetter.hint.ukBiometricResidencePermit = BRPs are different from biometric residence cards (BRCs)
+upliftOrLetter.ukBiometricResidenceCard = UK biometric residence card
+upliftOrLetter.hint.ukBiometricResidenceCard = You need a biometric residence card
+upliftOrLetter.payslipOrP60 = Payslip or P60
+upliftOrLetter.hint.payslipOrP60 = You need a payslip dated after 23 January 2023 or your most recent P60
+upliftOrLetter.selfAssessment = Self Assessment
+upliftOrLetter.hint.selfAssessment = You need details from your recent Self Assessment returns
+upliftOrLetter.taxCredits = Tax Credits
+upliftOrLetter.hint.taxCredits = You need your claim details, and you can use Voice ID
+upliftOrLetter.creditRecord = Credit record
+upliftOrLetter.hint.creditRecord = You need a credit record
 #Or
 upliftOrLetter.noneOfTheAbove = I do not have any of these items
 
+serviceIvApp.title = Can you download an app to your mobile device?
+serviceIvApp.heading = Can you download an app to your mobile device?
+serviceIvApp.error.required = Select yes if you can download an app to your mobile device
+serviceIvApp.p1 = You`ll need to use an app and the camera on your mobile device to match your face to your ID document.

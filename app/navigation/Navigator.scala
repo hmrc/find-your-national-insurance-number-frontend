@@ -19,7 +19,7 @@ package navigation
 import config.FrontendAppConfig
 import controllers.routes
 import models.HaveSetUpGGUserID.{No, Yes}
-import models.UpliftOrLetter.NoneOfTheAbove
+import models.UpliftOrLetter._
 import models._
 import pages._
 import play.api.mvc.Call
@@ -37,7 +37,8 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
   private lazy val pdvStart      = s"/personal-details-validation/start?completionUrl=$redirectUrl&origin=$origin&failureUrl=$redirectUrl"
 
   private val normalRoutes: Page => UserAnswers => Call = {
-    case UpliftOrLetterPage                 => userAnswers => navigateUpliftOrLetter(userAnswers)
+    case UpliftOrLetterPage                 => userAnswers => navigateCanIv(userAnswers)
+    case ServiceIvAppPage                   => userAnswers => navigateOnlineOrLetter(userAnswers)
     case HaveSetUpGGUserIDPage              => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
     case SelectNINOLetterAddressPage        => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
     case SelectAlternativeServicePage       => userAnswers => navigateSelectAlternativeService(userAnswers)
@@ -54,11 +55,24 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
       normalRoutes(page)(userAnswers)
   }
 
-  private def navigateUpliftOrLetter(userAnswers: UserAnswers): Call =
+  private def navigateOnlineOrLetter(userAnswers: UserAnswers): Call =
+    userAnswers.get(ServiceIvAppPage) match {
+      case Some(true) => controllers.auth.routes.AuthController.redirectToSMN
+      case _          => Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart")
+    }
+
+  private def navigateCanIv(userAnswers: UserAnswers): Call =
     userAnswers.get(UpliftOrLetterPage) match {
-      case Some(x) =>
-        if(x.contains(NoneOfTheAbove)) Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart") else {
-          controllers.auth.routes.AuthController.redirectToSMN
+      case Some(selections) =>
+        selections.toSeq match {
+          case Seq(NoneOfTheAbove)            => Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart")
+          case Seq(UkPhotocardDrivingLicence) => controllers.routes.ServiceIvAppController.onPageLoad()
+          case Seq(UkOrInternationalPassport) => controllers.routes.ServiceIvAppController.onPageLoad()
+          case _ => if (selections.toList.length > 1) {
+            controllers.auth.routes.AuthController.redirectToSMN
+          } else {
+            Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart")
+          }
         }
       case _ => routes.JourneyRecoveryController.onPageLoad()
     }
