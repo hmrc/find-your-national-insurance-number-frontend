@@ -6,22 +6,22 @@ if (window.history && window.history.replaceState && typeof window.history.repla
 document.addEventListener('DOMContentLoaded', function(event) {
 
   // handle exclusive checkbox
-//  var checkboxes = document.querySelectorAll('.govuk-checkboxes__input');
-//  var exclusiveCheckbox = document.querySelector('[data-behaviour="exclusive"]');
-//  if (exclusiveCheckbox !== null) {
-//     checkboxes.forEach(function (checkbox) {
-//        checkbox.addEventListener('click', function() {
-//           if (checkbox === exclusiveCheckbox) {
-//              checkboxes.forEach(function (c) {
-//                 if (c !== exclusiveCheckbox) {
-//                    c.checked = false;
-//                 }
-//              });
-//           } else {
-//              exclusiveCheckbox.checked = false;
-//           }
-//        });
-//     });
-//  }
+  var checkboxes = document.querySelectorAll('.govuk-checkboxes__input');
+  var exclusiveCheckbox = document.querySelector('[data-behaviour="exclusive"]');
+  if (exclusiveCheckbox !== null) {
+     checkboxes.forEach(function (checkbox) {
+        checkbox.addEventListener('click', function() {
+           if (checkbox === exclusiveCheckbox) {
+              checkboxes.forEach(function (c) {
+                 if (c !== exclusiveCheckbox) {
+                    c.checked = false;
+                 }
+              });
+           } else {
+              exclusiveCheckbox.checked = false;
+           }
+        });
+     });
+  }
 
 });
