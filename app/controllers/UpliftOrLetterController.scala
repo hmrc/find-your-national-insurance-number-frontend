@@ -16,6 +16,7 @@
 
 package controllers
 
+import Helpers.TaxYearResolver
 import controllers.actions._
 import forms.UpliftOrLetterFormProvider
 import models.{Mode, UpliftOrLetter}
@@ -40,6 +41,7 @@ class UpliftOrLetterController @Inject()(
                                         requireData: DataRequiredAction,
                                         formProvider: UpliftOrLetterFormProvider,
                                         val controllerComponents: MessagesControllerComponents,
+                                        taxYearResolver: TaxYearResolver,
                                         view: UpliftOrLetterView
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
@@ -52,15 +54,21 @@ class UpliftOrLetterController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode))
+      val cy = taxYearResolver.currentTaxYear.toString
+      val ny = (taxYearResolver.currentTaxYear + 1).toString
+
+      Ok(view(preparedForm, cy, ny, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
 
+      val cy = taxYearResolver.currentTaxYear.toString
+      val ny = (taxYearResolver.currentTaxYear + 1).toString
+
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
+          Future.successful(BadRequest(view(formWithErrors, cy, ny, mode))),
 
         value =>
           for {

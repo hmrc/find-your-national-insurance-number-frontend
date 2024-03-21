@@ -67,7 +67,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
         selections.toSeq match {
           case Seq(NoneOfTheAbove)            => Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart")
           case Seq(UkPhotocardDrivingLicence) => controllers.routes.ServiceIvAppController.onPageLoad()
-          case Seq(UkOrInternationalPassport) => controllers.routes.ServiceIvAppController.onPageLoad()
+          case Seq(ValidUkPassport)           => controllers.routes.ServiceIvAppController.onPageLoad()
           case _ => if (selections.toList.length > 1) {
             controllers.auth.routes.AuthController.redirectToSMN
           } else {

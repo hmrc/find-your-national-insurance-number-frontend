@@ -166,30 +166,22 @@ confirmYourPostcode.error.required = Enter your postcode
 confirmYourPostcode.error.invalid = Enter a valid UK postcode
 
 # Uplift or letter (CL50)
-upliftOrLetter.title = You will need to confirm your identity to get your number online
-upliftOrLetter.heading = You will need to confirm your identity to get your number online
-upliftOrLetter.p1 = This is to keep your National Insurance Number safe and protect you against fraud.
+upliftOrLetter.title = You will need to confirm your identity to get your National Insurance number online
+upliftOrLetter.heading = You will need to confirm your identity to get your National Insurance number online
+upliftOrLetter.p1 = This is to keep your number safe and protect you against fraud.
 upliftOrLetter.p2 = You can use these items to help confirm your identity.
 upliftOrLetter.h2 = Select the items you have nearby:
 upliftOrLetter.error.required = Please make a valid selection
 
 # Options
-upliftOrLetter.ukOrInternationalPassport = UK or International Passport
-upliftOrLetter.hint.ukOrInternationalPassport = You need a valid passport
-upliftOrLetter.ukPhotocardDrivingLicence = UK photocard driving licence (including provisional licences)
-upliftOrLetter.hint.ukPhotocardDrivingLicence = You need a driving licence issued by the DVA or DVLA
-upliftOrLetter.ukBiometricResidencePermit = UK biometric residence permit
-upliftOrLetter.hint.ukBiometricResidencePermit = BRPs are different from biometric residence cards (BRCs)
-upliftOrLetter.ukBiometricResidenceCard = UK biometric residence card
-upliftOrLetter.hint.ukBiometricResidenceCard = You need a biometric residence card
-upliftOrLetter.payslipOrP60 = Payslip or P60
-upliftOrLetter.hint.payslipOrP60 = You need a payslip dated after 23 January 2023 or your most recent P60
-upliftOrLetter.selfAssessment = Self Assessment
-upliftOrLetter.hint.selfAssessment = You need details from your recent Self Assessment returns
-upliftOrLetter.taxCredits = Tax Credits
-upliftOrLetter.hint.taxCredits = You need your claim details, and you can use Voice ID
-upliftOrLetter.creditRecord = Credit record
-upliftOrLetter.hint.creditRecord = You need a credit record
+upliftOrLetter.validUkPassport = A valid UK passport
+upliftOrLetter.ukPhotocardDrivingLicence = A UK photocard driving licence (includes provisional licences)
+upliftOrLetter.nonUkPassport = A non-UK passport
+upliftOrLetter.ukBiometricResidenceCard = A biometric residency permit (BRP) or card
+upliftOrLetter.taxCreditsClaim = Details from a tax credit claim (optional Voice ID)
+upliftOrLetter.payslipOrP60 = A payslip or P60 from {0} to {1}
+upliftOrLetter.hint.payslipOrP60 = Many employers will give you a P60 to show the tax you've paid on your salary in the tax year.
+upliftOrLetter.selfAssessment = A completed Self Assessment return for the last tax year
 #Or
 upliftOrLetter.noneOfTheAbove = I do not have any of these items
 
