@@ -58,20 +58,21 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
   private def navigateOnlineOrLetter(userAnswers: UserAnswers): Call =
     userAnswers.get(ServiceIvAppPage) match {
       case Some(true) => controllers.auth.routes.AuthController.redirectToSMN
-      case _          => Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart")
+      case _          => controllers.routes.PostLetterController.onPageLoad() // Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart")
     }
 
   private def navigateCanIv(userAnswers: UserAnswers): Call =
     userAnswers.get(UpliftOrLetterPage) match {
       case Some(selections) =>
         selections.toSeq match {
-          case Seq(NoneOfTheAbove)            => Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart")
+          case Seq(NoneOfTheAbove)            => controllers.routes.PostLetterController.onPageLoad() // Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart")
           case Seq(UkPhotocardDrivingLicence) => controllers.routes.ServiceIvAppController.onPageLoad()
           case Seq(ValidUkPassport)           => controllers.routes.ServiceIvAppController.onPageLoad()
           case _ => if (selections.toList.length > 1) {
             controllers.auth.routes.AuthController.redirectToSMN
           } else {
-            Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart")
+            controllers.routes.PostLetterController.onPageLoad()
+            // Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart")
           }
         }
       case _ => routes.JourneyRecoveryController.onPageLoad()

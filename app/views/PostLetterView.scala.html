@@ -26,21 +26,26 @@
 
 @(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("serviceIvApp.title")), showBackLinkJS = true, fullWidth = false) {
+@layout(pageTitle = title(form, messages("postLetter.title")), showBackLinkJS = true, fullWidth = false) {
 
-    @formHelper(action = routes.ServiceIvAppController.onSubmit(mode)) {
+    @formHelper(action = routes.PostLetterController.onSubmit(mode)) {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
-        <h1 class="govuk-heading-l">@messages("serviceIvApp.heading")</h1>
-        <p class="govuk-body">@messages("serviceIvApp.p1")</p>
+        <h1 class="govuk-heading-l">@messages("postLetter.heading")</h1>
+        <p class="govuk-body">@messages("postLetter.p1")</p>
+        <p class="govuk-body">@messages("postLetter.p2")</p>
+
+        <div class="govuk-inset-text">
+            @messages("postLetter.p3")
+        </div>
 
         @govukRadios(
             RadiosViewModel.yesNo(
                 field = form("value"),
-                legend = LegendViewModel(messages("serviceIvApp.h2")).asPageHeading(LegendSize.Medium)
+                legend = LegendViewModel(messages("postLetter.h2")).asPageHeading(LegendSize.Medium)
             )
         )
 

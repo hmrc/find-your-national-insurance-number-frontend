@@ -39,15 +39,17 @@
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
         }
 
+        <h1 class="govuk-heading-l">@messages("upliftOrLetter.heading")</h1>
+        <p class="govuk-body">@messages("upliftOrLetter.p1")</p>
+        <p class="govuk-body">@messages("upliftOrLetter.p2")</p>
+
         <div class="govuk-form-group">
-            <fieldset class="govuk-fieldset" aria-describedby="options-hint">
-                <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <fieldset class="govuk-fieldset">
+                <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
                     <h1 class="govuk-fieldset__heading">
-                        @messages("upliftOrLetter.heading")
+                        @messages("upliftOrLetter.h2")
                     </h1>
                 </legend>
-                <p class="govuk-body">@messages("upliftOrLetter.p1")</p>
-                <p class="govuk-body">@messages("upliftOrLetter.p2")</p>
 
                 <div class="govuk-form-group @if(form.hasErrors){ form-group-error govuk-form-group--error}">
                     @form.errors.map { error =>
@@ -58,9 +60,6 @@
                                  @messages(error.message, error.args: _*)
                          </span>
                     }
-                    <div id="options-hint" class="govuk-hint">
-                        @messages("upliftOrLetter.h2")
-                    </div>
                     <div class="govuk-checkboxes" data-module="govuk-checkboxes">
                         @UpliftOrLetter.ivOptions.zipWithIndex.map { case (item, index) =>
                         <div class="govuk-checkboxes__item">

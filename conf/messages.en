@@ -185,7 +185,16 @@ upliftOrLetter.selfAssessment = A completed Self Assessment return for the last 
 #Or
 upliftOrLetter.noneOfTheAbove = I do not have any of these items
 
-serviceIvApp.title = Can you download an app to your mobile device?
-serviceIvApp.heading = Can you download an app to your mobile device?
+serviceIvApp.title = Download an app to confirm your identity
+serviceIvApp.heading = Download an app to confirm your identity
 serviceIvApp.error.required = Select yes if you can download an app to your mobile device
-serviceIvApp.p1 = You`ll need to use an app and the camera on your mobile device to match your face to your ID document.
+serviceIvApp.p1 = You will need to use an app and your mobile device`s camera to match your face to the picture on your passport or UK driving licence.
+serviceIvApp.h2 = Can you download an app to your mobile device?
+
+postLetter.title = You will not be able to access your National Insurance number online
+postLetter.heading = You will not be able to access your National Insurance number online
+postLetter.p1 = This is because you do not have the documents to confirm your identity.
+postLetter.p2 = You can instead use this service to get your number posted to the address HMRC has on record for you.
+postLetter.p3 = We will not tell you your National Insurance number over the phone.
+postLetter.error.required = Select yes if you like us to post your number to you
+postLetter.h2 = Would you like us to post your number to you?
