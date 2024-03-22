@@ -23,7 +23,7 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"    %% s"hmrc-mongo-test-$playVersion"  % mongoVersion,
     "com.vladsch.flexmark" % "flexmark-all"                    % "0.64.8",
     "org.scalamock"        %% "scalamock"                      % "5.2.0"
-  ).map(_ % "test, it")
+  ).map(_ % "test")
 
   def apply(): Seq[ModuleID] = compile ++ test
 }
