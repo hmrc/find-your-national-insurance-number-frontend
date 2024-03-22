@@ -67,5 +67,5 @@ POST        /service-iv                                     controllers.UpliftOr
 GET         /service-iv-app                                 controllers.ServiceIvAppController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /service-iv-app                                 controllers.ServiceIvAppController.onSubmit(mode: Mode ?= NormalMode)
 
-GET        /postLetter                        controllers.PostLetterController.onPageLoad(mode: Mode ?= NormalMode)
-POST       /postLetter                        controllers.PostLetterController.onSubmit(mode: Mode ?= NormalMode)
+GET         /post-letter                                    controllers.PostLetterController.onPageLoad(mode: Mode ?= NormalMode)
+POST        /post-letter                                    controllers.PostLetterController.onSubmit(mode: Mode ?= NormalMode)

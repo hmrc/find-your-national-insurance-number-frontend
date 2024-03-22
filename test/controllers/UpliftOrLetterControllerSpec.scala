@@ -16,6 +16,8 @@
 
 package controllers
 
+import Helpers.TaxYearResolver
+import akka.http.scaladsl.model.DateTime
 import base.SpecBase
 import forms.UpliftOrLetterFormProvider
 import models.{NormalMode, UpliftOrLetter, UserAnswers}
@@ -41,6 +43,10 @@ class UpliftOrLetterControllerSpec extends SpecBase with MockitoSugar {
 
   val formProvider = new UpliftOrLetterFormProvider()
   val form = formProvider()
+  val taxYearResolver: TaxYearResolver = new TaxYearResolver()
+
+  val cy = taxYearResolver.currentTaxYear.toString
+  val ny = (taxYearResolver.currentTaxYear + 1).toString
 
   "UpliftOrLetter Controller" - {
 
@@ -57,7 +63,7 @@ class UpliftOrLetterControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
 
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, cy, ny, NormalMode)(request, messages(application)).toString
       }
     }
 
@@ -75,7 +81,7 @@ class UpliftOrLetterControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(UpliftOrLetter.values.toSet), NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(UpliftOrLetter.values.toSet), cy, ny, NormalMode)(request, messages(application)).toString
       }
     }
 
@@ -121,7 +127,7 @@ class UpliftOrLetterControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, cy, ny, NormalMode)(request, messages(application)).toString
       }
     }
   }
