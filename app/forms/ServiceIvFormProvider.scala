@@ -27,8 +27,8 @@ class ServiceIvFormProvider @Inject() extends Mappings {
 
   def apply(): Form[Set[ServiceIv]] =
     Form(
-      "value" -> set(enumerable[ServiceIv]("upliftOrLetter.error.required"))
-        .verifying(nonEmptySet("upliftOrLetter.error.required"))
-        .verifying(invalidMultiSelectUpliftOrLetter("upliftOrLetter.error.required"))
+      "value" -> set(enumerable[ServiceIv]("ServiceIv.error.required"))
+        .verifying(nonEmptySet("ServiceIv.error.required"))
+        .verifying(invalidMultiSelectUpliftOrLetter("ServiceIv.error.required"))
     )
 }
