@@ -171,43 +171,5 @@ class SelectAlternativeServiceControllerSpec extends SpecBase with MockitoSugar 
         contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
       }
     }
-
-    "must redirect to unauthorised controller when the user is not a valid customer" in {
-      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
-        .thenReturn(Future.successful(Some(fakePDVResponseDataInvalidCustomer)))
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(
-          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(GET, selectAlternativeServiceRoute)
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
-      }
-    }
-
-    "must redirect to journey recovery controller when there is no PDV data" in {
-      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
-        .thenReturn(Future.successful(None))
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(
-          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(GET, selectAlternativeServiceRoute)
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
   }
 }

@@ -21,9 +21,9 @@ import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
 
-  implicit lazy val arbitraryUpliftOrLetter: Arbitrary[UpliftOrLetter] =
+  implicit lazy val arbitraryUpliftOrLetter: Arbitrary[ServiceIv] =
     Arbitrary {
-      Gen.oneOf(UpliftOrLetter.values)
+      Gen.oneOf(ServiceIv.values)
     }
 
   implicit lazy val arbitraryEnteredPostCodeNotFound: Arbitrary[EnteredPostCodeNotFound] =

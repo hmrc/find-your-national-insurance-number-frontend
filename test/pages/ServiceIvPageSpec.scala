@@ -16,12 +16,17 @@
 
 package pages
 
-import models.UpliftOrLetter
-import play.api.libs.json.JsPath
+import models.ServiceIv
+import pages.behaviours.PageBehaviours
 
-case object UpliftOrLetterPage extends QuestionPage[Set[UpliftOrLetter]] {
+class ServiceIvPageSpec extends PageBehaviours {
 
-  override def path: JsPath = JsPath \ toString
+  "UpliftOrLetterPage" - {
 
-  override def toString: String = "upliftOrLetter"
+    beRetrievable[Set[ServiceIv]](ServiceIvPage)
+
+    beSettable[Set[ServiceIv]](ServiceIvPage)
+
+    beRemovable[Set[ServiceIv]](ServiceIvPage)
+  }
 }

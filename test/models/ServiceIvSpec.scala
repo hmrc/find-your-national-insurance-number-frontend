@@ -24,35 +24,35 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.OptionValues
 import play.api.libs.json.{JsError, JsString, Json}
 
-class UpliftOrLetterSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with OptionValues with ModelGenerators {
+class ServiceIvSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with OptionValues with ModelGenerators {
 
   "UpliftOrLetter" - {
 
     "must deserialise valid values" in {
 
-      val gen = arbitrary[UpliftOrLetter]
+      val gen = arbitrary[ServiceIv]
 
       forAll(gen) {
         upliftOrLetter =>
 
-          JsString(upliftOrLetter.toString).validate[UpliftOrLetter].asOpt.value mustEqual upliftOrLetter
+          JsString(upliftOrLetter.toString).validate[ServiceIv].asOpt.value mustEqual upliftOrLetter
       }
     }
 
     "must fail to deserialise invalid values" in {
 
-      val gen = arbitrary[String] suchThat (!UpliftOrLetter.values.map(_.toString).contains(_))
+      val gen = arbitrary[String] suchThat (!ServiceIv.values.map(_.toString).contains(_))
 
       forAll(gen) {
         invalidValue =>
 
-          JsString(invalidValue).validate[UpliftOrLetter] mustEqual JsError("error.invalid")
+          JsString(invalidValue).validate[ServiceIv] mustEqual JsError("error.invalid")
       }
     }
 
     "must serialise" in {
 
-      val gen = arbitrary[UpliftOrLetter]
+      val gen = arbitrary[ServiceIv]
 
       forAll(gen) {
         upliftOrLetter =>

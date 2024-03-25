@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import models.UpliftOrLetter._
+@import models.ServiceIv._
 
 @this(
     layout: templates.LayoutProvider,
@@ -23,31 +23,31 @@
     govukButton: GovukButton
 )
 
-@(form: Form[Set[UpliftOrLetter]], cy: String, ny: String, mode: Mode)(implicit request: Request[_], messages: Messages)
+@(form: Form[Set[ServiceIv]], cy: String, ny: String, mode: Mode)(implicit request: Request[_], messages: Messages)
 
-  @checked(item: UpliftOrLetter) = {
+  @checked(item: ServiceIv) = {
     @if(form.value.getOrElse(Set.empty).contains(item)) {
       checked
     }
   }
 
-@layout(pageTitle = title(form, messages("upliftOrLetter.title")), showBackLinkJS = true, fullWidth = false) {
+@layout(pageTitle = title(form, messages("ServiceIv.title")), showBackLinkJS = true, fullWidth = false) {
 
-    @formHelper(action = routes.UpliftOrLetterController.onSubmit(mode)) {
+    @formHelper(action = routes.ServiceIvController.onSubmit(mode)) {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
         }
 
-        <h1 class="govuk-heading-l">@messages("upliftOrLetter.heading")</h1>
-        <p class="govuk-body">@messages("upliftOrLetter.p1")</p>
-        <p class="govuk-body">@messages("upliftOrLetter.p2")</p>
+        <h1 class="govuk-heading-l">@messages("ServiceIv.heading")</h1>
+        <p class="govuk-body">@messages("ServiceIv.p1")</p>
+        <p class="govuk-body">@messages("ServiceIv.p2")</p>
 
         <div class="govuk-form-group">
             <fieldset class="govuk-fieldset">
                 <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
                     <h1 class="govuk-fieldset__heading">
-                        @messages("upliftOrLetter.h2")
+                        @messages("ServiceIv.h2")
                     </h1>
                 </legend>
 
@@ -61,15 +61,15 @@
                          </span>
                     }
                     <div class="govuk-checkboxes" data-module="govuk-checkboxes">
-                        @UpliftOrLetter.ivOptions.zipWithIndex.map { case (item, index) =>
+                        @ServiceIv.ivOptions.zipWithIndex.map { case (item, index) =>
                         <div class="govuk-checkboxes__item">
                             <input class="govuk-checkboxes__input" id="value_@index" name="value[@index]" type="checkbox" value="@item" @checked(item)>
                             <label class="govuk-label govuk-checkboxes__label" for="value_@index">
-                                @messages(s"upliftOrLetter.${item}", cy, ny)
+                                @messages(s"ServiceIv.${item}", cy, ny)
                             </label>
-                            @if(messages(s"upliftOrLetter.hint.${item.toString()}") != s"upliftOrLetter.hint.${item.toString()}") {
+                            @if(messages(s"ServiceIv.hint.${item.toString()}") != s"ServiceIv.hint.${item.toString()}") {
                                 <label class="govuk-hint govuk-checkboxes__hint" for="value_@index">
-                                    @messages(s"upliftOrLetter.hint.${item.toString()}")
+                                    @messages(s"ServiceIv.hint.${item.toString()}")
                                 </label>
                             }
                         </div>
@@ -78,7 +78,7 @@
                         <div class="govuk-checkboxes__item">
                             <input class="govuk-checkboxes__input" id="value_7" name="value[7]" type="checkbox" value="noneOfTheAbove" data-behaviour="exclusive" @checked(NoneOfTheAbove)>
                             <label class="govuk-label govuk-checkboxes__label" for="value_7">
-                                @messages(s"upliftOrLetter.noneOfTheAbove")
+                                @messages(s"ServiceIv.noneOfTheAbove")
                             </label>
                         </div>
                     </div>

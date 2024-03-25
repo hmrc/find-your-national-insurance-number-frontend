@@ -17,31 +17,30 @@
 package controllers
 
 import Helpers.TaxYearResolver
-import akka.http.scaladsl.model.DateTime
 import base.SpecBase
-import forms.UpliftOrLetterFormProvider
-import models.{NormalMode, UpliftOrLetter, UserAnswers}
+import forms.ServiceIvFormProvider
+import models.{NormalMode, ServiceIv, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.UpliftOrLetterPage
+import pages.ServiceIvPage
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
-import views.html.UpliftOrLetterView
+import views.html.ServiceIvView
 
 import scala.concurrent.Future
 
-class UpliftOrLetterControllerSpec extends SpecBase with MockitoSugar {
+class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
 
-  lazy val upliftOrLetterRoute = routes.UpliftOrLetterController.onPageLoad(NormalMode).url
+  lazy val upliftOrLetterRoute = routes.ServiceIvController.onPageLoad(NormalMode).url
 
-  val formProvider = new UpliftOrLetterFormProvider()
+  val formProvider = new ServiceIvFormProvider()
   val form = formProvider()
   val taxYearResolver: TaxYearResolver = new TaxYearResolver()
 
@@ -59,7 +58,7 @@ class UpliftOrLetterControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[UpliftOrLetterView]
+        val view = application.injector.instanceOf[ServiceIvView]
 
         status(result) mustEqual OK
 
@@ -69,19 +68,19 @@ class UpliftOrLetterControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(UpliftOrLetterPage, UpliftOrLetter.values.toSet).success.value
+      val userAnswers = UserAnswers(userAnswersId).set(ServiceIvPage, ServiceIv.values.toSet).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, upliftOrLetterRoute)
 
-        val view = application.injector.instanceOf[UpliftOrLetterView]
+        val view = application.injector.instanceOf[ServiceIvView]
 
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(UpliftOrLetter.values.toSet), cy, ny, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(ServiceIv.values.toSet), cy, ny, NormalMode)(request, messages(application)).toString
       }
     }
 
@@ -102,7 +101,7 @@ class UpliftOrLetterControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, upliftOrLetterRoute)
-            .withFormUrlEncodedBody(("value[0]", UpliftOrLetter.values.head.toString))
+            .withFormUrlEncodedBody(("value[0]", ServiceIv.values.head.toString))
 
         val result = route(application, request).value
 
@@ -122,7 +121,7 @@ class UpliftOrLetterControllerSpec extends SpecBase with MockitoSugar {
 
         val boundForm = form.bind(Map("value" -> "invalid value"))
 
-        val view = application.injector.instanceOf[UpliftOrLetterView]
+        val view = application.injector.instanceOf[ServiceIvView]
 
         val result = route(application, request).value
 

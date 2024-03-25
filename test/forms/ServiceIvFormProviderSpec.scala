@@ -17,22 +17,22 @@
 package forms
 
 import forms.behaviours.CheckboxFieldBehaviours
-import models.UpliftOrLetter
+import models.ServiceIv
 import play.api.data.FormError
 
-class UpliftOrLetterFormProviderSpec extends CheckboxFieldBehaviours {
+class ServiceIvFormProviderSpec extends CheckboxFieldBehaviours {
 
-  val form = new UpliftOrLetterFormProvider()()
+  val form = new ServiceIvFormProvider()()
 
   ".value" - {
 
     val fieldName = "value"
     val requiredKey = "upliftOrLetter.error.required"
 
-    behave like checkboxField[UpliftOrLetter](
+    behave like checkboxField[ServiceIv](
       form,
       fieldName,
-      validValues  = UpliftOrLetter.values,
+      validValues  = ServiceIv.values,
       invalidError = FormError(s"$fieldName[0]", "error.invalid")
     )
 

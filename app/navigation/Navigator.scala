@@ -19,7 +19,7 @@ package navigation
 import config.FrontendAppConfig
 import controllers.routes
 import models.HaveSetUpGGUserID.{No, Yes}
-import models.UpliftOrLetter._
+import models.ServiceIv._
 import models._
 import pages._
 import play.api.mvc.Call
@@ -31,14 +31,12 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class Navigator @Inject()(implicit config: FrontendAppConfig) {
 
-  private lazy val origin        = FMNOrigin
-  private lazy val redirectUrl   = config.fmnCheckDetailsUrl
   private lazy val getNINOByPost = "/fill-online/get-your-national-insurance-number-by-post"
-  private lazy val pdvStart      = s"/personal-details-validation/start?completionUrl=$redirectUrl&origin=$origin&failureUrl=$redirectUrl"
 
   private val normalRoutes: Page => UserAnswers => Call = {
-    case UpliftOrLetterPage                 => userAnswers => navigateCanIv(userAnswers)
-    case ServiceIvAppPage                   => userAnswers => navigateOnlineOrLetter(userAnswers)
+    case ServiceIvPage                      => userAnswers => navigateIvEvidence(userAnswers)
+    case ServiceIvAppPage                   => userAnswers => navigateCanDownloadApp(userAnswers)
+    case PostLetterPage                     => userAnswers => navigatePostLetter(userAnswers)
     case HaveSetUpGGUserIDPage              => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
     case SelectNINOLetterAddressPage        => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
     case SelectAlternativeServicePage       => userAnswers => navigateSelectAlternativeService(userAnswers)
@@ -55,27 +53,31 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
       normalRoutes(page)(userAnswers)
   }
 
-  private def navigateOnlineOrLetter(userAnswers: UserAnswers): Call =
+  private def navigatePostLetter(userAnswers: UserAnswers): Call =
+    userAnswers.get(PostLetterPage) match {
+      case Some(true) => controllers.routes.TracingWhatYouNeedController.onPageLoad()
+      case _          => routes.SelectAlternativeServiceController.onPageLoad()
+    }
+  private def navigateCanDownloadApp(userAnswers: UserAnswers): Call =
     userAnswers.get(ServiceIvAppPage) match {
       case Some(true) => controllers.auth.routes.AuthController.redirectToSMN
-      case _          => controllers.routes.PostLetterController.onPageLoad() // Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart")
+      case _          => controllers.routes.PostLetterController.onPageLoad()
     }
 
-  private def navigateCanIv(userAnswers: UserAnswers): Call =
-    userAnswers.get(UpliftOrLetterPage) match {
+  private def navigateIvEvidence(userAnswers: UserAnswers): Call =
+    userAnswers.get(ServiceIvPage) match {
       case Some(selections) =>
         selections.toSeq match {
-          case Seq(NoneOfTheAbove)            => controllers.routes.PostLetterController.onPageLoad() // Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart")
+          case Seq(NoneOfTheAbove)            => controllers.routes.PostLetterController.onPageLoad()
           case Seq(UkPhotocardDrivingLicence) => controllers.routes.ServiceIvAppController.onPageLoad()
           case Seq(ValidUkPassport)           => controllers.routes.ServiceIvAppController.onPageLoad()
           case _ => if (selections.toList.length > 1) {
             controllers.auth.routes.AuthController.redirectToSMN
           } else {
             controllers.routes.PostLetterController.onPageLoad()
-            // Call(GET, s"${config.personalDetailsValidationFrontEnd}$pdvStart")
           }
         }
-      case _ => routes.JourneyRecoveryController.onPageLoad()
+      case _ => routes.SelectAlternativeServiceController.onPageLoad()
     }
 
   private def navigateHaveSetUpGGUserID(userAnswers: UserAnswers): Call =
