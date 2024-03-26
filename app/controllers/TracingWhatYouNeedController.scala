@@ -41,7 +41,7 @@ class TracingWhatYouNeedController @Inject()(
       val redirectUrl   = config.fmnCheckDetailsUrl
 
       val pdvUrl = s"${config.personalDetailsValidationFrontEnd}/personal-details-validation/start?" +
-        s"completionUrl=${URLEncoder.encode(redirectUrl, "UTF-8")}pdvBaseUrl&failureUrl=${URLEncoder.encode(redirectUrl, "UTF-8")}&origin=$origin"
+        s"completionUrl=${URLEncoder.encode(redirectUrl, "UTF-8")}&failureUrl=${URLEncoder.encode(redirectUrl, "UTF-8")}&origin=$origin"
 
       Ok(view(pdvUrl))
   }
