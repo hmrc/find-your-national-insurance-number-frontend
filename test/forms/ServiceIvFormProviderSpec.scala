@@ -27,7 +27,7 @@ class ServiceIvFormProviderSpec extends CheckboxFieldBehaviours {
   ".value" - {
 
     val fieldName = "value"
-    val requiredKey = "upliftOrLetter.error.required"
+    val requiredKey = "ServiceIv.error.required"
 
     behave like checkboxField[ServiceIv](
       form,

@@ -38,7 +38,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
 
-  lazy val upliftOrLetterRoute = routes.ServiceIvController.onPageLoad(NormalMode).url
+  lazy val serviceIvRoute = routes.ServiceIvController.onPageLoad(NormalMode).url
 
   val formProvider = new ServiceIvFormProvider()
   val form = formProvider()
@@ -54,7 +54,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, upliftOrLetterRoute)
+        val request = FakeRequest(GET, serviceIvRoute)
 
         val result = route(application, request).value
 
@@ -62,7 +62,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
 
-        contentAsString(result) mustEqual view(form, cy, ny, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, cy, ny, NormalMode)(request, messages).toString
       }
     }
 
@@ -73,14 +73,14 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, upliftOrLetterRoute)
+        val request = FakeRequest(GET, serviceIvRoute)
 
         val view = application.injector.instanceOf[ServiceIvView]
 
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(ServiceIv.values.toSet), cy, ny, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(ServiceIv.values.toSet), cy, ny, NormalMode)(request, messages).toString
       }
     }
 
@@ -100,7 +100,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, upliftOrLetterRoute)
+          FakeRequest(POST, serviceIvRoute)
             .withFormUrlEncodedBody(("value[0]", ServiceIv.values.head.toString))
 
         val result = route(application, request).value
@@ -116,7 +116,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, upliftOrLetterRoute)
+          FakeRequest(POST, serviceIvRoute)
             .withFormUrlEncodedBody(("value", "invalid value"))
 
         val boundForm = form.bind(Map("value" -> "invalid value"))
@@ -126,7 +126,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, cy, ny, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, cy, ny, NormalMode)(request, messages).toString
       }
     }
   }
