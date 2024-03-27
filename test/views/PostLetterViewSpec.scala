@@ -42,5 +42,5 @@ class PostLetterViewSpec extends ViewBehaviours with Generators {
   behave like pageWithContent("p", "You can instead use this service to get your number posted to the address HMRC has on record for you.")
   behave like pageWithContent("div", "We will not tell you your National Insurance number over the phone.")
 
-  behave like pageWithContent("h1", "Would you like us to post your number to you?")
+  behave like pageWithContent("legend", "Would you like us to post your number to you?")
 }

@@ -180,7 +180,7 @@ ServiceIv.nonUkPassport = A non-UK passport
 ServiceIv.ukBiometricResidenceCard = A biometric residency permit (BRP) or card
 ServiceIv.taxCreditsClaim = Details from a tax credit claim (optional Voice ID)
 ServiceIv.payslipOrP60 = A payslip or P60 from {0} to {1}
-ServiceIv.hint.payslipOrP60 = Many employers will give you a P60 to show the tax you`ve paid on your salary in the tax year.
+ServiceIv.hint.payslipOrP60 = Many employers will give you a P60 to show the tax you’ve paid on your salary in the tax year.
 ServiceIv.selfAssessment = A completed Self Assessment return for the last tax year
 #Or
 ServiceIv.noneOfTheAbove = I do not have any of these items
@@ -188,7 +188,7 @@ ServiceIv.noneOfTheAbove = I do not have any of these items
 serviceIvApp.title = Download an app to confirm your identity
 serviceIvApp.heading = Download an app to confirm your identity
 serviceIvApp.error.required = Select yes if you can download an app to your mobile device
-serviceIvApp.p1 = You will need to use an app and your mobile device`s camera to match your face to the picture on your passport or UK driving licence.
+serviceIvApp.p1 = You will need to use an app and your mobile device’s camera to match your face to the picture on your passport or UK driving licence.
 serviceIvApp.h2 = Can you download an app to your mobile device?
 
 postLetter.title = You will not be able to access your National Insurance number online

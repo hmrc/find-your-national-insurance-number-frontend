@@ -38,6 +38,6 @@ class ServiceIvAppViewSpec extends ViewBehaviours with Generators {
 
   behave like pageWithHeading()
 
-  behave like pageWithContent("p", "You will need to use an app and your mobile device`s camera to match your face to the picture on your passport or UK driving licence.")
-  behave like pageWithContent("h1", "Can you download an app to your mobile device?")
+  behave like pageWithContent("p", "You will need to use an app and your mobile device’s camera to match your face to the picture on your passport or UK driving licence.")
+  behave like pageWithContent("legend", "Can you download an app to your mobile device?")
 }

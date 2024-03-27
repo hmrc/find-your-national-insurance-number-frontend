@@ -43,14 +43,14 @@ class ServiceIvViewSpec extends ViewBehaviours with Generators {
   behave like pageWithContent("p", "This is to keep your number safe and protect you against fraud.")
   behave like pageWithContent("p", "You can use these items to help confirm your identity.")
 
-  behave like pageWithContent("h1", "Select the items you have nearby:")
+  behave like pageWithContent("legend", "Select the items you have nearby:")
 
   behave like pageWithContent("label", "A valid UK passport")
   behave like pageWithContent("label", "A non-UK passport")
   behave like pageWithContent("label", "A biometric residency permit (BRP) or card")
   behave like pageWithContent("label", "Details from a tax credit claim (optional Voice ID)")
   behave like pageWithContent("label", "A payslip or P60 from 2023 to 2024")
-  behave like pageWithContent("label", "Many employers will give you a P60 to show the tax you`ve paid on your salary in the tax year.")
+  behave like pageWithContent("label", "Many employers will give you a P60 to show the tax you’ve paid on your salary in the tax year.")
   behave like pageWithContent("label", "A completed Self Assessment return for the last tax year")
   behave like pageWithContent("label", "I do not have any of these items")
 }
