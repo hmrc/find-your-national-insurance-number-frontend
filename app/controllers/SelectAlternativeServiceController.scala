@@ -40,7 +40,7 @@ class SelectAlternativeServiceController @Inject()(
                                        navigator: Navigator,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
-                                       requireValidData: ValidCustomerDataRequiredAction,
+                                       requireValidData: DataRequiredAction,
                                        formProvider: SelectAlternativeServiceFormProvider,
                                        personalDetailsValidationService: PersonalDetailsValidationService,
                                        auditService: AuditService,

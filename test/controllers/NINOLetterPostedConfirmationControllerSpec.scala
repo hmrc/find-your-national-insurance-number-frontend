@@ -76,7 +76,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[NINOLetterPostedConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual view()(request, messages).toString
       }
     }
 

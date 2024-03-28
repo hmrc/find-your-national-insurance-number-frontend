@@ -27,6 +27,9 @@ trait UserAnswersGenerator extends TryValues {
   self: Generators =>
 
   val generators: Seq[Gen[(QuestionPage[_], JsValue)]] =
+    arbitrary[(PostLetterPage.type, JsValue)] ::
+    arbitrary[(ServiceIvAppPage.type, JsValue)] ::
+    arbitrary[(ServiceIvPage.type, JsValue)] ::
     arbitrary[(EnteredPostCodeNotFoundPage.type, JsValue)] ::
     arbitrary[(ValidDataNINOMatchedNINOHelpPage.type, JsValue)] ::
     arbitrary[(ConfirmYourPostcodePage.type, JsValue)] ::

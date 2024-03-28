@@ -22,4 +22,5 @@ object FMNConstants {
   val EmptyString: String = StringUtils.EMPTY
   val PDVOrigin: String = "PDV"
   val IVOrigin: String = "IV"
+  val FMNOrigin: String = "FMN"
 }

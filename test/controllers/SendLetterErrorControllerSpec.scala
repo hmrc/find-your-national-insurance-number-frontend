@@ -86,7 +86,7 @@ class SendLetterErrorControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[SendLetterErrorView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application), config).toString
+        contentAsString(result) mustEqual view(form, NormalMode)(request, messages, config).toString
       }
     }
 
@@ -110,7 +110,7 @@ class SendLetterErrorControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(SelectAlternativeService.values.head), NormalMode)(request, messages(application), config).toString
+        contentAsString(result) mustEqual view(form.fill(SelectAlternativeService.values.head), NormalMode)(request, messages, config).toString
       }
     }
 
@@ -165,7 +165,7 @@ class SendLetterErrorControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application), config).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages, config).toString
       }
     }
 

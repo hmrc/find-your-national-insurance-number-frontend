@@ -16,8 +16,10 @@
 
 package forms.mappings
 
-import java.time.LocalDate
+import models.ServiceIv
+import models.ServiceIv.NoneOfTheAbove
 
+import java.time.LocalDate
 import play.api.data.validation.{Constraint, Invalid, Valid}
 
 trait Constraints {
@@ -113,4 +115,10 @@ trait Constraints {
     }
 
   protected def postCode(errorKey: String): Constraint[String] = regexp(regexPostcode, errorKey)
+
+  protected def invalidMultiSelectUpliftOrLetter(errorKey: String): Constraint[Set[ServiceIv]] =
+    Constraint {
+      case set if set.toList.length > 1 && set.contains(NoneOfTheAbove) => Invalid(errorKey)
+      case _ => Valid
+    }
 }

@@ -107,7 +107,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[SelectNINOLetterAddressView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
       }
     }
 
@@ -132,7 +132,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(SelectNINOLetterAddress.values.head), NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(SelectNINOLetterAddress.values.head), NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
       }
     }
 
@@ -260,7 +260,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
       }
     }
 

@@ -52,7 +52,7 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
         val result = route(application, request).value
         status(result) mustEqual OK
         val view = application.injector.instanceOf[InvalidDataNINOHelpView]
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application), config).toString
+        contentAsString(result) mustEqual view(form, NormalMode)(request, messages, config).toString
       }
     }
 
@@ -70,7 +70,7 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(InvalidDataNINOHelp.values.head), NormalMode)(request, messages(application), config).toString
+        contentAsString(result) mustEqual view(form.fill(InvalidDataNINOHelp.values.head), NormalMode)(request, messages, config).toString
       }
     }
 
@@ -116,7 +116,7 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application), config).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages, config).toString
       }
     }
   }

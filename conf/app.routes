@@ -60,3 +60,14 @@ POST        /number-letter                                  controllers.ValidDat
 
 GET         /confirm-your-postcode                          controllers.ConfirmYourPostcodeController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /confirm-your-postcode                          controllers.ConfirmYourPostcodeController.onSubmit(mode: Mode ?= NormalMode)
+
+GET         /identity-confirmation                          controllers.ServiceIvController.onPageLoad(mode: Mode ?= NormalMode)
+POST        /identity-confirmation                          controllers.ServiceIvController.onSubmit(mode: Mode ?= NormalMode)
+
+GET         /identity-confirmation-app                      controllers.ServiceIvAppController.onPageLoad(mode: Mode ?= NormalMode)
+POST        /identity-confirmation-app                      controllers.ServiceIvAppController.onSubmit(mode: Mode ?= NormalMode)
+
+GET         /unable-to-access-online                        controllers.PostLetterController.onPageLoad(mode: Mode ?= NormalMode)
+POST        /unable-to-access-online                        controllers.PostLetterController.onSubmit(mode: Mode ?= NormalMode)
+
+GET         /identity-check                                 controllers.TracingWhatYouNeedController.onPageLoad()

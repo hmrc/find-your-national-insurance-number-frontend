@@ -164,3 +164,46 @@ confirmYourPostcode.h2 = Enter your postcode
 confirmYourPostcode.hint = For example SW1A 2AA
 confirmYourPostcode.error.required = Enter your postcode
 confirmYourPostcode.error.invalid = Enter a valid UK postcode
+
+# Service IV check (CL50)
+ServiceIv.title = You will need to confirm your identity to get your National Insurance number online
+ServiceIv.heading = You will need to confirm your identity to get your National Insurance number online
+ServiceIv.p1 = This is to keep your number safe and protect you against fraud.
+ServiceIv.p2 = You can use these items to help confirm your identity.
+ServiceIv.h2 = Select the items you have nearby:
+ServiceIv.error.required = Select the items you have nearby to help confirm your identity
+
+# Options
+ServiceIv.validUkPassport = A valid UK passport
+ServiceIv.ukPhotocardDrivingLicence = A UK photocard driving licence (full or provisional)
+ServiceIv.nonUkPassport = A non-UK passport
+ServiceIv.ukBiometricResidenceCard = A biometric residency permit (BRP) or card
+ServiceIv.taxCreditsClaim = Details from a tax credit claim (optional Voice ID)
+ServiceIv.payslipOrP60 = A payslip or P60
+ServiceIv.hint.payslipOrP60 = Many employers will give you a P60 to show the tax you’ve paid on your salary in the tax year.
+ServiceIv.selfAssessment = A completed Self Assessment return for the last tax year
+#Or
+ServiceIv.noneOfTheAbove = I do not have any of these items
+
+serviceIvApp.title = Download an app to confirm your identity
+serviceIvApp.heading = Download an app to confirm your identity
+serviceIvApp.error.required = Select yes if you can download an app to your mobile device
+serviceIvApp.p1 = You will need to use an app and your mobile device’s camera to match your face to the picture on your passport or UK driving licence.
+serviceIvApp.h2 = Can you download an app to your mobile device?
+
+postLetter.title = You will not be able to access your National Insurance number online
+postLetter.heading = You will not be able to access your National Insurance number online
+postLetter.p1 = This is because you do not have the documents to confirm your identity.
+postLetter.p2 = You can instead use this service to get your number posted to the address HMRC has on record for you.
+postLetter.p3 = We will not tell you your National Insurance number over the phone.
+postLetter.error.required = Select yes if you like us to post your number to you
+postLetter.h2 = Would you like us to post your number to you?
+
+tracingWhatYouNeed.heading = We need you to check your identity
+tracingWhatYouNeed.title = We need you to check your identity
+tracingWhatYouNeed.p1 = We will ask you for personal details, like your:
+tracingWhatYouNeed.li1 = name
+tracingWhatYouNeed.li2 = date of birth
+tracingWhatYouNeed.li3 = National Insurance number (optional)
+tracingWhatYouNeed.li4 = postcode
+tracingWhatYouNeed.p3 = If the details you give us match our records, then we can post you a letter with your National Insurance number on it.
