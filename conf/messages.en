@@ -179,7 +179,7 @@ ServiceIv.ukPhotocardDrivingLicence = A UK photocard driving licence (full or pr
 ServiceIv.nonUkPassport = A non-UK passport
 ServiceIv.ukBiometricResidenceCard = A biometric residency permit (BRP) or card
 ServiceIv.taxCreditsClaim = Details from a tax credit claim (optional Voice ID)
-ServiceIv.payslipOrP60 = A payslip or P60 from {0} to {1}
+ServiceIv.payslipOrP60 = A payslip or P60
 ServiceIv.hint.payslipOrP60 = Many employers will give you a P60 to show the tax you’ve paid on your salary in the tax year.
 ServiceIv.selfAssessment = A completed Self Assessment return for the last tax year
 #Or
@@ -204,5 +204,6 @@ tracingWhatYouNeed.title = We need you to check your identity
 tracingWhatYouNeed.p1 = We will ask you for personal details, like your:
 tracingWhatYouNeed.li1 = name
 tracingWhatYouNeed.li2 = date of birth
-tracingWhatYouNeed.li3 = postcode
-tracingWhatYouNeed.p3 = We will check the details you give us with our records and then ask some security questions to confirm your identity.
+tracingWhatYouNeed.li3 = National Insurance number (optional)
+tracingWhatYouNeed.li4 = postcode
+tracingWhatYouNeed.p3 = If we can match the details you give us with our records, then we can post you a letter with your National Insurance number on it.

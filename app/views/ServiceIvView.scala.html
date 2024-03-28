@@ -23,7 +23,7 @@
     govukButton: GovukButton
 )
 
-@(form: Form[Set[ServiceIv]], cy: String, ny: String, mode: Mode)(implicit request: Request[_], messages: Messages)
+@(form: Form[Set[ServiceIv]], mode: Mode)(implicit request: Request[_], messages: Messages)
 
   @checked(item: ServiceIv) = {
     @if(form.value.getOrElse(Set.empty).contains(item)) {
@@ -63,7 +63,7 @@
                         <div class="govuk-checkboxes__item">
                             <input class="govuk-checkboxes__input" id="value_@index" name="value[@index]" type="checkbox" value="@item" @checked(item)>
                             <label class="govuk-label govuk-checkboxes__label" for="value_@index">
-                                @messages(s"ServiceIv.${item}", cy, ny)
+                                @messages(s"ServiceIv.${item}")
                             </label>
                             @if(messages(s"ServiceIv.hint.${item.toString()}") != s"ServiceIv.hint.${item.toString()}") {
                                 <label class="govuk-hint govuk-checkboxes__hint" for="value_@index">

@@ -16,7 +16,6 @@
 
 package controllers
 
-import Helpers.TaxYearResolver
 import controllers.actions._
 import forms.ServiceIvFormProvider
 import models.{Mode, ServiceIv}
@@ -41,7 +40,6 @@ class ServiceIvController @Inject()(
                                      requireData: DataRequiredAction,
                                      formProvider: ServiceIvFormProvider,
                                      val controllerComponents: MessagesControllerComponents,
-                                     taxYearResolver: TaxYearResolver,
                                      view: ServiceIvView
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
@@ -54,21 +52,15 @@ class ServiceIvController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      val cy = taxYearResolver.currentTaxYear.toString
-      val ny = (taxYearResolver.currentTaxYear + 1).toString
-
-      Ok(view(preparedForm, cy, ny, mode))
+      Ok(view(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
 
-      val cy = taxYearResolver.currentTaxYear.toString
-      val ny = (taxYearResolver.currentTaxYear + 1).toString
-
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, cy, ny, mode))),
+          Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value =>
           for {

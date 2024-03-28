@@ -40,7 +40,8 @@ class TracingWhatYouNeedViewSpec extends ViewBehaviours with Generators {
 
   behave like pageWithContent("li", "name")
   behave like pageWithContent("li", "date of birth")
+  behave like pageWithContent("li", "National Insurance number (optional)")
   behave like pageWithContent("li", "postcode")
 
-  behave like pageWithContent("p", "We will check the details you give us with our records and then ask some security questions to confirm your identity.")
+  behave like pageWithContent("p", "If we can match the details you give us with our records, then we can post you a letter with your National Insurance number on it.")
 }
