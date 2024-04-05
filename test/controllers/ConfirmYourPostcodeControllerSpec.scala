@@ -24,6 +24,7 @@ import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueRespon
 import models.pdv.{PDVResponseData, PersonalDetails}
 import models.{AddressLine, CorrelationId, IndividualDetailsResponseEnvelope, NormalMode, UserAnswers, individualdetails}
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{never, verify}
 import org.mockito.MockitoSugar.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.ConfirmYourPostcodePage
@@ -195,6 +196,41 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.NINOLetterPostedConfirmationController.onPageLoad().url
+      }
+    }
+
+    "must redirect to journey recovery and not call NPS FMN letter API when the user has already had a letter in the session" in {
+      val mockSessionRepository = mock[SessionRepository]
+      val mockNPSFMNConnector = mock[NPSFMNConnector]
+      val mockNPSFMNService = mock[NPSFMNService]
+
+      val userAnswers = UserAnswers(id = userAnswersId, letterRequestedSuccessfully = true)
+
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
+        .thenReturn(Future.successful(LetterIssuedResponse()))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NPSFMNService].toInstance(mockNPSFMNService),
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, confirmYourPostcodeRoute)
+            .withFormUrlEncodedBody(("value", "AA1 1AA"))
+
+        val result = route(application, request).value
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        verify(mockNPSFMNService, never()).sendLetter(any(), any())(any(), any())
       }
     }
 

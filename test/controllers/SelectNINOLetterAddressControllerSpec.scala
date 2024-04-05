@@ -204,6 +204,41 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "must redirect to journey recovery and not call NPS FMN letter API when the user has already had a letter in the session" in {
+      val mockSessionRepository = mock[SessionRepository]
+      val mockNPSFMNConnector = mock[NPSFMNConnector]
+      val mockNPSFMNService = mock[NPSFMNService]
+
+      val userAnswers = UserAnswers(id = userAnswersId, letterRequestedSuccessfully = true)
+
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
+        .thenReturn(Future.successful(LetterIssuedResponse()))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NPSFMNService].toInstance(mockNPSFMNService),
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, selectNINOLetterAddressRoute)
+            .withFormUrlEncodedBody(("value", SelectNINOLetterAddress.Postcode.toString))
+
+        val result = route(application, request).value
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        verify(mockNPSFMNService, never()).sendLetter(any(), any())(any(), any())
+      }
+    }
+
     "must redirect to the send letter error page when invalid data is submitted to NPS FMN API" in {
 
       val mockSessionRepository = mock[SessionRepository]
