@@ -22,7 +22,8 @@ import models.errors.IndividualDetailsError
 import models.individualdetails.Address
 import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.{PDVResponseData, PersonalDetails}
-import models.{IndividualDetailsNino, Mode, NormalMode}
+import models.requests.DataRequest
+import models.{IndividualDetailsNino, Mode, NormalMode, UserAnswers}
 import pages.ConfirmYourPostcodePage
 import play.api.Logging
 import play.api.data.Form
@@ -83,7 +84,7 @@ class ConfirmYourPostcodeController @Inject()(
             idAddress <- individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino))
             redirectBasedOnMatch <- pdvData match {
               case Some(pdvValidData) =>
-                checkUserEnteredPostcodeMatchWithNPSPostCode(mode, userEnteredPostCode, idAddress, pdvValidData)
+                checkUserEnteredPostcodeMatchWithNPSPostCode(mode, userEnteredPostCode, idAddress, pdvValidData, request)
               case None => throw new IllegalArgumentException("No pdv data found")
             }
           } yield redirectBasedOnMatch
@@ -94,14 +95,19 @@ class ConfirmYourPostcodeController @Inject()(
   private def checkUserEnteredPostcodeMatchWithNPSPostCode(mode: Mode,
                                                            userEnteredPostCode: String,
                                                            idAddress: Either[IndividualDetailsError, Address],
-                                                           pdvValidData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Result] =
+                                                           pdvValidData: PDVResponseData,
+                                                           request: DataRequest[AnyContent])(implicit hc: HeaderCarrier): Future[Result] =
     pdvValidData.npsPostCode match {
       case Some(npsPostCode) if comparePostCode(npsPostCode, userEnteredPostCode) =>
-        idAddress match {
-          case Right(idAddr) =>
-            auditService.findYourNinoConfirmPostcode(userEnteredPostCode, Some(idAddr), Some(pdvValidData), Some("true"))
+        if (!request.userAnswers.letterRequestedSuccessfully) {
+          idAddress match {
+            case Right(idAddr) =>
+              auditService.findYourNinoConfirmPostcode(userEnteredPostCode, Some(idAddr), Some(pdvValidData), Some("true"))
+          }
+          npsLetterChecks(pdvValidData, mode, request.userAnswers)
+        } else {
+          Future(Redirect(routes.JourneyRecoveryController.onPageLoad()))
         }
-        npsLetterChecks(pdvValidData, mode)
       case None =>
         throw new IllegalArgumentException("nps postcode missing")
       case _ =>
@@ -109,7 +115,7 @@ class ConfirmYourPostcodeController @Inject()(
         Future(Redirect(routes.EnteredPostCodeNotFoundController.onPageLoad(mode = NormalMode)))
     }
 
-  private def npsLetterChecks(personalDetailsResponse: PDVResponseData, mode: Mode)(implicit hc: HeaderCarrier): Future[Result] = {
+  private def npsLetterChecks(personalDetailsResponse: PDVResponseData, mode: Mode, userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Result] = {
     personalDetailsResponse.personalDetails match {
       case Some(personalDetails: PersonalDetails) =>
         for {
@@ -117,6 +123,8 @@ class ConfirmYourPostcodeController @Inject()(
           status <- npsFMNService.sendLetter(personalDetails.nino.nino, FMNHelper.createNPSFMNRequest(idData))
         } yield status match {
           case LetterIssuedResponse() =>
+            val updatedAnswers = userAnswers.copy(letterRequestedSuccessfully = true)
+            sessionRepository.set(updatedAnswers)
             Redirect(routes.NINOLetterPostedConfirmationController.onPageLoad())
           case RLSDLONFAResponse(responseStatus, responseMessage) =>
             auditService.findYourNinoTechnicalError(personalDetailsResponse, personalDetails, responseStatus, responseMessage)

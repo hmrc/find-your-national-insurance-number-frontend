@@ -96,7 +96,11 @@ class SelectNINOLetterAddressController @Inject()(
                     auditAddress(pdvData, nino, value.toString)
                     Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA)))
                   case Some(SelectNINOLetterAddress.Postcode) =>
-                    sendLetter(nino, pdvData, value.toString, uA, mode)
+                    if (!uA.letterRequestedSuccessfully) {
+                      sendLetter(nino, pdvData, value.toString, uA, mode)
+                    } else {
+                      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                    }
                 }
             }
           }
@@ -111,7 +115,9 @@ class SelectNINOLetterAddressController @Inject()(
       idData => {
         npsFMNService.sendLetter(nino, FMNHelper.createNPSFMNRequest(idData)) map {
           case LetterIssuedResponse() =>
-            Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA))
+            val updatedAnswers = uA.copy(letterRequestedSuccessfully = true)
+            sessionRepository.set(updatedAnswers)
+            Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, updatedAnswers))
           case RLSDLONFAResponse(responseStatus, responseMessage) =>
             auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage)
             Redirect(routes.SendLetterErrorController.onPageLoad(mode))
