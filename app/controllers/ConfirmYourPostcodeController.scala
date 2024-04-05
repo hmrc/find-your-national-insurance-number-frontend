@@ -51,9 +51,7 @@ class ConfirmYourPostcodeController @Inject()(
                                         view: ConfirmYourPostcodeView,
                                         personalDetailsValidationService: PersonalDetailsValidationService,
                                         individualDetailsService: IndividualDetailsService,
-                                        npsFMNService: NPSFMNService,
-                                        auditService: AuditService,
-                                        checkDetailsService: CheckDetailsService
+                                        auditService: AuditService
                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[String] = formProvider()
@@ -83,7 +81,7 @@ class ConfirmYourPostcodeController @Inject()(
             idAddress <- individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino))
             redirectBasedOnMatch <- pdvData match {
               case Some(pdvValidData) =>
-                checkUserEnteredPostcodeMatchWithNPSPostCode(mode, userEnteredPostCode, idAddress, pdvValidData)
+                checkUserEnteredPostcodeMatchWithNPSPostCode(userEnteredPostCode, idAddress, pdvValidData)
               case None => throw new IllegalArgumentException("No pdv data found")
             }
           } yield redirectBasedOnMatch
@@ -91,8 +89,7 @@ class ConfirmYourPostcodeController @Inject()(
       )
   }
 
-  private def checkUserEnteredPostcodeMatchWithNPSPostCode(mode: Mode,
-                                                           userEnteredPostCode: String,
+  private def checkUserEnteredPostcodeMatchWithNPSPostCode(userEnteredPostCode: String,
                                                            idAddress: Either[IndividualDetailsError, Address],
                                                            pdvValidData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Result] =
     pdvValidData.npsPostCode match {
@@ -101,36 +98,11 @@ class ConfirmYourPostcodeController @Inject()(
           case Right(idAddr) =>
             auditService.findYourNinoConfirmPostcode(userEnteredPostCode, Some(idAddr), Some(pdvValidData), Some("true"))
         }
-        npsLetterChecks(pdvValidData, mode)
+        Future(Redirect(routes.SelectNINOLetterAddressController.onPageLoad()))
       case None =>
         throw new IllegalArgumentException("nps postcode missing")
       case _ =>
         auditService.findYourNinoConfirmPostcode(userEnteredPostCode, None, Some(pdvValidData), Some("false"))
         Future(Redirect(routes.EnteredPostCodeNotFoundController.onPageLoad(mode = NormalMode)))
     }
-
-  private def npsLetterChecks(personalDetailsResponse: PDVResponseData, mode: Mode)(implicit hc: HeaderCarrier): Future[Result] = {
-    personalDetailsResponse.personalDetails match {
-      case Some(personalDetails: PersonalDetails) =>
-        for {
-          idData <- individualDetailsService.getIndividualDetailsData(personalDetails.nino.nino)
-          status <- npsFMNService.sendLetter(personalDetails.nino.nino, FMNHelper.createNPSFMNRequest(idData))
-        } yield status match {
-          case LetterIssuedResponse() =>
-            Redirect(routes.NINOLetterPostedConfirmationController.onPageLoad())
-          case RLSDLONFAResponse(responseStatus, responseMessage) =>
-            auditService.findYourNinoTechnicalError(personalDetailsResponse, personalDetails, responseStatus, responseMessage)
-            Redirect(routes.SendLetterErrorController.onPageLoad(mode))
-          case TechnicalIssueResponse(responseStatus, responseMessage) =>
-            auditService.findYourNinoTechnicalError(personalDetailsResponse, personalDetails, responseStatus, responseMessage)
-            Redirect(routes.LetterTechnicalErrorController.onPageLoad())
-          case _ =>
-            logger.warn("Unknown NPS FMN API response")
-            Redirect(routes.LetterTechnicalErrorController.onPageLoad())
-        }
-      case None =>
-        throw new IllegalArgumentException("No personal details data found")
-    }
-  }
-
 }

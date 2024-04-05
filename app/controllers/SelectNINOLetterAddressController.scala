@@ -24,17 +24,18 @@ import models.pdv.PDVResponseData
 import models.{IndividualDetailsNino, Mode, SelectNINOLetterAddress, UserAnswers}
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
-import pages.SelectNINOLetterAddressPage
+import pages.{ConfirmYourPostcodePage, SelectNINOLetterAddressPage}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
-import services.{AuditService, CheckDetailsService, IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
+import services.{AuditService, IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.FMNConstants.EmptyString
 import util.FMNHelper
+import util.FMNHelper.comparePostCode
 import views.html.SelectNINOLetterAddressView
 
 import javax.inject.Inject
@@ -54,8 +55,7 @@ class SelectNINOLetterAddressController @Inject()(
                                                    view: SelectNINOLetterAddressView,
                                                    personalDetailsValidationService: PersonalDetailsValidationService,
                                                    auditService: AuditService,
-                                                   npsFMNService: NPSFMNService,
-                                                   checkDetailsService: CheckDetailsService
+                                                   npsFMNService: NPSFMNService
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[SelectNINOLetterAddress] = formProvider()
@@ -66,15 +66,34 @@ class SelectNINOLetterAddressController @Inject()(
         case None => form
         case Some(value) => form.fill(value)
       }
-
       for {
         pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", EmptyString))
-        postCode = getPostCode(pdvData)
       } yield {
-        if (postCode.isEmpty) {
-          throw new IllegalArgumentException("PDV data not found")
+        val pdvPostcode = getPostCode(pdvData)
+        if (pdvPostcode.isEmpty) {
+          //allow users through who have entered a matching postcode in confirm-your-postcode
+          val confirmPostcodeValue = request.userAnswers.get(ConfirmYourPostcodePage)  match {
+            case Some(value) => value
+            case _ => ""
+          }
+          pdvData match {
+            case Some(pdvValidData) =>
+              pdvValidData.npsPostCode match {
+                case Some(npsPostCode) =>
+                    if (comparePostCode(npsPostCode, confirmPostcodeValue)) {
+                      Ok(view(preparedForm, mode, confirmPostcodeValue))
+                    }
+                    else {
+                      throw new IllegalArgumentException("Postcode does not match")
+                    }
+                case _ => throw new IllegalArgumentException("NPS postcode not found")
+              }
+            case _ => throw new IllegalArgumentException("PDV data not found")
+          }
         }
-        Ok(view(preparedForm, mode, postCode))
+        else {
+          Ok(view(preparedForm, mode, pdvPostcode))
+        }
       }
   }
 
