@@ -21,6 +21,7 @@ import forms.SelectNINOLetterAddressFormProvider
 import models.errors._
 import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.PDVResponseData
+import models.requests.DataRequest
 import models.{IndividualDetailsNino, Mode, SelectNINOLetterAddress, UserAnswers}
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
@@ -72,23 +73,11 @@ class SelectNINOLetterAddressController @Inject()(
         val pdvPostcode = getPostCode(pdvData)
         if (pdvPostcode.isEmpty) {
           //allow users through who have entered a matching postcode in confirm-your-postcode
-          val confirmPostcodeValue = request.userAnswers.get(ConfirmYourPostcodePage)  match {
-            case Some(value) => value
-            case _ => ""
-          }
-          pdvData match {
-            case Some(pdvValidData) =>
-              pdvValidData.npsPostCode match {
-                case Some(npsPostCode) =>
-                    if (comparePostCode(npsPostCode, confirmPostcodeValue)) {
-                      Ok(view(preparedForm, mode, confirmPostcodeValue))
-                    }
-                    else {
-                      throw new IllegalArgumentException("Postcode does not match")
-                    }
-                case _ => throw new IllegalArgumentException("NPS postcode not found")
-              }
-            case _ => throw new IllegalArgumentException("PDV data not found")
+          val confirmPostcodeValue = confirmYourPostcodeValue(request)
+          if (postcodeMatch(pdvData, confirmPostcodeValue)) {
+            Ok(view(preparedForm, mode, confirmPostcodeValue))
+          } else {
+            throw new IllegalArgumentException("Postcode does not match")
           }
         }
         else {
@@ -121,6 +110,24 @@ class SelectNINOLetterAddressController @Inject()(
           }
         )
       )
+  }
+
+  private def confirmYourPostcodeValue(request: DataRequest[AnyContent]): String = {
+    request.userAnswers.get(ConfirmYourPostcodePage) match {
+      case Some(value) => value
+      case _ => ""
+    }
+  }
+
+  private def postcodeMatch(PDVResponseData: Option[PDVResponseData], confirmPostcodeValue: String): Boolean = {
+    PDVResponseData match {
+      case Some(pdvValidData) =>
+        pdvValidData.npsPostCode match {
+          case Some(npsPostCode) => comparePostCode(npsPostCode, confirmPostcodeValue)
+          case _ => throw new IllegalArgumentException("NPS postcode not found")
+        }
+      case _ => throw new IllegalArgumentException("PDV data not found")
+    }
   }
 
   private def sendLetter(nino: String, pdvData: Option[PDVResponseData], value: String, uA: UserAnswers, mode: Mode)
