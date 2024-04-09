@@ -21,13 +21,14 @@ import controllers.actions._
 import models.UserAnswers
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
-import play.api.inject.bind
+import play.api.inject.{Injector, bind}
 import play.api.inject.guice.GuiceApplicationBuilder
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import util.WireMockSupport
+
 import scala.reflect.ClassTag
 import org.scalatestplus.mockito.MockitoSugar
 
@@ -42,7 +43,11 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
 
   def emptyUserAnswers : UserAnswers = UserAnswers(userAnswersId)
 
-  def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
+  def injector: Injector                               = app.injector
+  def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
+
+  def messagesApi: MessagesApi    = injector.instanceOf[MessagesApi]
+  implicit def messages: Messages = messagesApi.preferred(fakeRequest)
 
   protected def applicationBuilder(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
