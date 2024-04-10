@@ -306,6 +306,30 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
 
+      "when PDV data not found" in {
+        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+            inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
+            inject.bind[AuditService].toInstance(auditService)
+          )
+          .build()
+
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+          .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
+        running(app) {
+          val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
+          val result = route(app, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+
+          verify(auditService, times(1)).start()(any())
+        }
+
+      }
+
     }
 
     "must redirect to ValidDataNINOMatchedNINOHelpController" - {
@@ -391,6 +415,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       }
 
     }
+
 
   }
 

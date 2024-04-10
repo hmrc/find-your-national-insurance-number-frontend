@@ -17,7 +17,7 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.pdv.{PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
+import models.pdv.{PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.MockitoSugar
@@ -39,8 +39,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
   import PDVResponseDataServiceSpec._
 
   override def beforeEach(): Unit = {
-    reset(mockConnector, mockEncryptedPersonalDetailsValidationRepository, mockPersonalDetailsValidationRepository,
-    )
+    reset(mockConnector, mockEncryptedPersonalDetailsValidationRepository, mockPersonalDetailsValidationRepository)
   }
 
   "PDVResponseDataService with EncryptedPersonalDetailsValidationRepository" must {
@@ -118,6 +117,13 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         }(ec)
       }
 
+      "not create a row with PdvNotFoundResponse status" in {
+        val pdvNotFoundResponse = PDVNotFoundResponse(HttpResponse(404, "PDV data not found"))
+
+        personalDetailsValidationService.createPDVDataRow(pdvNotFoundResponse).map { result =>
+          result mustBe pdvNotFoundResponse
+        }(ec)
+      }
     }
 
     "getPDVMatchResult" must {
@@ -295,6 +301,14 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
 
         personalDetailsValidationService.createPDVDataRow(pdvSuccessResponse).map { result =>
           result mustBe pdvSuccessResponse
+        }(ec)
+      }
+
+      "not create a row with PdvNotFoundResponse status" in {
+        val pdvNotFoundResponse = PDVNotFoundResponse(HttpResponse(404, "PDV data not found"))
+
+        personalDetailsValidationService.createPDVDataRow(pdvNotFoundResponse).map { result =>
+          result mustBe pdvNotFoundResponse
         }(ec)
       }
 

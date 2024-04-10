@@ -43,7 +43,6 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     }
   }
 
-
   // Get a PDV match result
   def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponse] = {
     connector.retrieveMatchingDetails(pdvRequest) map { response =>
