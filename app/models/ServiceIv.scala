@@ -16,8 +16,6 @@
 
 package models
 
-import java.time.{LocalDate, LocalDateTime}
-
 sealed trait ServiceIv
 
 object ServiceIv extends Enumerable.Implicits {

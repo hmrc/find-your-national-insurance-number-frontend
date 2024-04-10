@@ -196,16 +196,20 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
       "return PDVResponseData when personalDetailsValidationService returns a successful response" ignore {
         val mockPDVRequest = PDVRequest("1234567890", "1234567890")
 
-        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
-          .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation).toString())))
+        val response = HttpResponse(200, Json.toJson(pdvSuccessResponse).toString())
 
+        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
+          .thenReturn(Future.successful(response))
+
+        when(personalDetailsValidationService.getPDVMatchResult(mockPDVRequest)(hc))
+          .thenReturn(Future.successful(pdvSuccessResponse))
         when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc))
           .thenReturn(Future.successful(pdvSuccessResponse))
 
         val result = personalDetailsValidationService.getPDVData(mockPDVRequest)
 
-        result.map { pdvResponse =>
-          pdvResponse mustBe pdvSuccessResponse
+        result.map { pdvResponseData =>
+          pdvResponseData mustBe pdvSuccessResponse
         }
       }
 
@@ -405,7 +409,7 @@ object PDVResponseDataServiceSpec {
       LocalDate.parse("1945-03-18")
     )
 
-  val pdvSuccessResponse: PDVResponse = PDVSuccessResponse(PDVResponseData(
+  val pdvSuccessResponse: PDVSuccessResponse = PDVSuccessResponse(PDVResponseData(
       validationId,
       "success",
       Some(personalDetails),

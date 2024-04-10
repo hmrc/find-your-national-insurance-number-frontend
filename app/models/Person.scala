@@ -51,7 +51,7 @@ object Person {
     def getDateOfBirth: String = person.dateOfBirth.map(_.toString).getOrElse(StringUtils.EMPTY)
   }
 
-  implicit val formats = Json.format[Person]
+  implicit val formats: OFormat[Person] = Json.format[Person]
 
 }
 
