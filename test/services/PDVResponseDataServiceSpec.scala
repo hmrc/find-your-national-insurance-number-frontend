@@ -17,7 +17,7 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.pdv.{PDVRequest, PDVResponseData, PDVSuccessResponse, PersonalDetails}
+import models.pdv.{PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.MockitoSugar
@@ -113,8 +113,8 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockEncryptedPersonalDetailsValidationRepository.insertOrReplacePDVResultData(any())(any()))
           .thenReturn(Future.successful(validationId))
 
-        personalDetailsValidationService.createPDVDataRow(PDVSuccessResponse(personalDetailsValidation)).map { result =>
-          result mustBe personalDetailsValidation
+        personalDetailsValidationService.createPDVDataRow(pdvSuccessResponse).map { result =>
+          result mustBe pdvSuccessResponse
         }(ec)
       }
 
@@ -176,9 +176,11 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockRepository.insertOrReplacePDVResultData(any())(any()))
           .thenReturn(Future.successful("AB1 2CD"))
 
-        service.createPDVDataRow(PDVSuccessResponse(pdvResponseData)).map { result =>
-          result.personalDetails mustBe defined
-          result.personalDetails.get.postCode mustBe Some(expectedPostCode)
+        service.createPDVDataRow(PDVSuccessResponse(pdvResponseData)).map {
+          case PDVSuccessResponse(pdvResponseData) =>
+            pdvResponseData.personalDetails mustBe defined
+            pdvResponseData.personalDetails.get.postCode mustBe Some(expectedPostCode)
+          case _ => fail("Expected PDVSuccessResponse")
         }
       }
     }
@@ -192,12 +194,12 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
           .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation).toString())))
 
         when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc))
-          .thenReturn(Future.successful(personalDetailsValidation))
+          .thenReturn(Future.successful(pdvSuccessResponse))
 
         val result = personalDetailsValidationService.getPDVData(mockPDVRequest)
 
-        result.map { pdvResponseData =>
-          pdvResponseData mustBe personalDetailsValidation
+        result.map { pdvResponse =>
+          pdvResponse mustBe pdvSuccessResponse
         }
       }
 
@@ -291,8 +293,8 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockPersonalDetailsValidationRepository.insertOrReplacePDVResultData(any())(any()))
           .thenReturn(Future.successful(validationId))
 
-        personalDetailsValidationService.createPDVDataRow(PDVSuccessResponse(personalDetailsValidation)).map { result =>
-          result mustBe personalDetailsValidation
+        personalDetailsValidationService.createPDVDataRow(pdvSuccessResponse).map { result =>
+          result mustBe pdvSuccessResponse
         }(ec)
       }
 
@@ -354,9 +356,11 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockRepository.insertOrReplacePDVResultData(any())(any()))
           .thenReturn(Future.successful("AB1 2CD"))
 
-        service.createPDVDataRow(PDVSuccessResponse(pdvResponseData)).map { result =>
-          result.personalDetails mustBe defined
-          result.personalDetails.get.postCode mustBe Some(expectedPostCode)
+        service.createPDVDataRow(PDVSuccessResponse(pdvResponseData)).map {
+          case PDVSuccessResponse(pdvResponseData) =>
+            pdvResponseData.personalDetails mustBe defined
+            pdvResponseData.personalDetails.get.postCode mustBe Some(expectedPostCode)
+          case _ => fail("Expected PDVSuccessResponse")
         }
       }
     }
@@ -387,8 +391,17 @@ object PDVResponseDataServiceSpec {
       LocalDate.parse("1945-03-18")
     )
 
-  val personalDetailsValidation: PDVResponseData =
-    PDVResponseData(
+  val pdvSuccessResponse: PDVResponse = PDVSuccessResponse(PDVResponseData(
+      validationId,
+      "success",
+      Some(personalDetails),
+      reason = None,
+      validCustomer = None,
+      CRN = None,
+      npsPostCode = None
+    ))
+
+  val personalDetailsValidation: PDVResponseData = PDVResponseData(
       validationId,
       "success",
       Some(personalDetails),

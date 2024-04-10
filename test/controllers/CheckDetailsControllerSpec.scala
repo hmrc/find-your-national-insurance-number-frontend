@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import models.individualdetails._
-import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails}
+import models.pdv.{PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import models.{AddressLine, NormalMode, individualdetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
@@ -314,13 +314,15 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
         import scala.concurrent.ExecutionContext.Implicits.global
         val mockPDVResponseDataSuccessWithoutNino = mockPDVResponseDataSuccess.copy(
-          personalDetails = Some(fakePersonDetails.copy(postCode = None))
+          pdvResponseData = mockPDVResponseDataSuccess.pdvResponseData.copy(
+            personalDetails = Some(fakePersonDetails.copy(postCode = None))
+          )
         )
 
         when(mockPersonalDetailsValidationService.getPDVData(any())(any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccessWithoutNino))
 
-        when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
+        when(mockIndividualDetailsService.getIdData(any[PDVResponse])(any()))
           .thenReturn(Future(Right(fakeIndividualDetails)))
 
         when(mockIndividualDetailsService.getNPSPostCode(any()))
@@ -354,7 +356,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockPersonalDetailsValidationService.getPDVData(any())(any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
-        when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
+        when(mockIndividualDetailsService.getIdData(any[PDVResponse])(any()))
           .thenReturn(Future(Right(fakeIndividualDetails)))
 
         when(mockIndividualDetailsService.getNPSPostCode(any()))
@@ -453,12 +455,12 @@ object CheckDetailsControllerSpec {
     addressList = AddressList(Some(List(fakeAddress)))
   )
 
-  val mockPDVResponseDataSuccess: PDVResponseData = PDVResponseData(
+  val mockPDVResponseDataSuccess: PDVSuccessResponse = PDVSuccessResponse(PDVResponseData(
     "01234",
     "success",
     Some(fakePersonDetails),
     LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
-  )
+  ))
 
   val headers: Map[String, Seq[String]] = Map(
     "CorrelationId" -> Seq("1118057e-fbbc-47a8-a8b4-78d9f015c253"),
