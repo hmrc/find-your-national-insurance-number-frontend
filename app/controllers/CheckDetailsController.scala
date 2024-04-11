@@ -16,6 +16,7 @@
 
 package controllers
 
+import cacheables.OriginCacheable
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import models.Mode
 import models.errors.{ConnectorError, IndividualDetailsError}
@@ -25,6 +26,7 @@ import models.requests.DataRequest
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
+import repositories.SessionRepository
 import services.{AuditService, CheckDetailsService, IndividualDetailsService, PersonalDetailsValidationService}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -45,6 +47,7 @@ class CheckDetailsController @Inject()(
                                         auditService: AuditService,
                                         checkDetailsService: CheckDetailsService,
                                         individualDetailsService: IndividualDetailsService,
+                                        sessionRepository: SessionRepository,
                                         val controllerComponents: MessagesControllerComponents,
                                         val authConnector: AuthConnector
                                       )(implicit ec: ExecutionContext)
@@ -57,7 +60,12 @@ class CheckDetailsController @Inject()(
 
         origin.map(_.toUpperCase) match {
           case Some(PDVOrigin) | Some(IVOrigin) | Some(FMNOrigin) =>
-            validOriginJourney(origin, request, mode)
+//            val updatedAnswers = request.userAnswers.copy(origin = origin)
+//            sessionRepository.set(updatedAnswers)
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(OriginCacheable, origin.getOrElse("None")))
+              _ <- sessionRepository.set(updatedAnswers)
+            } yield  validOriginJourney(origin, mode)
           case _ =>
             logger.error(s"Invalid origin: $origin")
             Future(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
@@ -65,8 +73,8 @@ class CheckDetailsController @Inject()(
       }
     }
 
-  private def validOriginJourney(origin: Option[String], request: DataRequest[AnyContent], mode: Mode)
-                                (implicit headerCarrier: HeaderCarrier): Future[Result] = {
+  private def validOriginJourney(origin: Option[String], mode: Mode)
+                                (implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[Result] = {
     logger.info(s"Valid origin: $origin")
 
     val pdvRequest = PDVRequest(

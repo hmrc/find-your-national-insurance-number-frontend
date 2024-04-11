@@ -16,6 +16,7 @@
 
 package controllers
 
+import cacheables.OriginCacheable
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import forms.InvalidDataNINOHelpFormProvider
@@ -70,13 +71,7 @@ class InvalidDataNINOHelpController @Inject()(
 
         value => {
           personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map(
-            pdv =>
-              auditService.audit(AuditUtils.buildAuditEvent(pdv.flatMap(_.personalDetails),
-                auditType = "FindYourNinoOptionChosen",
-                validationOutcome = pdv.map(_.validationStatus).getOrElse("failure"),
-                identifierType = pdv.map(_.CRN.getOrElse("")).getOrElse(""),
-                findMyNinoOption = Some(value.toString)
-              ))
+            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
           )
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(InvalidDataNINOHelpPage, value))

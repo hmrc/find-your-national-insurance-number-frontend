@@ -16,6 +16,7 @@
 
 package controllers
 
+import cacheables.OriginCacheable
 import controllers.actions._
 import forms.LetterTechnicalErrorFormProvider
 import models.Mode
@@ -90,12 +91,7 @@ class LetterTechnicalErrorController @Inject()(
           } yield {
             val personalDetails = pdvData.flatMap(_.personalDetails)
             val postcode: String = personalDetails.flatMap(_.postCode).getOrElse(StringUtils.EMPTY)
-            auditService.audit(AuditUtils.buildAuditEvent(personalDetails,
-              auditType = "FindYourNinoOptionChosen",
-              validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
-              identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
-              findMyNinoOption = Some(value.toString)
-            ))
+            auditService.findYourNinoOptionChosen(pdvData, value.toString, request.userAnswers.get(OriginCacheable))
             if (value.toString == "tryAgain") {
               tryAgainCountRepository.insertOrIncrement(request.userId)
               if (postcode.nonEmpty) {
