@@ -60,12 +60,7 @@ class CheckDetailsController @Inject()(
 
         origin.map(_.toUpperCase) match {
           case Some(PDVOrigin) | Some(IVOrigin) | Some(FMNOrigin) =>
-//            val updatedAnswers = request.userAnswers.copy(origin = origin)
-//            sessionRepository.set(updatedAnswers)
-            for {
-              updatedAnswers <- Future.fromTry(request.userAnswers.set(OriginCacheable, origin.getOrElse("None")))
-              _ <- sessionRepository.set(updatedAnswers)
-            } yield  validOriginJourney(origin, mode)
+            validOriginJourney(origin, mode)
           case _ =>
             logger.error(s"Invalid origin: $origin")
             Future(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
@@ -84,6 +79,8 @@ class CheckDetailsController @Inject()(
 
     val result: Try[Future[Result]] = Try {
       val processData = for {
+        updatedAnswers <- Future.fromTry(request.userAnswers.set(OriginCacheable, origin.getOrElse("None")))
+        _ <- sessionRepository.set(updatedAnswers)
         pdvData <- personalDetailsValidationService.getPDVData(pdvRequest)
         idData  <- individualDetailsService.getIdData(pdvData)
         sessionWithNINO = request.session + ("nino" -> pdvData.getNino)

@@ -19,11 +19,13 @@ package controllers
 import base.SpecBase
 import models.individualdetails._
 import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails}
+import models.requests.DataRequest
 import models.{AddressLine, NormalMode, individualdetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.inject
+import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.{AuditService, CheckDetailsService, IndividualDetailsService, PersonalDetailsValidationService}
@@ -39,6 +41,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
   import CheckDetailsControllerSpec._
 
   val controller: CheckDetailsController = application.injector.instanceOf[CheckDetailsController]
+
+  implicit val dataRequest: DataRequest[AnyContent]  = mock[DataRequest[AnyContent]]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -124,7 +128,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           )
           .build()
 
-        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any(), any()))
           .thenReturn(Future.failed(new RuntimeException("Something went wrong")))
 
         running(app) {
@@ -139,7 +143,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       }
 
       "and audit the event when getIdData returns a Left with ConnectorError" in {
-        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -163,7 +167,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
       "when idPostCode does not equal pdvData.getPostCode" in {
 
-        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -195,7 +199,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           )
           .build()
 
-        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
         running(app) {
@@ -219,7 +223,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           )
           .build()
 
-        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
         running(app) {
@@ -243,7 +247,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           )
           .build()
 
-        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
         running(app) {
@@ -267,7 +271,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           )
           .build()
 
-        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
         running(app) {
@@ -292,7 +296,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           .build()
 
         val pdvRequest = PDVRequest("credentialId", "sessionId")
-        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(pdvRequest)(hc))
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(pdvRequest))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
         running(app) {
@@ -317,7 +321,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           personalDetails = Some(fakePersonDetails.copy(postCode = None))
         )
 
-        when(mockPersonalDetailsValidationService.getPDVData(any())(any()))
+        when(mockPersonalDetailsValidationService.getPDVData(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccessWithoutNino))
 
         when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
@@ -351,7 +355,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
       "when idPostCode equals pdvData.getPostCode" in {
         import scala.concurrent.ExecutionContext.Implicits.global
-        when(mockPersonalDetailsValidationService.getPDVData(any())(any()))
+        when(mockPersonalDetailsValidationService.getPDVData(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
         when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
@@ -363,7 +367,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockCheckDetailsService.checkConditions(any()))
           .thenReturn((true,""))
 
-        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
 
