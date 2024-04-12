@@ -23,7 +23,7 @@ import models.errors.{IndividualDetailsError, InvalidIdentifier}
 import models.individualdetails.AddressType.ResidentialAddress
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope}
 import models.individualdetails.{Address, AddressList, IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache, ResolveMerge}
-import models.pdv.{PDVResponse, PDVResponseData, PDVSuccessResponse}
+import models.pdv.{PDVNotFoundResponse, PDVResponse, PDVResponseData, PDVSuccessResponse}
 import org.mongodb.scala.MongoException
 import play.api.Logging
 import repositories.IndividualDetailsRepoTrait
@@ -69,11 +69,16 @@ class IndividualDetailsServiceImpl @Inject()(
         getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
           case Some(data) => data.nino.nino
           case None =>
-            logger.warn("No Personal Details found in PDV data, likely validation failed")
+            logger.warn("No Personal Details found in PDV data.")
             EmptyString
         })).value
+      case PDVNotFoundResponse(_) =>
+        logger.warn("PDV Data not found.")
+        Future.successful(Left(
+          InvalidIdentifier(IndividualDetailsNino(EmptyString))
+        ))
       case _ =>
-        logger.warn("PDVResponseData not found in PDVResponse")
+        logger.warn("Unexpected response from PDV.")
         Future.successful(Left(
           InvalidIdentifier(IndividualDetailsNino(EmptyString))
         ))
