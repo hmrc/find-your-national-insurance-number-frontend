@@ -107,8 +107,7 @@ class CheckDetailsController @Inject()(
     pdvResponse match {
       case _ @ PDVSuccessResponse(pdvData: PDVResponseData) =>
         handleCheckDetailsFailureJourney(idDataError, mode, sessionWithNINO, origin, pdvData)
-      case pdvData @ PDVNotFoundResponse(_) =>
-        // TODO
+      case _ @ PDVNotFoundResponse(_) =>
         auditService.findYourNinoPDVMatchFailed(None, origin)
         logger.warn(s"PDV data not found.")
         Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
@@ -155,6 +154,8 @@ class CheckDetailsController @Inject()(
           Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
         }
       case _ @ PDVNotFoundResponse(_) =>
+        auditService.findYourNinoPDVMatchFailed(None, origin)
+        logger.warn(s"PDV data not found.")
         Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
       case _ =>
         checkDetailsMatchingFailedWithUnknownIssue(mode)
@@ -198,11 +199,9 @@ class CheckDetailsController @Inject()(
     Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
   }
 
-  private def getNinoFromPDVResponse(pdvData: PDVResponse): String = {
-    pdvData match {
+  private def getNinoFromPDVResponse(pdvData: PDVResponse): String = pdvData match {
       case _ @ PDVSuccessResponse(data: PDVResponseData) => data.getNino
       case _ => EmptyString
     }
-  }
 
 }

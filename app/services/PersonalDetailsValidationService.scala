@@ -135,7 +135,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
       pdv <- createPDVDataFromPDVMatch(body)
     } yield pdv match {
       case pdvResponse: PDVResponse => pdvResponse
-      case _ => throw new Exception("No PDV data found")
+      case _ => throw new Exception("PDV response could not be parsed.")
     }
     p.recover {
       case ex: Exception =>
