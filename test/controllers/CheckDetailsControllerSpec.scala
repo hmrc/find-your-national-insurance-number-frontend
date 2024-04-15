@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import models.individualdetails._
-import models.pdv.{PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
+import models.pdv.{PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import models.{AddressLine, NormalMode, individualdetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
@@ -316,7 +316,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           .build()
 
         when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
-          .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+          .thenReturn(Future.successful(
+            PDVNotFoundResponse(HttpResponse(404, "No association found"))
+          ))
 
         running(app) {
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
