@@ -416,7 +416,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
     }
 
-
   }
 
 }

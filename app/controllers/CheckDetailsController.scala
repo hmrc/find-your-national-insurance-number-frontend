@@ -154,7 +154,6 @@ class CheckDetailsController @Inject()(
           Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
         }
       case _ @ PDVNotFoundResponse(_) =>
-        // TODO check this NoMatchData audit event
         auditService.findYourNinoPDVNoMatchData(origin)
         logger.warn(s"PDV data not found.")
         Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)

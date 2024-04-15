@@ -42,8 +42,9 @@ class PersonalDetailsValidationConnector @Inject()(val httpClientV2: HttpClientV
         Future.successful(response)
       } recover {
         case e: HttpException if e.responseCode == NOT_FOUND || e.responseCode == BAD_REQUEST =>
-          // TODO do we need to remove audit event for 404?
-          auditService.findYourNinoGetPdvDataHttpError(e.responseCode.toString, e.message)
+          if(!e.message.contains("No association found") && !e.message.contains("No record found using validation ID")) {
+            auditService.findYourNinoGetPdvDataHttpError(e.responseCode.toString, e.message)
+          }
           HttpResponse(e.responseCode, e.message)
         case _ =>
           auditService.findYourNinoGetPdvDataHttpError(INTERNAL_SERVER_ERROR.toString, "Service unavailable")

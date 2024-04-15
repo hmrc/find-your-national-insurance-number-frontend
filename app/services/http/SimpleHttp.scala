@@ -25,7 +25,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class SimpleHttp @Inject()(http: HttpClient)(implicit executionContext: ExecutionContext) {
 
-  implicit val r = new HttpReads[HttpResponse] {
+  implicit val r: HttpReads[HttpResponse] = new HttpReads[HttpResponse] {
     override def read(method: String, url: String, response: HttpResponse): HttpResponse = response
   }
 
