@@ -108,7 +108,7 @@ class CheckDetailsController @Inject()(
       case _ @ PDVSuccessResponse(pdvData: PDVResponseData) =>
         handleCheckDetailsFailureJourney(idDataError, mode, sessionWithNINO, origin, pdvData)
       case _ @ PDVNotFoundResponse(_) =>
-        auditService.findYourNinoPDVMatchFailed(None, origin)
+        auditService.findYourNinoPDVNoMatchData(origin)
         logger.warn(s"PDV data not found.")
         Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
       case _ =>
@@ -124,7 +124,7 @@ class CheckDetailsController @Inject()(
       Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
     } else if (pdvData.validationStatus.equals("failure")) {
       logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
-      auditService.findYourNinoPDVMatchFailed(Some(pdvData), origin)
+      auditService.findYourNinoPDVMatchFailed(pdvData, origin)
       Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
     } else {
       val errorStatusCode: Option[String] = idDataError match {
@@ -150,11 +150,12 @@ class CheckDetailsController @Inject()(
           checkDetailsMatchingSuccess(pdvData, idData, mode, sessionWithNINO, origin)
         } else {
           logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
-          auditService.findYourNinoPDVMatchFailed(Some(pdvData), origin)
+          auditService.findYourNinoPDVMatchFailed(pdvData, origin)
           Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
         }
       case _ @ PDVNotFoundResponse(_) =>
-        auditService.findYourNinoPDVMatchFailed(None, origin)
+        // TODO check this NoMatchData audit event
+        auditService.findYourNinoPDVNoMatchData(origin)
         logger.warn(s"PDV data not found.")
         Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
       case _ =>

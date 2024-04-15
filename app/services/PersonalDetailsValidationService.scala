@@ -79,6 +79,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
               Future.successful(PDVSuccessResponse(pdvResponseData))
             }
           case ("failure", None) =>
+            pdvRepository.insertOrReplacePDVResultData(pdvResponseData)
             Future.successful(PDVSuccessResponse(pdvResponseData))
           case (_, None) =>
             Future.failed(new RuntimeException("PersonalDetails is None in PDVResponseData"))
