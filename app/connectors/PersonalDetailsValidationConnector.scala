@@ -16,6 +16,7 @@
 
 package connectors
 
+import cacheables.OriginCacheable
 import config.FrontendAppConfig
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException, HttpResponse}
 import com.google.inject.{Inject, Singleton}
@@ -23,7 +24,9 @@ import models.pdv.PDVRequest
 import play.api.Logging
 import uk.gov.hmrc.http.client.HttpClientV2
 import models.pdv.PDVRequest._
+import models.requests.DataRequest
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND}
+import play.api.mvc.AnyContent
 import services.AuditService
 
 import java.net.URL
@@ -32,7 +35,8 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class PersonalDetailsValidationConnector @Inject()(val httpClientV2: HttpClientV2, config: FrontendAppConfig, auditService: AuditService) extends Logging {
 
-  def retrieveMatchingDetails(pdvRequest: PDVRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse] = {
+  def retrieveMatchingDetails(pdvRequest: PDVRequest)
+                             (implicit hc: HeaderCarrier, ex: ExecutionContext, request: DataRequest[AnyContent]): Future[HttpResponse] = {
     val url = s"${config.pdvBaseUrl}/personal-details-validation/retrieve-by-session"
       httpClientV2
       .post(new URL(url))
@@ -42,10 +46,10 @@ class PersonalDetailsValidationConnector @Inject()(val httpClientV2: HttpClientV
         Future.successful(response)
       } recover {
         case e: HttpException if e.responseCode == NOT_FOUND || e.responseCode == BAD_REQUEST =>
-          auditService.findYourNinoGetPdvDataHttpError(e.responseCode.toString, e.message)
+          auditService.findYourNinoGetPdvDataHttpError(e.responseCode.toString, e.message, request.userAnswers.get(OriginCacheable))
           HttpResponse(e.responseCode, e.message)
         case _ =>
-          auditService.findYourNinoGetPdvDataHttpError(INTERNAL_SERVER_ERROR.toString, "Service unavailable")
+          auditService.findYourNinoGetPdvDataHttpError(INTERNAL_SERVER_ERROR.toString, "Service unavailable", request.userAnswers.get(OriginCacheable))
           HttpResponse(INTERNAL_SERVER_ERROR, "Service unavailable")
       }
   }

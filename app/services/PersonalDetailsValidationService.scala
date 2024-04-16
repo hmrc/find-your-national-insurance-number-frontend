@@ -18,10 +18,12 @@ package services
 
 import connectors.PersonalDetailsValidationConnector
 import models.pdv.{PDVBadRequestResponse, PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse}
+import models.requests.DataRequest
 import org.mongodb.scala.MongoException
 import play.api.Logging
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
 import play.api.libs.json.Json
+import play.api.mvc.AnyContent
 import repositories.PersonalDetailsValidationRepoTrait
 import uk.gov.hmrc.http.HeaderCarrier
 import util.FMNConstants.EmptyString
@@ -34,7 +36,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
                                                  pdvRepository: PersonalDetailsValidationRepoTrait
                                                 )(implicit val ec: ExecutionContext) extends Logging{
 
-  def createPDVDataFromPDVMatch(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponseData] = {
+  def createPDVDataFromPDVMatch(pdvRequest: PDVRequest)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[PDVResponseData] = {
     for {
       pdvResponse <- getPDVMatchResult(pdvRequest)
       pdvResponseData <- createPDVDataRow(pdvResponse)
@@ -45,7 +47,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
 
 
   // Get a PDV match result
-  def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponse] = {
+  def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[PDVResponse] = {
     connector.retrieveMatchingDetails(pdvRequest) map { response =>
       response.status match {
         case OK =>
@@ -128,7 +130,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     }
   }
 
-  def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponseData] = {
+  def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[PDVResponseData] = {
     val p = for {
       pdvData <- createPDVDataFromPDVMatch(body)
     } yield pdvData match {
