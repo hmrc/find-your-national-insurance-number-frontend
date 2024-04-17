@@ -47,7 +47,7 @@ class PersonalDetailsValidationConnector @Inject()(val httpClientV2: HttpClientV
       } recover {
         case e: HttpException if e.responseCode == NOT_FOUND || e.responseCode == BAD_REQUEST =>
           if(!e.message.contains("No association found") && !e.message.contains("No record found using validation ID")) {
-            auditService.findYourNinoGetPdvDataHttpError(e.responseCode.toString, e.message)
+            auditService.findYourNinoGetPdvDataHttpError(e.responseCode.toString, e.message, request.userAnswers.get(OriginCacheable))
           }
           HttpResponse(e.responseCode, e.message)
         case _ =>

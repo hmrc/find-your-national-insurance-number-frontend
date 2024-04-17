@@ -19,6 +19,7 @@ package controllers
 import base.SpecBase
 import models.individualdetails._
 import models.pdv.{PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
+import models.requests.DataRequest
 import models.{AddressLine, NormalMode, individualdetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
@@ -318,7 +319,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           )
           .build()
 
-        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any(), any()))
           .thenReturn(Future.successful(
             PDVNotFoundResponse(HttpResponse(404, "No association found"))
           ))

@@ -69,8 +69,8 @@ class CheckDetailsController @Inject()(
     }
 
   private def validOriginJourney(origin: Option[String],
-                                 request: DataRequest[AnyContent],
-                                 mode: Mode)(implicit headerCarrier: HeaderCarrier): Future[Result] = {
+                                 mode: Mode
+                                )(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[Result] = {
 
     logger.info(s"Valid origin: $origin")
 

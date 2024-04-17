@@ -164,7 +164,7 @@ class PDVResponseDataConnectorSpec
 
       val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec, mockDataRequest).futureValue.leftSideValue
       result.status mustBe NOT_FOUND
-      verify(mockAuditService, times(0)).findYourNinoGetPdvDataHttpError(any(), any())(any())
+      verify(mockAuditService, times(0)).findYourNinoGetPdvDataHttpError(any(), any(), any())(any())
     }
 
     "return service NOT_FOUND when called with an unknown validationId" in new LocalSetup {
@@ -178,9 +178,9 @@ class PDVResponseDataConnectorSpec
       val pdvRequest: PDVRequest = mock[PDVRequest]
       stubPost(url, NOT_FOUND, None, Some(body))
 
-      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest).futureValue.leftSideValue
+      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec, mockDataRequest).futureValue.leftSideValue
       result.status mustBe NOT_FOUND
-      verify(mockAuditService, times(0)).findYourNinoGetPdvDataHttpError(any(), any())(any())
+      verify(mockAuditService, times(0)).findYourNinoGetPdvDataHttpError(any(), any(), any())(any())
     }
 
     "return generic NOT_FOUND when endpoint is not available" in new LocalSetup {
@@ -194,9 +194,9 @@ class PDVResponseDataConnectorSpec
       val pdvRequest: PDVRequest = mock[PDVRequest]
       stubPost(url, NOT_FOUND, None, Some(body))
 
-      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest).futureValue.leftSideValue
+      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec, mockDataRequest).futureValue.leftSideValue
       result.status mustBe NOT_FOUND
-      verify(mockAuditService, times(1)).findYourNinoGetPdvDataHttpError(any(), any())(any())
+      verify(mockAuditService, times(1)).findYourNinoGetPdvDataHttpError(any(), any(), any())(any())
     }
 
     "return BAD_REQUEST when called with invalid data" in new LocalSetup {

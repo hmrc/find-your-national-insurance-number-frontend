@@ -36,7 +36,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
                                                  pdvRepository: PersonalDetailsValidationRepoTrait
                                                 )(implicit val ec: ExecutionContext) extends Logging{
 
-  def createPDVDataFromPDVMatch(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponse] = {
+  def createPDVDataFromPDVMatch(pdvRequest: PDVRequest)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[PDVResponse] = {
     for {
       pdvResponse <- getPDVMatchResult(pdvRequest)
       pdvResponse <- createPDVDataRow(pdvResponse)
@@ -133,7 +133,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     }
   }
 
-  def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponse] = {
+  def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[PDVResponse] = {
     val p = for {
       pdv <- createPDVDataFromPDVMatch(body)
     } yield pdv match {

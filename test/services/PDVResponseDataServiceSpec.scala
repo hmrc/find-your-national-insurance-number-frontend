@@ -18,6 +18,7 @@ package services
 
 import connectors.PersonalDetailsValidationConnector
 import models.pdv.{PDVNotFoundResponse, PDVRequest, PDVResponseData, PDVSuccessResponse, PersonalDetails}
+import models.requests.DataRequest
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.MockitoSugar
@@ -200,12 +201,12 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
 
         val response = HttpResponse(200, Json.toJson(pdvSuccessResponse).toString())
 
-        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
+        when(mockConnector.retrieveMatchingDetails(any())(any(), any(), any()))
           .thenReturn(Future.successful(response))
 
-        when(personalDetailsValidationService.getPDVMatchResult(mockPDVRequest)(hc))
+        when(personalDetailsValidationService.getPDVMatchResult(mockPDVRequest)(hc, mockDataRequest))
           .thenReturn(Future.successful(pdvSuccessResponse))
-        when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc))
+        when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc, mockDataRequest))
           .thenReturn(Future.successful(pdvSuccessResponse))
 
         val result = personalDetailsValidationService.getPDVData(mockPDVRequest)
