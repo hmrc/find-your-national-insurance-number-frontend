@@ -16,6 +16,7 @@
 
 package controllers
 
+import cacheables.OriginCacheable
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
 import models.errors._
@@ -93,7 +94,7 @@ class SelectNINOLetterAddressController @Inject()(
                 sessionRepository.set(uA)
                 uA.get(SelectNINOLetterAddressPage) match {
                   case Some(SelectNINOLetterAddress.NotThisAddress) =>
-                    auditAddress(pdvData, nino, value.toString)
+                    auditAddress(pdvData, nino, value.toString, uA)
                     Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA)))
                   case Some(SelectNINOLetterAddress.Postcode) =>
                     sendLetter(nino, pdvData, value.toString, uA, mode)
@@ -106,17 +107,17 @@ class SelectNINOLetterAddressController @Inject()(
 
   private def sendLetter(nino: String, pdvData: Option[PDVResponseData], value: String, uA: UserAnswers, mode: Mode)
                         (implicit headerCarrier: HeaderCarrier): Future[Result] = {
-    auditAddress(pdvData, nino, value)
+    auditAddress(pdvData, nino, value, uA)
     individualDetailsService.getIndividualDetailsData(nino) flatMap {
       idData => {
         npsFMNService.sendLetter(nino, FMNHelper.createNPSFMNRequest(idData)) map {
           case LetterIssuedResponse() =>
             Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA))
           case RLSDLONFAResponse(responseStatus, responseMessage) =>
-            auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage)
+            auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage, uA.get(OriginCacheable))
             Redirect(routes.SendLetterErrorController.onPageLoad(mode))
           case TechnicalIssueResponse(responseStatus, responseMessage) =>
-            auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage)
+            auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage, uA.get(OriginCacheable))
             Redirect(routes.LetterTechnicalErrorController.onPageLoad())
           case _ =>
             logger.warn("Unknown NPS FMN API response")
@@ -132,17 +133,17 @@ class SelectNINOLetterAddressController @Inject()(
       case _ => StringUtils.EMPTY
     }
 
-  private def auditAddress(pdvData: Option[PDVResponseData], nino: String, value: String)(
+  private def auditAddress(pdvData: Option[PDVResponseData], nino: String, value: String, userAnswers: UserAnswers)(
     implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Unit] = {
     individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino)) map {
-      case Right(idAddress) => auditService.findYourNinoOnlineLetterOption(pdvData, idAddress, value)
+      case Right(idAddress) => auditService.findYourNinoOnlineLetterOption(pdvData, idAddress, value, userAnswers.get(OriginCacheable))
       case Left(individualDetailsError) =>
         val statusCode = individualDetailsError match {
           case conError: ConnectorError => Some(conError.statusCode.toString)
           case _ => None
         }
         val responseMessage = "Could not get individuals address"
-        auditService.findYourNinoError(pdvData, statusCode, responseMessage)
+        auditService.findYourNinoError(pdvData, statusCode, responseMessage, userAnswers.get(OriginCacheable))
         throw new IllegalArgumentException(responseMessage)
     }
   }

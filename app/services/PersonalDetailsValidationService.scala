@@ -18,10 +18,12 @@ package services
 
 import connectors.PersonalDetailsValidationConnector
 import models.pdv.{PDVBadRequestResponse, PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse}
+import models.requests.DataRequest
 import org.mongodb.scala.MongoException
 import play.api.Logging
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
 import play.api.libs.json.Json
+import play.api.mvc.AnyContent
 import repositories.PersonalDetailsValidationRepoTrait
 import uk.gov.hmrc.http.HeaderCarrier
 import util.FMNConstants.EmptyString
@@ -44,7 +46,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
   }
 
   // Get a PDV match result
-  def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc:HeaderCarrier): Future[PDVResponse] = {
+  def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[PDVResponse] = {
     connector.retrieveMatchingDetails(pdvRequest) map { response =>
       response.status match {
         case OK =>

@@ -17,14 +17,17 @@
 package connectors
 
 import base.WireMockHelper
+import cacheables.OriginCacheable
 import config.FrontendAppConfig
 import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails}
+import models.requests.DataRequest
+import org.mockito.{Answers, ArgumentMatchers}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify}
+import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.libs.json.Json
-import play.api.mvc.Result
+import play.api.mvc.{AnyContent, Result}
 import play.api.mvc.Results.Ok
 import play.api.test.{DefaultAwaitTimeout, Injecting}
 import services.AuditService
@@ -41,6 +44,11 @@ class PDVResponseDataConnectorSpec
     with MockitoSugar
     with DefaultAwaitTimeout
     with Injecting {
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockDataRequest)
+  }
 
   override implicit lazy val app: Application = app(
     Map("microservice.services.personal-details-validation.port" -> server.port())
@@ -92,6 +100,8 @@ class PDVResponseDataConnectorSpec
 
   val httpResponse: HttpResponse = HttpResponse(200, body, headers2)
 
+  private val mockDataRequest: DataRequest[AnyContent]  = mock[DataRequest[AnyContent]](Answers.RETURNS_DEEP_STUBS)
+
   trait SpecSetup {
     def url: String
     val fakeNino: Nino = Nino(new Generator(new Random()).nextNino.nino)
@@ -133,7 +143,7 @@ class PDVResponseDataConnectorSpec
     "return OK when called with an existing validationId" in new LocalSetup {
       val pdvRequest: PDVRequest = PDVRequest("pdv-success-not-crn", "dummy")
       stubPost(url, OK, Some(Json.toJson(pdvRequest).toString()), Some(Json.toJson(personalDetailsValidation).toString()))
-      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest).futureValue.leftSideValue
+      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec, mockDataRequest).futureValue.leftSideValue
       result.status mustBe OK
       Json.parse(result.body).as[PDVResponseData].personalDetails mustBe personalDetailsValidation.personalDetails
     }
@@ -149,7 +159,10 @@ class PDVResponseDataConnectorSpec
       val pdvRequest: PDVRequest = mock[PDVRequest]
       stubPost(url, NOT_FOUND, None, Some(body))
 
-      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest).futureValue.leftSideValue
+      when(mockDataRequest.userAnswers.get(ArgumentMatchers.eq(OriginCacheable))(any()))
+        .thenReturn(Some("origin"))
+
+      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec, mockDataRequest).futureValue.leftSideValue
       result.status mustBe NOT_FOUND
       verify(mockAuditService, times(0)).findYourNinoGetPdvDataHttpError(any(), any())(any())
     }
@@ -191,9 +204,12 @@ class PDVResponseDataConnectorSpec
       val pdvRequest: PDVRequest = PDVRequest("invalid", "dummy")
       stubPost(url, BAD_REQUEST, Some(Json.toJson(pdvRequest).toString()), None)
 
-      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest).futureValue.leftSideValue
+      when(mockDataRequest.userAnswers.get(ArgumentMatchers.eq(OriginCacheable))(any()))
+        .thenReturn(Some("origin"))
+
+      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec, mockDataRequest).futureValue.leftSideValue
       result.status mustBe BAD_REQUEST
-      verify(mockAuditService, times(1)).findYourNinoGetPdvDataHttpError(any(), any())(any())
+      verify(mockAuditService, times(1)).findYourNinoGetPdvDataHttpError(any(), any(), any())(any())
     }
 
     "return INTERNAL_SERVER_ERROR when called with valid request" in new LocalSetup {
@@ -201,9 +217,12 @@ class PDVResponseDataConnectorSpec
       val pdvRequest: PDVRequest = PDVRequest("pdv-success-not-crn", "dummy")
       stubPost(url, INTERNAL_SERVER_ERROR, Some(Json.toJson(pdvRequest).toString()), None)
 
-      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest).futureValue.leftSideValue
+      when(mockDataRequest.userAnswers.get(ArgumentMatchers.eq(OriginCacheable))(any()))
+        .thenReturn(Some("origin"))
+
+      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec, mockDataRequest).futureValue.leftSideValue
       result.status mustBe INTERNAL_SERVER_ERROR
-      verify(mockAuditService, times(1)).findYourNinoGetPdvDataHttpError(any(), any())(any())
+      verify(mockAuditService, times(1)).findYourNinoGetPdvDataHttpError(any(), any(), any())(any())
     }
   }
 
