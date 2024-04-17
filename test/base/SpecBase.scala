@@ -39,7 +39,7 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
   implicit val hc: HeaderCarrier = HeaderCarrier()
   val userAnswersId: String = "id"
 
-  implicit val config = mock[FrontendAppConfig]
+  implicit val config: FrontendAppConfig = mock[FrontendAppConfig]
 
   def emptyUserAnswers : UserAnswers = UserAnswers(userAnswersId)
 
@@ -78,6 +78,6 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
 
   def injected[T](implicit evidence: ClassTag[T]): T = app.injector.instanceOf[T]
 
-  implicit lazy val cc = app.injector.instanceOf[MessagesControllerComponents]
+  implicit lazy val cc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
 
 }

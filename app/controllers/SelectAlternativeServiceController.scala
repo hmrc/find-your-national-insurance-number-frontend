@@ -29,7 +29,6 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import util.AuditUtils
 import views.html.SelectAlternativeServiceView
 
 import javax.inject.Inject

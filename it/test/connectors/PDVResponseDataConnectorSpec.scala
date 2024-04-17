@@ -148,8 +148,7 @@ class PDVResponseDataConnectorSpec
       Json.parse(result.body).as[PDVResponseData].personalDetails mustBe personalDetailsValidation.personalDetails
     }
 
-    "return NOT_FOUND when called with an unknown validationId" in new LocalSetup {
-
+    "return service NOT_FOUND when no association" in new LocalSetup {
       val body: String =
         s"""
            |{
@@ -162,6 +161,38 @@ class PDVResponseDataConnectorSpec
 
       when(mockDataRequest.userAnswers.get(ArgumentMatchers.eq(OriginCacheable))(any()))
         .thenReturn(Some("origin"))
+
+      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec, mockDataRequest).futureValue.leftSideValue
+      result.status mustBe NOT_FOUND
+      verify(mockAuditService, times(0)).findYourNinoGetPdvDataHttpError(any(), any(), any())(any())
+    }
+
+    "return service NOT_FOUND when called with an unknown validationId" in new LocalSetup {
+      val body: String =
+        s"""
+           |{
+           |  "error": "No record found using validation ID"
+           |}
+           |""".stripMargin
+
+      val pdvRequest: PDVRequest = mock[PDVRequest]
+      stubPost(url, NOT_FOUND, None, Some(body))
+
+      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec, mockDataRequest).futureValue.leftSideValue
+      result.status mustBe NOT_FOUND
+      verify(mockAuditService, times(0)).findYourNinoGetPdvDataHttpError(any(), any(), any())(any())
+    }
+
+    "return generic NOT_FOUND when endpoint is not available" in new LocalSetup {
+      val body: String =
+        s"""
+           |{
+           |  "error": "URI not found"
+           |}
+           |""".stripMargin
+
+      val pdvRequest: PDVRequest = mock[PDVRequest]
+      stubPost(url, NOT_FOUND, None, Some(body))
 
       val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec, mockDataRequest).futureValue.leftSideValue
       result.status mustBe NOT_FOUND

@@ -22,9 +22,8 @@ import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelop
 import models.errors.{IndividualDetailsError, InvalidIdentifier}
 import models.individualdetails.AddressType.ResidentialAddress
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope}
-import models.individualdetails.{Address, AddressList, IndividualDetails,
-  IndividualDetailsData, IndividualDetailsDataCache, ResolveMerge}
-import models.pdv.PDVResponseData
+import models.individualdetails.{Address, AddressList, IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache, ResolveMerge}
+import models.pdv.{PDVNotFoundResponse, PDVResponse, PDVResponseData, PDVSuccessResponse}
 import org.mongodb.scala.MongoException
 import play.api.Logging
 import repositories.IndividualDetailsRepoTrait
@@ -40,7 +39,7 @@ trait IndividualDetailsService {
 
   def getNPSPostCode(idData: IndividualDetails): String
 
-  def getIdData(pdvData: PDVResponseData)(
+  def getIdData(pdvData: PDVResponse)(
     implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]]
 
   def getIndividualDetailsAddress(nino: IndividualDetailsNino)(
@@ -64,13 +63,27 @@ class IndividualDetailsServiceImpl @Inject()(
   override def getNPSPostCode(idData: IndividualDetails): String =
     getAddressTypeResidential(idData.addressList).addressPostcode.map(_.value).getOrElse("")
 
-  override def getIdData(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
-    getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
-      case Some(data) => data.nino.nino
-      case None =>
-        logger.warn("No Personal Details found in PDV data, likely validation failed")
-        EmptyString
-    })).value
+  override def getIdData(pdvResponse: PDVResponse)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
+    pdvResponse match {
+      case PDVSuccessResponse(pdvData : PDVResponseData) =>
+        getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
+          case Some(data) => data.nino.nino
+          case None =>
+            logger.warn("No Personal Details found in PDV data.")
+            EmptyString
+        })).value
+      case PDVNotFoundResponse(_) =>
+        logger.warn("PDV Data not found.")
+        Future.successful(Left(
+          InvalidIdentifier(IndividualDetailsNino(EmptyString))
+        ))
+      case _ =>
+        logger.warn("Unexpected response from PDV.")
+        Future.successful(Left(
+          InvalidIdentifier(IndividualDetailsNino(EmptyString))
+        ))
+    }
+
   }
 
   override def getIndividualDetailsAddress(nino: IndividualDetailsNino)(
