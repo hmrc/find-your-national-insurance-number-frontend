@@ -311,5 +311,24 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
+
+    "must redirect to logged out controller when there is no cached data" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(None))
+
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, letterTechnicalErrorRoute)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual auth.routes.SignedOutController.onPageLoad.url
+      }
+    }
   }
 }

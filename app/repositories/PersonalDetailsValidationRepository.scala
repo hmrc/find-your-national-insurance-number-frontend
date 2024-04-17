@@ -119,4 +119,12 @@ class PersonalDetailsValidationRepository @Inject()(
         }
       }.map(_.headOption)
 
+  def clear(nino: String): Future[Boolean] = {
+    val filter = Filters.equal("personalDetails.nino", nino)
+    collection
+      .deleteOne(filter)
+      .toFuture
+      .map(_ => true)
+  }
+
 }

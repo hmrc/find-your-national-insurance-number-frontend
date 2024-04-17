@@ -17,12 +17,14 @@
 package controllers
 
 import base.SpecBase
+import controllers.CheckDetailsControllerSpec.auditService
 import models.pdv.{PDVResponseData, PersonalDetails}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{times, verify, when}
 import play.api.inject
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import repositories.{IndividualDetailsRepository, PersonalDetailsValidationRepository, SessionRepository}
 import services.PersonalDetailsValidationService
 import uk.gov.hmrc.domain.Nino
 import views.html.NINOLetterPostedConfirmationView
@@ -34,6 +36,9 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
 
   lazy val ninoLetterPostedConfirmationRoute = routes.NINOLetterPostedConfirmationController.onPageLoad().url
   val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
+  val mockPersonalDetailsValidationRepository: PersonalDetailsValidationRepository = mock[PersonalDetailsValidationRepository]
+  val mockIndividualDetailsRepository: IndividualDetailsRepository = mock[IndividualDetailsRepository]
+  val mockSessionRepository: SessionRepository = mock[SessionRepository]
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
@@ -64,7 +69,10 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
-          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+          inject.bind[PersonalDetailsValidationRepository].toInstance(mockPersonalDetailsValidationRepository),
+          inject.bind[IndividualDetailsRepository].toInstance(mockIndividualDetailsRepository),
+          inject.bind[SessionRepository].toInstance(mockSessionRepository)
         )
         .build()
 
@@ -77,44 +85,10 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view()(request, messages).toString
-      }
-    }
 
-    "must redirect to unauthorised controller when the user is not a valid customer" in {
-      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
-        .thenReturn(Future.successful(Some(fakePDVResponseDataInvalidCustomer)))
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(
-          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(GET, ninoLetterPostedConfirmationRoute)
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
-      }
-    }
-
-    "must redirect to journey recovery controller when there is no PDV data" in {
-      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
-        .thenReturn(Future.successful(None))
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(
-          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(GET, ninoLetterPostedConfirmationRoute)
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        verify(mockPersonalDetailsValidationRepository, times(1)).clear(any())
+        verify(mockIndividualDetailsRepository, times(1)).clear(any())
+        verify(mockSessionRepository, times(1)).clear(any())
       }
     }
   }

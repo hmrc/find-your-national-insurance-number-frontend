@@ -32,22 +32,27 @@ class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationSer
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {
     personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map {
       case Some(pdvData) =>
-        pdvData.validCustomer.getOrElse("").equals("true") match {
-          case false =>
-            Left(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
-          case _ =>
-            request.userAnswers match {
-              case None =>
-                val userAnswers = UserAnswers(
-                  id = request.userId,
-                  lastUpdated = Instant.now(java.time.Clock.systemUTC())
-                )
-                Right(DataRequest(request.request, request.userId, userAnswers, request.credId))
-              case Some(data) =>
-                Right(DataRequest(request.request, request.userId, data, request.credId))
-            }
+        if (pdvData.validCustomer.getOrElse("").equals("true")) {
+          request.userAnswers match {
+            case None =>
+              val userAnswers = UserAnswers(
+                id = request.userId,
+                lastUpdated = Instant.now(java.time.Clock.systemUTC())
+              )
+              Right(DataRequest(request.request, request.userId, userAnswers, request.credId))
+            case Some(data) =>
+              Right(DataRequest(request.request, request.userId, data, request.credId))
+          }
+        } else {
+          Left(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
         }
-      case _ => Left(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+      case _ =>
+        // No PDV data; check the user answers cache. If no uer answers then no session.
+        if (request.userAnswers.isEmpty) {
+          Left(Redirect(controllers.auth.routes.SignedOutController.onPageLoad).withNewSession)
+        } else {
+          Left(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+        }
     }
   }
 }

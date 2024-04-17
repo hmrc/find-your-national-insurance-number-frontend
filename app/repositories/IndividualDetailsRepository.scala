@@ -82,4 +82,12 @@ class IndividualDetailsRepository @Inject()(mongoComponent: MongoComponent,
       Future.failed(e)
   }
 
+  def clear(nino: String): Future[Boolean] = {
+    val filter = Filters.equal("individualDetails.nino", nino.take(8))
+    collection
+      .deleteOne(filter)
+      .toFuture
+      .map(_ => true)
+  }
+
 }
