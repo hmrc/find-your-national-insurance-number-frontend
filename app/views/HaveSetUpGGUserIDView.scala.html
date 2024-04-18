@@ -40,25 +40,25 @@
             @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
         }
 
+<h1 class="govuk-heading-xl">@messages("haveSetUpGGUserID.heading")</h1>
+
+<p class="govuk-body">@messages("haveSetUpGGUserID.p1")</p>
+<p class="govuk-body">@messages("haveSetUpGGUserID.p2")</p>
+<ul class="govuk-list govuk-list--bullet">
+    <li>@messages("haveSetUpGGUserID.l1.li1")</li>
+    <li>@messages("haveSetUpGGUserID.l1.li2")</li>
+</ul>
+
         @govukRadios(
             RadiosViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("haveSetUpGGUserID.heading")).asPageHeading(LegendSize.Large),
+                legend = LegendViewModel(messages("haveSetUpGGUserID.title")).asPageSubHeading(LegendSize.Medium),
                 items  = HaveSetUpGGUserID.options
-            ).withHint(HintViewModel(HtmlContent(hintText)).withCssClass("govuk-!-padding-top-5"))
+            )
         )
 
         @govukButton(
             ButtonViewModel(messages("site.continue"))
         )
     }
-}
-
-@hintText = {
-    <p class="govuk-body">@messages("haveSetUpGGUserID.p1")</p>
-    <p class="govuk-body">@messages("haveSetUpGGUserID.p2")</p>
-    <ul class="govuk-list govuk-list--bullet">
-        <li>@messages("haveSetUpGGUserID.l1.li1")</li>
-        <li>@messages("haveSetUpGGUserID.l1.li2")</li>
-    </ul>
 }

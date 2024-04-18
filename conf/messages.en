@@ -49,8 +49,8 @@ setUpGGUserIDStart.l1.li1 = an email address
 setUpGGUserIDStart.l1.li2 = a phone number or an authenticator app
 
 haveSetUpGGUserID.title = Have you set up a Government Gateway user ID before?
-haveSetUpGGUserID.heading = Have you set up a Government Gateway user ID before?
-haveSetUpGGUserID.p1 = To check if you have, search your email for ‘Government Gateway ID’. Your user ID may be included in an email we have sent you.
+haveSetUpGGUserID.heading = User ID
+haveSetUpGGUserID.p1 = To check if you have set up a Government Gateway user ID before, search your email for ‘Government Gateway ID’. Your user ID may be included in an email we have sent you.
 haveSetUpGGUserID.p2 = You may have set one up to:
 haveSetUpGGUserID.l1.li1 = access your personal tax account to check your records with HMRC
 haveSetUpGGUserID.l1.li2 = sign up for another online government service
