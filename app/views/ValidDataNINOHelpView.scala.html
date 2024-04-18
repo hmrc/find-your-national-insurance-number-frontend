@@ -35,7 +35,7 @@
 ) {
 
     @if(form.errors.nonEmpty) {
-        @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
+        @govukErrorSummary(ErrorSummaryViewModel(form))
     }
 
     <h1 class="govuk-heading-xl">@messages("ninoHelpView.heading")</h1>
