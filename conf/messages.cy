@@ -145,3 +145,45 @@ confirmYourPostcode.hint=Er enghraifft SW1A 2AA
 confirmYourPostcode.error.required=Nodwch eich cod post
 confirmYourPostcode.error.invalid=Nodwch god post yn y DU sy’n ddilys
 
+# Service IV check (CL50)
+ServiceIv.title = Bydd angen i chi gadarnhau pwy ydych er mwyn cael eich rhif Yswiriant Gwladol ar-lein
+ServiceIv.heading = Bydd angen i chi gadarnhau pwy ydych er mwyn cael eich rhif Yswiriant Gwladol ar-lein
+ServiceIv.p1 = Mae hyn er mwyn cadw eich rhif yn ddiogel a’ch diogelu rhag twyll.
+ServiceIv.p2 = Gallwch ddefnyddio’r eitemau hyn i helpu i gadarnhau pwy ydych.
+ServiceIv.h2 = Dewiswch yr eitemau sydd gennych wrth law:
+ServiceIv.error.required =
+
+# Options
+ServiceIv.validUkPassport = Pasbort dilys y DU
+ServiceIv.ukPhotocardDrivingLicence = Trwydded yrru cerdyn-llun yn y DU (llawn neu dros dro)
+ServiceIv.nonUkPassport = Pasbort nad yw o’r DU
+ServiceIv.ukBiometricResidenceCard = Cerdyn neu drwydded breswylio fiometrig (BRP)
+ServiceIv.taxCreditsClaim = Manylion hawliad credyd treth (ID Llais dewisol)
+ServiceIv.payslipOrP60 = Slip cyflog neu P60
+ServiceIv.hint.payslipOrP60 = Bydd llawer o gyflogwyr yn rhoi P60 i chi sy’n dangos y dreth rydych wedi’i thalu ar eich cyflog yn ystod y flwyddyn dreth.
+ServiceIv.selfAssessment = Ffurflen Dreth Hunanasesiad wedi’i llenwi ar gyfer y flwyddyn dreth ddiwethaf
+#Or
+ServiceIv.noneOfTheAbove = Nid oes gennyf yr un o’r eitemau hyn
+
+serviceIvApp.title = Lawrlwythwch ap i gadarnhau pwy ydych
+serviceIvApp.heading = Lawrlwythwch ap i gadarnhau pwy ydych
+serviceIvApp.error.required =
+serviceIvApp.p1 = Bydd angen i chi ddefnyddio ap a chamera eich dyfais symudol i baru’ch wyneb â’r llun ar eich pasbort neu drwydded yrru’r DU.
+serviceIvApp.h2 = Allwch chi lawrlwytho ap i’ch dyfais symudol?
+
+postLetter.title =
+postLetter.heading =
+postLetter.p1 =
+postLetter.p2 =
+postLetter.p3 =
+postLetter.error.required =
+postLetter.h2 =
+
+tracingWhatYouNeed.heading =
+tracingWhatYouNeed.title =
+tracingWhatYouNeed.p1 = Byddwn yn gofyn am fanylion personol amdanoch, fel eich:
+tracingWhatYouNeed.li1 = enw
+tracingWhatYouNeed.li2 = dyddiad geni
+tracingWhatYouNeed.li3 = rhif Yswiriant Gwladol (dewisol)
+tracingWhatYouNeed.li4 = cod post
+tracingWhatYouNeed.p3 = Os yw’r manylion a roddwch i ni yn cyd-fynd â’n cofnodion, gallwn bostio llythyr atoch gyda’ch rhif Yswiriant Gwladol arno.
