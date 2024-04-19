@@ -34,12 +34,13 @@
             @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
         }
 
-<h1 class="govuk-heading-l">@messages("selectAlternativeService.heading.1")</h1>
-<p class="govuk-body">@messages("selectAlternativeService.options")</p>
-<ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-7">
-    <li>@messages("selectAlternativeService.options.l1")</li>
-    <li>@messages("selectAlternativeService.options.l2")</li>
-</ul>
+        <h1 class="govuk-heading-l">@messages("selectAlternativeService.heading.1")</h1>
+
+        <p class="govuk-body">@messages("selectAlternativeService.options")</p>
+        <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-7">
+            <li>@messages("selectAlternativeService.options.l1")</li>
+            <li>@messages("selectAlternativeService.options.l2")</li>
+        </ul>
 
         @govukRadios(
             RadiosViewModel(
