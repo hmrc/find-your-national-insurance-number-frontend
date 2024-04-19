@@ -45,9 +45,4 @@ trait ModelGenerators {
     Arbitrary {
       Gen.oneOf(SelectNINOLetterAddress.values.toSeq)
     }
-
-  implicit lazy val arbitraryHaveSetUpGGUserID: Arbitrary[HaveSetUpGGUserID] =
-    Arbitrary {
-      Gen.oneOf(HaveSetUpGGUserID.values.toSeq)
-    }
 }

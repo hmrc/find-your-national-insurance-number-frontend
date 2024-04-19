@@ -18,7 +18,6 @@ package navigation
 
 import config.FrontendAppConfig
 import controllers.routes
-import models.HaveSetUpGGUserID.{No, Yes}
 import models.ServiceIv._
 import models._
 import pages._
@@ -36,7 +35,6 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     case ServiceIvPage                      => userAnswers => navigateIvEvidence(userAnswers)
     case ServiceIvAppPage                   => userAnswers => navigateCanDownloadApp(userAnswers)
     case PostLetterPage                     => userAnswers => navigatePostLetter(userAnswers)
-    case HaveSetUpGGUserIDPage              => userAnswers => navigateHaveSetUpGGUserID(userAnswers)
     case SelectNINOLetterAddressPage        => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
     case SelectAlternativeServicePage       => userAnswers => navigateSelectAlternativeService(userAnswers)
     case LetterTechnicalErrorPage           => userAnswers => navigateLetterTechnicalError(userAnswers)
@@ -44,7 +42,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     case ValidDataNINOHelpPage              => userAnswers => navigateValidDataNINOHelp(userAnswers)
     case EnteredPostCodeNotFoundPage        => userAnswers => navigateEnteredPostCodeNotFound(userAnswers)
     case ValidDataNINOMatchedNINOHelpPage   => userAnswers => navigateValidDataNINOMatchedNINOHelp(userAnswers)
-    case _                                  => _           => routes.IndexController.onPageLoad
+    case _                                  => _           => routes.JourneyRecoveryController.onPageLoad()
   }
 
   def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
@@ -80,13 +78,6 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
           }
         }
       case _ => routes.SelectAlternativeServiceController.onPageLoad()
-    }
-
-  private def navigateHaveSetUpGGUserID(userAnswers: UserAnswers): Call =
-    userAnswers.get(HaveSetUpGGUserIDPage) match {
-      case Some(No)   => routes.SetUpGGUserIDStartController.onPageLoad()
-      case Some(Yes)  => controllers.auth.routes.AuthController.redirectToSMN
-      case _          => routes.SetUpGGUserIDStartController.onPageLoad()
     }
 
   private def navigateSelectNINOLetterAddress(userAnswers: UserAnswers): Call =
