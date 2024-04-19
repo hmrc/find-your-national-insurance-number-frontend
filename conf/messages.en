@@ -71,6 +71,7 @@ ninoLetterPostedConfirmation.letterArrival = We’ll post the letter confirming 
 ninoLetterPostedConfirmation.goBackToGovUK = Exit and go back to GOV.UK
 
 selectAlternativeService.title = What would you like to do instead?
+selectAlternativeService.heading.1 = Options
 selectAlternativeService.heading = What would you like to do instead?
 selectAlternativeService.printForm = Print and post a form
 selectAlternativeService.printForm.hint = Once we have received the completed form, we can send you a letter confirming your National Insurance number.

@@ -60,6 +60,7 @@ ninoLetterPostedConfirmation.heading=Bydd eich rhif Yswiriant Gwladol yn cael ei
 ninoLetterPostedConfirmation.letterArrival=Byddwn yn postio’r llythyr sy’n cadarnhau’ch rhif. Bydd hwn yn cyrraedd cyn pen 15 diwrnod.
 ninoLetterPostedConfirmation.goBackToGovUK=Gadael ac yn ôl i GOV.UK
 selectAlternativeService.title=Beth yr hoffech ei wneud yn lle?
+selectAlternativeService.heading.1=Opsiynau
 selectAlternativeService.heading=Beth yr hoffech ei wneud yn lle?
 selectAlternativeService.printForm=Argraffu ac anfon ffurflen
 selectAlternativeService.printForm.hint=Unwaith bod gennym y ffurflen wedi’i llenwi, gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol.
