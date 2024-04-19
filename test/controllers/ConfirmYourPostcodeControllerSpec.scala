@@ -438,5 +438,84 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "must redirect to the confirmation page when valid nino is submitted to NPS FMN API" in {
+      val mockSessionRepository = mock[SessionRepository]
+      val mockNPSFMNConnector = mock[NPSFMNConnector]
+      val mockNPSFMNService = mock[NPSFMNService]
+      val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
+      when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
+        .thenReturn(Future.successful(LetterIssuedResponse()))
+
+
+      when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
+        .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
+
+      val application =
+        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NPSFMNService].toInstance(mockNPSFMNService),
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
+            bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          )
+          .build()
+
+      lazy val confirmYourPostcodeRoute: String = routes.ConfirmYourPostcodeController.onSubmit(NormalMode).url
+
+      running(application) {
+        val request =
+          FakeRequest(POST, confirmYourPostcodeRoute)
+            .withFormUrlEncodedBody(("value", "AA1 1AA"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.NINOLetterPostedConfirmationController.onPageLoad().url
+      }
+    }
+
+    "must redirect to the confirmation page when valid nino (with preceding whitespaces) is submitted to NPS FMN API" in {
+      val mockSessionRepository = mock[SessionRepository]
+      val mockNPSFMNConnector = mock[NPSFMNConnector]
+      val mockNPSFMNService = mock[NPSFMNService]
+      val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
+      when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
+        .thenReturn(Future.successful(LetterIssuedResponse()))
+
+
+      when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
+        .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
+
+      val application =
+        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NPSFMNService].toInstance(mockNPSFMNService),
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
+            bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          )
+          .build()
+
+      lazy val confirmYourPostcodeRoute: String = routes.ConfirmYourPostcodeController.onSubmit(NormalMode).url
+
+      running(application) {
+        val request =
+          FakeRequest(POST, confirmYourPostcodeRoute)
+            .withFormUrlEncodedBody(("value", "  AA1 1AA"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.NINOLetterPostedConfirmationController.onPageLoad().url
+      }
+    }
   }
 }
