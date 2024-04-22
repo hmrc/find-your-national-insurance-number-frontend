@@ -130,14 +130,14 @@ class NavigatorSpec extends SpecBase {
 
     "When on ServiceIvAppPage" - {
       "when the answer is Yes" - {
-        "must go to SetUpGGUserIDStartController" in {
+        "must go to store" in {
           val userAnswers = UserAnswers("id").set(ServiceIvAppPage, true).success.value
           navigator.nextPage(ServiceIvAppPage, NormalMode, userAnswers) mustBe auth.routes.AuthController.redirectToSMN
         }
       }
 
       "when the answer is No" - {
-        "must go to SetUpGGUserIDStartController" in {
+        "must go to PostLetterController" in {
           val userAnswers = UserAnswers("id").set(ServiceIvAppPage, false).success.value
           navigator.nextPage(ServiceIvAppPage, NormalMode, userAnswers) mustBe routes.PostLetterController.onPageLoad()
         }
@@ -146,14 +146,14 @@ class NavigatorSpec extends SpecBase {
 
     "When on PostLetterPage" - {
       "when the answer is Yes" - {
-        "must go to SetUpGGUserIDStartController" in {
+        "must go to TracingWhatYouNeedController" in {
           val userAnswers = UserAnswers("id").set(PostLetterPage, true).success.value
           navigator.nextPage(PostLetterPage, NormalMode, userAnswers) mustBe routes.TracingWhatYouNeedController.onPageLoad()
         }
       }
 
       "when the answer is No" - {
-        "must go to SetUpGGUserIDStartController" in {
+        "must go to SelectAlternativeServiceController" in {
           val userAnswers = UserAnswers("id").set(PostLetterPage, false).success.value
           navigator.nextPage(PostLetterPage, NormalMode, userAnswers) mustBe routes.SelectAlternativeServiceController.onPageLoad()
         }
