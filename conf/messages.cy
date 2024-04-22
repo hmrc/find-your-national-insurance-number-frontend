@@ -12,6 +12,7 @@ error.browser.title.prefix=Gwall:
 error.boolean=Rhowch ateb
 error.required=Nodwch werth
 error.summary.title=Mae problem wedi codi
+error.message.prefix=Gwall:
 index.title=Sut i ddod o hyd i’ch rhif Yswiriant Gwladol ar-lein
 index.heading=Sut i ddod o hyd i’ch rhif Yswiriant Gwladol ar-lein
 index.p1=Gallwch gael nodyn atgoffa neu gadarnhad swyddogol o’ch rhif Yswiriant Gwladol ar-lein.
