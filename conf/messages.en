@@ -15,21 +15,6 @@ error.boolean = Please give an answer
 error.required = Please enter a value
 error.summary.title = There is a problem
 
-index.title = How to find your National Insurance number online
-index.heading = How to find your National Insurance number online
-index.p1 = You can get a reminder or official confirmation of your National Insurance number online.
-index.whatYouWillNeedToDo.heading = What you’ll need to do
-index.whatYouWillNeedToDo.p1 = You’ll need to do 3 things.
-index.setUpOrLogInUsingGG.heading = 1. Set up or log in using Government Gateway
-index.setUpOrLogInUsingGG.p1 = You’ll just need an email and phone number.
-index.tellUsWhoYouAre.heading = 2. Tell us who you are
-index.tellUsWhoYouAre.p1 = You’ll need to provide your name, date of birth and your postcode.
-index.tellUsWhoYouAre.p2 = We always ask if you know your National Insurance number, so just select ‘No’.
-index.confirmYourIdentity.heading = 3. Confirm your identity
-index.confirmYourIdentity.p1 = To prove who you are, you can choose to use:
-index.confirmYourIdentity.l1.li1 = identity documents including a passport and UK photocard driving licence
-index.confirmYourIdentity.l1.li2 = details from your P60, Self Assessment or credit record
-
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
 journeyRecovery.startAgain.title = Sorry, there is a problem with the service
@@ -41,23 +26,6 @@ signedOut.guidance = We did not save your answers.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
-
-setUpGGUserIDStart.title = Set up a Government Gateway user ID
-setUpGGUserIDStart.heading = Set up a Government Gateway user ID
-setUpGGUserIDStart.p1 = You’ll need:
-setUpGGUserIDStart.l1.li1 = an email address
-setUpGGUserIDStart.l1.li2 = a phone number or an authenticator app
-
-haveSetUpGGUserID.title = Have you set up a Government Gateway user ID before?
-haveSetUpGGUserID.heading = Have you set up a Government Gateway user ID before?
-haveSetUpGGUserID.p1 = To check if you have, search your email for ‘Government Gateway ID’. Your user ID may be included in an email we have sent you.
-haveSetUpGGUserID.p2 = You may have set one up to:
-haveSetUpGGUserID.l1.li1 = access your personal tax account to check your records with HMRC
-haveSetUpGGUserID.l1.li2 = sign up for another online government service
-haveSetUpGGUserID.yes = Yes
-haveSetUpGGUserID.no = No
-haveSetUpGGUserID.notSure = Not sure
-haveSetUpGGUserID.error.required = Select an option to continue
 
 selectNINOLetterAddress.title = Where would you like the letter sent?
 selectNINOLetterAddress.heading = Where would you like the letter sent?
