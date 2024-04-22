@@ -36,7 +36,7 @@ class PostLetterController @Inject()(
                                          navigator: Navigator,
                                          identify: IdentifierAction,
                                          getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
+                                         requireData: CL50DataRequiredAction,
                                          formProvider: PostLetterFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
                                          view: PostLetterView

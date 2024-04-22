@@ -17,7 +17,6 @@
 package controllers
 
 import base.SpecBase
-import controllers.actions.{DataRequiredAction, JourneyClosedActionImpl}
 import forms.ServiceIvFormProvider
 import models.{NormalMode, ServiceIv, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
@@ -47,7 +46,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilderCl50On(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, serviceIvRoute)
@@ -66,7 +65,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
       val userAnswers = UserAnswers(userAnswersId).set(ServiceIvPage, ServiceIv.values.toSet).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilderCl50On(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, serviceIvRoute)
@@ -87,7 +86,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilderCl50On(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
@@ -108,7 +107,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilderCl50On(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
         val request =
@@ -129,9 +128,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
     "CL50 feature toggle on" - {
       "must redirect to store" in {
 
-        val application = applicationBuilderCl50(userAnswers = Some(emptyUserAnswers)).overrides(
-          bind(classOf[DataRequiredAction]).to(classOf[JourneyClosedActionImpl])
-        ).build()
+        val application = applicationBuilderCl50Off(userAnswers = Some(emptyUserAnswers)).build()
 
         running(application) {
           val request = FakeRequest(GET, serviceIvRoute)

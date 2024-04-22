@@ -37,7 +37,7 @@ class ServiceIvController @Inject()(
                                      navigator: Navigator,
                                      identify: IdentifierAction,
                                      getData: DataRetrievalAction,
-                                     requireData: DataRequiredAction,
+                                     requireData: CL50DataRequiredAction,
                                      formProvider: ServiceIvFormProvider,
                                      val controllerComponents: MessagesControllerComponents,
                                      view: ServiceIvView

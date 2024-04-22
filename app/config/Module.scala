@@ -36,11 +36,12 @@ class Module(environment: Environment, config: Configuration) extends AbstractMo
   override def configure(): Unit = {
 
     bind(classOf[DataRetrievalAction]).to(classOf[DataRetrievalActionImpl]).asEagerSingleton()
+    bind(classOf[DataRequiredAction]).to(classOf[DataRequiredActionImpl]).asEagerSingleton()
 
     if(cl50Toggle) {
-      bind(classOf[DataRequiredAction]).to(classOf[DataRequiredActionImpl]).asEagerSingleton()
+      bind(classOf[CL50DataRequiredAction]).to(classOf[CL50DataRequiredActionImpl]).asEagerSingleton()
     } else {
-      bind(classOf[DataRequiredAction]).to(classOf[JourneyClosedActionImpl]).asEagerSingleton()
+      bind(classOf[CL50DataRequiredAction]).to(classOf[JourneyClosedActionImpl]).asEagerSingleton()
     }
 
     bind(classOf[ValidCustomerDataRequiredAction]).to(classOf[ValidCustomerDataRequiredActionImpl]).asEagerSingleton()

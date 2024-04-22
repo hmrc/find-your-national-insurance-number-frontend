@@ -17,7 +17,6 @@
 package controllers
 
 import base.SpecBase
-import controllers.actions.{DataRequiredAction, JourneyClosedActionImpl}
 import forms.PostLetterFormProvider
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
@@ -86,7 +85,7 @@ class PostLetterControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilderCl50On(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
@@ -107,7 +106,7 @@ class PostLetterControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilderCl50On(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
         val request =
@@ -128,9 +127,7 @@ class PostLetterControllerSpec extends SpecBase with MockitoSugar {
     "CL50 feature toggle on" - {
       "must redirect to store" in {
 
-        val application = applicationBuilderCl50(userAnswers = Some(emptyUserAnswers)).overrides(
-          bind(classOf[DataRequiredAction]).to(classOf[JourneyClosedActionImpl])
-        ).build()
+        val application = applicationBuilderCl50Off(userAnswers = Some(emptyUserAnswers)).build()
 
         running(application) {
           val request = FakeRequest(GET, postLetterRoute)

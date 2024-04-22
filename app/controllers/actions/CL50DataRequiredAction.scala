@@ -16,17 +16,30 @@
 
 package controllers.actions
 
+import models.UserAnswers
 import models.requests.{DataRequest, OptionalDataRequest}
-import play.api.mvc.Result
-import play.api.mvc.Results.Redirect
+import play.api.mvc.{ActionRefiner, Result}
 
+import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 // TODO - can be removed when the CL50 journey toggle is removed
-class JourneyClosedActionImpl @Inject()(implicit val executionContext: ExecutionContext) extends CL50DataRequiredAction {
+class CL50DataRequiredActionImpl @Inject()(implicit val executionContext: ExecutionContext) extends CL50DataRequiredAction {
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {
-      Future.successful(Left(Redirect(controllers.auth.routes.AuthController.redirectToSMN)))
+
+    request.userAnswers match {
+      case None =>
+        val userAnswers = UserAnswers(
+          id = request.userId,
+          lastUpdated = Instant.now(java.time.Clock.systemUTC())
+        )
+        Future.successful(Right(DataRequest(request.request, request.userId, userAnswers, request.credId)))
+      case Some(data) =>
+        Future.successful(Right(DataRequest(request.request, request.userId, data, request.credId)))
+    }
   }
 }
+
+trait CL50DataRequiredAction extends ActionRefiner[OptionalDataRequest, DataRequest]

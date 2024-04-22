@@ -17,9 +17,7 @@
 package controllers
 
 import base.SpecBase
-import controllers.actions.{DataRequiredAction, JourneyClosedActionImpl}
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -34,7 +32,7 @@ class TracingWhatYouNeedControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilderCl50On(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, whatYouNeedRoute)
@@ -48,9 +46,7 @@ class TracingWhatYouNeedControllerSpec extends SpecBase with MockitoSugar {
     "CL50 feature toggle on" - {
       "must redirect to store" in {
 
-        val application = applicationBuilderCl50(userAnswers = Some(emptyUserAnswers)).overrides(
-          bind(classOf[DataRequiredAction]).to(classOf[JourneyClosedActionImpl])
-        ).build()
+        val application = applicationBuilderCl50Off(userAnswers = Some(emptyUserAnswers)).build()
 
         running(application) {
           val request = FakeRequest(GET, whatYouNeedRoute)
