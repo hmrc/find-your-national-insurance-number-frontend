@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import controllers.actions.{DataRequiredAction, JourneyClosedActionImpl}
 import forms.ServiceIvAppFormProvider
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
@@ -121,6 +122,25 @@ class ServiceIvAppControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages).toString
+      }
+    }
+
+    "CL50 feature toggle on" - {
+      "must redirect to store" in {
+
+        val application = applicationBuilderCl50(userAnswers = Some(emptyUserAnswers)).overrides(
+          bind(classOf[DataRequiredAction]).to(classOf[JourneyClosedActionImpl])
+        ).build()
+
+        running(application) {
+          val request = FakeRequest(GET, serviceIvAppRoute)
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+
+          redirectLocation(result).value mustEqual controllers.auth.routes.AuthController.redirectToSMN.url
+        }
       }
     }
   }
