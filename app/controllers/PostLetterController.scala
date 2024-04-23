@@ -18,7 +18,6 @@ package controllers
 
 import controllers.actions._
 import forms.PostLetterFormProvider
-import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
 import pages.PostLetterPage
@@ -28,6 +27,7 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.PostLetterView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PostLetterController @Inject()(
@@ -36,7 +36,7 @@ class PostLetterController @Inject()(
                                          navigator: Navigator,
                                          identify: IdentifierAction,
                                          getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
+                                         requireData: CL50DataRequiredAction,
                                          formProvider: PostLetterFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
                                          view: PostLetterView

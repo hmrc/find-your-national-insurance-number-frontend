@@ -17,7 +17,7 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions.IdentifierAction
+import controllers.actions.{CL50DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -30,12 +30,14 @@ import javax.inject.Inject
 class TracingWhatYouNeedController @Inject()(
                                               override val messagesApi: MessagesApi,
                                               identify: IdentifierAction,
+                                              getData: DataRetrievalAction,
+                                              requireData: CL50DataRequiredAction,
                                               val controllerComponents: MessagesControllerComponents,
                                               config: FrontendAppConfig,
                                               view: TracingWhatYouNeedView
                                             ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = identify {
+  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData)  {
     implicit request =>
       val origin        = FMNOrigin
       val redirectUrl   = config.fmnCheckDetailsUrl

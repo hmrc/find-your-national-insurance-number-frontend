@@ -29,13 +29,21 @@ import java.time.{Clock, ZoneOffset}
 // $COVERAGE-OFF$
 class Module(environment: Environment, config: Configuration) extends AbstractModule {
 
-  private val scaWrapperEnabled = config.getOptional[Boolean]("features.sca-wrapper-enabled").getOrElse(false)
-  private val encryptionEnabled = config.get[Boolean]("mongodb.encryption.enabled")
+  private val scaWrapperEnabled   = config.getOptional[Boolean]("features.sca-wrapper-enabled").getOrElse(false)
+  private val encryptionEnabled   = config.get[Boolean]("mongodb.encryption.enabled")
+  private val cl50Toggle: Boolean = config.get[Boolean]("features.cl50")
 
   override def configure(): Unit = {
 
     bind(classOf[DataRetrievalAction]).to(classOf[DataRetrievalActionImpl]).asEagerSingleton()
     bind(classOf[DataRequiredAction]).to(classOf[DataRequiredActionImpl]).asEagerSingleton()
+
+    if(cl50Toggle) {
+      bind(classOf[CL50DataRequiredAction]).to(classOf[CL50DataRequiredActionImpl]).asEagerSingleton()
+    } else {
+      bind(classOf[CL50DataRequiredAction]).to(classOf[JourneyClosedActionImpl]).asEagerSingleton()
+    }
+
     bind(classOf[ValidCustomerDataRequiredAction]).to(classOf[ValidCustomerDataRequiredActionImpl]).asEagerSingleton()
 
     // For session based storage instead of cred based, change to SessionIdentifierAction
