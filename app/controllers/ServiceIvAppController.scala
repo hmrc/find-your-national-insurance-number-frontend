@@ -18,7 +18,6 @@ package controllers
 
 import controllers.actions._
 import forms.ServiceIvAppFormProvider
-import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
 import pages.ServiceIvAppPage
@@ -28,6 +27,7 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ServiceIvAppView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ServiceIvAppController @Inject()(
@@ -36,7 +36,7 @@ class ServiceIvAppController @Inject()(
                                          navigator: Navigator,
                                          identify: IdentifierAction,
                                          getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
+                                         requireData: CL50DataRequiredAction,
                                          formProvider: ServiceIvAppFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
                                          view: ServiceIvAppView

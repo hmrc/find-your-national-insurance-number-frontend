@@ -58,6 +58,24 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
       )
 
+  protected def applicationBuilderCl50Off(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+    new GuiceApplicationBuilder()
+      .overrides(
+        bind[CL50DataRequiredAction].to[JourneyClosedActionImpl],
+        bind[ValidCustomerDataRequiredAction].to[ValidCustomerDataRequiredActionImpl],
+        bind[IdentifierAction].to[FakeIdentifierAction],
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+      )
+
+  protected def applicationBuilderCl50On(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+    new GuiceApplicationBuilder()
+      .overrides(
+        bind[CL50DataRequiredAction].to[CL50DataRequiredActionImpl],
+        bind[ValidCustomerDataRequiredAction].to[ValidCustomerDataRequiredActionImpl],
+        bind[IdentifierAction].to[FakeIdentifierAction],
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+      )
+
   protected def applicationBuilderWithConfig(
                                               config: Map[String, Any] = Map(),
                                               userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
