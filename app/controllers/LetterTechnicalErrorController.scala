@@ -19,11 +19,12 @@ package controllers
 import cacheables.OriginCacheable
 import controllers.actions._
 import forms.LetterTechnicalErrorFormProvider
-import models.Mode
+import models.{LetterTechnicalError, Mode}
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
 import pages.LetterTechnicalErrorPage
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.{SessionRepository, TryAgainCountRepository}
@@ -49,14 +50,14 @@ class LetterTechnicalErrorController @Inject()(
                                                 view: LetterTechnicalErrorView
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  val form = formProvider()
+  val form: Form[LetterTechnicalError] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) async {
     implicit request =>
 
+      // form to not be pre-populated
       val preparedForm = request.userAnswers.get(LetterTechnicalErrorPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
+        case _ => form
       }
 
       for {
