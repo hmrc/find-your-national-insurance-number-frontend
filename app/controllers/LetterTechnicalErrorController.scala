@@ -54,18 +54,12 @@ class LetterTechnicalErrorController @Inject()(
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) async {
     implicit request =>
-
-      // form to not be pre-populated
-      val preparedForm = request.userAnswers.get(LetterTechnicalErrorPage) match {
-        case _ => form
-      }
-
       for {
         retryAllowed <- tryAgainCountRepository.findById(request.userId).map {
           case Some (value) => if (value.count >= 5) {false} else {true}
           case None => true
         }
-      } yield Ok(view(preparedForm, mode, retryAllowed))
+      } yield Ok(view(form, mode, retryAllowed))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
