@@ -60,16 +60,16 @@ ninoLetterPostedConfirmation.heading=Bydd eich rhif Yswiriant Gwladol yn cael ei
 ninoLetterPostedConfirmation.letterArrival=Byddwn yn postio’r llythyr sy’n cadarnhau’ch rhif. Bydd hwn yn cyrraedd cyn pen 15 diwrnod.
 ninoLetterPostedConfirmation.goBackToGovUK=Gadael ac yn ôl i GOV.UK
 
-selectAlternativeService.title = TODO
-selectAlternativeService.heading.1 = TODO
-selectAlternativeService.heading = Beth yr hoffech ei wneud?
+selectAlternativeService.title = Bydd angen i chi gysylltu â CThEF am eich rhif Yswiriant Gwladol.
+selectAlternativeService.heading = Bydd angen i chi gysylltu â CThEF am eich rhif Yswiriant Gwladol.
+selectAlternativeService.heading.2 = Beth yr hoffech ei wneud?
 selectAlternativeService.printForm = Argraffu ac anfon ffurflen
 selectAlternativeService.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol.
 selectAlternativeService.phoneHMRC = Ffonio CThEF
 selectAlternativeService.phoneHMRC.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno.
 selectAlternativeService.error.required = Rhowch wybod i ni beth yr hoffech ei wneud
-selectAlternativeService.p1 = TODO
-selectAlternativeService.p2 = TODO
+selectAlternativeService.p1 = Ni fydd CThEF yn rhoi gwybod i chi am eich rhif Yswiriant Gwladol dros y ffôn na thrwy sgwrs dros y we.
+selectAlternativeService.p2 = Byddwn yn ei bostio atoch a bydd yn cyrraedd cyn pen 15 diwrnod gwaith.
 
 phoneHMRCDetails.title=Ffoniwch CThEF i gael llythyr gyda’ch rhif Yswiriant Gwladol arno
 phoneHMRCDetails.heading=Ffoniwch CThEF i gael llythyr gyda’ch rhif Yswiriant Gwladol arno

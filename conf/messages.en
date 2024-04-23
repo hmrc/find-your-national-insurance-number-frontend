@@ -70,9 +70,9 @@ ninoLetterPostedConfirmation.heading = Your National Insurance number will be se
 ninoLetterPostedConfirmation.letterArrival = We’ll post the letter confirming your number. It will arrive within 15 days.
 ninoLetterPostedConfirmation.goBackToGovUK = Exit and go back to GOV.UK
 
-selectAlternativeService.title = What would you like to do?
-selectAlternativeService.heading.1 = You will need to contact HMRC for your National Insurance number
-selectAlternativeService.heading = What would you like to do?
+selectAlternativeService.title = You will need to contact HMRC for your National Insurance number
+selectAlternativeService.heading = You will need to contact HMRC for your National Insurance number
+selectAlternativeService.heading.2 = What would you like to do?
 selectAlternativeService.printForm = Print and post a form
 selectAlternativeService.printForm.hint = Once we have received the completed form, we can send you a letter confirming your National Insurance number.
 selectAlternativeService.phoneHMRC = Phone HMRC
