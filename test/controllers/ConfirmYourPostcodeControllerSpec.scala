@@ -378,7 +378,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.NINOLetterPostedConfirmationController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SelectNINOLetterAddressController.onPageLoad().url
       }
     }
 
@@ -418,7 +418,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.NINOLetterPostedConfirmationController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SelectNINOLetterAddressController.onPageLoad().url
       }
     }
   }
