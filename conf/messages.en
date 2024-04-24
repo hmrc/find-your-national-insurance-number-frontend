@@ -14,6 +14,7 @@ error.browser.title.prefix = Error:
 error.boolean = Please give an answer
 error.required = Please enter a value
 error.summary.title = There is a problem
+error.message.prefix = Error:
 
 index.title = How to find your National Insurance number online
 index.heading = How to find your National Insurance number online
