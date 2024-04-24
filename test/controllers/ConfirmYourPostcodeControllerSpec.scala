@@ -20,7 +20,7 @@ import base.SpecBase
 import connectors.{IndividualDetailsConnector, NPSFMNConnector}
 import forms.ConfirmYourPostcodeFormProvider
 import models.individualdetails._
-import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
+import models.nps.LetterIssuedResponse
 import models.pdv.{PDVResponseData, PersonalDetails}
 import models.{AddressLine, CorrelationId, IndividualDetailsResponseEnvelope, NormalMode, UserAnswers, individualdetails}
 import org.mockito.ArgumentMatchers.any
@@ -63,7 +63,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       firstName = "John",
       lastName = "Doe",
       nino = Nino("AB123456C"),
-      postCode = Some("AA1 1AA"),
+      postCode = None,
       dateOfBirth = LocalDate.of(1990, 1, 1)
     )),
     validCustomer = Some("true"),
@@ -76,13 +76,13 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
     validCustomer = Some("false")
   )
 
-  val fakePDVResponseDataFailure: PDVResponseData = PDVResponseData(
+  val fakePDVResponseDataNoNpsPostcode: PDVResponseData = PDVResponseData(
     id = "fakeId",
     validationStatus = "failure",
     personalDetails = None,
     validCustomer = Some("true"),
-    CRN = Some("fakeCRN"),
-    npsPostCode = Some("AA1 1  AA"),
+    CRN = None,
+    npsPostCode = None,
     reason = None
   )
 
@@ -160,17 +160,12 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the confirmation page when valid data is submitted to NPS FMN API" in {
+    "must redirect to the postcode page when valid data is submitted" in {
       val mockSessionRepository = mock[SessionRepository]
-      val mockNPSFMNConnector = mock[NPSFMNConnector]
-      val mockNPSFMNService = mock[NPSFMNService]
       val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseData)))
-      when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
-        .thenReturn(Future.successful(LetterIssuedResponse()))
-
 
       when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
         .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
@@ -179,8 +174,6 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[NPSFMNService].toInstance(mockNPSFMNService),
-            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
             bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
             bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
@@ -194,21 +187,16 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.NINOLetterPostedConfirmationController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SelectNINOLetterAddressController.onPageLoad().url
       }
     }
 
     "must redirect to postcode issue page when postcode entered doesn't match NPS postcode" in {
       val mockSessionRepository = mock[SessionRepository]
-      val mockNPSFMNConnector = mock[NPSFMNConnector]
-      val mockNPSFMNService = mock[NPSFMNService]
       val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseData)))
-      when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
-        .thenReturn(Future.successful(LetterIssuedResponse()))
-
 
       when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
         .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
@@ -217,8 +205,6 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[NPSFMNService].toInstance(mockNPSFMNService),
-            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
             bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
             bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
@@ -236,16 +222,12 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must throw an exception when PDV details missing" in {
+    "must throw an exception when nps postcode missing" in {
       val mockSessionRepository = mock[SessionRepository]
-      val mockNPSFMNConnector = mock[NPSFMNConnector]
-      val mockNPSFMNService = mock[NPSFMNService]
       val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
-        .thenReturn(Future(Some(fakePDVResponseDataFailure)))
-      when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
-        .thenReturn(Future.successful(LetterIssuedResponse()))
+        .thenReturn(Future(Some(fakePDVResponseDataNoNpsPostcode)))
 
       when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
         .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
@@ -254,8 +236,6 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[NPSFMNService].toInstance(mockNPSFMNService),
-            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
             bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
             bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
@@ -269,82 +249,6 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         assertThrows[IllegalArgumentException] {
           await(route(application, request).value)
         }
-      }
-    }
-
-    "must redirect to the send letter error page when invalid data is submitted to NPS FMN API" in {
-      val mockSessionRepository = mock[SessionRepository]
-      val mockNPSFMNConnector = mock[NPSFMNConnector]
-      val mockNPSFMNService = mock[NPSFMNService]
-      val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
-      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
-      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
-        .thenReturn(Future(Some(fakePDVResponseData)))
-      when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
-        .thenReturn(Future.successful(RLSDLONFAResponse(SEE_OTHER, "some message")))
-
-
-      when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
-        .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
-
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[NPSFMNService].toInstance(mockNPSFMNService),
-            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
-            bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
-            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-          )
-          .build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, confirmYourPostcodeRoute)
-            .withFormUrlEncodedBody(("value", "AA1 1AA"))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.SendLetterErrorController.onPageLoad(NormalMode).url
-      }
-    }
-
-    "must redirect to Technical error page for a POST when NPS FMN API returns error status other than 202 and 400" in {
-      val mockSessionRepository = mock[SessionRepository]
-      val mockNPSFMNConnector = mock[NPSFMNConnector]
-      val mockNPSFMNService = mock[NPSFMNService]
-      val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
-      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
-      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
-        .thenReturn(Future(Some(fakePDVResponseData)))
-      when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
-        .thenReturn(Future.successful(TechnicalIssueResponse(SEE_OTHER, "some message")))
-
-
-      when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
-        .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
-
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[NPSFMNService].toInstance(mockNPSFMNService),
-            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
-            bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
-            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-          )
-          .build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, confirmYourPostcodeRoute)
-            .withFormUrlEncodedBody(("value", "AA1 1AA"))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.LetterTechnicalErrorController.onPageLoad().url
       }
     }
 
