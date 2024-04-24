@@ -17,9 +17,10 @@
 package controllers
 
 import base.SpecBase
-import connectors.IndividualDetailsConnector
+import connectors.{IndividualDetailsConnector, NPSFMNConnector}
 import forms.ConfirmYourPostcodeFormProvider
 import models.individualdetails._
+import models.nps.LetterIssuedResponse
 import models.pdv.{PDVResponseData, PersonalDetails}
 import models.{AddressLine, CorrelationId, IndividualDetailsResponseEnvelope, NormalMode, UserAnswers, individualdetails}
 import org.mockito.ArgumentMatchers.any
@@ -32,7 +33,7 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
-import services.PersonalDetailsValidationService
+import services.{NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.domain.Nino
 import views.html.ConfirmYourPostcodeView
 
@@ -338,6 +339,86 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to the confirmation page when valid nino is submitted to NPS FMN API" in {
+      val mockSessionRepository = mock[SessionRepository]
+      val mockNPSFMNConnector = mock[NPSFMNConnector]
+      val mockNPSFMNService = mock[NPSFMNService]
+      val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
+      when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
+        .thenReturn(Future.successful(LetterIssuedResponse()))
+
+
+      when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
+        .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
+
+      val application =
+        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NPSFMNService].toInstance(mockNPSFMNService),
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
+            bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          )
+          .build()
+
+      lazy val confirmYourPostcodeRoute: String = routes.ConfirmYourPostcodeController.onSubmit(NormalMode).url
+
+      running(application) {
+        val request =
+          FakeRequest(POST, confirmYourPostcodeRoute)
+            .withFormUrlEncodedBody(("value", "AA1 1AA"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.SelectNINOLetterAddressController.onPageLoad().url
+      }
+    }
+
+    "must redirect to the confirmation page when valid nino (with preceding whitespaces) is submitted to NPS FMN API" in {
+      val mockSessionRepository = mock[SessionRepository]
+      val mockNPSFMNConnector = mock[NPSFMNConnector]
+      val mockNPSFMNService = mock[NPSFMNService]
+      val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
+        .thenReturn(Future(Some(fakePDVResponseData)))
+      when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
+        .thenReturn(Future.successful(LetterIssuedResponse()))
+
+
+      when(mockIndividualDetailsConnector.getIndividualDetails(any(), anyValueType[ResolveMerge])(any(), any(), anyValueType[CorrelationId]))
+        .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
+
+      val application =
+        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NPSFMNService].toInstance(mockNPSFMNService),
+            bind[NPSFMNConnector].toInstance(mockNPSFMNConnector),
+            bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          )
+          .build()
+
+      lazy val confirmYourPostcodeRoute: String = routes.ConfirmYourPostcodeController.onSubmit(NormalMode).url
+
+      running(application) {
+        val request =
+          FakeRequest(POST, confirmYourPostcodeRoute)
+            .withFormUrlEncodedBody(("value", "  AA1 1AA"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.SelectNINOLetterAddressController.onPageLoad().url
       }
     }
   }

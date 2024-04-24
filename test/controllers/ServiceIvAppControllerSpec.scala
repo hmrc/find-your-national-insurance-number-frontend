@@ -17,7 +17,6 @@
 package controllers
 
 import base.SpecBase
-import controllers.actions.{DataRequiredAction, JourneyClosedActionImpl}
 import forms.ServiceIvAppFormProvider
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}

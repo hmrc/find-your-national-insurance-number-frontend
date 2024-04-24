@@ -144,4 +144,3 @@ confirmYourPostcode.h2=Nodwch eich cod post
 confirmYourPostcode.hint=Er enghraifft SW1A 2AA
 confirmYourPostcode.error.required=Nodwch eich cod post
 confirmYourPostcode.error.invalid=Nodwch god post yn y DU sy’n ddilys
-
