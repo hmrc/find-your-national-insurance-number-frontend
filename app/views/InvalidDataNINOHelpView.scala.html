@@ -34,7 +34,7 @@
     fullWidth = false
 ) {
 
-    <h1 class="govuk-heading-xl">@messages("invalidDataNinoHelp.heading")</h1>
+    <h1 class="govuk-heading-l">@messages("invalidDataNinoHelp.heading")</h1>
     <div class="govuk-inset-text">@messages("invalidDataNinoHelp.inset")</div>
     <p class="govuk-body">@messages("invalidDataNinoHelp.p1")</p>
 
@@ -46,7 +46,7 @@
         @govukRadios(
             RadiosViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("invalidDataNinoHelp.h2")).asPageSubHeading(LegendSize.Large),
+                legend = LegendViewModel(messages("invalidDataNinoHelp.h2")).asPageSubHeading(LegendSize.Medium),
                 items  = InvalidDataNINOHelp.options
             )
         )
