@@ -181,6 +181,30 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
       }
     }
 
+    "must redirect to logged out controller when there is no cached data" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(None))
+
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(
+          inject.bind[AuthConnector].toInstance(mockAuthConnector),
+          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        ).build()
+
+      running(application) {
+        val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
+          Helpers.GET,
+          controllers.routes.ValidDataNINOHelpController.onPageLoad(NormalMode).url
+        ).withSession(
+          SessionKeys.sessionId -> "id",
+          "UserAnswers" -> userAnswersJson.toString())
+
+        val result = route(application, fakeRequest).value
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual auth.routes.SignedOutController.onPageLoad.url
+      }
+    }
+
     "must redirect to the next page for a POST with valid data" in {
 
         when(mockAuthConnector.authorise[Option[CredentialRole] ~ Option[String]](

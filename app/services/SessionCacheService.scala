@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package repositories
+package services
 
-import models.pdv.PDVResponseData
+import repositories.{IndividualDetailsRepoTrait, PersonalDetailsValidationRepoTrait, SessionRepository}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-trait PersonalDetailsValidationRepoTrait {
-  def insertOrReplacePDVResultData(pdvResponseData: PDVResponseData)(implicit ec: ExecutionContext): Future[String]
-  def updateCustomerValidityWithReason(nino: String, validCustomer: Boolean, reason: String)(implicit ec: ExecutionContext): Future[String]
-  def updatePDVDataWithNPSPostCode(nino: String, npsPostCode: String)(implicit ec: ExecutionContext): Future[String]
-  def findByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]]
-  def clear(nino: String): Future[Boolean]
+class SessionCacheService @Inject()(sessionRepository: SessionRepository,
+                                  individualDetailsRepository: IndividualDetailsRepoTrait,
+                                  personalDetailsValidationRepository: PersonalDetailsValidationRepoTrait) {
+
+  def invalidateCache(nino: String, userId: String): Future[Boolean] = {
+    personalDetailsValidationRepository.clear(nino)
+    individualDetailsRepository.clear(nino)
+    sessionRepository.clear(userId)
+  }
+
 }

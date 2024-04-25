@@ -336,8 +336,28 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "must redirect to logged out controller when there is no cached data" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(None))
+
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, selectNINOLetterAddressRoute)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual auth.routes.SignedOutController.onPageLoad.url
+      }
+    }
+
     "must return OK and the correct view for a GET when user has come from confirm-your-postcode" in {
       val userAnswers: UserAnswers = UserAnswers(userAnswersId).set(ConfirmYourPostcodePage, "AA1 1AA").success.value
+
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataWithoutPostcode)))
 
