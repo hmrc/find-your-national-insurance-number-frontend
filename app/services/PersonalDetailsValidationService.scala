@@ -36,15 +36,14 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
                                                  pdvRepository: PersonalDetailsValidationRepoTrait
                                                 )(implicit val ec: ExecutionContext) extends Logging{
 
-  def createPDVDataFromPDVMatch(pdvRequest: PDVRequest)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[PDVResponseData] = {
+  def createPDVDataFromPDVMatch(pdvRequest: PDVRequest)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[PDVResponse] = {
     for {
       pdvResponse <- getPDVMatchResult(pdvRequest)
-      pdvResponseData <- createPDVDataRow(pdvResponse)
+      pdvResponse <- createPDVDataRow(pdvResponse)
     } yield {
-      pdvResponseData
+      pdvResponse
     }
   }
-
 
   // Get a PDV match result
   def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[PDVResponse] = {
@@ -65,7 +64,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
   }
 
   // Create a PDV data row
-  def createPDVDataRow(personalDetailsValidation: PDVResponse): Future[PDVResponseData] = {
+  def createPDVDataRow(personalDetailsValidation: PDVResponse): Future[PDVResponse] = {
     personalDetailsValidation match {
       case _@PDVSuccessResponse(pdvResponseData) =>
         (pdvResponseData.validationStatus.trim.toLowerCase, pdvResponseData.personalDetails) match {
@@ -75,17 +74,21 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
               val newPersonalDetails = personalDetails.copy(postCode = Some(reformattedPostCode))
               val newPDVResponseData = pdvResponseData.copy(personalDetails = Some(newPersonalDetails))
               pdvRepository.insertOrReplacePDVResultData(newPDVResponseData)
-              Future.successful(newPDVResponseData)
+              Future.successful(PDVSuccessResponse(newPDVResponseData))
             }
             else {
               pdvRepository.insertOrReplacePDVResultData(pdvResponseData)
-              Future.successful(pdvResponseData)
+              Future.successful(PDVSuccessResponse(pdvResponseData))
             }
           case ("failure", None) =>
-            Future.successful(pdvResponseData)
+            pdvRepository.insertOrReplacePDVResultData(pdvResponseData)
+            Future.successful(PDVSuccessResponse(pdvResponseData))
           case (_, None) =>
             Future.failed(new RuntimeException("PersonalDetails is None in PDVResponseData"))
         }
+      case pdvNotFoundResponse@PDVNotFoundResponse(_) =>
+        logger.warn(s"Failed creating PDV data row. PDV data not found.")
+        Future.successful(pdvNotFoundResponse)
       case _ =>
         logger.warn(s"Failed creating PDV data row.")
         throw new RuntimeException(s"Failed creating PDV data row.")
@@ -130,14 +133,12 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     }
   }
 
-  def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[PDVResponseData] = {
+  def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[PDVResponse] = {
     val p = for {
-      pdvData <- createPDVDataFromPDVMatch(body)
-    } yield pdvData match {
-      case data: PDVResponseData =>
-        data
-      case _ =>
-        throw new Exception("No PDV data found")
+      pdv <- createPDVDataFromPDVMatch(body)
+    } yield pdv match {
+      case pdvResponse: PDVResponse => pdvResponse
+      case _ => throw new Exception("PDV response could not be parsed.")
     }
     p.recover {
       case ex: Exception =>

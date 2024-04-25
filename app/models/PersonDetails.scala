@@ -17,7 +17,7 @@
 package models
 
 import org.apache.commons.lang3.StringUtils
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class PersonDetails(
                           person: Person,
@@ -29,5 +29,5 @@ object PersonDetails {
   implicit class PersonDetailsOps(private val pd: PersonDetails) extends AnyVal {
     def getPostCode: String = pd.address.map(_.getPostCode).getOrElse(StringUtils.EMPTY)
   }
-  implicit val formats = Json.format[PersonDetails]
+  implicit val formats: OFormat[PersonDetails] = Json.format[PersonDetails]
 }

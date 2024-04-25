@@ -24,7 +24,6 @@ import models._
 import pages._
 import play.api.mvc.Call
 import uk.gov.hmrc.http.HttpVerbs.GET
-import util.FMNConstants.FMNOrigin
 
 import javax.inject.{Inject, Singleton}
 

@@ -57,6 +57,17 @@ class AuditService @Inject()(auditConnector: AuditConnector
     )
   }
 
+  def findYourNinoPDVNoMatchData(origin: Option[String])(implicit headerCarrier: HeaderCarrier): Unit =
+    audit(
+      AuditUtils.buildAuditEvent(
+        personDetails = None,
+        auditType = "FindYourNinoPDVMatchFailed",
+        validationOutcome = "NoMatchData",
+        identifierType = EmptyString,
+        origin = origin
+      )
+    )
+
   def findYourNinoIdDataError(pdvData: PDVResponseData,
                               errorStatusCode: Option[String],
                               idDataError: IndividualDetailsError,

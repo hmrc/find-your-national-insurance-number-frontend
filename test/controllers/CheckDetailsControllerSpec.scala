@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import models.individualdetails._
-import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails}
+import models.pdv.{PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
 import models.requests.DataRequest
 import models.{AddressLine, NormalMode, individualdetails}
 import org.mockito.ArgumentMatchers.any
@@ -310,6 +310,32 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
 
+      "when PDV data not found" in {
+        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+            inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
+            inject.bind[AuditService].toInstance(auditService)
+          )
+          .build()
+
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any(), any()))
+          .thenReturn(Future.successful(
+            PDVNotFoundResponse(HttpResponse(404, "No association found"))
+          ))
+
+        running(app) {
+          val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
+          val result = route(app, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+
+          verify(auditService, times(1)).start()(any())
+        }
+
+      }
+
     }
 
     "must redirect to ValidDataNINOMatchedNINOHelpController" - {
@@ -318,13 +344,15 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
         import scala.concurrent.ExecutionContext.Implicits.global
         val mockPDVResponseDataSuccessWithoutNino = mockPDVResponseDataSuccess.copy(
-          personalDetails = Some(fakePersonDetails.copy(postCode = None))
+          pdvResponseData = mockPDVResponseDataSuccess.pdvResponseData.copy(
+            personalDetails = Some(fakePersonDetails.copy(postCode = None))
+          )
         )
 
         when(mockPersonalDetailsValidationService.getPDVData(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccessWithoutNino))
 
-        when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
+        when(mockIndividualDetailsService.getIdData(any[PDVResponse])(any()))
           .thenReturn(Future(Right(fakeIndividualDetails)))
 
         when(mockIndividualDetailsService.getNPSPostCode(any()))
@@ -358,7 +386,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockPersonalDetailsValidationService.getPDVData(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
-        when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
+        when(mockIndividualDetailsService.getIdData(any[PDVResponse])(any()))
           .thenReturn(Future(Right(fakeIndividualDetails)))
 
         when(mockIndividualDetailsService.getNPSPostCode(any()))
@@ -457,12 +485,12 @@ object CheckDetailsControllerSpec {
     addressList = AddressList(Some(List(fakeAddress)))
   )
 
-  val mockPDVResponseDataSuccess: PDVResponseData = PDVResponseData(
+  val mockPDVResponseDataSuccess: PDVSuccessResponse = PDVSuccessResponse(PDVResponseData(
     "01234",
     "success",
     Some(fakePersonDetails),
     LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
-  )
+  ))
 
   val headers: Map[String, Seq[String]] = Map(
     "CorrelationId" -> Seq("1118057e-fbbc-47a8-a8b4-78d9f015c253"),

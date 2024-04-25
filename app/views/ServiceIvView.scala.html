@@ -43,25 +43,22 @@
         <p class="govuk-body">@messages("ServiceIv.p1")</p>
         <p class="govuk-body">@messages("ServiceIv.p2")</p>
 
-        <div class="govuk-form-group">
-            <fieldset class="govuk-fieldset">
+        <div class="govuk-form-group @if(form.hasErrors){ form-group-error govuk-form-group--error}">
+            <fieldset class="govuk-fieldset" @if(form.hasErrors){ aria-describedby="error-message-input"}>
                 <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
                     @messages("ServiceIv.h2")
                 </legend>
 
-                <div class="govuk-form-group @if(form.hasErrors){ form-group-error govuk-form-group--error}">
                     @form.errors.map { error =>
-                        <span class="govuk-error-message margin-bottom-small" id="error-message-input">
-                            <span id="visually-hidden-error-prefix" class="govuk-visually-hidden">
-                                @messages("error.message.prefix")
-                            </span>
-                                 @messages(error.message, error.args: _*)
-                         </span>
+                        <p class="govuk-error-message margin-bottom-small" id="error-message-input">
+                            <span class="govuk-visually-hidden">@messages("error.message.prefix")</span>
+                            @messages(error.message, error.args: _*)
+                        </p>
                     }
                     <div class="govuk-checkboxes" data-module="govuk-checkboxes">
                         @ServiceIv.ivOptions.zipWithIndex.map { case (item, index) =>
                         <div class="govuk-checkboxes__item">
-                            <input class="govuk-checkboxes__input" id="value_@index" name="value[@index]" type="checkbox" value="@item" @checked(item)>
+                            <input class="govuk-checkboxes__input" id="value_@index" name="value[@index]" type="checkbox" value="@item" @if(form.data.keys.toSet.contains(s"value[$index]")){checked}>
                             <label class="govuk-label govuk-checkboxes__label" for="value_@index">
                                 @messages(s"ServiceIv.${item}")
                             </label>
@@ -74,13 +71,12 @@
                         }
                         <div class="govuk-checkboxes__divider">or</div>
                         <div class="govuk-checkboxes__item">
-                            <input class="govuk-checkboxes__input" id="value_7" name="value[7]" type="checkbox" value="noneOfTheAbove" data-behaviour="exclusive" @checked(NoneOfTheAbove)>
+                            <input class="govuk-checkboxes__input" id="value_7" name="value[7]" type="checkbox" value="noneOfTheAbove" data-behaviour="exclusive" @if(form.data.keys.toSet.contains("value[7]")){checked}>
                             <label class="govuk-label govuk-checkboxes__label" for="value_7">
                                 @messages(s"ServiceIv.noneOfTheAbove")
                             </label>
                         </div>
                     </div>
-                </div>
             </fieldset>
         </div>
 

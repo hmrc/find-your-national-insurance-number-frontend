@@ -39,7 +39,7 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
   implicit val hc: HeaderCarrier = HeaderCarrier()
   val userAnswersId: String = "id"
 
-  implicit val config = mock[FrontendAppConfig]
+  implicit val config: FrontendAppConfig = mock[FrontendAppConfig]
 
   def emptyUserAnswers : UserAnswers = UserAnswers(userAnswersId)
 
@@ -53,6 +53,24 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
     new GuiceApplicationBuilder()
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[ValidCustomerDataRequiredAction].to[ValidCustomerDataRequiredActionImpl],
+        bind[IdentifierAction].to[FakeIdentifierAction],
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+      )
+
+  protected def applicationBuilderCl50Off(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+    new GuiceApplicationBuilder()
+      .overrides(
+        bind[CL50DataRequiredAction].to[JourneyClosedActionImpl],
+        bind[ValidCustomerDataRequiredAction].to[ValidCustomerDataRequiredActionImpl],
+        bind[IdentifierAction].to[FakeIdentifierAction],
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+      )
+
+  protected def applicationBuilderCl50On(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+    new GuiceApplicationBuilder()
+      .overrides(
+        bind[CL50DataRequiredAction].to[CL50DataRequiredActionImpl],
         bind[ValidCustomerDataRequiredAction].to[ValidCustomerDataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
@@ -78,6 +96,6 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
 
   def injected[T](implicit evidence: ClassTag[T]): T = app.injector.instanceOf[T]
 
-  implicit lazy val cc = app.injector.instanceOf[MessagesControllerComponents]
+  implicit lazy val cc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
 
 }
