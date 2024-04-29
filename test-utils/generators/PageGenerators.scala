@@ -42,9 +42,6 @@ trait PageGenerators {
   implicit lazy val arbitrarySelectAlternativeServicePage: Arbitrary[SelectAlternativeServicePage.type] =
     Arbitrary(SelectAlternativeServicePage)
 
-  implicit lazy val arbitraryHaveSetUpGGUserIDPage: Arbitrary[HaveSetUpGGUserIDPage.type] =
-    Arbitrary(HaveSetUpGGUserIDPage)
-
   implicit lazy val arbitrarySelectNINOLetterAddressPage: Arbitrary[SelectNINOLetterAddressPage.type] =
     Arbitrary(SelectNINOLetterAddressPage)
 

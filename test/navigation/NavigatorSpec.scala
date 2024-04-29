@@ -19,7 +19,6 @@ package navigation
 import base.SpecBase
 import controllers.routes
 import controllers.auth
-import models.HaveSetUpGGUserID.{No, Yes}
 import models.ServiceIv._
 import models._
 import pages._
@@ -36,10 +35,10 @@ class NavigatorSpec extends SpecBase {
 
     "When normalRoutes" - {
       "for any other page" - {
-        "must always go to IndexController" in {
+        "must always go to journey recovery" in {
           val page = mock[Page] // replace with a specific instance of Page
           val userAnswers = UserAnswers("id") // replace with a specific instance of UserAnswers
-          navigator.nextPage(page, NormalMode, userAnswers) mustBe routes.IndexController.onPageLoad
+          navigator.nextPage(page, NormalMode, userAnswers) mustBe routes.JourneyRecoveryController.onPageLoad()
         }
       }
     }
@@ -131,14 +130,14 @@ class NavigatorSpec extends SpecBase {
 
     "When on ServiceIvAppPage" - {
       "when the answer is Yes" - {
-        "must go to SetUpGGUserIDStartController" in {
+        "must go to store" in {
           val userAnswers = UserAnswers("id").set(ServiceIvAppPage, true).success.value
           navigator.nextPage(ServiceIvAppPage, NormalMode, userAnswers) mustBe auth.routes.AuthController.redirectToSMN
         }
       }
 
       "when the answer is No" - {
-        "must go to SetUpGGUserIDStartController" in {
+        "must go to PostLetterController" in {
           val userAnswers = UserAnswers("id").set(ServiceIvAppPage, false).success.value
           navigator.nextPage(ServiceIvAppPage, NormalMode, userAnswers) mustBe routes.PostLetterController.onPageLoad()
         }
@@ -147,43 +146,16 @@ class NavigatorSpec extends SpecBase {
 
     "When on PostLetterPage" - {
       "when the answer is Yes" - {
-        "must go to SetUpGGUserIDStartController" in {
+        "must go to TracingWhatYouNeedController" in {
           val userAnswers = UserAnswers("id").set(PostLetterPage, true).success.value
           navigator.nextPage(PostLetterPage, NormalMode, userAnswers) mustBe routes.TracingWhatYouNeedController.onPageLoad()
         }
       }
 
       "when the answer is No" - {
-        "must go to SetUpGGUserIDStartController" in {
+        "must go to SelectAlternativeServiceController" in {
           val userAnswers = UserAnswers("id").set(PostLetterPage, false).success.value
           navigator.nextPage(PostLetterPage, NormalMode, userAnswers) mustBe routes.SelectAlternativeServiceController.onPageLoad()
-        }
-      }
-    }
-
-    "When on HaveSetUpGGUserIDPage" - {
-
-      "when the answer is No" - {
-
-        "must go to SetUpGGUserIDStartController" in {
-          val userAnswers = UserAnswers("id").set(HaveSetUpGGUserIDPage, No).success.value
-          navigator.nextPage(HaveSetUpGGUserIDPage, NormalMode, userAnswers) mustBe routes.SetUpGGUserIDStartController.onPageLoad()
-        }
-      }
-
-      "when the answer is Yes" - {
-
-        "must redirect to SMN" in {
-          val userAnswers = UserAnswers("id").set(HaveSetUpGGUserIDPage, Yes).success.value
-          navigator.nextPage(HaveSetUpGGUserIDPage, NormalMode, userAnswers) mustBe controllers.auth.routes.AuthController.redirectToSMN
-        }
-      }
-
-      "when there is no answer" - {
-
-        "must go to SetUpGGUserIDStartController" in {
-          val userAnswers = UserAnswers("id")
-          navigator.nextPage(HaveSetUpGGUserIDPage, NormalMode, userAnswers) mustBe routes.SetUpGGUserIDStartController.onPageLoad()
         }
       }
     }
