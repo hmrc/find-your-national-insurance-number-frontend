@@ -194,9 +194,9 @@ serviceIvApp.h2 = Can you download an app to your mobile device?
 
 postLetter.title = You will not be able to access your National Insurance number online
 postLetter.heading = You will not be able to access your National Insurance number online
-postLetter.p1 = This is because you do not have the documents to confirm your identity.
+postLetter.p1 = This is because you are unable to prove your identity.
 postLetter.p2 = You can instead use this service to get your number posted to the address HMRC has on record for you.
-postLetter.p3 = We will not tell you your National Insurance number over the phone.
+postLetter.p3 = We will not tell you your National Insurance number over the phone or on webchat.
 postLetter.error.required = Select yes if you like us to post your number to you
 postLetter.h2 = Would you like us to post your number to you?
 
