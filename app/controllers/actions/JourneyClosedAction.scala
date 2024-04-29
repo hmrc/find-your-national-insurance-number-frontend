@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package repositories
+package controllers.actions
 
-import models.pdv.PDVResponseData
+import models.requests.{DataRequest, OptionalDataRequest}
+import play.api.mvc.Result
+import play.api.mvc.Results.Redirect
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-trait PersonalDetailsValidationRepoTrait {
-  def insertOrReplacePDVResultData(pdvResponseData: PDVResponseData)(implicit ec: ExecutionContext): Future[String]
-  def updateCustomerValidityWithReason(nino: String, validCustomer: Boolean, reason: String)(implicit ec: ExecutionContext): Future[String]
-  def updatePDVDataWithNPSPostCode(nino: String, npsPostCode: String)(implicit ec: ExecutionContext): Future[String]
-  def findByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]]
-  def clear(nino: String): Future[Boolean]
+// TODO - can be removed when the CL50 journey toggle is removed
+class JourneyClosedActionImpl @Inject()(implicit val executionContext: ExecutionContext) extends CL50DataRequiredAction {
+
+  override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {
+      Future.successful(Left(Redirect(controllers.auth.routes.AuthController.redirectToSMN)))
+  }
 }

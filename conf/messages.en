@@ -14,6 +14,7 @@ error.browser.title.prefix = Error:
 error.boolean = Please give an answer
 error.required = Please enter a value
 error.summary.title = There is a problem
+error.message.prefix = Error:
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service

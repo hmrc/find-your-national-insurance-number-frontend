@@ -85,11 +85,12 @@ class IndividualDetailsConnectorSpec
 
   }
 }
+
 trait IndividualDetailsConnectorFixture extends MockFactory {
   implicit val hc:            HeaderCarrier = HeaderCarrier()
   implicit val correlationId: CorrelationId = CorrelationId.random
 
-  val metrics = new Metrics {
+  val metrics: Metrics = new Metrics {
     override def defaultRegistry: MetricRegistry = new MetricRegistry()
   }
 
@@ -104,7 +105,6 @@ trait IndividualDetailsConnectorFixture extends MockFactory {
   val httpClient: HttpClient       = mock[HttpClient]
   val appConfig:  FrontendAppConfig  = new FrontendAppConfig(myconfig, myServicesConfig)
   val ec:         ExecutionContext = implicitly[ExecutionContext]
-
 
   val name = Name(
     NameSequenceNumber(1),

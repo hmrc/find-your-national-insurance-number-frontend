@@ -19,11 +19,12 @@ package controllers
 import cacheables.OriginCacheable
 import controllers.actions._
 import forms.LetterTechnicalErrorFormProvider
-import models.Mode
+import models.{LetterTechnicalError, Mode}
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
 import pages.LetterTechnicalErrorPage
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.{SessionRepository, TryAgainCountRepository}
@@ -49,22 +50,16 @@ class LetterTechnicalErrorController @Inject()(
                                                 view: LetterTechnicalErrorView
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  val form = formProvider()
+  val form: Form[LetterTechnicalError] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) async {
     implicit request =>
-
-      val preparedForm = request.userAnswers.get(LetterTechnicalErrorPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
-
       for {
         retryAllowed <- tryAgainCountRepository.findById(request.userId).map {
           case Some (value) => if (value.count >= 5) {false} else {true}
           case None => true
         }
-      } yield Ok(view(preparedForm, mode, retryAllowed))
+      } yield Ok(view(form, mode, retryAllowed))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {

@@ -25,7 +25,7 @@ import models.{NormalMode, SelectNINOLetterAddress, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.SelectNINOLetterAddressPage
+import pages.{ConfirmYourPostcodePage, SelectNINOLetterAddressPage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -60,7 +60,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
     )),
     validCustomer = Some("true"),
     CRN = Some("fakeCRN"),
-    npsPostCode = Some("AA1 1AA"),
+    npsPostCode = None,
     reason = None
   )
 
@@ -336,11 +336,11 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must throw IllegalArgumentException when there is no postcode present in PDV data" in {
+    "must redirect to logged out controller when there is no cached data" in {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
-        .thenReturn(Future.successful(Some(fakePDVResponseDataWithoutPostcode)))
+        .thenReturn(Future.successful(None))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder(userAnswers = None)
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -348,10 +348,32 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request = FakeRequest(GET, selectNINOLetterAddressRoute)
+        val result = route(application, request).value
 
-        a[IllegalArgumentException] should be thrownBy {
-          await(route(application, request).value)
-        }
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual auth.routes.SignedOutController.onPageLoad.url
+      }
+    }
+
+    "must return OK and the correct view for a GET when user has come from confirm-your-postcode" in {
+      val userAnswers: UserAnswers = UserAnswers(userAnswersId).set(ConfirmYourPostcodePage, "AA1 1AA").success.value
+
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseDataWithoutPostcode)))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, selectNINOLetterAddressRoute)
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[SelectNINOLetterAddressView]
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
       }
     }
   }
