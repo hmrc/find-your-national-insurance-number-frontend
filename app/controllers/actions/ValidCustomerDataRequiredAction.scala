@@ -16,17 +16,19 @@
 
 package controllers.actions
 
+import config.FrontendAppConfig
 import models.UserAnswers
 import models.requests.{DataRequest, OptionalDataRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
 import services.PersonalDetailsValidationService
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationService: PersonalDetailsValidationService)
+class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationService: PersonalDetailsValidationService, config: FrontendAppConfig)
                                                    (implicit val executionContext: ExecutionContext) extends ValidCustomerDataRequiredAction {
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {
@@ -49,7 +51,8 @@ class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationSer
       case _ =>
         // No PDV data; check the user answers cache. If no user answers then no session.
         if (request.userAnswers.isEmpty) {
-          Left(Redirect(controllers.auth.routes.SignedOutController.onPageLoad).withNewSession)
+          //Left(Redirect(controllers.auth.routes.SignedOutController.onPageLoad).withNewSession)
+          Left(Redirect(controllers.auth.routes.AuthController.signout(None, None)))
         } else {
           Left(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
         }
