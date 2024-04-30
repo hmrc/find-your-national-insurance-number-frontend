@@ -51,7 +51,6 @@ class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationSer
       case _ =>
         // No PDV data; check the user answers cache. If no user answers then no session.
         if (request.userAnswers.isEmpty) {
-          //Left(Redirect(controllers.auth.routes.SignedOutController.onPageLoad).withNewSession)
           Left(Redirect(controllers.auth.routes.AuthController.signout(None, None)))
         } else {
           Left(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
