@@ -86,7 +86,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[NINOLetterPostedConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view()(request, messages).toString
 
         verify(mockSessionCacheService, times(1)).invalidateCache(any(), any())
       }
@@ -114,7 +114,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[NINOLetterPostedConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view()(request, messages).toString
 
         verify(mockSessionCacheService, times(1)).invalidateCache(any(), any())
       }
