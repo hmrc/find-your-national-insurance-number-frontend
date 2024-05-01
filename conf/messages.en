@@ -39,16 +39,16 @@ ninoLetterPostedConfirmation.heading = Your National Insurance number will be se
 ninoLetterPostedConfirmation.letterArrival = We’ll post the letter confirming your number. It will arrive within 15 days.
 ninoLetterPostedConfirmation.goBackToGovUK = Exit and go back to GOV.UK
 
-selectAlternativeService.title = What would you like to do instead?
-selectAlternativeService.heading = What would you like to do instead?
+selectAlternativeService.title = You will need to contact HMRC for your National Insurance number
+selectAlternativeService.heading = You will need to contact HMRC for your National Insurance number
+selectAlternativeService.heading.2 = What would you like to do?
 selectAlternativeService.printForm = Print and post a form
 selectAlternativeService.printForm.hint = Once we have received the completed form, we can send you a letter confirming your National Insurance number.
 selectAlternativeService.phoneHMRC = Phone HMRC
-selectAlternativeService.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it. We will not tell you your National Insurance number over the phone.
+selectAlternativeService.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it.
 selectAlternativeService.error.required = Tell us what you would like to do
-selectAlternativeService.options = These are your options if you:
-selectAlternativeService.options.l1 = are not able to get your National Insurance number online
-selectAlternativeService.options.l2 = previously selected ‘No’ or ‘Not to this address’
+selectAlternativeService.p1 = HMRC will not tell you your National Insurance number over the phone or on webchat.
+selectAlternativeService.p2 = We will post it to you and it will arrive within 15 working days.
 
 phoneHMRCDetails.title = Phone HMRC for a letter with your National Insurance number on it
 phoneHMRCDetails.heading = Phone HMRC for a letter with your National Insurance number on it

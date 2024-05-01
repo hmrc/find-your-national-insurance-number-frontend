@@ -88,7 +88,7 @@ class SelectAlternativeServiceControllerSpec extends SpecBase with MockitoSugar 
         val view = application.injector.instanceOf[SelectAlternativeServiceView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view(form, NormalMode)(request, messages).toString
       }
     }
 
@@ -113,7 +113,7 @@ class SelectAlternativeServiceControllerSpec extends SpecBase with MockitoSugar 
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(SelectAlternativeService.values.head), NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view(form.fill(SelectAlternativeService.values.head), NormalMode)(request, messages).toString
       }
     }
 
@@ -168,7 +168,7 @@ class SelectAlternativeServiceControllerSpec extends SpecBase with MockitoSugar 
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view(boundForm, NormalMode)(request, messages).toString
       }
     }
   }

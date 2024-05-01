@@ -98,4 +98,8 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
 
   implicit lazy val cc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
 
+  implicit class StringOps(s: String) {
+    def removeAllNonces(): String = s.replaceAll("""nonce="[^"]*"""", "")
+  }
+
 }
