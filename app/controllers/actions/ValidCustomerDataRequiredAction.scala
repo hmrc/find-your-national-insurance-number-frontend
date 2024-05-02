@@ -16,6 +16,7 @@
 
 package controllers.actions
 
+import cacheables.LetterSubmittedCacheable
 import config.FrontendAppConfig
 import models.UserAnswers
 import models.requests.{DataRequest, OptionalDataRequest}
@@ -31,6 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationService: PersonalDetailsValidationService, config: FrontendAppConfig)
                                                    (implicit val executionContext: ExecutionContext) extends ValidCustomerDataRequiredAction {
 
+  // TODO - refactor this!
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {
     personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map {
       case Some(pdvData) =>
@@ -43,15 +45,23 @@ class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationSer
               )
               Right(DataRequest(request.request, request.userId, userAnswers, request.credId))
             case Some(data) =>
-              Right(DataRequest(request.request, request.userId, data, request.credId))
+              data.get(LetterSubmittedCacheable) match {
+                case Some(value) => if (value.toLowerCase == "true") {
+                  // Letter already submitted. Logout and exit survey
+                  Left(Redirect(controllers.auth.routes.AuthController.signout(None, None)))
+                } else {
+                  Right(DataRequest(request.request, request.userId, data, request.credId))
+                }
+                case _ => Right(DataRequest(request.request, request.userId, data, request.credId))
+              }
           }
         } else {
           Left(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
         }
       case _ =>
-        // No PDV data; check the user answers cache. If no user answers then no session.
+        // No PDV data; check the user answers cache. If no user answers then cache expired.
         if (request.userAnswers.isEmpty) {
-          Left(Redirect(controllers.auth.routes.AuthController.signout(None, None)))
+          Left(Redirect(controllers.auth.routes.SignedOutController.onPageLoad))
         } else {
           Left(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
         }

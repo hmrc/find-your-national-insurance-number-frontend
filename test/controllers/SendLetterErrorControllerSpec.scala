@@ -222,7 +222,7 @@ class SendLetterErrorControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual auth.routes.AuthController.signout(None, None).url
+        redirectLocation(result).value mustEqual controllers.auth.routes.SignedOutController.onPageLoad.url
       }
     }
   }

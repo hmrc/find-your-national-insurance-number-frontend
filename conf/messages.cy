@@ -31,7 +31,7 @@ selectNINOLetterAddress.error.required=Rhowch wybod i ni i ble yr hoffech i’r 
 ninoLetterPostedConfirmation.title=Bydd eich rhif Yswiriant Gwladol yn cael ei anfon drwy’r post
 ninoLetterPostedConfirmation.heading=Bydd eich rhif Yswiriant Gwladol yn cael ei anfon drwy’r post
 ninoLetterPostedConfirmation.letterArrival=Byddwn yn postio’r llythyr sy’n cadarnhau’ch rhif. Bydd hwn yn cyrraedd cyn pen 15 diwrnod.
-ninoLetterPostedConfirmation.goBackToGovUK=Gadael ac yn ôl i GOV.UK
+ninoLetterPostedConfirmation.goBackToGovUK=???
 
 selectAlternativeService.title = Bydd angen i chi gysylltu â CThEF am eich rhif Yswiriant Gwladol
 selectAlternativeService.heading = Bydd angen i chi gysylltu â CThEF am eich rhif Yswiriant Gwladol
