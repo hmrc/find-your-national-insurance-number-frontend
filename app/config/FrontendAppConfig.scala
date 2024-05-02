@@ -34,9 +34,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   private val contactHost = configuration.get[String]("contact-frontend.host")
   private val contactFormServiceIdentifier = "find-your-national-insurance-number"
 
-  val gtmContainer: String = configuration.get[String]("tracking-consent-frontend.gtm.container")
-  val trackingHost: String = getExternalUrl(s"tracking-frontend.host").getOrElse("")
-  val trackingServiceUrl = s"$trackingHost/track"
   val enc = URLEncoder.encode(_: String, "UTF-8")
 
   def feedbackUrl(implicit request: RequestHeader): String =
@@ -83,16 +80,12 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   val hmrcExtraSupportUrl: String = configuration.get[String]("urls.hmrcExtraSupport")
   val callChargesUrl: String = configuration.get[String]("urls.callCharges")
 
-  val accessibilityStatementToggle: Boolean =
-    configuration.getOptional[Boolean](s"accessibility-statement.toggle").getOrElse(false)
-
   val accessibilityBaseUrl: String = servicesConfig.getString("accessibility-statement.baseUrl")
   private val accessibilityRedirectUrl =
     servicesConfig.getString("accessibility-statement.redirectUrl")
 
   def accessibilityStatementUrl(referrer: String) =
     s"$accessibilityBaseUrl/accessibility-statement$accessibilityRedirectUrl?referrerUrl=${SafeRedirectUrl(accessibilityBaseUrl + referrer).encodedUrl}"
-
 
   def individualDetails: DesApiServiceConfig =
     DesApiServiceConfig(configuration.get[Configuration]("microservice.services.individual-details"))
