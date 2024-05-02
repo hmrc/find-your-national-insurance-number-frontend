@@ -48,7 +48,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         val application =
           applicationBuilder(None)
             .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-            .configure("features.sca-wrapper-enabled" -> true)
             .build()
 
         running(application) {
@@ -71,7 +70,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         val application =
           applicationBuilder(None)
             .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-            .configure("features.sca-wrapper-enabled" -> false)
             .build()
 
         running(application) {
@@ -93,7 +91,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         val application =
           applicationBuilder(None)
             .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-            .configure("features.sca-wrapper-enabled" -> false)
             .build()
 
         running(application) {

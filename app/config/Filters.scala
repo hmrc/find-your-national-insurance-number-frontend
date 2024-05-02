@@ -27,12 +27,9 @@ import javax.inject.{Inject, Singleton};
 class Filters @Inject()(
                          defaultFilters: EnabledFilters,
                          wrapperDataFilter: WrapperDataFilter,
-                         appConfig: FrontendAppConfig
                        ) extends HttpFilters {
 
-  override val filters: Seq[EssentialFilter] = {
-    defaultFilters.filters ++
-      Option.when(appConfig.SCAWrapperEnabled)(wrapperDataFilter)
-  }
+  override val filters: Seq[EssentialFilter] =
+    defaultFilters.filters ++ Option(wrapperDataFilter)
 }
 // $COVERAGE-ON$

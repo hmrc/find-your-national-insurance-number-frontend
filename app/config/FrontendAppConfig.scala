@@ -63,9 +63,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   def getBasGatewayFrontendSignOutUrl(continueUrl: String): String =
     basGatewayFrontendHost + s"/bas-gateway/sign-out-without-state?continue=$continueUrl"
 
-  val languageTranslationEnabled: Boolean =
-    configuration.get[Boolean]("features.welsh-translation")
-
   def languageMap: Map[String, Lang] = Map(
     "en" -> Lang("en"),
     "cy" -> Lang("cy")
@@ -85,8 +82,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
 
   val hmrcExtraSupportUrl: String = configuration.get[String]("urls.hmrcExtraSupport")
   val callChargesUrl: String = configuration.get[String]("urls.callCharges")
-
-  val SCAWrapperEnabled: Boolean = configuration.getOptional[Boolean]("features.sca-wrapper-enabled").getOrElse(false)
 
   val accessibilityStatementToggle: Boolean =
     configuration.getOptional[Boolean](s"accessibility-statement.toggle").getOrElse(false)
