@@ -16,11 +16,10 @@
 
 package forms
 
-import forms.behaviours.OptionFieldBehaviours
-import models.SelectNINOLetterAddress
+import forms.behaviours.BooleanFieldBehaviours
 import play.api.data.FormError
 
-class SelectNINOLetterAddressFormProviderSpec extends OptionFieldBehaviours {
+class SelectNINOLetterAddressFormProviderSpec extends BooleanFieldBehaviours {
 
   val form = new SelectNINOLetterAddressFormProvider()()
 
@@ -28,12 +27,12 @@ class SelectNINOLetterAddressFormProviderSpec extends OptionFieldBehaviours {
 
     val fieldName = "value"
     val requiredKey = "selectNINOLetterAddress.error.required"
+    val invalidKey = "error.boolean"
 
-    behave like optionsField[SelectNINOLetterAddress](
+    behave like booleanField(
       form,
       fieldName,
-      validValues  = SelectNINOLetterAddress.values,
-      invalidError = FormError(fieldName, "error.invalid")
+      invalidError = FormError(fieldName, invalidKey)
     )
 
     behave like mandatoryField(

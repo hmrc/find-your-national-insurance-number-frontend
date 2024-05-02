@@ -225,18 +225,18 @@ class NavigatorSpec extends SpecBase {
 
     "When on SelectNINOLetterAddressPage" - {
 
-      "when the answer is Postcode" - {
+      "when the answer is yes" - {
 
         "must go to NINOLetterPostedConfirmationController" in {
-          val userAnswers = UserAnswers("id").set(SelectNINOLetterAddressPage, SelectNINOLetterAddress.Postcode).success.value
+          val userAnswers = UserAnswers("id").set(SelectNINOLetterAddressPage, true).success.value
           navigator.nextPage(SelectNINOLetterAddressPage, NormalMode, userAnswers) mustBe routes.NINOLetterPostedConfirmationController.onPageLoad()
         }
       }
 
-      "when the answer is NotThisAddress" - {
+      "when the answer is no" - {
 
         "must go to SelectAlternativeServiceController" in {
-          val userAnswers = UserAnswers("id").set(SelectNINOLetterAddressPage, SelectNINOLetterAddress.NotThisAddress).success.value
+          val userAnswers = UserAnswers("id").set(SelectNINOLetterAddressPage, false).success.value
           navigator.nextPage(SelectNINOLetterAddressPage, NormalMode, userAnswers) mustBe routes.SelectAlternativeServiceController.onPageLoad(mode = NormalMode)
         }
       }

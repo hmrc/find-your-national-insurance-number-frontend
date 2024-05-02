@@ -23,7 +23,7 @@ import models.errors._
 import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.PDVResponseData
 import models.requests.DataRequest
-import models.{IndividualDetailsNino, Mode, SelectNINOLetterAddress, UserAnswers}
+import models.{IndividualDetailsNino, Mode, UserAnswers}
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
 import pages.{ConfirmYourPostcodePage, SelectNINOLetterAddressPage}
@@ -60,7 +60,7 @@ class SelectNINOLetterAddressController @Inject()(
                                                    npsFMNService: NPSFMNService
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  val form: Form[SelectNINOLetterAddress] = formProvider()
+  val form: Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
@@ -100,12 +100,13 @@ class SelectNINOLetterAddressController @Inject()(
               case Failure(_) => Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
               case Success(uA) =>
                 sessionRepository.set(uA)
+                val auditValue = if (value.toString.equals("true")) "postCode" else "notThisAddress"
                 uA.get(SelectNINOLetterAddressPage) match {
-                  case Some(SelectNINOLetterAddress.NotThisAddress) =>
-                    auditAddress(pdvData, nino, value.toString, uA)
+                  case Some(false) =>
+                    auditAddress(pdvData, nino, auditValue, uA)
                     Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA)))
-                  case Some(SelectNINOLetterAddress.Postcode) =>
-                    sendLetter(nino, pdvData, value.toString, uA, mode)
+                  case Some(true) =>
+                    sendLetter(nino, pdvData, auditValue, uA, mode)
                 }
             }
           }

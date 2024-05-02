@@ -28,11 +28,12 @@ signedOut.guidance = We did not save your answers.
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
 
-selectNINOLetterAddress.title = Where would you like the letter sent?
-selectNINOLetterAddress.heading = Where would you like the letter sent?
-selectNINOLetterAddress.postCode = To the address with the postcode
-selectNINOLetterAddress.notThisAddress = Not to this address
-selectNINOLetterAddress.error.required = Tell us where you would like the letter sent
+selectNINOLetterAddress.title = HMRC can send your National Insurance number letter to this postcode
+selectNINOLetterAddress.heading = HMRC can send your National Insurance number letter to this postcode
+selectNINOLetterAddress.h2 = Would you like your National Insurance number posted there?
+selectNINOLetterAddress.postcode = Postcode
+selectNINOLetterAddress.inset = This service can only post your number to the address with this postcode.
+selectNINOLetterAddress.error.required = Select yes if you would like the letter posted to you
 
 ninoLetterPostedConfirmation.title = Your National Insurance number will be sent by post
 ninoLetterPostedConfirmation.heading = Your National Insurance number will be sent by post
@@ -72,14 +73,14 @@ phoneHMRCDetails.findOutCallCharges = <a href="{0}" class="govuk-link" target="_
 
 ninoHelpView.title = HMRC can post your National Insurance number to you
 ninoHelpView.heading = HMRC can post your National Insurance number to you
-ninoHelpView.inset = HMRC will not tell you your National Insurance number over the phone.
-ninoHelpView.p1 = You can request a letter with your number on it. It’ll then arrive within 15 working days.
+ninoHelpView.inset = HMRC will not tell you your National Insurance number over the phone or on webchat.
+ninoHelpView.p1 = You can use this service to get your number posted to the address HMRC has on record for you.
 ninoHelpView.h2 = Would you like your number posted to you?
-ninoHelpView.error.required = Select an option to continue
+ninoHelpView.error.required = Select yes if you would like your number posted to you
 
 invalidDataNinoHelp.title = HMRC can post your National Insurance number to you
 invalidDataNinoHelp.heading = HMRC can post your National Insurance number to you
-invalidDataNinoHelp.inset = HMRC will not tell you your National Insurance number over the phone.
+invalidDataNinoHelp.inset = HMRC will not tell you your National Insurance number over the phone or on webchat.
 invalidDataNinoHelp.p1 = You can request a letter with your number on it. It’ll then arrive within 15 working days.
 invalidDataNinoHelp.h2 = How would you like to ask HMRC to post your number to you?
 invalidDataNinoHelp.printForm = Print and post a form
@@ -122,9 +123,10 @@ enteredPostCodeNotFound.error.required = Tell us what you would like to do
 
 validDataNINOMatchedNINOHelp.title = Get your National Insurance number posted to you on a letter
 validDataNINOMatchedNINOHelp.heading = Get your National Insurance number posted to you on a letter
-validDataNINOMatchedNINOHelp.p1 = If you need your number on a letter, HMRC can post it to you. It’ll then arrive within 15 working days.
+validDataNINOMatchedNINOHelp.p1 = You can request a letter with your number on it.
+validDataNINOMatchedNINOHelp.inset = This service can only use the address HMRC has on record for you.
 validDataNINOMatchedNINOHelp.h2 = Would you like the letter posted to you?
-validDataNINOMatchedNINOHelp.error.required = Select an option to continue
+validDataNINOMatchedNINOHelp.error.required = Select yes if you would like the letter posted to you
 
 confirmYourPostcode.title = You need to confirm your postcode
 confirmYourPostcode.heading = You need to confirm your postcode

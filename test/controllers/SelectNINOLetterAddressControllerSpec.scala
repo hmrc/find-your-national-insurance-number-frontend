@@ -21,7 +21,7 @@ import connectors.NPSFMNConnector
 import forms.SelectNINOLetterAddressFormProvider
 import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.{PDVResponseData, PersonalDetails}
-import models.{NormalMode, SelectNINOLetterAddress, UserAnswers}
+import models.{NormalMode, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
@@ -116,7 +116,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseData)))
 
-      val userAnswers = UserAnswers(userAnswersId).set(SelectNINOLetterAddressPage, SelectNINOLetterAddress.values.head).success.value
+      val userAnswers = UserAnswers(userAnswersId).set(SelectNINOLetterAddressPage, true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -132,11 +132,11 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form.fill(SelectNINOLetterAddress.values.head), NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view(form.fill(true), NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
       }
     }
 
-    "must redirect to the confirmation page and call NPS FMN letter API when the to this address option is selected with valid data" in {
+    "must redirect to the confirmation page and call NPS FMN letter API when yes option is selected with valid data" in {
 
       val mockSessionRepository = mock[SessionRepository]
       val mockNPSFMNConnector = mock[NPSFMNConnector]
@@ -161,7 +161,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, selectNINOLetterAddressRoute)
-            .withFormUrlEncodedBody(("value", SelectNINOLetterAddress.values.head.toString))
+            .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
 
@@ -171,7 +171,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to service alternatives and not call NPS FMN letter API when the not to this address option is selected" in {
+    "must redirect to service alternatives and not call NPS FMN letter API when no option is selected" in {
       val mockSessionRepository = mock[SessionRepository]
       val mockNPSFMNConnector = mock[NPSFMNConnector]
       val mockNPSFMNService = mock[NPSFMNService]
@@ -195,7 +195,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, selectNINOLetterAddressRoute)
-            .withFormUrlEncodedBody(("value", SelectNINOLetterAddress.NotThisAddress.toString))
+            .withFormUrlEncodedBody(("value", "false"))
 
         val result = route(application, request).value
         status(result) mustEqual SEE_OTHER
@@ -229,7 +229,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, selectNINOLetterAddressRoute)
-            .withFormUrlEncodedBody(("value", SelectNINOLetterAddress.values.head.toString))
+            .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
 
@@ -289,7 +289,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, selectNINOLetterAddressRoute)
-            .withFormUrlEncodedBody(("value", SelectNINOLetterAddress.values.head.toString))
+            .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
 
