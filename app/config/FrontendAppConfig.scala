@@ -20,8 +20,6 @@ import com.google.inject.{Inject, Singleton}
 import controllers.bindable.Origin
 import play.api.Configuration
 import play.api.i18n.Lang
-import play.api.mvc.RequestHeader
-import uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import java.net.URLEncoder
 
@@ -31,27 +29,16 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   val host: String    = configuration.get[String]("host")
   val appName: String = configuration.get[String]("appName")
 
-  private val contactHost = configuration.get[String]("contact-frontend.host")
-  private val contactFormServiceIdentifier = "find-your-national-insurance-number"
-
   val enc = URLEncoder.encode(_: String, "UTF-8")
 
-  def feedbackUrl(implicit request: RequestHeader): String =
-    s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${SafeRedirectUrl(host + request.uri).encodedUrl}"
-
   val loginUrl: String           = configuration.get[String]("urls.login")
-  val signOutUrl: String         = configuration.get[String]("urls.signOut")
   val registerUrl: String        = configuration.get[String]("urls.register")
   val storeMyNinoUrl: String     = configuration.get[String]("urls.storeMyNinoUrl")
   val fmnCheckDetailsUrl: String = configuration.get[String]("urls.fmnCheckDetailsUrl")
 
-  private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
-  val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/find-your-national-insurance-number"
-
   val feedbackSurveyFrontendHost = getExternalUrl(s"feedback-survey-frontend.host").getOrElse("")
   val basGatewayFrontendHost = getExternalUrl(s"bas-gateway-frontend.host").getOrElse("")
 
-  val defaultOrigin: Origin = Origin("FIND_MY_NINO")
   private def getExternalUrl(key: String): Option[String] =
     configuration.getOptional[String](s"external-url.$key")
   def getFeedbackSurveyUrl(origin: Origin): String =
@@ -65,9 +52,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
     "cy" -> Lang("cy")
   )
 
-  val timeout: Int   = configuration.get[Int]("timeout-dialog.timeout")
-  val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
-
   val cacheTtl: Int = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
   val pdvBaseUrl: String = configuration.get[Service]("microservice.services.personal-details-validation").baseUrl
@@ -79,13 +63,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
 
   val hmrcExtraSupportUrl: String = configuration.get[String]("urls.hmrcExtraSupport")
   val callChargesUrl: String = configuration.get[String]("urls.callCharges")
-
-  val accessibilityBaseUrl: String = servicesConfig.getString("accessibility-statement.baseUrl")
-  private val accessibilityRedirectUrl =
-    servicesConfig.getString("accessibility-statement.redirectUrl")
-
-  def accessibilityStatementUrl(referrer: String) =
-    s"$accessibilityBaseUrl/accessibility-statement$accessibilityRedirectUrl?referrerUrl=${SafeRedirectUrl(accessibilityBaseUrl + referrer).encodedUrl}"
 
   def individualDetails: DesApiServiceConfig =
     DesApiServiceConfig(configuration.get[Configuration]("microservice.services.individual-details"))
@@ -105,13 +82,10 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
 
   val npsFMNAPIUrl: String = s"$npsFMNAPIProtocol://$npsFMNAPIHost:$npsFMNAPIPort$npsFMNAPIBaseUrl"
 
-  def cacheSecretKey:String = configuration.get[String]("cache.secret-key")
-
   // banners
   val showAlphaBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-alpha")
   val showBetaBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-beta")
   val showHelpImproveBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-help-improve")
-  val showChildBenefitBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-child-benefit")
 
   val npsFMNAppStatusMessageList:String = configuration.get[String]("npsfmn.app-status-message-list")
 

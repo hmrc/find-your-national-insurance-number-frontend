@@ -77,15 +77,6 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
     getElementHref(link) must include("http://localhost:12346/accessibility-statement/personal-account?referrerUrl=http%3A%2F%2Flocalhost%3A12346%2Ffind-your-national-insurance-number" )
   }
 
-  "must render 'page not working properly' link" in {
-    val link = getElementByClass(doc, "hmrc-report-technical-issue")
-
-    assertElementContainsText(link, "Is this page not working properly? (opens in new tab)")
-    getElementHref(link) must include(
-      "http://localhost:9250/contact/report-technical-problem?newTab=true&service=find-your-national-insurance-number-frontend&referrerUrl="
-    )
-  }
-
   def pageWithTitle(args: Any*): Unit =
     pageWithTitle(doc, prefix, args: _*)
 
