@@ -171,13 +171,13 @@ serviceIvApp.error.required =
 serviceIvApp.p1 = Bydd angen i chi ddefnyddio ap a chamera eich dyfais symudol i baru’ch wyneb â’r llun ar eich pasbort neu drwydded yrru’r DU.
 serviceIvApp.h2 = Allwch chi lawrlwytho ap i’ch dyfais symudol?
 
-postLetter.title =
-postLetter.heading =
-postLetter.p1 =
-postLetter.p2 =
-postLetter.p3 =
-postLetter.error.required =
-postLetter.h2 =
+postLetter.title = Ni allwch gael mynediad i’ch rhif Yswiriant Gwladol ar-lein
+postLetter.heading = Ni allwch gael mynediad i’ch rhif Yswiriant Gwladol ar-lein
+postLetter.p1 = Mae hyn oherwydd nad oes gennych y dogfennau i gadarnhau pwy ydych chi.
+postLetter.p2 = Yn lle hynny, gallwch ddefnyddio’r gwasanaeth hwn i gael eich rhif wedi’i bostio i’r cyfeiriad sydd gan CThEF ar eich cyfer.
+postLetter.p3 = Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
+postLetter.error.required = Dewiswch ‘Iawn’ os hoffech i ni bostio eich rhif i chi
+postLetter.h2 = Hoffech chi i ni bostio’ch rhif i chi?
 
 tracingWhatYouNeed.heading =
 tracingWhatYouNeed.title =
