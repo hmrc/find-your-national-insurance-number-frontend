@@ -34,19 +34,21 @@
     fullWidth = false
 ) {
 
-    <h1 class="govuk-heading-xl">@messages("invalidDataNinoHelp.heading")</h1>
+    @if(form.errors.nonEmpty) {
+        @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
+    }
+
+    <h1 class="govuk-heading-l">@messages("invalidDataNinoHelp.heading")</h1>
+
     <div class="govuk-inset-text">@messages("invalidDataNinoHelp.inset")</div>
     <p class="govuk-body">@messages("invalidDataNinoHelp.p1")</p>
 
     @formHelper(action = routes.InvalidDataNINOHelpController.onSubmit(mode), 'autoComplete -> "off") {
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
-        }
         @govukRadios(
             RadiosViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("invalidDataNinoHelp.h2")).asPageSubHeading(LegendSize.Large),
+                legend = LegendViewModel(messages("invalidDataNinoHelp.h2")).asPageSubHeading(LegendSize.Medium),
                 items  = InvalidDataNINOHelp.options
             )
         )

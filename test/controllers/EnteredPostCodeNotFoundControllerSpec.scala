@@ -88,7 +88,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[EnteredPostCodeNotFoundView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view(form, NormalMode)(request, messages).toString
       }
     }
 
@@ -111,7 +111,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(EnteredPostCodeNotFound.values.head), NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view(form.fill(EnteredPostCodeNotFound.values.head), NormalMode)(request, messages).toString
       }
     }
 
@@ -166,7 +166,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view(boundForm, NormalMode)(request, messages).toString
       }
     }
 
@@ -205,6 +205,25 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to logged out controller when there is no cached data" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(None))
+
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, enteredPostCodeNotFoundRoute)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual auth.routes.SignedOutController.onPageLoad.url
       }
     }
   }

@@ -19,7 +19,9 @@ package controllers
 import controllers.actions._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.SessionCacheService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import util.FMNConstants.EmptyString
 import views.html.NINOLetterPostedConfirmationView
 
 import javax.inject.Inject
@@ -30,11 +32,15 @@ class NINOLetterPostedConfirmationController @Inject()(
                                        getData: DataRetrievalAction,
                                        requireValidData: ValidCustomerDataRequiredAction,
                                        val controllerComponents: MessagesControllerComponents,
-                                       view: NINOLetterPostedConfirmationView
+                                       view: NINOLetterPostedConfirmationView,
+                                       sessionCacheService: SessionCacheService
                                      ) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>
+      val nino = request.session.data.getOrElse("nino", EmptyString)
+      sessionCacheService.invalidateCache(nino, request.userId)
       Ok(view())
   }
+
 }

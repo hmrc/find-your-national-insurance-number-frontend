@@ -79,14 +79,6 @@ trait UserAnswersEntryGenerators extends PageGenerators with ModelGenerators {
         value <- arbitrary[SelectAlternativeService].map(Json.toJson(_))
       } yield (page, value)
     }
-  
-  implicit lazy val arbitraryHaveSetUpGGUserIDUserAnswersEntry: Arbitrary[(HaveSetUpGGUserIDPage.type, JsValue)] =
-    Arbitrary {
-      for {
-        page  <- arbitrary[HaveSetUpGGUserIDPage.type]
-        value <- arbitrary[HaveSetUpGGUserID].map(Json.toJson(_))
-      } yield (page, value)
-    }
 
   implicit lazy val arbitrarySelectNINOLetterAddressUserAnswersEntry: Arbitrary[(SelectNINOLetterAddressPage.type, JsValue)] =
   Arbitrary {

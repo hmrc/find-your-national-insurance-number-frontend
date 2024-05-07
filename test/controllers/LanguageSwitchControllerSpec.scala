@@ -34,8 +34,9 @@ class LanguageSwitchControllerSpec extends SpecBase with Results with MockitoSug
 
     "return the fallback URL" in {
       when(appConfig.languageMap).thenReturn(Map("en" -> Lang("en"), "fr" -> Lang("fr")))
+      when(appConfig.fmnGuidancePageUrl).thenReturn("/foo")
       val result = controller.fallbackURL
-      result mustBe routes.IndexController.onPageLoad.url
+      result mustBe "/foo"
     }
 
     "return the language map" in {

@@ -43,7 +43,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${SafeRedirectUrl(host + request.uri).encodedUrl}"
 
   val loginUrl: String           = configuration.get[String]("urls.login")
-  val loginContinueUrl: String   = configuration.get[String]("urls.loginContinue")
   val signOutUrl: String         = configuration.get[String]("urls.signOut")
   val registerUrl: String        = configuration.get[String]("urls.register")
   val storeMyNinoUrl: String     = configuration.get[String]("urls.storeMyNinoUrl")

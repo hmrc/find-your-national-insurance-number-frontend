@@ -21,8 +21,7 @@ import controllers.actions._
 import forms.ConfirmYourPostcodeFormProvider
 import models.errors.IndividualDetailsError
 import models.individualdetails.Address
-import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.PDVResponseData
 import models.{IndividualDetailsNino, Mode, NormalMode, UserAnswers}
 import pages.ConfirmYourPostcodePage
 import play.api.Logging
@@ -30,12 +29,11 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
-import services.{AuditService, CheckDetailsService, IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
+import services.{AuditService, IndividualDetailsService, PersonalDetailsValidationService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.FMNConstants.EmptyString
 import util.FMNHelper.comparePostCode
-import util.FMNHelper
 import views.html.ConfirmYourPostcodeView
 
 import javax.inject.Inject
@@ -52,9 +50,7 @@ class ConfirmYourPostcodeController @Inject()(
                                         view: ConfirmYourPostcodeView,
                                         personalDetailsValidationService: PersonalDetailsValidationService,
                                         individualDetailsService: IndividualDetailsService,
-                                        npsFMNService: NPSFMNService,
-                                        auditService: AuditService,
-                                        checkDetailsService: CheckDetailsService
+                                        auditService: AuditService
                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[String] = formProvider()
@@ -84,7 +80,7 @@ class ConfirmYourPostcodeController @Inject()(
             idAddress <- individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino))
             redirectBasedOnMatch <- pdvData match {
               case Some(pdvValidData) =>
-                checkUserEnteredPostcodeMatchWithNPSPostCode(mode, userEnteredPostCode, idAddress, pdvValidData, updatedAnswers)
+                checkUserEnteredPostcodeMatchWithNPSPostCode(userEnteredPostCode, idAddress, pdvValidData, updatedAnswers)
               case None => throw new IllegalArgumentException("No pdv data found")
             }
           } yield redirectBasedOnMatch
@@ -92,8 +88,7 @@ class ConfirmYourPostcodeController @Inject()(
       )
   }
 
-  private def checkUserEnteredPostcodeMatchWithNPSPostCode(mode: Mode,
-                                                           userEnteredPostCode: String,
+  private def checkUserEnteredPostcodeMatchWithNPSPostCode(userEnteredPostCode: String,
                                                            idAddress: Either[IndividualDetailsError, Address],
                                                            pdvValidData: PDVResponseData,
                                                            userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Result] =
@@ -103,36 +98,11 @@ class ConfirmYourPostcodeController @Inject()(
           case Right(idAddr) =>
             auditService.findYourNinoConfirmPostcode(userEnteredPostCode, Some(idAddr), Some(pdvValidData), Some("true"), userAnswers.get(OriginCacheable))
         }
-        npsLetterChecks(pdvValidData, mode, userAnswers)
+        Future(Redirect(routes.SelectNINOLetterAddressController.onPageLoad()))
       case None =>
         throw new IllegalArgumentException("nps postcode missing")
       case _ =>
         auditService.findYourNinoConfirmPostcode(userEnteredPostCode, None, Some(pdvValidData), Some("false"), userAnswers.get(OriginCacheable))
         Future(Redirect(routes.EnteredPostCodeNotFoundController.onPageLoad(mode = NormalMode)))
     }
-
-  private def npsLetterChecks(personalDetailsResponse: PDVResponseData, mode: Mode, userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Result] = {
-    personalDetailsResponse.personalDetails match {
-      case Some(personalDetails: PersonalDetails) =>
-        for {
-          idData <- individualDetailsService.getIndividualDetailsData(personalDetails.nino.nino)
-          status <- npsFMNService.sendLetter(personalDetails.nino.nino, FMNHelper.createNPSFMNRequest(idData))
-        } yield status match {
-          case LetterIssuedResponse() =>
-            Redirect(routes.NINOLetterPostedConfirmationController.onPageLoad())
-          case RLSDLONFAResponse(responseStatus, responseMessage) =>
-            auditService.findYourNinoTechnicalError(personalDetailsResponse, personalDetails, responseStatus, responseMessage, userAnswers.get(OriginCacheable))
-            Redirect(routes.SendLetterErrorController.onPageLoad(mode))
-          case TechnicalIssueResponse(responseStatus, responseMessage) =>
-            auditService.findYourNinoTechnicalError(personalDetailsResponse, personalDetails, responseStatus, responseMessage, userAnswers.get(OriginCacheable))
-            Redirect(routes.LetterTechnicalErrorController.onPageLoad())
-          case _ =>
-            logger.warn("Unknown NPS FMN API response")
-            Redirect(routes.LetterTechnicalErrorController.onPageLoad())
-        }
-      case None =>
-        throw new IllegalArgumentException("No personal details data found")
-    }
-  }
-
 }

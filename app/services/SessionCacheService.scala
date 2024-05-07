@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package forms
+package services
+
+import repositories.{IndividualDetailsRepoTrait, PersonalDetailsValidationRepoTrait, SessionRepository}
 
 import javax.inject.Inject
+import scala.concurrent.Future
 
-import forms.mappings.Mappings
-import play.api.data.Form
-import models.HaveSetUpGGUserID
+class SessionCacheService @Inject()(sessionRepository: SessionRepository,
+                                  individualDetailsRepository: IndividualDetailsRepoTrait,
+                                  personalDetailsValidationRepository: PersonalDetailsValidationRepoTrait) {
 
-class HaveSetUpGGUserIDFormProvider @Inject() extends Mappings {
+  def invalidateCache(nino: String, userId: String): Future[Boolean] = {
+    personalDetailsValidationRepository.clear(nino)
+    individualDetailsRepository.clear(nino)
+    sessionRepository.clear(userId)
+  }
 
-  def apply(): Form[HaveSetUpGGUserID] =
-    Form(
-      "value" -> enumerable[HaveSetUpGGUserID]("haveSetUpGGUserID.error.required")
-    )
 }

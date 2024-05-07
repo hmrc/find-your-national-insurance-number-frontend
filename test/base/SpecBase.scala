@@ -58,6 +58,24 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
       )
 
+  protected def applicationBuilderCl50Off(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+    new GuiceApplicationBuilder()
+      .overrides(
+        bind[CL50DataRequiredAction].to[JourneyClosedActionImpl],
+        bind[ValidCustomerDataRequiredAction].to[ValidCustomerDataRequiredActionImpl],
+        bind[IdentifierAction].to[FakeIdentifierAction],
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+      )
+
+  protected def applicationBuilderCl50On(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+    new GuiceApplicationBuilder()
+      .overrides(
+        bind[CL50DataRequiredAction].to[CL50DataRequiredActionImpl],
+        bind[ValidCustomerDataRequiredAction].to[ValidCustomerDataRequiredActionImpl],
+        bind[IdentifierAction].to[FakeIdentifierAction],
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+      )
+
   protected def applicationBuilderWithConfig(
                                               config: Map[String, Any] = Map(),
                                               userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
@@ -79,5 +97,9 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
   def injected[T](implicit evidence: ClassTag[T]): T = app.injector.instanceOf[T]
 
   implicit lazy val cc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+
+  implicit class StringOps(s: String) {
+    def removeAllNonces(): String = s.replaceAll("""nonce="[^"]*"""", "")
+  }
 
 }

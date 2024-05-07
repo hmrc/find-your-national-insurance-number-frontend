@@ -19,11 +19,11 @@ package controllers
 import base.SpecBase
 import models.pdv.{PDVResponseData, PersonalDetails}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{reset, times, verify, when}
 import play.api.inject
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.PersonalDetailsValidationService
+import services.{PersonalDetailsValidationService, SessionCacheService}
 import uk.gov.hmrc.domain.Nino
 import views.html.NINOLetterPostedConfirmationView
 
@@ -32,8 +32,9 @@ import scala.concurrent.Future
 
 class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
 
-  lazy val ninoLetterPostedConfirmationRoute = routes.NINOLetterPostedConfirmationController.onPageLoad().url
+  lazy val ninoLetterPostedConfirmationRoute: String = routes.NINOLetterPostedConfirmationController.onPageLoad().url
   val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
+  val mockSessionCacheService: SessionCacheService = mock[SessionCacheService]
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
@@ -51,6 +52,12 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
     reason = None
   )
 
+  override def beforeEach(): Unit = {
+    reset(
+      mockSessionCacheService
+    )
+  }
+
   val fakePDVResponseDataInvalidCustomer: PDVResponseData = fakePDVResponseData.copy(
     validCustomer = Some("false")
   )
@@ -62,9 +69,12 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
+      when(mockSessionCacheService.invalidateCache(any(), any())).thenReturn(Future.successful(true))
+
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
-          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+          inject.bind[SessionCacheService].toInstance(mockSessionCacheService),
         )
         .build()
 
@@ -76,45 +86,37 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[NINOLetterPostedConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view()(request, messages).toString
+
+        verify(mockSessionCacheService, times(1)).invalidateCache(any(), any())
       }
     }
 
-    "must redirect to unauthorised controller when the user is not a valid customer" in {
+    "must return OK and the correct view for a GET when cache invalidation fails" in {
+
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
-        .thenReturn(Future.successful(Some(fakePDVResponseDataInvalidCustomer)))
+        .thenReturn(Future.successful(Some(fakePDVResponseData)))
+
+      when(mockSessionCacheService.invalidateCache(any(), any())).thenReturn(Future.successful(false))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
-          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+          inject.bind[SessionCacheService].toInstance(mockSessionCacheService),
         )
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, ninoLetterPostedConfirmationRoute)
+        val request = FakeRequest(GET, routes.NINOLetterPostedConfirmationController.onPageLoad().url)
+
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
-      }
-    }
+        val view = application.injector.instanceOf[NINOLetterPostedConfirmationView]
 
-    "must redirect to journey recovery controller when there is no PDV data" in {
-      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
-        .thenReturn(Future.successful(None))
+        status(result) mustEqual OK
+        contentAsString(result).removeAllNonces mustEqual view()(request, messages).toString
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(
-          inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(GET, ninoLetterPostedConfirmationRoute)
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        verify(mockSessionCacheService, times(1)).invalidateCache(any(), any())
       }
     }
   }
