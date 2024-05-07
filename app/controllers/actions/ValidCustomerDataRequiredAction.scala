@@ -47,7 +47,7 @@ class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationSer
           Left(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
         }
       case _ =>
-        // No PDV data; check the user answers cache. If no user answers then no session.
+        // No PDV data; check the user answers cache. If no user answers then clear session (new X-Session-ID)
         if (request.userAnswers.isEmpty) {
           Left(Redirect(controllers.auth.routes.SignedOutController.onPageLoad).withNewSession)
         } else {
