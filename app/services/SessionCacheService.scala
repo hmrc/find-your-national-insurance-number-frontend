@@ -19,7 +19,7 @@ package services
 import repositories.{IndividualDetailsRepoTrait, PersonalDetailsValidationRepoTrait, SessionRepository}
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class SessionCacheService @Inject()(sessionRepository: SessionRepository,
                                   individualDetailsRepository: IndividualDetailsRepoTrait,

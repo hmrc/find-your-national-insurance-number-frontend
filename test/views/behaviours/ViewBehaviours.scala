@@ -62,12 +62,6 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
     }
   }
 
-  "must render service name link in header" in {
-    val link = getElementByClass(doc, "hmrc-header__service-name--linked")
-    assertElementContainsText(link, "Find your National Insurance number")
-    assertElementContainsHref(link, "/find-your-national-insurance-number/how-to-find-online")
-  }
-
   "must append service to feedback link" in {
     val link = getElementBySelector(doc, ".govuk-phase-banner__text > .govuk-link")
     getElementHref(link) must include("http://localhost:9250/contact/beta-feedback?service=find-your-national-insurance-number-frontend&backUrl=http%3A%2F%2Flocalhost%3A14033")

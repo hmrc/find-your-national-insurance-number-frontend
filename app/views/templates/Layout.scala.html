@@ -80,7 +80,7 @@
 }
 
 @additionalScripts = {
-    <script src='@controllers.routes.Assets.versioned("javascripts/app.js")'></script>
+    <script @CSPNonce.attr src='@controllers.routes.Assets.versioned("javascripts/app.js")'></script>
 }
 
 @accountMenu = @{ None }
@@ -115,7 +115,7 @@
 @hmrcLayout(
     pageTitle = Some(pageTitle),
     serviceName = Some(Messages("service.name")),
-    serviceUrl = Some("/find-your-national-insurance-number/how-to-find-online"),
+    serviceUrl = None,
     signOutUrl = if (showSignOutInHeader) Some(controllers.auth.routes.AuthController.signout(Some(RedirectUrl(config.getFeedbackSurveyUrl(config.defaultOrigin))), Some(config.defaultOrigin)).url) else None,
     isWelshTranslationAvailable = true,
     accessibilityStatementUrl = Some(config.accessibilityStatementUrl(request.uri)),
