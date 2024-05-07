@@ -19,6 +19,7 @@ package controllers.actions
 import cacheables.LetterSubmittedCacheable
 import config.FrontendAppConfig
 import models.UserAnswers
+import models.pdv.PDVResponseData
 import models.requests.{DataRequest, OptionalDataRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
@@ -44,27 +45,23 @@ class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationSer
                 lastUpdated = Instant.now(java.time.Clock.systemUTC())
               )
               Right(DataRequest(request.request, request.userId, userAnswers, request.credId))
-            case Some(data) =>
-              data.get(LetterSubmittedCacheable) match {
-                case Some(value) => if (value.toLowerCase == "true") {
+            case Some(uA) =>
+              uA.get(LetterSubmittedCacheable) match {
+                case Some(isSubmitted) => if (isSubmitted.toLowerCase == "true") {
                   // Letter already submitted. Logout and exit survey
                   Left(Redirect(controllers.auth.routes.AuthController.signout(None, None)))
                 } else {
-                  Right(DataRequest(request.request, request.userId, data, request.credId))
+                  Right(DataRequest(request.request, request.userId, uA, request.credId))
                 }
-                case _ => Right(DataRequest(request.request, request.userId, data, request.credId))
+                case _ => Right(DataRequest(request.request, request.userId, uA, request.credId))
               }
           }
         } else {
           Left(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
         }
       case _ =>
-        // No PDV data; check the user answers cache. If no user answers then cache expired.
-        if (request.userAnswers.isEmpty) {
-          Left(Redirect(controllers.auth.routes.SignedOutController.onPageLoad))
-        } else {
-          Left(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
-        }
+        // If no PDV data we can't proceed. Cache expiry. End session and start over
+        Left(Redirect(controllers.auth.routes.SignedOutController.onPageLoad))
     }
   }
 }
