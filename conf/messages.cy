@@ -138,6 +138,7 @@ ServiceIv.payslipOrP60 = Slip cyflog neu P60
 ServiceIv.hint.payslipOrP60 = Bydd llawer o gyflogwyr yn rhoi P60 i chi sy’n dangos y dreth rydych wedi’i thalu ar eich cyflog yn ystod y flwyddyn dreth.
 ServiceIv.selfAssessment = Ffurflen Dreth Hunanasesiad wedi’i llenwi ar gyfer y flwyddyn dreth ddiwethaf
 #Or
+ServiceIv.or = neu
 ServiceIv.noneOfTheAbove = Nid oes gennyf yr un o’r eitemau hyn
 
 serviceIvApp.title = Lawrlwythwch ap i gadarnhau pwy ydych
