@@ -149,7 +149,7 @@ serviceIvApp.h2 = Allwch chi lawrlwytho ap i’ch dyfais symudol?
 
 postLetter.title = Ni allwch gael mynediad i’ch rhif Yswiriant Gwladol ar-lein
 postLetter.heading = Ni allwch gael mynediad i’ch rhif Yswiriant Gwladol ar-lein
-postLetter.p1 = Mae hyn oherwydd na allwch brofi pwy ydych chi
+postLetter.p1 = Mae hyn oherwydd na allwch brofi pwy ydych chi.
 postLetter.p2 = Yn lle hynny, gallwch ddefnyddio’r gwasanaeth hwn i gael eich rhif wedi’i bostio i’r cyfeiriad sydd gan CThEF ar eich cyfer.
 postLetter.p3 = Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
 postLetter.error.required = Dewiswch ‘Iawn’ os hoffech i ni bostio eich rhif i chi
