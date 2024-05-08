@@ -58,22 +58,11 @@ trait LayoutProvider {
            ): HtmlFormat.Appendable
 }
 
-class OldLayoutProvider @Inject()(layout: views.html.templates.Layout) extends LayoutProvider {
-
-  //noinspection ScalaStyle
-  override def apply(pageTitle: String, showBackLinkJS: Boolean, timeout: Boolean, showSignOut: Boolean,
-                     stylesheets: Option[Html], fullWidth: Boolean, accountHome: Boolean, yourProfileActive: Boolean,
-                     hideAccountMenu: Boolean, backLinkUrl: Option[String],
-                     disableSessionExpired: Boolean, sidebarContent: Option[Html], messagesActive: Boolean,
-                     showSignOutInHeader: Boolean, bannerConfig: BannerConfig)(contentBlock: Html)
-                    (implicit request: Request[_], messages: Messages): HtmlFormat.Appendable = {
-    layout(pageTitle, showBackLinkJS, timeout, showSignOut, showSignOutInHeader, stylesheets, fullWidth, accountHome, yourProfileActive,
-      hideAccountMenu, backLinkUrl, disableSessionExpired, sidebarContent, messagesActive)(contentBlock)
-  }
-}
-
-class NewLayoutProvider @Inject()(wrapperService: WrapperService, additionalScript: AdditionalScript,
-                                  headBlock: HeadBlock, appConfig: FrontendAppConfig) extends LayoutProvider with Logging {
+class NewLayoutProvider @Inject()(wrapperService: WrapperService,
+                                  additionalScript: AdditionalScript,
+                                  headBlock: HeadBlock,
+                                  appConfig: FrontendAppConfig
+                                 ) extends LayoutProvider with Logging {
 
   lazy val newLayoutBannerConfig: BannerConfig = BannerConfig(
     showAlphaBanner = appConfig.showAlphaBanner,

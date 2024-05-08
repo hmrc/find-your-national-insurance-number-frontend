@@ -22,14 +22,13 @@ import controllers.actions._
 import repositories.{EncryptedIndividualDetailsRepository, EncryptedPersonalDetailsValidationRepository,
   IndividualDetailsRepoTrait, IndividualDetailsRepository,
   PersonalDetailsValidationRepoTrait, PersonalDetailsValidationRepository}
-import views.html.templates.{LayoutProvider, NewLayoutProvider, OldLayoutProvider}
+import views.html.templates.{LayoutProvider, NewLayoutProvider}
 
 import java.time.{Clock, ZoneOffset}
 
 // $COVERAGE-OFF$
 class Module(environment: Environment, config: Configuration) extends AbstractModule {
 
-  private val scaWrapperEnabled   = config.getOptional[Boolean]("features.sca-wrapper-enabled").getOrElse(false)
   private val encryptionEnabled   = config.get[Boolean]("mongodb.encryption.enabled")
   private val cl50Toggle: Boolean = config.get[Boolean]("features.cl50")
 
@@ -51,11 +50,7 @@ class Module(environment: Environment, config: Configuration) extends AbstractMo
 
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
 
-    if (scaWrapperEnabled) {
-      bind(classOf[LayoutProvider]).to(classOf[NewLayoutProvider]).asEagerSingleton()
-    } else {
-      bind(classOf[LayoutProvider]).to(classOf[OldLayoutProvider]).asEagerSingleton()
-    }
+    bind(classOf[LayoutProvider]).to(classOf[NewLayoutProvider]).asEagerSingleton()
 
     if (encryptionEnabled) {
       bind(classOf[IndividualDetailsRepoTrait])

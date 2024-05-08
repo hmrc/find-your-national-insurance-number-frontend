@@ -40,7 +40,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
 
     "signOut" - {
 
-      "must clear user answers and redirect to sign out, specifying the exit survey as the continue URL when the sca wrapper is enabled" in {
+      "must clear user answers and redirect to sign out, specifying the exit survey as the continue URL" in {
 
         val mockSessionRepository = mock[SessionRepository]
         when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
@@ -48,7 +48,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         val application =
           applicationBuilder(None)
             .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-            .configure("features.sca-wrapper-enabled" -> true)
             .build()
 
         running(application) {
@@ -60,28 +59,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
 
           status(result) mustEqual SEE_OTHER
 
-        }
-      }
-
-      "must clear user answers and redirect to sign out, specifying the exit survey as the continue URL when the sca wrapper is disabled" in {
-
-        val mockSessionRepository = mock[SessionRepository]
-        when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
-
-        val application =
-          applicationBuilder(None)
-            .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-            .configure("features.sca-wrapper-enabled" -> false)
-            .build()
-
-        running(application) {
-
-          val sentLocation = "http://example.com&origin=FIND_MY_NINO"
-          val request = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), Some(Origin("FIND_MY_NINO"))).url)
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
         }
       }
 
@@ -93,7 +70,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         val application =
           applicationBuilder(None)
             .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-            .configure("features.sca-wrapper-enabled" -> false)
             .build()
 
         running(application) {
