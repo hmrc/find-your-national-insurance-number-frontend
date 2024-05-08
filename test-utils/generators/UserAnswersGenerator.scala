@@ -35,7 +35,6 @@ trait UserAnswersGenerator extends TryValues {
     arbitrary[(ConfirmYourPostcodePage.type, JsValue)] ::
     arbitrary[(SelectAlternativeServicePage.type, JsValue)] ::
     arbitrary[(SelectNINOLetterAddressPage.type, JsValue)] ::
-    arbitrary[(HaveSetUpGGUserIDPage.type, JsValue)] ::
     Nil
 
   implicit lazy val arbitraryUserData: Arbitrary[UserAnswers] = {

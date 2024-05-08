@@ -111,11 +111,11 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[LetterTechnicalErrorView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, true)(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view(form, NormalMode, true)(request, messages).toString
       }
     }
 
-    "must populate the view correctly on a GET when the question has previously been answered" in {
+    "must not populate any value in the view on a GET when the question has previously been answered" in {
 
       val userAnswers = UserAnswers(userAnswersId).set(LetterTechnicalErrorPage, LetterTechnicalError.values.head).success.value
       val mockTryAgainCountRepository = mock[TryAgainCountRepository]
@@ -139,7 +139,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(LetterTechnicalError.values.head), NormalMode, true)(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view(form, NormalMode, true)(request, messages).toString
       }
     }
 
@@ -309,6 +309,25 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to logged out controller when there is no cached data" in {
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(None))
+
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, letterTechnicalErrorRoute)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual auth.routes.SignedOutController.onPageLoad.url
       }
     }
   }

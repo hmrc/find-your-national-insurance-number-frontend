@@ -134,4 +134,11 @@ class EncryptedPersonalDetailsValidationRepository @Inject()(
         }
       }
   }
+  def clear(nino: String): Future[Boolean] = {
+    val filter = Filters.equal("personalDetails.nino", nino)
+    collection
+      .deleteOne(filter)
+      .toFuture
+      .map(_ => true)
+  }
 }

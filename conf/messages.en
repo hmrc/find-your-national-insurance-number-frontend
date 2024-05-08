@@ -14,21 +14,7 @@ error.browser.title.prefix = Error:
 error.boolean = Please give an answer
 error.required = Please enter a value
 error.summary.title = There is a problem
-
-index.title = How to find your National Insurance number online
-index.heading = How to find your National Insurance number online
-index.p1 = You can get a reminder or official confirmation of your National Insurance number online.
-index.whatYouWillNeedToDo.heading = What you’ll need to do
-index.whatYouWillNeedToDo.p1 = You’ll need to do 3 things.
-index.setUpOrLogInUsingGG.heading = 1. Set up or log in using Government Gateway
-index.setUpOrLogInUsingGG.p1 = You’ll just need an email and phone number.
-index.tellUsWhoYouAre.heading = 2. Tell us who you are
-index.tellUsWhoYouAre.p1 = You’ll need to provide your name, date of birth and your postcode.
-index.tellUsWhoYouAre.p2 = We always ask if you know your National Insurance number, so just select ‘No’.
-index.confirmYourIdentity.heading = 3. Confirm your identity
-index.confirmYourIdentity.p1 = To prove who you are, you can choose to use:
-index.confirmYourIdentity.l1.li1 = identity documents including a passport and UK photocard driving licence
-index.confirmYourIdentity.l1.li2 = details from your P60, Self Assessment or credit record
+error.message.prefix = Error:
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
@@ -42,23 +28,6 @@ signedOut.guidance = We did not save your answers.
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
 
-setUpGGUserIDStart.title = Set up a Government Gateway user ID
-setUpGGUserIDStart.heading = Set up a Government Gateway user ID
-setUpGGUserIDStart.p1 = You’ll need:
-setUpGGUserIDStart.l1.li1 = an email address
-setUpGGUserIDStart.l1.li2 = a phone number or an authenticator app
-
-haveSetUpGGUserID.title = Have you set up a Government Gateway user ID before?
-haveSetUpGGUserID.heading = Have you set up a Government Gateway user ID before?
-haveSetUpGGUserID.p1 = To check if you have, search your email for ‘Government Gateway ID’. Your user ID may be included in an email we have sent you.
-haveSetUpGGUserID.p2 = You may have set one up to:
-haveSetUpGGUserID.l1.li1 = access your personal tax account to check your records with HMRC
-haveSetUpGGUserID.l1.li2 = sign up for another online government service
-haveSetUpGGUserID.yes = Yes
-haveSetUpGGUserID.no = No
-haveSetUpGGUserID.notSure = Not sure
-haveSetUpGGUserID.error.required = Select an option to continue
-
 selectNINOLetterAddress.title = Where would you like the letter sent?
 selectNINOLetterAddress.heading = Where would you like the letter sent?
 selectNINOLetterAddress.postCode = To the address with the postcode
@@ -70,16 +39,16 @@ ninoLetterPostedConfirmation.heading = Your National Insurance number will be se
 ninoLetterPostedConfirmation.letterArrival = We’ll post the letter confirming your number. It will arrive within 15 days.
 ninoLetterPostedConfirmation.goBackToGovUK = Exit and go back to GOV.UK
 
-selectAlternativeService.title = What would you like to do instead?
-selectAlternativeService.heading = What would you like to do instead?
+selectAlternativeService.title = You will need to contact HMRC for your National Insurance number
+selectAlternativeService.heading = You will need to contact HMRC for your National Insurance number
+selectAlternativeService.heading.2 = What would you like to do?
 selectAlternativeService.printForm = Print and post a form
 selectAlternativeService.printForm.hint = Once we have received the completed form, we can send you a letter confirming your National Insurance number.
 selectAlternativeService.phoneHMRC = Phone HMRC
-selectAlternativeService.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it. We will not tell you your National Insurance number over the phone.
+selectAlternativeService.phoneHMRC.hint = You’ll need to answer some questions, then we’ll post you a letter with your number on it.
 selectAlternativeService.error.required = Tell us what you would like to do
-selectAlternativeService.options = These are your options if you:
-selectAlternativeService.options.l1 = are not able to get your National Insurance number online
-selectAlternativeService.options.l2 = previously selected ‘No’ or ‘Not to this address’
+selectAlternativeService.p1 = HMRC will not tell you your National Insurance number over the phone or on webchat.
+selectAlternativeService.p2 = We will post it to you and it will arrive within 15 working days.
 
 phoneHMRCDetails.title = Phone HMRC for a letter with your National Insurance number on it
 phoneHMRCDetails.heading = Phone HMRC for a letter with your National Insurance number on it
@@ -193,9 +162,9 @@ serviceIvApp.h2 = Can you download an app to your mobile device?
 
 postLetter.title = You will not be able to access your National Insurance number online
 postLetter.heading = You will not be able to access your National Insurance number online
-postLetter.p1 = This is because you do not have the documents to confirm your identity.
+postLetter.p1 = This is because you are unable to prove your identity.
 postLetter.p2 = You can instead use this service to get your number posted to the address HMRC has on record for you.
-postLetter.p3 = We will not tell you your National Insurance number over the phone.
+postLetter.p3 = We will not tell you your National Insurance number over the phone or on webchat.
 postLetter.error.required = Select yes if you like us to post your number to you
 postLetter.h2 = Would you like us to post your number to you?
 

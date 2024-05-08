@@ -27,5 +27,6 @@ trait IndividualDetailsRepoTrait {
 
   def findIndividualDetailsDataByNino(nino: String
                                      )(implicit ec: ExecutionContext): Future[Option[IndividualDetailsDataCache]]
+  def clear(nino: String): Future[Boolean]
 
 }

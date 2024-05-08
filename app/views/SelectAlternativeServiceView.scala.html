@@ -34,12 +34,19 @@
             @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
         }
 
+        <h1 class="govuk-heading-l">@messages("selectAlternativeService.heading")</h1>
+
+        <div class="govuk-inset-text">
+            <p>@messages("selectAlternativeService.p1")</p>
+            <p>@messages("selectAlternativeService.p2")</p>
+        </div>
+
         @govukRadios(
             RadiosViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("selectAlternativeService.heading")).asPageHeading(LegendSize.Large),
+                legend = LegendViewModel(messages("selectAlternativeService.heading.2")).asPageSubHeading(LegendSize.Medium),
                 items  = SelectAlternativeService.options
-            ).withHint(HintViewModel(HtmlContent(hintText)).withCssClass("govuk-!-padding-top-5"))
+            )
         )
 
         @govukButton(
@@ -48,10 +55,3 @@
     }
 }
 
-@hintText = {
-    <p class="govuk-body">@messages("selectAlternativeService.options")</p>
-    <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-7">
-        <li>@messages("selectAlternativeService.options.l1")</li>
-        <li>@messages("selectAlternativeService.options.l2")</li>
-    </ul>
-}

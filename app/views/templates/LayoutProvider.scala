@@ -94,7 +94,7 @@ class NewLayoutProvider @Inject()(wrapperService: WrapperService, additionalScri
       pageTitle = Some(pageTitle),
       showBackLinkJS = showBackLinkJS,
       backLinkUrl =backLinkUrl,
-      serviceNameUrl = Some("/find-your-national-insurance-number/how-to-find-online"),
+      serviceNameUrl = None,
       scripts = Seq(additionalScript()),
       styleSheets = stylesheets.toSeq :+ headBlock(),
       fullWidth = fullWidth,
