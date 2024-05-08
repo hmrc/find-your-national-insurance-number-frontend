@@ -152,6 +152,7 @@ ServiceIv.payslipOrP60 = A payslip or P60
 ServiceIv.hint.payslipOrP60 = Many employers will give you a P60 to show the tax you’ve paid on your salary in the tax year.
 ServiceIv.selfAssessment = A completed Self Assessment return for the last tax year
 #Or
+ServiceIv.or = or
 ServiceIv.noneOfTheAbove = I do not have any of these items
 
 serviceIvApp.title = Download an app to confirm your identity

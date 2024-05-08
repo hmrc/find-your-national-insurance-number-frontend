@@ -119,3 +119,47 @@ confirmYourPostcode.h2=Nodwch eich cod post
 confirmYourPostcode.hint=Er enghraifft SW1A 2AA
 confirmYourPostcode.error.required=Nodwch eich cod post
 confirmYourPostcode.error.invalid=Nodwch god post yn y DU sy’n ddilys
+
+# Service IV check (CL50)
+ServiceIv.title = Bydd angen i chi gadarnhau pwy ydych er mwyn cael eich rhif Yswiriant Gwladol ar-lein
+ServiceIv.heading = Bydd angen i chi gadarnhau pwy ydych er mwyn cael eich rhif Yswiriant Gwladol ar-lein
+ServiceIv.p1 = Mae hyn er mwyn cadw eich rhif yn ddiogel a’ch diogelu rhag twyll.
+ServiceIv.p2 = Gallwch ddefnyddio’r eitemau hyn i helpu i gadarnhau pwy ydych.
+ServiceIv.h2 = Dewiswch yr eitemau sydd gennych wrth law:
+ServiceIv.error.required = Dewiswch yr eitemau sydd gennych wrth law i helpu i gadarnhau pwy ydych
+
+# Options
+ServiceIv.validUkPassport = Pasbort dilys y DU
+ServiceIv.ukPhotocardDrivingLicence = Trwydded yrru cerdyn-llun yn y DU (llawn neu dros dro)
+ServiceIv.nonUkPassport = Pasbort nad yw o’r DU
+ServiceIv.ukBiometricResidenceCard = Cerdyn neu drwydded breswylio fiometrig (BRP)
+ServiceIv.taxCreditsClaim = Manylion hawliad credyd treth (ID Llais dewisol)
+ServiceIv.payslipOrP60 = Slip cyflog neu P60
+ServiceIv.hint.payslipOrP60 = Bydd llawer o gyflogwyr yn rhoi P60 i chi sy’n dangos y dreth rydych wedi’i thalu ar eich cyflog yn ystod y flwyddyn dreth.
+ServiceIv.selfAssessment = Ffurflen Dreth Hunanasesiad wedi’i llenwi ar gyfer y flwyddyn dreth ddiwethaf
+#Or
+ServiceIv.or = neu
+ServiceIv.noneOfTheAbove = Nid oes gennyf yr un o’r eitemau hyn
+
+serviceIvApp.title = Lawrlwythwch ap i gadarnhau pwy ydych
+serviceIvApp.heading = Lawrlwythwch ap i gadarnhau pwy ydych
+serviceIvApp.error.required = Dewiswch ‘Iawn’ os gallwch lawrlwytho ap i’ch dyfais symudol
+serviceIvApp.p1 = Bydd angen i chi ddefnyddio ap a chamera eich dyfais symudol i baru’ch wyneb â’r llun ar eich pasbort neu drwydded yrru’r DU.
+serviceIvApp.h2 = Allwch chi lawrlwytho ap i’ch dyfais symudol?
+
+postLetter.title = Ni allwch gael mynediad i’ch rhif Yswiriant Gwladol ar-lein
+postLetter.heading = Ni allwch gael mynediad i’ch rhif Yswiriant Gwladol ar-lein
+postLetter.p1 = Mae hyn oherwydd na allwch brofi pwy ydych chi.
+postLetter.p2 = Yn lle hynny, gallwch ddefnyddio’r gwasanaeth hwn i gael eich rhif wedi’i bostio i’r cyfeiriad sydd gan CThEF ar eich cyfer.
+postLetter.p3 = Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
+postLetter.error.required = Dewiswch ‘Iawn’ os hoffech i ni bostio eich rhif i chi
+postLetter.h2 = Hoffech chi i ni bostio’ch rhif i chi?
+
+tracingWhatYouNeed.heading = Mae angen i chi wirio pwy ydych chi
+tracingWhatYouNeed.title = Mae angen i chi wirio pwy ydych chi
+tracingWhatYouNeed.p1 = Byddwn yn gofyn am fanylion personol amdanoch, fel eich:
+tracingWhatYouNeed.li1 = enw
+tracingWhatYouNeed.li2 = dyddiad geni
+tracingWhatYouNeed.li3 = rhif Yswiriant Gwladol (dewisol)
+tracingWhatYouNeed.li4 = cod post
+tracingWhatYouNeed.p3 = Os yw’r manylion a roddwch i ni yn cyd-fynd â’n cofnodion, gallwn bostio llythyr atoch gyda’ch rhif Yswiriant Gwladol arno.

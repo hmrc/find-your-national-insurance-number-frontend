@@ -69,11 +69,11 @@
                             }
                         </div>
                         }
-                        <div class="govuk-checkboxes__divider">or</div>
+                        <div class="govuk-checkboxes__divider">@messages("ServiceIv.or")</div>
                         <div class="govuk-checkboxes__item">
                             <input class="govuk-checkboxes__input" id="value_7" name="value[7]" type="checkbox" value="noneOfTheAbove" data-behaviour="exclusive" @if(form.data.keys.toSet.contains("value[7]")){checked}>
                             <label class="govuk-label govuk-checkboxes__label" for="value_7">
-                                @messages(s"ServiceIv.noneOfTheAbove")
+                                @messages("ServiceIv.noneOfTheAbove")
                             </label>
                         </div>
                     </div>
