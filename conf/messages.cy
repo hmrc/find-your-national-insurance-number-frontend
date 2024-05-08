@@ -151,7 +151,7 @@ ServiceIv.heading = Bydd angen i chi gadarnhau pwy ydych er mwyn cael eich rhif 
 ServiceIv.p1 = Mae hyn er mwyn cadw eich rhif yn ddiogel a’ch diogelu rhag twyll.
 ServiceIv.p2 = Gallwch ddefnyddio’r eitemau hyn i helpu i gadarnhau pwy ydych.
 ServiceIv.h2 = Dewiswch yr eitemau sydd gennych wrth law:
-ServiceIv.error.required =
+ServiceIv.error.required = Dewiswch yr eitemau sydd gennych wrth law i helpu i gadarnhau pwy ydych
 
 # Options
 ServiceIv.validUkPassport = Pasbort dilys y DU
@@ -167,7 +167,7 @@ ServiceIv.noneOfTheAbove = Nid oes gennyf yr un o’r eitemau hyn
 
 serviceIvApp.title = Lawrlwythwch ap i gadarnhau pwy ydych
 serviceIvApp.heading = Lawrlwythwch ap i gadarnhau pwy ydych
-serviceIvApp.error.required =
+serviceIvApp.error.required = Dewiswch ‘Iawn’ os gallwch lawrlwytho ap i’ch dyfais symudol
 serviceIvApp.p1 = Bydd angen i chi ddefnyddio ap a chamera eich dyfais symudol i baru’ch wyneb â’r llun ar eich pasbort neu drwydded yrru’r DU.
 serviceIvApp.h2 = Allwch chi lawrlwytho ap i’ch dyfais symudol?
 
@@ -179,8 +179,8 @@ postLetter.p3 = Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn
 postLetter.error.required = Dewiswch ‘Iawn’ os hoffech i ni bostio eich rhif i chi
 postLetter.h2 = Hoffech chi i ni bostio’ch rhif i chi?
 
-tracingWhatYouNeed.heading =
-tracingWhatYouNeed.title =
+tracingWhatYouNeed.heading = Mae angen i chi wirio pwy ydych chi
+tracingWhatYouNeed.title = Mae angen i chi wirio pwy ydych chi
 tracingWhatYouNeed.p1 = Byddwn yn gofyn am fanylion personol amdanoch, fel eich:
 tracingWhatYouNeed.li1 = enw
 tracingWhatYouNeed.li2 = dyddiad geni
