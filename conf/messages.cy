@@ -151,12 +151,12 @@ postLetter.title = Ni allwch gael mynediad i’ch rhif Yswiriant Gwladol ar-lein
 postLetter.heading = Ni allwch gael mynediad i’ch rhif Yswiriant Gwladol ar-lein
 postLetter.p1 = Mae hyn oherwydd na allwch brofi pwy ydych chi.
 postLetter.p2 = Yn lle hynny, gallwch ddefnyddio’r gwasanaeth hwn i gael eich rhif wedi’i bostio i’r cyfeiriad sydd gan CThEF ar eich cyfer.
-postLetter.p3 = Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
-postLetter.error.required = Dewiswch ‘Iawn’ os hoffech i ni bostio eich rhif i chi
-postLetter.h2 = Hoffech chi i ni bostio’ch rhif i chi?
+postLetter.p3 = Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn na thrwy sgwrs dros y we.
+postLetter.error.required = Dewiswch ‘Iawn’ os hoffech i ni bostio eich rhif atoch
+postLetter.h2 = A hoffech i ni anfon eich rhif atoch drwy'r post?
 
-tracingWhatYouNeed.heading = Mae angen i chi wirio pwy ydych chi
-tracingWhatYouNeed.title = Mae angen i chi wirio pwy ydych chi
+tracingWhatYouNeed.heading = Mae angen i ni wirio pwy ydych chi
+tracingWhatYouNeed.title = Mae angen i ni wirio pwy ydych chi
 tracingWhatYouNeed.p1 = Byddwn yn gofyn am fanylion personol amdanoch, fel eich:
 tracingWhatYouNeed.li1 = enw
 tracingWhatYouNeed.li2 = dyddiad geni
