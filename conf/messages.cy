@@ -28,7 +28,7 @@ selectNINOLetterAddress.title=Gall CThEF anfon eich llythyr rhif Yswiriant Gwlad
 selectNINOLetterAddress.heading=Gall CThEF anfon eich llythyr rhif Yswiriant Gwladol i’r cod post hwn
 selectNINOLetterAddress.h2 = Hoffech i’ch rhif Yswiriant Gwladol gael ei bostio yno?
 selectNINOLetterAddress.postcode = Cod post
-selectNINOLetterAddress.inset = Dim ond y cyfeiriad gyda'r cod post hwn y gall y gwasanaeth hwn bostio'ch rhif iddo.
+selectNINOLetterAddress.inset = Dim ond y cyfeiriad gyda’r cod post hwn y gall y gwasanaeth hwn bostio’ch rhif iddo.
 selectNINOLetterAddress.error.required=Dewiswch ‘Iawn’ os hoffech i’r llythyr gael ei bostio atoch
 
 ninoLetterPostedConfirmation.title=Bydd eich rhif Yswiriant Gwladol yn cael ei anfon drwy’r post
