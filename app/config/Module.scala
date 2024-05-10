@@ -47,6 +47,7 @@ class Module(environment: Environment, config: Configuration) extends AbstractMo
 
     // For session based storage instead of cred based, change to SessionIdentifierAction
     bind(classOf[IdentifierAction]).to(classOf[SessionIdentifierAction]).asEagerSingleton()
+    bind(classOf[IdentifierActionIndividual]).to(classOf[SessionIdentifierActionIndividual]).asEagerSingleton()
 
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
 

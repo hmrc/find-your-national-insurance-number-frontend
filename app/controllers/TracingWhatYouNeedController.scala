@@ -17,7 +17,7 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions.{CL50DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import controllers.actions.{CL50DataRequiredAction, DataRetrievalAction, IdentifierAction, IdentifierActionIndividual}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -29,7 +29,7 @@ import javax.inject.Inject
 
 class TracingWhatYouNeedController @Inject()(
                                               override val messagesApi: MessagesApi,
-                                              identify: IdentifierAction,
+                                              identify: IdentifierActionIndividual,
                                               getData: DataRetrievalAction,
                                               requireData: CL50DataRequiredAction,
                                               val controllerComponents: MessagesControllerComponents,

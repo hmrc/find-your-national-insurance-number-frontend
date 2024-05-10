@@ -31,15 +31,15 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ServiceIvAppController @Inject()(
-                                         override val messagesApi: MessagesApi,
-                                         sessionRepository: SessionRepository,
-                                         navigator: Navigator,
-                                         identify: IdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: CL50DataRequiredAction,
-                                         formProvider: ServiceIvAppFormProvider,
-                                         val controllerComponents: MessagesControllerComponents,
-                                         view: ServiceIvAppView
+                                        override val messagesApi: MessagesApi,
+                                        sessionRepository: SessionRepository,
+                                        navigator: Navigator,
+                                        identify: IdentifierActionIndividual,
+                                        getData: DataRetrievalAction,
+                                        requireData: CL50DataRequiredAction,
+                                        formProvider: ServiceIvAppFormProvider,
+                                        val controllerComponents: MessagesControllerComponents,
+                                        view: ServiceIvAppView
                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()

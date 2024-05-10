@@ -35,7 +35,7 @@ class ServiceIvController @Inject()(
                                      override val messagesApi: MessagesApi,
                                      sessionRepository: SessionRepository,
                                      navigator: Navigator,
-                                     identify: IdentifierAction,
+                                     identify: IdentifierActionIndividual,
                                      getData: DataRetrievalAction,
                                      requireData: CL50DataRequiredAction,
                                      formProvider: ServiceIvFormProvider,
