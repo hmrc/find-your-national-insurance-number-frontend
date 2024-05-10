@@ -153,7 +153,7 @@ postLetter.p1 = Mae hyn oherwydd na allwch brofi pwy ydych chi.
 postLetter.p2 = Yn lle hynny, gallwch ddefnyddio’r gwasanaeth hwn i gael eich rhif wedi’i bostio i’r cyfeiriad sydd gan CThEF ar eich cyfer.
 postLetter.p3 = Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn na thrwy sgwrs dros y we.
 postLetter.error.required = Dewiswch ‘Iawn’ os hoffech i ni bostio eich rhif atoch
-postLetter.h2 = A hoffech i ni anfon eich rhif atoch drwy'r post?
+postLetter.h2 = A hoffech i ni anfon eich rhif atoch drwy’r post?
 
 tracingWhatYouNeed.heading = Mae angen i ni wirio pwy ydych chi
 tracingWhatYouNeed.title = Mae angen i ni wirio pwy ydych chi
