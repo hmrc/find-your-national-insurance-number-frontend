@@ -82,8 +82,8 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
 
   private def navigateSelectNINOLetterAddress(userAnswers: UserAnswers): Call =
     userAnswers.get(SelectNINOLetterAddressPage) match {
-      case Some(SelectNINOLetterAddress.Postcode)       => routes.NINOLetterPostedConfirmationController.onPageLoad()
-      case Some(SelectNINOLetterAddress.NotThisAddress) => routes.SelectAlternativeServiceController.onPageLoad(mode = NormalMode)
+      case Some(true)  => routes.NINOLetterPostedConfirmationController.onPageLoad()
+      case Some(false) => routes.SelectAlternativeServiceController.onPageLoad(mode = NormalMode)
       case _                                            => routes.JourneyRecoveryController.onPageLoad()
     }
 

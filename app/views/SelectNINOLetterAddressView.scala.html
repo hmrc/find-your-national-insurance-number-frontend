@@ -21,24 +21,36 @@
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukRadios: GovukRadios,
-    govukButton: GovukButton
+    govukButton: GovukButton,
+    govukSummaryList: GovukSummaryList
 )
 
 @(form: Form[_], mode: Mode, postcode: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("selectNINOLetterAddress.title")), showBackLinkJS = true, fullWidth = false) {
 
+    @if(form.errors.nonEmpty) {
+        @govukErrorSummary(ErrorSummaryViewModel(form))
+    }
+
+    <h1 class="govuk-heading-l">@messages("selectNINOLetterAddress.heading")</h1>
+    @govukSummaryList(SummaryList(
+        rows = Seq(
+            SummaryListRow(
+                key = Key(content = Text(messages("selectNINOLetterAddress.postcode"))),
+                value = Value(content = HtmlContent(postcode))
+            )
+        )
+    ))
+    <div class="govuk-inset-text">
+        <p class="govuk-body">@messages("selectNINOLetterAddress.inset")</p>
+    </div>
+
     @formHelper(action = routes.SelectNINOLetterAddressController.onSubmit(mode), 'autoComplete -> "off") {
-
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
-        }
-
         @govukRadios(
-            RadiosViewModel(
-                field  = form("value"),
-                legend = LegendViewModel(messages("selectNINOLetterAddress.heading")).asPageHeading(LegendSize.Large),
-                items  = SelectNINOLetterAddress.options(messages, postcode)
+            RadiosViewModel.yesNo(
+                field = form("value"),
+                legend = LegendViewModel(messages("selectNINOLetterAddress.h2")).asPageSubHeading(LegendSize.Medium)
             )
         )
 

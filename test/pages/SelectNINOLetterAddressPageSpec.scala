@@ -16,17 +16,16 @@
 
 package pages
 
-import models.SelectNINOLetterAddress
 import pages.behaviours.PageBehaviours
 
 class SelectNINOLetterAddressPageSpec extends PageBehaviours {
 
   "SelectNINOLetterAddressPage" - {
 
-    beRetrievable[SelectNINOLetterAddress](SelectNINOLetterAddressPage)
+    beRetrievable[Boolean](SelectNINOLetterAddressPage)
 
-    beSettable[SelectNINOLetterAddress](SelectNINOLetterAddressPage)
+    beSettable[Boolean](SelectNINOLetterAddressPage)
 
-    beRemovable[SelectNINOLetterAddress](SelectNINOLetterAddressPage)
+    beRemovable[Boolean](SelectNINOLetterAddressPage)
   }
 }

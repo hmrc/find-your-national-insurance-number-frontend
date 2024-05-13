@@ -39,10 +39,10 @@
     }
 
     <h1 class="govuk-heading-l">@messages("ninoHelpView.heading")</h1>
+    <p class="govuk-body">@messages("ninoHelpView.p1")</p>
     <div class="govuk-inset-text">
         <p class="govuk-body">@messages("ninoHelpView.inset")</p>
     </div>
-    <p class="govuk-body">@messages("ninoHelpView.p1")</p>
 
     @formHelper(action = routes.ValidDataNINOHelpController.onSubmit(mode), 'autoComplete -> "off") {
 

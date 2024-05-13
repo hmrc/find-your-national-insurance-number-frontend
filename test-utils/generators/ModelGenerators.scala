@@ -40,9 +40,4 @@ trait ModelGenerators {
     Arbitrary {
       Gen.oneOf(InvalidDataNINOHelp.values.toSeq)
     }
-
-  implicit lazy val arbitrarySelectNINOLetterAddress: Arbitrary[SelectNINOLetterAddress] =
-    Arbitrary {
-      Gen.oneOf(SelectNINOLetterAddress.values.toSeq)
-    }
 }

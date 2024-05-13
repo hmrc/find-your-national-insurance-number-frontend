@@ -37,6 +37,9 @@
 
     <h1 class="govuk-heading-l">@messages("validDataNINOMatchedNINOHelp.heading")</h1>
     <p class="govuk-body">@messages("validDataNINOMatchedNINOHelp.p1")</p>
+    <div class="govuk-inset-text">
+        <p class="govuk-body">@messages("validDataNINOMatchedNINOHelp.inset")</p>
+    </div>
 
     @formHelper(action = routes.ValidDataNINOMatchedNINOHelpController.onSubmit(mode), 'autoComplete -> "off") {
         @govukRadios(

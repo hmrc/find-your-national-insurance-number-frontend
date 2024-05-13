@@ -12,6 +12,7 @@ error.browser.title.prefix=Gwall:
 error.boolean=Rhowch ateb
 error.required=Nodwch werth
 error.summary.title=Mae problem wedi codi
+error.message.prefix = Gwall:
 
 journeyRecovery.continue.title=Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
 journeyRecovery.continue.heading=Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
@@ -23,11 +24,13 @@ signedOut.guidance=Ni wnaethom gadw’ch atebion.
 unauthorised.title=Ni allwch ddefnyddio’r gwasanaeth hwn gyda’r cyfrif hwn
 unauthorised.heading=Ni allwch ddefnyddio’r gwasanaeth hwn gyda’r cyfrif hwn
 
-selectNINOLetterAddress.title=I ble’r hoffech i ni anfon y llythyr?
-selectNINOLetterAddress.heading=I ble’r hoffech i ni anfon y llythyr?
-selectNINOLetterAddress.postCode=I’r cyfeiriad sydd â’r cod post
-selectNINOLetterAddress.notThisAddress=Dim i’r cyfeiriad hwn
-selectNINOLetterAddress.error.required=Rhowch wybod i ni i ble yr hoffech i’r llythyr gael ei anfon
+selectNINOLetterAddress.title=Gall CThEF anfon eich llythyr rhif Yswiriant Gwladol i’r cod post hwn
+selectNINOLetterAddress.heading=Gall CThEF anfon eich llythyr rhif Yswiriant Gwladol i’r cod post hwn
+selectNINOLetterAddress.h2 = Hoffech i’ch rhif Yswiriant Gwladol gael ei bostio yno?
+selectNINOLetterAddress.postcode = Cod post
+selectNINOLetterAddress.inset = Dim ond y cyfeiriad gyda’r cod post hwn y gall y gwasanaeth hwn bostio’ch rhif iddo.
+selectNINOLetterAddress.error.required=Dewiswch ‘Iawn’ os hoffech i’r llythyr gael ei bostio atoch
+
 ninoLetterPostedConfirmation.title=Bydd eich rhif Yswiriant Gwladol yn cael ei anfon drwy’r post
 ninoLetterPostedConfirmation.heading=Bydd eich rhif Yswiriant Gwladol yn cael ei anfon drwy’r post
 ninoLetterPostedConfirmation.letterArrival=Byddwn yn postio’r llythyr sy’n cadarnhau’ch rhif. Bydd hwn yn cyrraedd cyn pen 15 diwrnod.
@@ -64,13 +67,13 @@ phoneHMRCDetails.findOutCallCharges=<a href="{0}" class="govuk-link" target="_bl
 
 ninoHelpView.title=Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
 ninoHelpView.heading=Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
-ninoHelpView.inset=Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
-ninoHelpView.p1=Gallwch ofyn am gael llythyr sy’n dangos eich rhif. Bydd hwnnw yn cyrraedd cyn pen 15 diwrnod gwaith.
+ninoHelpView.inset=Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn na thrwy sgwrs dros y we.
+ninoHelpView.p1=Gallwch ddefnyddio’r gwasanaeth hwn i gael eich rhif wedi’i bostio i’r cyfeiriad sydd gan CThEF ar eich cyfer.
 ninoHelpView.h2=A hoffech i’ch rhif gael ei bostio atoch?
-ninoHelpView.error.required=Dewiswch opsiwn i fynd yn eich blaen
+ninoHelpView.error.required=Dewiswch ‘Iawn’ os hoffech i’ch rhif gael ei bostio atoch
 invalidDataNinoHelp.title=Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
 invalidDataNinoHelp.heading=Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
-invalidDataNinoHelp.inset=Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
+invalidDataNinoHelp.inset=Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn na thrwy sgwrs dros y we.
 invalidDataNinoHelp.p1=Gallwch ofyn am gael llythyr sy’n dangos eich rhif. Bydd hwnnw yn cyrraedd cyn pen 15 diwrnod gwaith.
 invalidDataNinoHelp.h2=Sut hoffech chi ofyn i CThEF bostio’ch rhif atoch?
 invalidDataNinoHelp.printForm=Argraffu ac anfon ffurflen
@@ -109,9 +112,10 @@ enteredPostCodeNotFound.phoneHMRC.hint=Bydd angen i chi ateb ychydig o gwestiyna
 enteredPostCodeNotFound.error.required=Rhowch wybod i ni beth yr hoffech ei wneud
 validDataNINOMatchedNINOHelp.title=Cael eich rhif Yswiriant Gwladol wedi’i bostio atoch ar lythyr
 validDataNINOMatchedNINOHelp.heading=Cael eich rhif Yswiriant Gwladol wedi’i bostio atoch ar lythyr
-validDataNINOMatchedNINOHelp.p1=Os ydych angen eich rhif ar lythyr, gall CThEF ei bostio atoch. Bydd hwnnw yn cyrraedd cyn pen 15 diwrnod gwaith.
+validDataNINOMatchedNINOHelp.p1=Gallwch ofyn am gael llythyr sy’n dangos eich rhif.
+validDataNINOMatchedNINOHelp.inset = Dim ond y cyfeiriad sydd gan CThEF ar eich cyfer y gall y gwasanaeth hwn ei ddefnyddio.
 validDataNINOMatchedNINOHelp.h2=A hoffech i’r llythyr gael ei bostio atoch?
-validDataNINOMatchedNINOHelp.error.required=Dewiswch opsiwn i fynd yn eich blaen
+validDataNINOMatchedNINOHelp.error.required=Dewiswch ‘Iawn’ os hoffech i’r llythyr gael ei bostio atoch
 confirmYourPostcode.title=Mae angen i chi gadarnhau’ch cod post
 confirmYourPostcode.heading=Mae angen i chi gadarnhau’ch cod post
 confirmYourPostcode.p1=Am resymau diogelwch, mae’n rhaid i’r cod post yr ydych yn ei nodi gyd-fynd â’n cofnodion. Er enghraifft, cyfeiriad parhaol y byddech yn ei roi i gyflogwr.

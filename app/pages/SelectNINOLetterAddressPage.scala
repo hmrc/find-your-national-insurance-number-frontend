@@ -16,10 +16,9 @@
 
 package pages
 
-import models.SelectNINOLetterAddress
 import play.api.libs.json.JsPath
 
-case object SelectNINOLetterAddressPage extends QuestionPage[SelectNINOLetterAddress] {
+case object SelectNINOLetterAddressPage extends QuestionPage[Boolean] {
 
   override def path: JsPath = JsPath \ toString
 
