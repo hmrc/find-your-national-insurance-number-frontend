@@ -206,7 +206,7 @@ class CheckDetailsController @Inject()(
   }
 
   private def getNinoFromPDVResponse(pdvData: PDVResponse): String = pdvData match {
-      case _ @ PDVSuccessResponse(data: PDVResponseData) => data.getNino
+      case PDVSuccessResponse(data: PDVResponseData) => data.getNino
       case _ => EmptyString
     }
 
