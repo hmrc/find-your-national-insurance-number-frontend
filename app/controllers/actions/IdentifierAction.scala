@@ -49,15 +49,15 @@ class SessionIdentifierAction @Inject()(
 
     authorised(AuthPredicate).retrieve(FMNRetrievals) {
       case Some(credentials) ~ confidenceLevel =>
-        if(confidenceLevel.level > ConfidenceLevel.L50.level) {
-          Future.successful(Redirect(controllers.auth.routes.AuthController.redirectToSMN))
-        } else {
-          hc.sessionId match {
-            case Some(session) =>
+        hc.sessionId match {
+          case Some(session) =>
+            if (confidenceLevel.level > ConfidenceLevel.L50.level) {
+              Future.successful(Redirect(config.storeMyNinoUrl, Map("continue" -> Seq(resolveCorrectUrl(request)))))
+            } else {
               block(IdentifierRequest(request, session.value, Some(credentials.providerId)))
-            case None =>
-              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-          }
+            }
+          case None =>
+            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
         }
       case _ =>
         throw new UnauthorizedException("Unable to retrieve internal Id and credentials Id.")
