@@ -25,7 +25,7 @@ import play.api.mvc.Results._
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
-//import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -41,19 +41,23 @@ class SessionIdentifierAction @Inject()(
  )(implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions with Logging{
 
   private val AuthPredicate = AuthProviders(GovernmentGateway)
-  private val FMNRetrievals = Retrievals.credentials
+  private val FMNRetrievals = Retrievals.credentials and Retrievals.confidenceLevel
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     authorised(AuthPredicate).retrieve(FMNRetrievals) {
-      case Some(credentials) =>
-        hc.sessionId match {
-          case Some(session) =>
-            block(IdentifierRequest(request, session.value, Some(credentials.providerId)))
-          case None =>
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      case Some(credentials) ~ confidenceLevel =>
+        if(confidenceLevel.level > ConfidenceLevel.L50.level) {
+          Future.successful(Redirect(controllers.auth.routes.AuthController.redirectToSMN))
+        } else {
+          hc.sessionId match {
+            case Some(session) =>
+              block(IdentifierRequest(request, session.value, Some(credentials.providerId)))
+            case None =>
+              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          }
         }
       case _ =>
         throw new UnauthorizedException("Unable to retrieve internal Id and credentials Id.")
