@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import viewmodels.LegendSize
+
 @this(
     layout: templates.LayoutProvider,
     formHelper: FormWithCSRF,
@@ -22,20 +24,42 @@
     govukButton: GovukButton
 )
 
+@* https://github.com/hmrc/play-frontend-govuk-examples/blob/main/src/test/play-3/twirl/uk/gov/hmrc/govukfrontend/views/examples/radios/hint.scala.html *@
+
 @(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("confirmIdentity.title"))) {
+@layout(pageTitle = title(form, messages("confirmIdentity.title")), showBackLinkJS = true, fullWidth = false) {
 
-    @formHelper(action = routes.ConfirmIdentityController.onSubmit(mode), 'autoComplete -> "off") {
+    @formHelper(action = routes.ConfirmIdentityController.onSubmit(mode)) {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
+        <h1 class="govuk-heading-l">@messages("confirmIdentity.heading")</h1>
+        <p class="govuk-body">@messages("confirmIdentity.p1")</p>
+        <h2 class="govuk-heading-m">@messages("confirmIdentity.h2")</h2>
+
+        <p class="govuk-body">@messages("confirmIdentity.p2")</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>@messages("confirmIdentity.options.passport")</li>
+            <li>@messages("confirmIdentity.options.drivingLicence")</li>
+            <li>@messages("confirmIdentity.options.biometric")</li>
+        </ul>
+
+        <p class="govuk-body">@messages("confirmIdentity.p3")</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>@messages("confirmIdentity.options.mobile")</li>
+            <li>@messages("confirmIdentity.options.payslip")</li>
+            <li>@messages("confirmIdentity.options.selfAssessment")</li>
+            <li>@messages("confirmIdentity.options.taxClaim")</li>
+        </ul>
+
         @govukRadios(
-            RadiosViewModel.yesNo(
+            RadiosViewModel.yesNoWithHint(
                 field = form("value"),
-                legend = LegendViewModel(messages("confirmIdentity.heading")).asPageHeading()
+                legend = LegendViewModel(messages("confirmIdentity.legend")).asPageSubHeading(LegendSize.Medium),
+                noHint = Some(messages("confirmIdentity.hint"))
             )
         )
 
