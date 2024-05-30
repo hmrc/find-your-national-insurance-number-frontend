@@ -52,7 +52,7 @@ class SessionIdentifierAction @Inject()(
         hc.sessionId match {
           case Some(session) =>
             if (confidenceLevel.level > ConfidenceLevel.L50.level) {
-              Future.successful(Redirect(config.storeMyNinoUrl, Map("continue" -> Seq(resolveCorrectUrl(request)))))
+              Future.successful(Redirect(config.storeMyNinoUrl))
             } else {
               block(IdentifierRequest(request, session.value, Some(credentials.providerId)))
             }
