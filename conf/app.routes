@@ -63,3 +63,6 @@ GET         /unable-to-access-online                        controllers.PostLett
 POST        /unable-to-access-online                        controllers.PostLetterController.onSubmit(mode: Mode ?= NormalMode)
 
 GET         /identity-check                                 controllers.TracingWhatYouNeedController.onPageLoad()
+
+GET        /confirm-identity                                controllers.ConfirmIdentityController.onPageLoad(mode: Mode ?= NormalMode)
+POST       /confirm-identity                                controllers.ConfirmIdentityController.onSubmit(mode: Mode ?= NormalMode)

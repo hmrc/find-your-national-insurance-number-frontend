@@ -90,4 +90,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   val npsFMNAppStatusMessageList:String = configuration.get[String]("npsfmn.app-status-message-list")
 
   val encryptionKey: String = configuration.get[String]("mongodb.encryption.key")
+
+  val extendedIvJourney: Boolean = configuration.get[Boolean]("features.extendedIvJourney")
 }

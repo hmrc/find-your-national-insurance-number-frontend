@@ -21,6 +21,9 @@ import pages._
 
 trait PageGenerators {
 
+  implicit lazy val arbitraryConfirmIdentityPage: Arbitrary[ConfirmIdentityPage.type] =
+    Arbitrary(ConfirmIdentityPage)
+
   implicit lazy val arbitraryPostLetterPage: Arbitrary[PostLetterPage.type] =
     Arbitrary(PostLetterPage)
 

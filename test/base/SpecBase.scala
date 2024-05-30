@@ -92,6 +92,22 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
       )
 
+  protected def applicationBuilderCl50OnWithConfig(
+                                              config: Map[String, Any] = Map(),
+                                              userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+    new GuiceApplicationBuilder()
+      .configure(
+        config ++ Map(
+          "microservice.services.auth.port" -> wiremockPort,
+          "microservice.host" -> "http://localhost:9900/fmn"
+        )
+      )
+      .overrides(
+        bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[IdentifierAction].to[FakeIdentifierAction],
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+      )
+
   def injected[T](c: Class[T]): T = app.injector.instanceOf(c)
 
   def injected[T](implicit evidence: ClassTag[T]): T = app.injector.instanceOf[T]

@@ -46,7 +46,10 @@ class ServiceIvAppControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilderCl50On(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilderCl50OnWithConfig(
+        Map("features.extendedIvJourney" -> true),
+        userAnswers = Some(emptyUserAnswers)
+      ).build()
 
       running(application) {
         val request = FakeRequest(GET, serviceIvAppRoute)
@@ -64,7 +67,10 @@ class ServiceIvAppControllerSpec extends SpecBase with MockitoSugar {
 
       val userAnswers = UserAnswers(userAnswersId).set(ServiceIvAppPage, true).success.value
 
-      val application = applicationBuilderCl50On(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilderCl50OnWithConfig(
+        Map("features.extendedIvJourney" -> true),
+        userAnswers = Some(userAnswers)
+      ).build()
 
       running(application) {
         val request = FakeRequest(GET, serviceIvAppRoute)
@@ -137,6 +143,26 @@ class ServiceIvAppControllerSpec extends SpecBase with MockitoSugar {
           status(result) mustEqual SEE_OTHER
 
           redirectLocation(result).value mustEqual controllers.auth.routes.AuthController.redirectToSMN.url
+        }
+      }
+    }
+
+    "Extended IV journey toggled off" - {
+      "must redirect to the Confirm Identity Page" in {
+
+        val application = applicationBuilderCl50OnWithConfig(
+          Map("features.extendedIvJourney" -> false),
+          userAnswers = Some(emptyUserAnswers)
+        ).build()
+
+        running(application) {
+          val request = FakeRequest(GET, serviceIvAppRoute)
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+
+          redirectLocation(result).value mustEqual controllers.routes.ConfirmIdentityController.onPageLoad().url
         }
       }
     }
