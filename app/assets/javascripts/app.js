@@ -23,5 +23,13 @@ document.addEventListener('DOMContentLoaded', function(event) {
         });
      });
   }
-
 });
+
+const printLink = document.getElementById('print-this');
+
+if(printLink != null && printLink != 'undefined' ) {
+    printLink.addEventListener("click", function (e) {
+        e.preventDefault();
+        window.print();
+    });
+};

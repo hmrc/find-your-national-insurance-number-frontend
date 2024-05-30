@@ -24,6 +24,8 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import util.FMNConstants.EmptyString
 import views.html.NINOLetterPostedConfirmationView
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class NINOLetterPostedConfirmationController @Inject()(
@@ -40,7 +42,7 @@ class NINOLetterPostedConfirmationController @Inject()(
     implicit request =>
       val nino = request.session.data.getOrElse("nino", EmptyString)
       sessionCacheService.invalidateCache(nino, request.userId)
-      Ok(view())
+      Ok(view(LocalDate.now.format(DateTimeFormatter.ofPattern("d MMMM uuuu"))))
   }
 
 }

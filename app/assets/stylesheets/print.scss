@@ -1,0 +1,20 @@
+.js-enabled .print-this {
+  display: block;
+  &__icon {
+      vertical-align: text-bottom;
+    }
+}
+
+.print-this {
+  display: none
+}
+
+@media print {
+  [href]:after {
+    display: none;
+  }
+
+  .hmrc-sign-out-nav {
+    display: none;
+  }
+}
