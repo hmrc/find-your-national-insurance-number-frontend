@@ -84,7 +84,6 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
         config ++ Map(
           "microservice.services.auth.port" -> wiremockPort,
           "microservice.host" -> "http://localhost:9900/fmn"
-
         )
       )
       .overrides(

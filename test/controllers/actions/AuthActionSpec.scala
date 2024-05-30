@@ -228,7 +228,7 @@ class FakeFailingAuthConnector @Inject()(exceptionToReturn: Throwable) extends A
 
 object AuthActionSpec {
 
-  private def fakeAuthConnector(stubbedRetrievalResult: Future[_]) = new AuthConnector {
+  private def fakeAuthConnector(stubbedRetrievalResult: Future[_]): AuthConnector = new AuthConnector {
 
     def authorise[A](predicate: Predicate, retrieval: Retrieval[A])
                     (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[A] = {
