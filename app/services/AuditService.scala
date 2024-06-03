@@ -104,13 +104,13 @@ class AuditService @Inject()(auditConnector: AuditConnector
 
   def findYourNinoPDVMatched(pdvData: PDVResponseData,
                              origin: Option[String],
-                             idData: IndividualDetails)(implicit hc: HeaderCarrier): Unit = {
+                             idData: Option[IndividualDetails])(implicit hc: HeaderCarrier): Unit = {
     audit(
       AuditUtils.buildAuditEvent(
         personDetails = pdvData.personalDetails,
         auditType = "FindYourNinoPDVMatched",
         validationOutcome = pdvData.validationStatus,
-        identifierType = idData.crnIndicator.asString,
+        identifierType = idData.map(_.crnIndicator.asString).getOrElse(EmptyString),
         origin = origin
       )
     )
