@@ -25,7 +25,7 @@ import models.individualdetails.IndividualDetails
 import models.pdv.{PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse}
 import models.requests.DataRequest
 import play.api.Logging
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import repositories.SessionRepository
 import services.{AuditService, CheckDetailsService, IndividualDetailsService, PersonalDetailsValidationService}
@@ -124,6 +124,7 @@ class CheckDetailsController @Inject()(
     }
 
   // TODO Will remove it after review
+
   //      private def handleCheckDetailsFailureJourney(idDataError: IndividualDetailsError,
   //                                               mode: Mode,
   //                                               sessionWithNINO: Session,
@@ -185,11 +186,7 @@ class CheckDetailsController @Inject()(
     auditService.findYourNinoIdDataError(pdvData, errorStatusCode, idDataError, origin)
     logger.warn(s"Failed to retrieve Individual Details data: ${idDataError.errorMessage}")
     // TODO review FailedDependency or use other status here???
-    FailedDependency(errorHandler.standardErrorTemplate(
-      Messages("global.error.InternalServerError500.title"),
-      Messages("global.error.InternalServerError500.heading"),
-      Messages("global.error.InternalServerError500.message")
-    )(request))
+    FailedDependency(errorHandler.standardErrorTemplate())
   }
 
   private def checkDetailsSuccessJourney(pdvResponse: PDVResponse,
