@@ -21,6 +21,7 @@ import models.requests.{DataRequest, OptionalDataRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
 import services.PersonalDetailsValidationService
+import util.FMNConstants.EmptyString
 
 import java.time.Instant
 import javax.inject.Inject
@@ -30,7 +31,7 @@ class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationSer
                                                    (implicit val executionContext: ExecutionContext) extends ValidCustomerDataRequiredAction {
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {
-    personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map {
+    personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", EmptyString)).map {
       case Some(pdvData) =>
         if (pdvData.validCustomer.getOrElse("").equals("true")) {
           request.userAnswers match {

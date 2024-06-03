@@ -123,38 +123,6 @@ class CheckDetailsController @Inject()(
         checkDetailsMatchingFailedWithUnknownIssue(mode)
     }
 
-  // TODO Will remove it after review
-
-  //      private def handleCheckDetailsFailureJourney(idDataError: IndividualDetailsError,
-  //                                               mode: Mode,
-  //                                               sessionWithNINO: Session,
-  //                                               origin: Option[String],
-  //                                               pdvData: PDVResponseData)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Result = {
-  //    if (pdvData.validationStatus.equals("failure")) {
-  //      logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
-  //      auditService.findYourNinoPDVMatchFailed(pdvData, origin)
-  //      Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
-  //    } else if (pdvData.validationStatus.equals("success")) {
-  //      auditService.findYourNinoPDVMatched(pdvData, origin, None)
-  //
-  //      val errorStatusCode: Option[String] = idDataError match {
-  //        case conError: ConnectorError => Some(conError.statusCode.toString)
-  //        case _ => None
-  //      }
-  //
-  //      auditService.findYourNinoIdDataError(pdvData, errorStatusCode, idDataError, origin)
-  //      logger.warn(s"Failed to retrieve Individual Details data: ${idDataError.errorMessage}")
-  //      // TODO review FailedDependency or use other status here???
-  //      FailedDependency(errorHandler.standardErrorTemplate(
-  //          Messages("global.error.InternalServerError500.title"),
-  //          Messages("global.error.InternalServerError500.heading"),
-  //          Messages("global.error.InternalServerError500.message")
-  //      )(request))
-  //    } else {
-  //      checkDetailsMatchingFailedWithUnknownIssue(mode)
-  //    }
-  //  }
-
   private def handleCheckDetailsFailureJourney(idDataError: IndividualDetailsError,
                                                mode: Mode,
                                                sessionWithNINO: Session,
@@ -185,8 +153,8 @@ class CheckDetailsController @Inject()(
 
     auditService.findYourNinoIdDataError(pdvData, errorStatusCode, idDataError, origin)
     logger.warn(s"Failed to retrieve Individual Details data: ${idDataError.errorMessage}")
-    // TODO review FailedDependency or use other status here???
-    FailedDependency(errorHandler.standardErrorTemplate())
+
+    ServiceUnavailable(errorHandler.standardErrorTemplate())
   }
 
   private def checkDetailsSuccessJourney(pdvResponse: PDVResponse,

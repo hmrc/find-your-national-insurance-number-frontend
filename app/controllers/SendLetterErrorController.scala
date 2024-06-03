@@ -22,7 +22,6 @@ import controllers.actions._
 import forms.SelectAlternativeServiceFormProvider
 import models.{Mode, SelectAlternativeService}
 import navigation.Navigator
-import org.apache.commons.lang3.StringUtils
 import pages.SelectAlternativeServicePage
 import play.api.Logging
 import play.api.data.Form
@@ -32,6 +31,7 @@ import repositories.SessionRepository
 import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SendLetterErrorView
+import util.FMNConstants.EmptyString
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -69,7 +69,7 @@ class SendLetterErrorController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY)).map(
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", EmptyString)).map(
             pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
           )
           for {

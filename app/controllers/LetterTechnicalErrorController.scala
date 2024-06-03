@@ -31,6 +31,7 @@ import repositories.{SessionRepository, TryAgainCountRepository}
 import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.LetterTechnicalErrorView
+import util.FMNConstants.EmptyString
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -81,7 +82,7 @@ class LetterTechnicalErrorController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(LetterTechnicalErrorPage, value))
             _ <- sessionRepository.set(updatedAnswers)
-            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY))
+            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", EmptyString))
           } yield {
             val personalDetails = pdvData.flatMap(_.personalDetails)
             val postcode: String = personalDetails.flatMap(_.postCode).getOrElse(StringUtils.EMPTY)
