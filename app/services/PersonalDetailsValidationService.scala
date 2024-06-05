@@ -17,11 +17,11 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.pdv.{PDVBadRequestResponse, PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse}
+import models.pdv.{PDVBadRequestResponse, PDVErrorResponse, PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse}
 import models.requests.DataRequest
 import org.mongodb.scala.MongoException
 import play.api.Logging
-import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
+import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.libs.json.Json
 import play.api.mvc.AnyContent
 import repositories.PersonalDetailsValidationRepoTrait
@@ -57,8 +57,11 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
         case NOT_FOUND =>
           logger.warn("Unable to find personal details record in personal-details-validation")
           PDVNotFoundResponse(response)
+        case INTERNAL_SERVER_ERROR =>
+          logger.error("Internal server error personal-details-validation")
+          PDVErrorResponse(response)
         case _ =>
-          throw new RuntimeException(s"Failed getting PDV data.")
+          throw new RuntimeException("Something went wrong personal-details-validation")
       }
     }
   }

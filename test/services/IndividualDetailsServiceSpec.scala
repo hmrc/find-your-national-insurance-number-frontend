@@ -105,13 +105,13 @@ class IndividualDetailsServiceSpec extends AsyncWordSpec with Matchers with Mock
 
   "IndividualDetailsService.getIdData" must {
     "return IndividualDetails when IndividualDetailsConnector returns a successful response" in {
-      val mockPDVResponseData = PDVSuccessResponse(
+      val mockPDVResponseData =
         PDVResponseData(
           "1234567890",
           "success",
           Some(models.pdv.PersonalDetails("Abc", "Pqr", Nino("AA123456D"), None, LocalDate.now())),
           LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
-      ))
+      )
 
       when(individualDetailsConnector.getIndividualDetails(
         IndividualDetailsNino(any[String]), anyValueType[ResolveMerge]
@@ -127,13 +127,12 @@ class IndividualDetailsServiceSpec extends AsyncWordSpec with Matchers with Mock
     }
 
     "return IndividualDetailsError when IndividualDetailsConnector returns an error" in {
-      val mockPDVResponseData = PDVSuccessResponse(
-          PDVResponseData(
+      val mockPDVResponseData = PDVResponseData(
           "1234567890",
           "success",
           Some(models.pdv.PersonalDetails("Abc", "Pqr", Nino("AA123456D"), None, LocalDate.now())),
           LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
-        ))
+        )
 
       when(individualDetailsConnector.getIndividualDetails(IndividualDetailsNino(any[String]), anyValueType[ResolveMerge])
       (any(), any(), anyValueType[CorrelationId]))
