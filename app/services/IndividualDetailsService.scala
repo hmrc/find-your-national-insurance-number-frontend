@@ -42,6 +42,9 @@ trait IndividualDetailsService {
   def getIdData(pdvData: PDVResponse)(
     implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]]
 
+  def getIdDataNew(pdvData: PDVResponseData)(
+    implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]]
+
   def getIndividualDetailsAddress(nino: IndividualDetailsNino)(
     implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Either[IndividualDetailsError, Address]]
 
@@ -65,7 +68,7 @@ class IndividualDetailsServiceImpl @Inject()(
 
   override def getIdData(pdvResponse: PDVResponse)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
     pdvResponse match {
-      case PDVSuccessResponse(pdvData : PDVResponseData) =>
+      case PDVSuccessResponse(pdvData: PDVResponseData) =>
         getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
           case Some(data) => data.nino.nino
           case None =>
@@ -84,6 +87,15 @@ class IndividualDetailsServiceImpl @Inject()(
         ))
     }
 
+  }
+
+  override def getIdDataNew(pdvData: PDVResponseData)(implicit hc: HeaderCarrier): Future[Either[IndividualDetailsError, IndividualDetails]] = {
+    getIndividualDetails(IndividualDetailsNino(pdvData.personalDetails match {
+      case Some(data) => data.nino.nino
+      case None =>
+        logger.warn("No Personal Details found in PDV data.")
+        EmptyString
+    })).value
   }
 
   override def getIndividualDetailsAddress(nino: IndividualDetailsNino)(
