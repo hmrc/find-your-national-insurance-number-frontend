@@ -22,7 +22,7 @@ import handlers.ErrorHandler
 import models.Mode
 import models.errors.{ConnectorError, IndividualDetailsError}
 import models.individualdetails.IndividualDetails
-import models.pdv.{PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse}
+import models.pdv.{PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, ValidationStatus}
 import models.requests.DataRequest
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -37,7 +37,6 @@ import util.FMNHelper.comparePostCode
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 class CheckDetailsController @Inject()(
                                         override val messagesApi: MessagesApi,
@@ -81,29 +80,32 @@ class CheckDetailsController @Inject()(
       request.session.data.getOrElse("sessionId", EmptyString)
     )
 
-    val result: Try[Future[Result]] = Try {
-      val processData = for {
-        updatedAnswers <- Future.fromTry(request.userAnswers.set(OriginCacheable, origin.getOrElse("None")))
-        _ <- sessionRepository.set(updatedAnswers)
-        pdvData <- personalDetailsValidationService.getPDVData(pdvRequest)
-        idData  <- individualDetailsService.getIdData(pdvData)
-        sessionWithNINO = request.session + ("nino" -> getNinoFromPDVResponse(pdvData))
-      } yield (pdvData, idData, sessionWithNINO) match {
-        case (pdvData, Left(idData), sessionWithNINO)  => checkDetailsFailureJourney(pdvData, idData, mode, sessionWithNINO, origin)
-        case (pdvData, Right(idData), sessionWithNINO) => checkDetailsSuccessJourney(pdvData, idData, mode, sessionWithNINO, origin)
-        case _                                         => checkDetailsMatchingFailedWithUnknownIssue(mode)
-      }
-      processData.recover {
-        case ex: Exception =>
-          logger.error(s"An error occurred in process data: ${ex.getMessage}")
-          Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
-      }
+    val processData:Future[Result] = for {
+      updatedAnswers <- Future.fromTry(request.userAnswers.set(OriginCacheable, origin.getOrElse("None")))
+      _ <- sessionRepository.set(updatedAnswers)
+      pdvData <- personalDetailsValidationService.getPDVData(pdvRequest)
+      idData  <- individualDetailsService.getIdData(pdvData)
+      sessionWithNINO = request.session + ("nino" -> getNinoFromPDVResponse(pdvData))
+    } yield handleJourneyBasedOnData(pdvData, idData, mode, sessionWithNINO, origin)
+
+    processData.recover {
+      case ex: Exception =>
+        logger.error(s"An error occurred in process data: ${ex.getMessage}")
+        Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode))
     }
-    result match {
-      case Success(res) => res
-      case Failure(ex) =>
-        logger.error(s"An error occurred, redirecting: ${ex.getMessage}")
-        Future(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
+
+  }
+
+  private def handleJourneyBasedOnData(pdvData: PDVResponse,
+                                       idData: Either[IndividualDetailsError, IndividualDetails],
+                                       mode: Mode,
+                                       sessionWithNINO: Session,
+                                       origin: Option[String]
+                                      )(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]):Result = {
+    idData match {
+      case Left(idDataError) => checkDetailsFailureJourney(pdvData, idDataError, mode, sessionWithNINO, origin)
+      case Right(idData) => checkDetailsSuccessJourney(pdvData, idData, mode, sessionWithNINO, origin)
+      case _ => checkDetailsMatchingFailedWithUnknownIssue(mode)
     }
   }
 
@@ -123,38 +125,6 @@ class CheckDetailsController @Inject()(
         checkDetailsMatchingFailedWithUnknownIssue(mode)
     }
 
-  // TODO Will remove it after review
-
-  //      private def handleCheckDetailsFailureJourney(idDataError: IndividualDetailsError,
-  //                                               mode: Mode,
-  //                                               sessionWithNINO: Session,
-  //                                               origin: Option[String],
-  //                                               pdvData: PDVResponseData)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Result = {
-  //    if (pdvData.validationStatus.equals("failure")) {
-  //      logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
-  //      auditService.findYourNinoPDVMatchFailed(pdvData, origin)
-  //      Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO)
-  //    } else if (pdvData.validationStatus.equals("success")) {
-  //      auditService.findYourNinoPDVMatched(pdvData, origin, None)
-  //
-  //      val errorStatusCode: Option[String] = idDataError match {
-  //        case conError: ConnectorError => Some(conError.statusCode.toString)
-  //        case _ => None
-  //      }
-  //
-  //      auditService.findYourNinoIdDataError(pdvData, errorStatusCode, idDataError, origin)
-  //      logger.warn(s"Failed to retrieve Individual Details data: ${idDataError.errorMessage}")
-  //      // TODO review FailedDependency or use other status here???
-  //      FailedDependency(errorHandler.standardErrorTemplate(
-  //          Messages("global.error.InternalServerError500.title"),
-  //          Messages("global.error.InternalServerError500.heading"),
-  //          Messages("global.error.InternalServerError500.message")
-  //      )(request))
-  //    } else {
-  //      checkDetailsMatchingFailedWithUnknownIssue(mode)
-  //    }
-  //  }
-
   private def handleCheckDetailsFailureJourney(idDataError: IndividualDetailsError,
                                                mode: Mode,
                                                sessionWithNINO: Session,
@@ -162,11 +132,11 @@ class CheckDetailsController @Inject()(
                                                pdvData: PDVResponseData
                                               )(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Result =
     pdvData.validationStatus match {
-      case "failure" =>
+      case ValidationStatus.Failure =>
         logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
         auditService.findYourNinoPDVMatchFailed(pdvData, origin)
         redirectToInvalidDataNINOHelpController(mode, sessionWithNINO)
-      case "success" =>
+      case ValidationStatus.Success =>
         handleSuccessValidationStatus(idDataError, origin, pdvData)
       case _ =>
         checkDetailsMatchingFailedWithUnknownIssue(mode)
@@ -197,12 +167,15 @@ class CheckDetailsController @Inject()(
 
     pdvResponse match {
       case _ @ PDVSuccessResponse(pdvData: PDVResponseData) =>
-        if (pdvData.validationStatus.equals("success")) {
-          checkDetailsMatchingSuccess(pdvData, idData, mode, sessionWithNINO, origin)
-        } else {
-          logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
-          auditService.findYourNinoPDVMatchFailed(pdvData, origin)
-          redirectToInvalidDataNINOHelpController(mode, sessionWithNINO)
+        pdvData.validationStatus match {
+          case ValidationStatus.Success =>
+            checkDetailsMatchingSuccess(pdvData, idData, mode, sessionWithNINO, origin)
+          case ValidationStatus.Failure =>
+            logger.warn(s"PDV matched failed: ${pdvData.validationStatus}")
+            auditService.findYourNinoPDVMatchFailed(pdvData, origin)
+            redirectToInvalidDataNINOHelpController(mode, sessionWithNINO)
+          case _ =>
+            checkDetailsMatchingFailedWithUnknownIssue(mode)
         }
       case _ @ PDVNotFoundResponse(_) =>
         auditService.findYourNinoPDVNoMatchData(origin)

@@ -18,7 +18,7 @@ package repositories
 
 import config.FrontendAppConfig
 import models.encryption.pdv.EncryptedPDVResponseData
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -58,7 +58,7 @@ class EncryptedPersonalDetailsValidationRepositorySpec
       "must insert or replace the PDVResultData" in {
         val pdvResultData = PDVResponseData(
           id = "id",
-          validationStatus = "success",
+          validationStatus = ValidationStatus.Success,
           personalDetails = Some(PersonalDetails(
             firstName = "firstName",
             lastName = "lastName",
@@ -77,7 +77,7 @@ class EncryptedPersonalDetailsValidationRepositorySpec
       "must insert or replace the PDVResultData when the PDVResultData already exists" in {
         val pdvResultData = PDVResponseData(
           id = "id",
-          validationStatus = "success",
+          validationStatus = ValidationStatus.Success,
           personalDetails = Some(PersonalDetails(
             firstName = "firstName",
             lastName = "lastName",
@@ -94,7 +94,7 @@ class EncryptedPersonalDetailsValidationRepositorySpec
 
         val pdvResultData2 = PDVResponseData(
           id = "id",
-          validationStatus = "success",
+          validationStatus = ValidationStatus.Success,
           personalDetails = Some(PersonalDetails(
             firstName = "firstName",
             lastName = "lastName",
@@ -118,7 +118,7 @@ class EncryptedPersonalDetailsValidationRepositorySpec
       "must update the customer validity and reason" in {
         val pdvResultData = PDVResponseData(
           id = "id",
-          validationStatus = "success",
+          validationStatus = ValidationStatus.Success,
           personalDetails = Some(PersonalDetails(
             firstName = "firstName",
             lastName = "lastName",
@@ -143,7 +143,7 @@ class EncryptedPersonalDetailsValidationRepositorySpec
       "must update the npsPostCode" in {
         val pdvResultData = PDVResponseData(
           id = "id",
-          validationStatus = "success",
+          validationStatus = ValidationStatus.Success,
           personalDetails = Some(PersonalDetails(
             firstName = "firstName",
             lastName = "lastName",
@@ -168,7 +168,7 @@ class EncryptedPersonalDetailsValidationRepositorySpec
       "must return the PDVResultData when it exists" in {
         val pdvResultData = PDVResponseData(
           id = "id",
-          validationStatus = "success",
+          validationStatus = ValidationStatus.Success,
           personalDetails = Some(PersonalDetails(
             firstName = "firstName",
             lastName = "lastName",
@@ -200,7 +200,7 @@ class EncryptedPersonalDetailsValidationRepositorySpec
       "must return the PDVResultData when it exists" in {
         val pdvResultData = PDVResponseData(
           id = "id",
-          validationStatus = "success",
+          validationStatus = ValidationStatus.Success,
           personalDetails = Some(PersonalDetails(
             firstName = "firstName",
             lastName = "lastName",

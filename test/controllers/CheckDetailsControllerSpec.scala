@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import models.errors.ConnectorError
 import models.individualdetails._
-import models.pdv.{PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails}
+import models.pdv.{PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse, PersonalDetails, ValidationStatus}
 import models.requests.DataRequest
 import models.{AddressLine, NormalMode, individualdetails}
 import org.mockito.ArgumentMatchers.any
@@ -429,7 +429,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       "when pdvData validationStatus is success but idDataError exists with InternalServerError error" in {
         val mockPDVResponseDataSuccess = PDVSuccessResponse(PDVResponseData(
           "01234",
-          "success",
+          ValidationStatus.Success,
           Some(fakePersonDetails),
           LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
         ))
@@ -467,7 +467,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       "when pdvData validationStatus is success but idDataError exists with BAD_GATEWAY error" in {
         val mockPDVResponseDataSuccess = PDVSuccessResponse(PDVResponseData(
           "01234",
-          "success",
+          ValidationStatus.Success,
           Some(fakePersonDetails),
           LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
         ))
@@ -505,7 +505,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       "when pdvData validationStatus is success but idDataError exists with SERVICE_UNAVAILABLE error" in {
         val mockPDVResponseDataSuccess = PDVSuccessResponse(PDVResponseData(
           "01234",
-          "success",
+          ValidationStatus.Success,
           Some(fakePersonDetails),
           LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
         ))
@@ -607,7 +607,7 @@ object CheckDetailsControllerSpec {
 
   val mockPDVResponseDataSuccess: PDVSuccessResponse = PDVSuccessResponse(PDVResponseData(
     "01234",
-    "success",
+    ValidationStatus.Success,
     Some(fakePersonDetails),
     LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
   ))

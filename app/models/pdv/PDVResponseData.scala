@@ -35,7 +35,7 @@ object PersonalDetails {
 
 case class PDVResponseData(
       id: String,
-      validationStatus: String,
+      validationStatus: ValidationStatus,
       personalDetails: Option[PersonalDetails],
       lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC),
       reason: Option[String],
@@ -79,7 +79,7 @@ object PDVResponseData {
 
     (
       (__ \ "id").read[String] and
-        (__ \ "validationStatus").read[String] and
+        (__ \ "validationStatus").read[String].map(ValidationStatus.fromString) and
         (__ \ "personalDetails").readNullable[PersonalDetails] and
           Reads.pure(Instant.now) and
         (__ \ "reason").readNullable[String] and
@@ -90,9 +90,7 @@ object PDVResponseData {
   }
 
   val writes: OWrites[PDVResponseData] = {
-
     import play.api.libs.functional.syntax._
-
     (
       (__ \ "id").write[String] and
         (__ \ "validationStatus").write[String] and
@@ -102,7 +100,7 @@ object PDVResponseData {
         (__ \ "validCustomer").writeNullable[String] and
         (__ \ "CRN").writeNullable[String] and
         (__ \ "npsPostCode").writeNullable[String]
-      )(unlift(PDVResponseData.unapply))
+      )((pdv: PDVResponseData) => (pdv.id, pdv.validationStatus.toString, pdv.personalDetails, pdv.lastUpdated, pdv.reason, pdv.validCustomer, pdv.CRN, pdv.npsPostCode))
   }
 
   implicit val format: OFormat[PDVResponseData] = OFormat(reads, writes)

@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.SelectAlternativeServiceFormProvider
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
 import models.{NormalMode, SelectAlternativeService, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
@@ -50,7 +50,7 @@ class SelectAlternativeServiceControllerSpec extends SpecBase with MockitoSugar 
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
-    validationStatus = "success",
+    validationStatus = ValidationStatus.Success,
     personalDetails = Some(PersonalDetails(
       firstName = "John",
       lastName = "Doe",

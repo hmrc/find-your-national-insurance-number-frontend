@@ -50,7 +50,7 @@ class AuditService @Inject()(auditConnector: AuditConnector
       AuditUtils.buildAuditEvent(
         personDetails = pdvData.personalDetails,
         auditType = "FindYourNinoPDVMatchFailed",
-        validationOutcome = pdvData.validationStatus,
+        validationOutcome = pdvData.validationStatus.toString,
         identifierType = EmptyString,
         origin = origin
       )
@@ -76,7 +76,7 @@ class AuditService @Inject()(auditConnector: AuditConnector
       AuditUtils.buildAuditEvent(
         personDetails = pdvData.personalDetails,
         auditType = "FindYourNinoError",
-        validationOutcome = pdvData.validationStatus,
+        validationOutcome = pdvData.validationStatus.toString,
         identifierType = EmptyString,
         pageErrorGeneratedFrom = Some("/checkDetails"),
         errorStatus = errorStatusCode,
@@ -109,7 +109,7 @@ class AuditService @Inject()(auditConnector: AuditConnector
       AuditUtils.buildAuditEvent(
         personDetails = pdvData.personalDetails,
         auditType = "FindYourNinoPDVMatched",
-        validationOutcome = pdvData.validationStatus,
+        validationOutcome = pdvData.validationStatus.toString,
         identifierType = idData.map(_.crnIndicator.asString).getOrElse(EmptyString),
         origin = origin
       )
@@ -123,7 +123,7 @@ class AuditService @Inject()(auditConnector: AuditConnector
                                  origin: Option[String])(implicit hc: HeaderCarrier): Unit = {
     audit(AuditUtils.buildAuditEvent(Some(personalDetails),
       auditType = "FindYourNinoError",
-      validationOutcome = personalDetailsResponse.validationStatus,
+      validationOutcome = personalDetailsResponse.validationStatus.toString,
       identifierType = personalDetailsResponse.CRN.getOrElse(EmptyString),
       pageErrorGeneratedFrom = Some("/confirm-your-postcode"),
       errorStatus = Some(responseStatus.toString),
@@ -138,7 +138,7 @@ class AuditService @Inject()(auditConnector: AuditConnector
     audit(AuditUtils.buildAuditEvent(
       pdvData.flatMap(_.personalDetails),
       auditType = "FindYourNinoOptionChosen",
-      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
+      validationOutcome = pdvData.map(_.validationStatus.toString).getOrElse("failure"),
       identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
       findMyNinoOption = Some(optionChosen),
       origin = origin
@@ -154,7 +154,7 @@ class AuditService @Inject()(auditConnector: AuditConnector
       pdvData.flatMap(_.personalDetails),
       individualDetailsAddress = individualDetailsAddress,
       auditType = "FindYourNinoConfirmPostcode",
-      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
+      validationOutcome = pdvData.map(_.validationStatus.toString).getOrElse("failure"),
       identifierType = pdvData.map(_.CRN.getOrElse(EmptyString)).getOrElse(EmptyString),
       findMyNinoPostcodeEntered = Some(userEnteredPostCode),
       findMyNinoPostcodeMatched = findMyNinoPostcodeMatched,
@@ -169,7 +169,7 @@ class AuditService @Inject()(auditConnector: AuditConnector
     audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
       individualDetailsAddress = Some(idAddress),
       auditType = "FindYourNinoOnlineLetterOption",
-      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
+      validationOutcome = pdvData.map(_.validationStatus.toString).getOrElse("failure"),
       identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
       findMyNinoOption = Some(value),
       origin = origin
@@ -182,7 +182,7 @@ class AuditService @Inject()(auditConnector: AuditConnector
                         origin: Option[String])(implicit headerCarrier: HeaderCarrier): Unit = {
     audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
       auditType = "FindYourNinoError",
-      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
+      validationOutcome = pdvData.map(_.validationStatus.toString).getOrElse("failure"),
       identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
       pageErrorGeneratedFrom = Some("/postcode"),
       errorStatus = responseStatus,
