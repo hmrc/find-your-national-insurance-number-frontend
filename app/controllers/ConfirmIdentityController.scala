@@ -18,29 +18,30 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions._
-import forms.ServiceIvAppFormProvider
+import forms.ConfirmIdentityFormProvider
+
+import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
-import pages.ServiceIvAppPage
+import pages.ConfirmIdentityPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.ServiceIvAppView
+import views.html.ConfirmIdentityView
 
-import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ServiceIvAppController @Inject()(
+class ConfirmIdentityController @Inject()(
                                          override val messagesApi: MessagesApi,
                                          sessionRepository: SessionRepository,
                                          navigator: Navigator,
                                          identify: IdentifierAction,
                                          getData: DataRetrievalAction,
                                          requireData: CL50DataRequiredAction,
-                                         formProvider: ServiceIvAppFormProvider,
+                                         formProvider: ConfirmIdentityFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
-                                         view: ServiceIvAppView,
+                                         view: ConfirmIdentityView,
                                          config: FrontendAppConfig
                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
@@ -49,15 +50,15 @@ class ServiceIvAppController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
 
-      if(config.extendedIvJourney) {
-        val preparedForm = request.userAnswers.get(ServiceIvAppPage) match {
+      if(config.extendedIvJourney){
+        Redirect(controllers.routes.ServiceIvController.onPageLoad())
+      } else {
+        val preparedForm = request.userAnswers.get(ConfirmIdentityPage) match {
           case None => form
           case Some(value) => form.fill(value)
         }
 
         Ok(view(preparedForm, mode))
-      } else {
-        Redirect(controllers.routes.ConfirmIdentityController.onPageLoad())
       }
   }
 
@@ -70,9 +71,9 @@ class ServiceIvAppController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(ServiceIvAppPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmIdentityPage, value))
             _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(ServiceIvAppPage, mode, updatedAnswers))
+          } yield Redirect(navigator.nextPage(ConfirmIdentityPage, mode, updatedAnswers))
       )
   }
 }

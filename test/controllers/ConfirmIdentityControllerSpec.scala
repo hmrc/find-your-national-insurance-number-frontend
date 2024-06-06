@@ -17,71 +17,70 @@
 package controllers
 
 import base.SpecBase
-import forms.ServiceIvFormProvider
-import models.{NormalMode, ServiceIv, UserAnswers}
+import forms.ConfirmIdentityFormProvider
+import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.ServiceIvPage
+import pages.ConfirmIdentityPage
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
-import views.html.ServiceIvView
+import views.html.ConfirmIdentityView
 
 import scala.concurrent.Future
 
-class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
+class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
 
-  lazy val serviceIvRoute = routes.ServiceIvController.onPageLoad(NormalMode).url
-
-  val formProvider = new ServiceIvFormProvider()
+  val formProvider = new ConfirmIdentityFormProvider()
   val form = formProvider()
 
-  "UpliftOrLetter Controller" - {
+  lazy val confirmIdentityRoute = routes.ConfirmIdentityController.onPageLoad(NormalMode).url
+
+  "ConfirmIdentity Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilderCl50OnWithConfig(
-        Map("features.extendedIvJourney" -> true),
+        Map("features.extendedIvJourney" -> false),
         userAnswers = Some(emptyUserAnswers)
       ).build()
 
       running(application) {
-        val request = FakeRequest(GET, serviceIvRoute)
+        val request = FakeRequest(GET, confirmIdentityRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[ServiceIvView]
+        val view = application.injector.instanceOf[ConfirmIdentityView]
 
         status(result) mustEqual OK
-
         contentAsString(result).removeAllNonces mustEqual view(form, NormalMode)(request, messages).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(ServiceIvPage, ServiceIv.values.toSet).success.value
+      val userAnswers = UserAnswers(userAnswersId).set(ConfirmIdentityPage, true).success.value
 
       val application = applicationBuilderCl50OnWithConfig(
-        Map("features.extendedIvJourney" -> true),
+        Map("features.extendedIvJourney" -> false),
         userAnswers = Some(userAnswers)
       ).build()
 
       running(application) {
-        val request = FakeRequest(GET, serviceIvRoute)
+        val request = FakeRequest(GET, confirmIdentityRoute)
 
-        val view = application.injector.instanceOf[ServiceIvView]
+        val view = application.injector.instanceOf[ConfirmIdentityView]
 
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form.fill(ServiceIv.values.toSet), NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view(form.fill(true), NormalMode)(request, messages).toString
       }
     }
 
@@ -101,8 +100,8 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, serviceIvRoute)
-            .withFormUrlEncodedBody(("value[0]", ServiceIv.values.head.toString))
+          FakeRequest(POST, confirmIdentityRoute)
+            .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
 
@@ -117,12 +116,12 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, serviceIvRoute)
-            .withFormUrlEncodedBody(("value", "invalid value"))
+          FakeRequest(POST, confirmIdentityRoute)
+            .withFormUrlEncodedBody(("value", ""))
 
-        val boundForm = form.bind(Map("value" -> "invalid value"))
+        val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[ServiceIvView]
+        val view = application.injector.instanceOf[ConfirmIdentityView]
 
         val result = route(application, request).value
 
@@ -137,7 +136,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilderCl50Off(userAnswers = Some(emptyUserAnswers)).build()
 
         running(application) {
-          val request = FakeRequest(GET, serviceIvRoute)
+          val request = FakeRequest(GET, confirmIdentityRoute)
 
           val result = route(application, request).value
 
@@ -148,22 +147,22 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "Extended IV journey toggled off" - {
-      "must redirect to the Confirm Identity Page" in {
+    "Extended IV journey toggled on" - {
+      "must redirect to the Service IV Page" in {
 
         val application = applicationBuilderCl50OnWithConfig(
-          Map("features.extendedIvJourney" -> false),
+          Map("features.extendedIvJourney" -> true),
           userAnswers = Some(emptyUserAnswers)
         ).build()
 
         running(application) {
-          val request = FakeRequest(GET, serviceIvRoute)
+          val request = FakeRequest(GET, confirmIdentityRoute)
 
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
 
-          redirectLocation(result).value mustEqual controllers.routes.ConfirmIdentityController.onPageLoad().url
+          redirectLocation(result).value mustEqual controllers.routes.ServiceIvController.onPageLoad().url
         }
       }
     }

@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
 import forms.ServiceIvFormProvider
 import models.{Mode, ServiceIv}
@@ -40,19 +41,25 @@ class ServiceIvController @Inject()(
                                      requireData: CL50DataRequiredAction,
                                      formProvider: ServiceIvFormProvider,
                                      val controllerComponents: MessagesControllerComponents,
-                                     view: ServiceIvView
+                                     view: ServiceIvView,
+                                     config: FrontendAppConfig
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form: Form[Set[ServiceIv]] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      val preparedForm = request.userAnswers.get(ServiceIvPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
 
-      Ok(view(preparedForm, mode))
+      if(config.extendedIvJourney) {
+        val preparedForm = request.userAnswers.get(ServiceIvPage) match {
+          case None => form
+          case Some(value) => form.fill(value)
+        }
+
+        Ok(view(preparedForm, mode))
+      } else {
+        Redirect(controllers.routes.ConfirmIdentityController.onPageLoad())
+      }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
