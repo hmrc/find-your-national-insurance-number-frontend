@@ -32,7 +32,7 @@ import org.mongodb.scala.MongoException
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.wordspec.AsyncWordSpec
 import play.api.http.Status.INTERNAL_SERVER_ERROR
-import repositories.EncryptedIndividualDetailsRepository
+import repositories.{EncryptedIndividualDetailsRepository, SessionRepository}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import util.AnyValueTypeMatcher.anyValueType
@@ -232,5 +232,6 @@ object IndividualDetailsServiceSpec {
 
   val individualDetailsRepository: EncryptedIndividualDetailsRepository = mock[EncryptedIndividualDetailsRepository]
   val individualDetailsConnector: DefaultIndividualDetailsConnector = mock[DefaultIndividualDetailsConnector]
-  val service = new IndividualDetailsServiceImpl(individualDetailsConnector, individualDetailsRepository)
+  val repository: SessionRepository = mock[SessionRepository]
+  val service = new IndividualDetailsServiceImpl(individualDetailsConnector, individualDetailsRepository, repository)
 }

@@ -190,7 +190,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
-            inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
             inject.bind[AuditService].toInstance(auditService),
             inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService)
@@ -225,7 +224,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
-            inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
             inject.bind[AuditService].toInstance(auditService),
             inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService)
@@ -260,13 +258,27 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
-            inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
-            inject.bind[AuditService].toInstance(auditService)
+            inject.bind[AuditService].toInstance(auditService),
+            inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService)
           )
           .build()
 
         when(mockPersonalDetailsValidationService.getPDVData(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any(), any()))
+          .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
+        when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any())).thenReturn(
+          Future(
+            Right(fakeIndividualDetails.copy(
+              addressList = new AddressList(Some(List(fakeAddress.copy(addressStatus = Some(AddressStatus.Dlo))))))
+            )
+          )
+        )
+
+        when(mockPersonalDetailsValidationService.updatePDVDataRowWithValidCustomer(any(), any(), any()))
+          .thenReturn(Future.successful(true))
 
         running(app) {
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
@@ -284,13 +296,27 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
-            inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
-            inject.bind[AuditService].toInstance(auditService)
+            inject.bind[AuditService].toInstance(auditService),
+            inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService)
           )
           .build()
 
         when(mockPersonalDetailsValidationService.getPDVData(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any(), any()))
+          .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
+        when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any())).thenReturn(
+          Future(
+            Right(fakeIndividualDetails.copy(
+              addressList = new AddressList(Some(List(fakeAddress.copy(addressStatus = Some(AddressStatus.Nfa))))))
+            )
+          )
+        )
+
+        when(mockPersonalDetailsValidationService.updatePDVDataRowWithValidCustomer(any(), any(), any()))
+          .thenReturn(Future.successful(true))
 
         running(app) {
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
