@@ -17,7 +17,7 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.pdv.{PDVBadRequestResponse, PDVErrorResponse, PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse}
+import models.pdv._
 import models.requests.DataRequest
 import org.mongodb.scala.MongoException
 import play.api.Logging
@@ -61,7 +61,8 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
           logger.error("Internal server error personal-details-validation")
           PDVErrorResponse(response)
         case _ =>
-          throw new RuntimeException("Something went wrong personal-details-validation")
+          logger.error("Unexpected response from personal-details-validation")
+          PDVUnexpectedResponse(response)
       }
     }
   }
@@ -92,6 +93,15 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
       case pdvNotFoundResponse@PDVNotFoundResponse(_) =>
         logger.warn(s"Failed creating PDV data row. PDV data not found.")
         Future.successful(pdvNotFoundResponse)
+      case pdvBadRequestResponse@PDVBadRequestResponse(_) =>
+        logger.warn(s"Failed creating PDV data row. Bad PDV request.")
+        Future.successful(pdvBadRequestResponse)
+      case pdvUnexpectedResponse@PDVUnexpectedResponse(_) =>
+        logger.warn(s"Failed creating PDV data row. PDV unexpected response.")
+        Future.successful(pdvUnexpectedResponse)
+      case pdvErrorResponse@PDVErrorResponse(_) =>
+        logger.warn(s"Failed creating PDV data row. PDV Internal server error.")
+        Future.successful(pdvErrorResponse)
       case _ =>
         logger.warn(s"Failed creating PDV data row.")
         throw new RuntimeException(s"Failed creating PDV data row.")
@@ -137,17 +147,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
   }
 
   def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[PDVResponse] = {
-    val p = for {
-      pdv <- createPDVDataFromPDVMatch(body)
-    } yield pdv match {
-      case pdvResponse: PDVResponse => pdvResponse
-      case _ => throw new Exception("PDV response could not be parsed.")
-    }
-    p.recover {
-      case ex: Exception =>
-        logger.debug(ex.getMessage)
-        throw ex
-    }
+    createPDVDataFromPDVMatch(body)
   }
 
 }
