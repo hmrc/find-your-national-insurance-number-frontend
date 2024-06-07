@@ -24,7 +24,7 @@ import models.errors.{IndividualDetailsError, InvalidIdentifier}
 import models.individualdetails.AddressType.ResidentialAddress
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, UserAnswers}
 import models.individualdetails.{Address, AddressList, IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache, ResolveMerge}
-import models.pdv.{PDVNotFoundResponse, PDVResponse, PDVResponseData, PDVSuccessResponse}
+import models.pdv.PDVResponseData
 import org.mongodb.scala.MongoException
 import play.api.Logging
 import repositories.{IndividualDetailsRepoTrait, SessionRepository}

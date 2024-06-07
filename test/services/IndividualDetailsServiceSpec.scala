@@ -25,7 +25,7 @@ import scala.concurrent.Future
 import models.individualdetails.{AccountStatusType, Address, AddressList, AddressPostcode, AddressSequenceNumber, AddressSource, AddressStatus, AddressType, CountryCode, CrnIndicator, DateOfBirthStatus, DateOfDeathStatus, DeliveryInfo, FirstForename, Honours, IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache, Name, NameEndDate, NameList, NameSequenceNumber, NameStartDate, NameType, NinoSuffix, OtherTitle, PafReference, RequestedName, ResolveMerge, SecondForename, Surname, TitleType, VpaMail}
 import models.{AddressLine, CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope}
 import models.errors.ConnectorError
-import models.pdv.{PDVResponseData, PDVSuccessResponse}
+import models.pdv.PDVResponseData
 import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.mock
 import org.mongodb.scala.MongoException

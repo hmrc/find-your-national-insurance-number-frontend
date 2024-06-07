@@ -18,7 +18,7 @@ package services
 
 import models.errors.IndividualDetailsError
 import models.individualdetails.{Address, IndividualDetails}
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.PDVResponseData
 import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
