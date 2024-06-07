@@ -140,8 +140,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
           val result = route(app, request).value
 
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          status(result) mustEqual INTERNAL_SERVER_ERROR
+          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
+          contentAsString(result) must include("Please try again in a few minutes.")
 
           verify(auditService, times(1)).start()(any())
         }
@@ -187,8 +188,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
           val result = route(app, request).value
 
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          status(result) mustEqual BAD_REQUEST
+          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
+          contentAsString(result) must include("Please try again in a few minutes.")
 
           verify(auditService, times(1)).start()(any())
         }
@@ -211,8 +213,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
           val result = route(app, request).value
 
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          status(result) mustEqual INTERNAL_SERVER_ERROR
+          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
+          contentAsString(result) must include("Please try again in a few minutes.")
 
           verify(auditService, times(1)).start()(any())
         }
@@ -240,7 +243,10 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           .thenReturn(Future.successful(true))
 
         when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
-          .thenReturn(Future(Right(fakeIndividualDetails)))
+          .thenReturn(Future.successful(Right(fakeIndividualDetails)))
+
+        when(mockIndividualDetailsService.createIndividualDetailsData(any(), any()))
+          .thenReturn(Future.successful("anystring"))
 
         when(mockCheckDetailsService.checkConditions(any())).thenReturn((true, "foo"))
 
@@ -277,6 +283,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
           .thenReturn(Future(Right(fakeIndividualDetails.copy(accountStatusType = Some(AccountStatusType.NotKnown)))))
 
+        when(mockIndividualDetailsService.createIndividualDetailsData(any(), any()))
+          .thenReturn(Future.successful("anystring"))
+
         when(mockPersonalDetailsValidationService.updatePDVDataRowWithValidCustomer(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
@@ -311,6 +320,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
           .thenReturn(Future(Right(fakeIndividualDetails.copy(crnIndicator = CrnIndicator.True))))
 
+        when(mockIndividualDetailsService.createIndividualDetailsData(any(), any()))
+          .thenReturn(Future.successful("anystring"))
+
         when(mockPersonalDetailsValidationService.updatePDVDataRowWithValidCustomer(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
@@ -340,6 +352,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
         when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
+        when(mockIndividualDetailsService.createIndividualDetailsData(any(), any()))
+          .thenReturn(Future.successful("anystring"))
 
         when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any())).thenReturn(
           Future(
@@ -378,6 +393,9 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
         when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any(), any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
+        when(mockIndividualDetailsService.createIndividualDetailsData(any(), any()))
+          .thenReturn(Future.successful("anystring"))
 
         when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any())).thenReturn(
           Future(
@@ -420,6 +438,12 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
           .thenReturn(Future(Right(fakeIndividualDetails)))
 
+        when(mockIndividualDetailsService.createIndividualDetailsData(any(), any()))
+          .thenReturn(Future.successful("anystring"))
+
+        when(mockPersonalDetailsValidationService.updatePDVDataRowWithValidCustomer(any(), any(), any()))
+          .thenReturn(Future.successful(true))
+
         when(mockIndividualDetailsService.getNPSPostCode(any()))
           .thenReturn("AA1 1AA")
 
@@ -456,6 +480,12 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
         when(mockIndividualDetailsService.getNPSPostCode(any()))
           .thenReturn("AA1 1AA")
+
+        when(mockPersonalDetailsValidationService.updatePDVDataRowWithValidCustomer(any(), any(), any()))
+          .thenReturn(Future.successful(true))
+
+        when(mockIndividualDetailsService.createIndividualDetailsData(any(), any()))
+          .thenReturn(Future.successful("anystring"))
 
         when(mockCheckDetailsService.checkConditions(any()))
           .thenReturn((true,""))
@@ -517,9 +547,10 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
           val result = route(app, request).value
 
-          status(result) mustEqual SEE_OTHER
+          status(result) mustEqual INTERNAL_SERVER_ERROR
 
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
+          contentAsString(result) must include("Please try again in a few minutes.")
 
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
           verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
@@ -554,8 +585,10 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
           val result = route(app, request).value
 
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          status(result) mustEqual INTERNAL_SERVER_ERROR
+
+          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
+          contentAsString(result) must include("Please try again in a few minutes.")
 
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
           verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
@@ -590,8 +623,10 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
           val result = route(app, request).value
 
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          status(result) mustEqual INTERNAL_SERVER_ERROR
+
+          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
+          contentAsString(result) must include("Please try again in a few minutes.")
 
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
           verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
@@ -623,8 +658,10 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(ivOrigin, NormalMode).url)
           val result = route(app, request).value
 
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+          status(result) mustEqual BAD_REQUEST
+
+          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
+          contentAsString(result) must include("Please try again in a few minutes.")
 
           verify(auditService, times(1)).start()(any())
         }

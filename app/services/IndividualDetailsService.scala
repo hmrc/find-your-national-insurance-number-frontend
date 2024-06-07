@@ -108,11 +108,10 @@ class IndividualDetailsServiceImpl @Inject()(
     )
   }
 
-  override def createIndividualDetailsData(sessionId: String, individualDetails: IndividualDetails): Future[String] = {
+  override def createIndividualDetailsData(sessionId: String, individualDetails: IndividualDetails): Future[String] =
     individualDetailsRepository.insertOrReplaceIndividualDetailsData(
       getIndividualDetailsData(sessionId, individualDetails)
     )
-  }
 
   override def getIndividualDetailsData(nino: String): Future[Option[IndividualDetailsDataCache]] =
     individualDetailsRepository.findIndividualDetailsDataByNino(nino) map {
