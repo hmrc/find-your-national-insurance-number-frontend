@@ -116,22 +116,6 @@ class AuditService @Inject()(auditConnector: AuditConnector
     )
   }
 
-  def findYourNinoTechnicalError(personalDetailsResponse: PDVResponseData,
-                                 personalDetails: PersonalDetails,
-                                 responseStatus: Int,
-                                 responseMessage: String,
-                                 origin: Option[String])(implicit hc: HeaderCarrier): Unit = {
-    audit(AuditUtils.buildAuditEvent(Some(personalDetails),
-      auditType = "FindYourNinoError",
-      validationOutcome = personalDetailsResponse.validationStatus,
-      identifierType = personalDetailsResponse.CRN.getOrElse(EmptyString),
-      pageErrorGeneratedFrom = Some("/confirm-your-postcode"),
-      errorStatus = Some(responseStatus.toString),
-      errorReason = Some(responseMessage),
-      origin = origin
-    ))
-  }
-
   def findYourNinoOptionChosen(pdvData: Option[PDVResponseData],
                                optionChosen: String,
                                origin: Option[String])(implicit hc: HeaderCarrier) = {
