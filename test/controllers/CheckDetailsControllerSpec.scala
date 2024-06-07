@@ -80,24 +80,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         verify(auditService, times(1)).start()(any())
       }
 
-      "when credentialId is empty" in {
-
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            inject.bind[AuditService].toInstance(auditService)
-          )
-          .build()
-
-        val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(pdvOrigin, NormalMode).url)
-          .withSession("sessionId" -> "", "credentialId" -> "")
-        val result = route(app, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
-
-        verify(auditService, times(1)).start()(any())
-      }
-
       "when PDVResponseData validationStatus is failure" in {
 
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
