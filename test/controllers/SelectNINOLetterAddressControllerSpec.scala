@@ -20,7 +20,7 @@ import base.SpecBase
 import connectors.NPSFMNConnector
 import forms.SelectNINOLetterAddressFormProvider
 import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
 import models.{NormalMode, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{never, times, verify, when}
@@ -50,7 +50,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
-    validationStatus = "success",
+    validationStatus = ValidationStatus.Success,
     personalDetails = Some(PersonalDetails(
       firstName = "John",
       lastName = "Doe",
@@ -66,7 +66,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
 
   val fakePDVResponseDataWithoutPostcode: PDVResponseData = PDVResponseData(
     id = "fakeId",
-    validationStatus = "success",
+    validationStatus = ValidationStatus.Success,
     personalDetails = Some(PersonalDetails(
       firstName = "John",
       lastName = "Doe",

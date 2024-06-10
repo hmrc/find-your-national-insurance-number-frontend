@@ -504,7 +504,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       "when pdvData validationStatus is success but idDataError exists with InternalServerError error" in {
         val mockPDVResponseDataSuccess = PDVSuccessResponse(PDVResponseData(
           "01234",
-          "success",
+          ValidationStatus.Success,
           Some(fakePersonDetails),
           LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
         ))
@@ -542,7 +542,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       "when pdvData validationStatus is success but idDataError exists with BAD_GATEWAY error" in {
         val mockPDVResponseDataSuccess = PDVSuccessResponse(PDVResponseData(
           "01234",
-          "success",
+          ValidationStatus.Success,
           Some(fakePersonDetails),
           LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
         ))
@@ -580,7 +580,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       "when pdvData validationStatus is success but idDataError exists with SERVICE_UNAVAILABLE error" in {
         val mockPDVResponseDataSuccess = PDVSuccessResponse(PDVResponseData(
           "01234",
-          "success",
+          ValidationStatus.Success,
           Some(fakePersonDetails),
           LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
         ))
@@ -714,13 +714,13 @@ object CheckDetailsControllerSpec {
 
   val mockPDVResponseDataSuccess: PDVSuccessResponse = PDVSuccessResponse(PDVResponseData(
     "01234",
-    "success",
+    ValidationStatus.Success,
     Some(fakePersonDetails),
     LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
   ))
   val mockPDVResponseDataFail: PDVSuccessResponse = PDVSuccessResponse(PDVResponseData(
     "01234",
-    "failure",
+    ValidationStatus.Failure,
     Some(fakePersonDetails),
     LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
   ))

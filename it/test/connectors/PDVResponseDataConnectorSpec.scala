@@ -19,7 +19,7 @@ package connectors
 import base.WireMockHelper
 import cacheables.OriginCacheable
 import config.FrontendAppConfig
-import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails}
+import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails, ValidationStatus}
 import models.requests.DataRequest
 import org.mockito.{Answers, ArgumentMatchers}
 import org.mockito.ArgumentMatchers.any
@@ -117,7 +117,7 @@ class PDVResponseDataConnectorSpec
     val personalDetailsValidation: PDVResponseData =
       PDVResponseData(
         id,
-        "success",
+        ValidationStatus.Success,
         Some(personalDetails),
         lastUpdated = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC),
         reason = None,

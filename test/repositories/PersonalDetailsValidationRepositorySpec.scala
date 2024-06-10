@@ -17,7 +17,7 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -57,7 +57,7 @@ class PersonalDetailsValidationRepositorySpec
       "must insert or replace the PDVResultData" in {
         val pdvResultData = PDVResponseData(
           id = "id",
-          validationStatus = "success",
+          validationStatus = ValidationStatus.Success,
           personalDetails = Some(PersonalDetails(
             firstName = "firstName",
             lastName = "lastName",
@@ -76,7 +76,7 @@ class PersonalDetailsValidationRepositorySpec
       "must insert or replace the PDVResultData when the PDVResultData already exists" in {
         val pdvResultData = PDVResponseData(
           id = "id",
-          validationStatus = "success",
+          validationStatus = ValidationStatus.Success,
           personalDetails = Some(PersonalDetails(
             firstName = "firstName",
             lastName = "lastName",
@@ -93,7 +93,7 @@ class PersonalDetailsValidationRepositorySpec
 
         val pdvResultData2 = PDVResponseData(
           id = "id",
-          validationStatus = "success",
+          validationStatus = ValidationStatus.Success,
           personalDetails = Some(PersonalDetails(
             firstName = "firstName",
             lastName = "lastName",
@@ -117,7 +117,7 @@ class PersonalDetailsValidationRepositorySpec
       "must update the customer validity and reason" in {
         val pdvResultData = PDVResponseData(
           id = "id",
-          validationStatus = "success",
+          validationStatus = ValidationStatus.Success,
           personalDetails = Some(PersonalDetails(
             firstName = "firstName",
             lastName = "lastName",
@@ -142,7 +142,7 @@ class PersonalDetailsValidationRepositorySpec
       "must update the npsPostCode" in {
         val pdvResultData = PDVResponseData(
           id = "id",
-          validationStatus = "success",
+          validationStatus = ValidationStatus.Success,
           personalDetails = Some(PersonalDetails(
             firstName = "firstName",
             lastName = "lastName",
@@ -167,7 +167,7 @@ class PersonalDetailsValidationRepositorySpec
         "must return the PDVResultData when it exists" in {
           val pdvResultData = PDVResponseData(
             id = "id",
-            validationStatus = "success",
+            validationStatus = ValidationStatus.Success,
             personalDetails = Some(PersonalDetails(
               firstName = "firstName",
               lastName = "lastName",
@@ -199,7 +199,7 @@ class PersonalDetailsValidationRepositorySpec
         "must return the PDVResultData when it exists" in {
           val pdvResultData = PDVResponseData(
             id = "id",
-            validationStatus = "success",
+            validationStatus = ValidationStatus.Success,
             personalDetails = Some(PersonalDetails(
               firstName = "firstName",
               lastName = "lastName",

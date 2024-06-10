@@ -33,7 +33,7 @@ package controllers
  */
 
 import base.SpecBase
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
 import models.{NormalMode, UserAnswers}
 import org.mockito.ArgumentMatchersSugar.any
 import org.mockito.MockitoSugar.when
@@ -69,7 +69,7 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
-    validationStatus = "success",
+    validationStatus = ValidationStatus.Success,
     personalDetails = Some(PersonalDetails(
       firstName = "John",
       lastName = "Doe",

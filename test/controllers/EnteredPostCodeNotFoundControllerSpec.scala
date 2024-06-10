@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.EnteredPostCodeNotFoundFormProvider
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
 import models.{EnteredPostCodeNotFound, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
@@ -47,7 +47,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
-    validationStatus = "success",
+    validationStatus = ValidationStatus.Success,
     personalDetails = Some(PersonalDetails(
       firstName = "John",
       lastName = "Doe",
