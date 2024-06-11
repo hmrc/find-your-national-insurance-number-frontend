@@ -19,7 +19,7 @@ package repositories
 import config.FrontendAppConfig
 import models.encryption.pdv.EncryptedPDVResponseData
 import models.encryption.pdv.EncryptedPDVResponseData.encrypt
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -56,13 +56,13 @@ class EncryptedPDVResponseRepositoryISpec
     )
 
   private val pdvResponseData = PDVResponseData(
-    "id", "valid", Some(personalDetails), Instant.ofEpochSecond(1), None, Some("false"), Some("false"),Some("somePostcode"))
+    "id", ValidationStatus.Success, Some(personalDetails), Instant.ofEpochSecond(1), None, Some("false"), Some("false"),Some("somePostcode"))
 
   private val validCustomerPDVResponseData = PDVResponseData(
-    "id", "valid", Some(personalDetails), Instant.ofEpochSecond(1), Some("Valid Reason"), Some("true"), Some("false"),Some("somePostcode"))
+    "id", ValidationStatus.Success, Some(personalDetails), Instant.ofEpochSecond(1), Some("Valid Reason"), Some("true"), Some("false"),Some("somePostcode"))
 
   private val invalidCustomerPDVResponseData = PDVResponseData(
-    "id", "valid", Some(personalDetails), Instant.ofEpochSecond(1), Some("Invalid Reason"), Some("false"), Some("false"),Some("somePostcode"))
+    "id", ValidationStatus.Success, Some(personalDetails), Instant.ofEpochSecond(1), Some("Invalid Reason"), Some("false"), Some("false"),Some("somePostcode"))
 
   private val mockAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1

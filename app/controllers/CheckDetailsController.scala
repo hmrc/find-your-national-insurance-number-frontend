@@ -77,13 +77,13 @@ class CheckDetailsController @Inject()(
       case PDVSuccessResponse(pdvResponseData) =>
         val sessionWithNINO = request.session + ("nino" -> pdvResponseData.getNino)
 
-        if (pdvResponseData.validationStatus.toLowerCase.equals("success")) {
-          individualsDetailsChecks(pdvResponseData, mode, sessionWithNINO, origin)
-        }
-        else {
-          logger.info(s"PDV matched failed: ${pdvResponseData.validationStatus}")
-          auditService.findYourNinoPDVMatchFailed(pdvResponseData, origin)
-          Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO))
+        pdvResponseData.validationStatus match {
+          case ValidationStatus.Success =>
+            individualsDetailsChecks(pdvResponseData, mode, sessionWithNINO, origin)
+          case _ =>
+            logger.info(s"PDV matched failed: ${pdvResponseData.validationStatus}")
+            auditService.findYourNinoPDVMatchFailed(pdvResponseData, origin)
+            Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO))
         }
       case PDVNotFoundResponse(r) =>
         logger.info(s"No PDV data found: ${r.status}")

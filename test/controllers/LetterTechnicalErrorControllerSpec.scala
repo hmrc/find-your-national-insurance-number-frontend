@@ -18,8 +18,8 @@ package controllers
 
 import base.SpecBase
 import forms.LetterTechnicalErrorFormProvider
-import models.pdv.{PDVResponseData, PersonalDetails}
-import models.{NormalMode, LetterTechnicalError, TryAgainCount, UserAnswers}
+import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
+import models.{LetterTechnicalError, NormalMode, TryAgainCount, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -54,7 +54,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
   val fakePDVResponseDataWithPostcode: PDVResponseData = PDVResponseData(
     id = "fakeId",
-    validationStatus = "success",
+    validationStatus = ValidationStatus.Success,
     personalDetails = Some(PersonalDetails(
       firstName = "John",
       lastName = "Doe",
@@ -70,7 +70,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
   val fakePDVResponseDataWithoutPostcode: PDVResponseData = PDVResponseData(
     id = "fakeId",
-    validationStatus = "success",
+    validationStatus = ValidationStatus.Success,
     personalDetails = Some(PersonalDetails(
       firstName = "John",
       lastName = "Doe",

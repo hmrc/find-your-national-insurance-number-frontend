@@ -71,8 +71,8 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
   def createPDVDataRow(personalDetailsValidation: PDVResponse): Future[PDVResponse] = {
     personalDetailsValidation match {
       case _@PDVSuccessResponse(pdvResponseData) =>
-        (pdvResponseData.validationStatus.trim.toLowerCase, pdvResponseData.personalDetails) match {
-          case ("success", Some(personalDetails)) =>
+        (pdvResponseData.validationStatus, pdvResponseData.personalDetails) match {
+          case (ValidationStatus.Success, Some(personalDetails)) =>
             val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(EmptyString))
             if (reformattedPostCode.strip().nonEmpty) {
               val newPersonalDetails = personalDetails.copy(postCode = Some(reformattedPostCode))
@@ -84,7 +84,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
               pdvRepository.insertOrReplacePDVResultData(pdvResponseData)
               Future.successful(PDVSuccessResponse(pdvResponseData))
             }
-          case ("failure", None) =>
+          case (ValidationStatus.Failure, None) =>
             pdvRepository.insertOrReplacePDVResultData(pdvResponseData)
             Future.successful(PDVSuccessResponse(pdvResponseData))
           case (_, None) =>
@@ -108,7 +108,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
     }
   }
 
-  // Update the PDV data row with the a validationStatus which is boolean value
+  // Update the PDV data row with the a validCustomer which is boolean value
   def updatePDVDataRowWithValidCustomer(nino: String, isValidCustomer: Boolean, reason:String): Future[Boolean] =
     pdvRepository.updateCustomerValidityWithReason(nino, isValidCustomer, reason) map {
       case str:String => if(str.length > 8) true else false
