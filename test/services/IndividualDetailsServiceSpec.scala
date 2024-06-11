@@ -25,14 +25,14 @@ import scala.concurrent.Future
 import models.individualdetails.{AccountStatusType, Address, AddressList, AddressPostcode, AddressSequenceNumber, AddressSource, AddressStatus, AddressType, CountryCode, CrnIndicator, DateOfBirthStatus, DateOfDeathStatus, DeliveryInfo, FirstForename, Honours, IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache, Name, NameEndDate, NameList, NameSequenceNumber, NameStartDate, NameType, NinoSuffix, OtherTitle, PafReference, RequestedName, ResolveMerge, SecondForename, Surname, TitleType, VpaMail}
 import models.{AddressLine, CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope}
 import models.errors.ConnectorError
-import models.pdv.{PDVResponseData, PDVSuccessResponse}
+import models.pdv.PDVResponseData
 import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.mock
 import org.mongodb.scala.MongoException
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.wordspec.AsyncWordSpec
 import play.api.http.Status.INTERNAL_SERVER_ERROR
-import repositories.EncryptedIndividualDetailsRepository
+import repositories.{EncryptedIndividualDetailsRepository, SessionRepository}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import util.AnyValueTypeMatcher.anyValueType
@@ -105,13 +105,13 @@ class IndividualDetailsServiceSpec extends AsyncWordSpec with Matchers with Mock
 
   "IndividualDetailsService.getIdData" must {
     "return IndividualDetails when IndividualDetailsConnector returns a successful response" in {
-      val mockPDVResponseData = PDVSuccessResponse(
+      val mockPDVResponseData =
         PDVResponseData(
           "1234567890",
           "success",
           Some(models.pdv.PersonalDetails("Abc", "Pqr", Nino("AA123456D"), None, LocalDate.now())),
           LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
-      ))
+      )
 
       when(individualDetailsConnector.getIndividualDetails(
         IndividualDetailsNino(any[String]), anyValueType[ResolveMerge]
@@ -127,13 +127,12 @@ class IndividualDetailsServiceSpec extends AsyncWordSpec with Matchers with Mock
     }
 
     "return IndividualDetailsError when IndividualDetailsConnector returns an error" in {
-      val mockPDVResponseData = PDVSuccessResponse(
-          PDVResponseData(
+      val mockPDVResponseData = PDVResponseData(
           "1234567890",
           "success",
           Some(models.pdv.PersonalDetails("Abc", "Pqr", Nino("AA123456D"), None, LocalDate.now())),
           LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
-        ))
+        )
 
       when(individualDetailsConnector.getIndividualDetails(IndividualDetailsNino(any[String]), anyValueType[ResolveMerge])
       (any(), any(), anyValueType[CorrelationId]))
@@ -233,5 +232,6 @@ object IndividualDetailsServiceSpec {
 
   val individualDetailsRepository: EncryptedIndividualDetailsRepository = mock[EncryptedIndividualDetailsRepository]
   val individualDetailsConnector: DefaultIndividualDetailsConnector = mock[DefaultIndividualDetailsConnector]
-  val service = new IndividualDetailsServiceImpl(individualDetailsConnector, individualDetailsRepository)
+  val repository: SessionRepository = mock[SessionRepository]
+  val service = new IndividualDetailsServiceImpl(individualDetailsConnector, individualDetailsRepository, repository)
 }

@@ -18,7 +18,7 @@ package services
 
 import models.errors.IndividualDetailsError
 import models.individualdetails.{Address, IndividualDetails}
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.PDVResponseData
 import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
@@ -104,32 +104,16 @@ class AuditService @Inject()(auditConnector: AuditConnector
 
   def findYourNinoPDVMatched(pdvData: PDVResponseData,
                              origin: Option[String],
-                             idData: IndividualDetails)(implicit hc: HeaderCarrier): Unit = {
+                             idData: Option[IndividualDetails])(implicit hc: HeaderCarrier): Unit = {
     audit(
       AuditUtils.buildAuditEvent(
         personDetails = pdvData.personalDetails,
         auditType = "FindYourNinoPDVMatched",
         validationOutcome = pdvData.validationStatus,
-        identifierType = idData.crnIndicator.asString,
+        identifierType = idData.map(_.crnIndicator.asString).getOrElse(EmptyString),
         origin = origin
       )
     )
-  }
-
-  def findYourNinoTechnicalError(personalDetailsResponse: PDVResponseData,
-                                 personalDetails: PersonalDetails,
-                                 responseStatus: Int,
-                                 responseMessage: String,
-                                 origin: Option[String])(implicit hc: HeaderCarrier): Unit = {
-    audit(AuditUtils.buildAuditEvent(Some(personalDetails),
-      auditType = "FindYourNinoError",
-      validationOutcome = personalDetailsResponse.validationStatus,
-      identifierType = personalDetailsResponse.CRN.getOrElse(EmptyString),
-      pageErrorGeneratedFrom = Some("/confirm-your-postcode"),
-      errorStatus = Some(responseStatus.toString),
-      errorReason = Some(responseMessage),
-      origin = origin
-    ))
   }
 
   def findYourNinoOptionChosen(pdvData: Option[PDVResponseData],
