@@ -49,7 +49,7 @@
                 label = LabelViewModel(messages("confirmYourPostcode.h2")).asPageSubHeading(LabelSize.Medium)
             ).withWidth(Fixed10)
             .withHint(HintViewModel(messages("confirmYourPostcode.hint")))
-            .withAutocomplete("on")
+            .withAutocomplete("postal-code")
         )
 
         @govukButton(

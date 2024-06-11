@@ -200,19 +200,45 @@ class AuthActionSpec extends SpecBase {
 
     "when the user has a confidence level > 50" - {
 
-      "will redirect to store" in {
-        val application = applicationBuilder(userAnswers = None).build()
+      "when the feature is toggled on" - {
 
-        running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
+        "will redirect to store" in {
+          val application = applicationBuilderWithConfig(
+            Map("features.confidenceLevelToggle" -> true), userAnswers = None
+          ).build()
 
-          val authAction = new SessionIdentifierAction(fakeAuthConnector(retrievals200), appConfig, bodyParsers)
-          val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(fakeRequest.withSession("sessionId" -> "SomeSession"))
+          running(application) {
+            val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
+            val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
-          status(result) mustBe SEE_OTHER
-          redirectLocation(result).value must startWith(appConfig.storeMyNinoUrl)
+            val authAction = new SessionIdentifierAction(fakeAuthConnector(retrievals200), appConfig, bodyParsers)
+            val controller = new Harness(authAction)
+            val result = controller.onPageLoad()(fakeRequest.withSession("sessionId" -> "SomeSession"))
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result).value must startWith(appConfig.storeMyNinoUrl)
+          }
+        }
+      }
+
+
+      "when the feature is toggled off" - {
+
+        "will grant access" in {
+          val application = applicationBuilderWithConfig(
+            Map("features.confidenceLevelToggle" -> false), userAnswers = None
+          ).build()
+
+          running(application) {
+            val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
+            val appConfig = application.injector.instanceOf[FrontendAppConfig]
+
+            val authAction = new SessionIdentifierAction(fakeAuthConnector(retrievals200), appConfig, bodyParsers)
+            val controller = new Harness(authAction)
+            val result = controller.onPageLoad()(fakeRequest.withSession("sessionId" -> "SomeSession"))
+
+            status(result) mustBe OK
+          }
         }
       }
     }

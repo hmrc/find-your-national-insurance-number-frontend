@@ -92,4 +92,5 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   val encryptionKey: String = configuration.get[String]("mongodb.encryption.key")
 
   val extendedIvJourney: Boolean = configuration.get[Boolean]("features.extendedIvJourney")
+  val confidenceLevelToggle: Boolean = configuration.get[Boolean]("features.confidenceLevelToggle")
 }
