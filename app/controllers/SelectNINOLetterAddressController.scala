@@ -107,6 +107,7 @@ class SelectNINOLetterAddressController @Inject()(
                     Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA)))
                   case Some(true) =>
                     sendLetter(nino, pdvData, auditValue, uA, mode)
+                  case _ => throw new IllegalArgumentException("Failed to get SelectNINOLetterAddressPage")
                 }
             }
           }

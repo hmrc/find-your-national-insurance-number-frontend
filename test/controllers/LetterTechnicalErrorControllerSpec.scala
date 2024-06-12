@@ -111,7 +111,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[LetterTechnicalErrorView]
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form, NormalMode, true)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode, retryAllowed = true)(request, messages).toString
       }
     }
 
@@ -139,7 +139,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form, NormalMode, true)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode, retryAllowed = true)(request, messages).toString
       }
     }
 

@@ -60,7 +60,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
 
-        contentAsString(result).removeAllNonces mustEqual view(form, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode)(request, messages).toString
       }
     }
 
@@ -81,7 +81,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form.fill(ServiceIv.values.toSet), NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form.fill(ServiceIv.values.toSet), NormalMode)(request, messages).toString
       }
     }
 
@@ -127,7 +127,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result).removeAllNonces mustEqual view(boundForm, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(boundForm, NormalMode)(request, messages).toString
       }
     }
 
@@ -143,7 +143,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
           status(result) mustEqual SEE_OTHER
 
-          redirectLocation(result).value mustEqual controllers.auth.routes.AuthController.redirectToSMN.url
+          redirectLocation(result).value mustEqual controllers.auth.routes.AuthController.redirectToSMN().url
         }
       }
     }

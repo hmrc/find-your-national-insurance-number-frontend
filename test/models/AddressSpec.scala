@@ -35,7 +35,7 @@ class AddressSpec extends AnyFlatSpec with Matchers {
       Some(LocalDate.now()),
       Some(LocalDate.now().plusDays(1)),
       Some("Type"),
-      false
+      isRls =  false
     )
   }
 
@@ -138,12 +138,12 @@ class AddressSpec extends AnyFlatSpec with Matchers {
 
 
   "AddressOps" should "return the postcode if it exists" in {
-    val address = Address(Some("Line 1"), Some("Line 2"), Some("Line 3"), Some("Line 4"), Some("Line 5"), Some("Postcode"), Some("Country"), Some(LocalDate.now()), Some(LocalDate.now().plusDays(1)), Some("Type"), false)
+    val address = Address(Some("Line 1"), Some("Line 2"), Some("Line 3"), Some("Line 4"), Some("Line 5"), Some("Postcode"), Some("Country"), Some(LocalDate.now()), Some(LocalDate.now().plusDays(1)), Some("Type"), isRls = false)
     address.getPostCode should be ("Postcode")
   }
 
   it should "return an empty string if the postcode does not exist" in {
-    val address = Address(Some("Line 1"), Some("Line 2"), Some("Line 3"), Some("Line 4"), Some("Line 5"), None, Some("Country"), Some(LocalDate.now()), Some(LocalDate.now().plusDays(1)), Some("Type"), false)
+    val address = Address(Some("Line 1"), Some("Line 2"), Some("Line 3"), Some("Line 4"), Some("Line 5"), None, Some("Country"), Some(LocalDate.now()), Some(LocalDate.now().plusDays(1)), Some("Type"), isRls = false)
     address.getPostCode should be ("")
   }
 }

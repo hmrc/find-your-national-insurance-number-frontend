@@ -48,7 +48,7 @@
 
     <p class="govuk-body">@messages("sendLetterError.p2")</p>
 
-    @formHelper(action = routes.SendLetterErrorController.onSubmit(), 'autoComplete -> "off") {
+    @formHelper(action = routes.SendLetterErrorController.onSubmit(), Symbol("autoComplete") -> "off") {
 
         @govukRadios(
             RadiosViewModel(

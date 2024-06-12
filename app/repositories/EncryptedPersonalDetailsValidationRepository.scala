@@ -138,7 +138,7 @@ class EncryptedPersonalDetailsValidationRepository @Inject()(
     val filter = Filters.equal("personalDetails.nino", nino)
     collection
       .deleteOne(filter)
-      .toFuture
+      .toFuture()
       .map(_ => true)
   }
 }

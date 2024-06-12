@@ -77,13 +77,12 @@ class NewLayoutProvider @Inject()(wrapperService: WrapperService,
                      disableSessionExpired: Boolean, sidebarContent: Option[Html], messagesActive: Boolean,
                      showSignOutInHeader: Boolean, bannerConfig: BannerConfig)(contentBlock: Html)
                     (implicit request: Request[_], messages: Messages): HtmlFormat.Appendable = {
-    wrapperService.layout(
+    wrapperService.standardScaLayout(
       disableSessionExpired = !timeout,
       content = contentBlock,
       pageTitle = Some(pageTitle),
       showBackLinkJS = showBackLinkJS,
       backLinkUrl =backLinkUrl,
-      serviceNameUrl = None,
       scripts = Seq(additionalScript()),
       styleSheets = stylesheets.toSeq :+ headBlock(),
       fullWidth = fullWidth,

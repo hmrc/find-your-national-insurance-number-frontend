@@ -89,6 +89,8 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
             Future.successful(PDVSuccessResponse(pdvResponseData))
           case (_, None) =>
             Future.failed(new RuntimeException("PersonalDetails is None in PDVResponseData"))
+          case _ =>
+            Future.failed(new RuntimeException("PersonalDetails could not be parsed"))
         }
       case pdvNotFoundResponse@PDVNotFoundResponse(_) =>
         logger.warn(s"Failed creating PDV data row. PDV data not found.")

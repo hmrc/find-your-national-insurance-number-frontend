@@ -50,10 +50,12 @@ lazy val root = (project in file("."))
       "-language:postfixOps",
       "-rootdir",
       baseDirectory.value.getCanonicalPath,
-      "-Wconf:cat=deprecation:ws,cat=feature:ws,cat=optimizer:ws,src=target/.*:s"
+      "-Wconf:cat=deprecation:ws,cat=feature:ws,cat=optimizer:ws,src=target/.*:s",
+      "-Ypatmat-exhaust-depth", "40"
     ),
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     retrieveManaged := true,
+    Global / excludeLintKeys += update / evictionWarningOptions,
     update / evictionWarningOptions :=
       EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     resolvers ++= Seq(Resolver.jcenterRepo),

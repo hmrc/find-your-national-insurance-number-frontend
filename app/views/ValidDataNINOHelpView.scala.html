@@ -44,7 +44,7 @@
         <p class="govuk-body">@messages("ninoHelpView.inset")</p>
     </div>
 
-    @formHelper(action = routes.ValidDataNINOHelpController.onSubmit(mode), 'autoComplete -> "off") {
+    @formHelper(action = routes.ValidDataNINOHelpController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @govukRadios(
             RadiosViewModel.yesNo(

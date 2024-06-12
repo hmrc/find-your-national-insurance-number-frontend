@@ -26,7 +26,6 @@ import play.api.Logging
 import util.FMNConstants.EmptyString
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[CheckDetailsServiceImpl])
 trait CheckDetailsService {
@@ -34,7 +33,7 @@ trait CheckDetailsService {
 
 }
 
-class CheckDetailsServiceImpl @Inject()(implicit ec: ExecutionContext) extends CheckDetailsService with Logging {
+class CheckDetailsServiceImpl @Inject() extends CheckDetailsService with Logging {
 
    def checkConditions(idData: IndividualDetails): (Boolean, String) = {
      var reason = EmptyString

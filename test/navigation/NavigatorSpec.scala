@@ -47,7 +47,7 @@ class NavigatorSpec extends SpecBase {
       "when on ConfirmIdentityPage" - {
         "when the answer is yes" in {
           val userAnswers = UserAnswers("id").set(ConfirmIdentityPage, true).success.value
-          navigator.nextPage(ConfirmIdentityPage, NormalMode, userAnswers) mustBe auth.routes.AuthController.redirectToSMN
+          navigator.nextPage(ConfirmIdentityPage, NormalMode, userAnswers) mustBe auth.routes.AuthController.redirectToSMN()
         }
 
         "when the answer is no" in {
@@ -105,7 +105,7 @@ class NavigatorSpec extends SpecBase {
           "must go to the AuthController" in {
             val value: Set[ServiceIv] = Set(UkPhotocardDrivingLicence, ValidUkPassport)
             val userAnswers = UserAnswers("id").set(ServiceIvPage, value).success.value
-            navigator.nextPage(ServiceIvPage, NormalMode, userAnswers) mustBe auth.routes.AuthController.redirectToSMN
+            navigator.nextPage(ServiceIvPage, NormalMode, userAnswers) mustBe auth.routes.AuthController.redirectToSMN()
           }
         }
 
@@ -147,7 +147,7 @@ class NavigatorSpec extends SpecBase {
         "when the answer is Yes" - {
           "must go to store" in {
             val userAnswers = UserAnswers("id").set(ServiceIvAppPage, true).success.value
-            navigator.nextPage(ServiceIvAppPage, NormalMode, userAnswers) mustBe auth.routes.AuthController.redirectToSMN
+            navigator.nextPage(ServiceIvAppPage, NormalMode, userAnswers) mustBe auth.routes.AuthController.redirectToSMN()
           }
         }
 

@@ -53,7 +53,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
 
   private def navigateConformIdentity(userAnswers: UserAnswers): Call =
     userAnswers.get(ConfirmIdentityPage) match {
-      case Some(true) => controllers.auth.routes.AuthController.redirectToSMN
+      case Some(true) => controllers.auth.routes.AuthController.redirectToSMN()
       case _          => controllers.routes.PostLetterController.onPageLoad()
     }
   private def navigatePostLetter(userAnswers: UserAnswers): Call =
@@ -63,7 +63,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     }
   private def navigateCanDownloadApp(userAnswers: UserAnswers): Call =
     userAnswers.get(ServiceIvAppPage) match {
-      case Some(true) => controllers.auth.routes.AuthController.redirectToSMN
+      case Some(true) => controllers.auth.routes.AuthController.redirectToSMN()
       case _          => controllers.routes.PostLetterController.onPageLoad()
     }
 
@@ -78,7 +78,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
                | Seq(UkBiometricResidenceCard) =>
             controllers.routes.ServiceIvAppController.onPageLoad()
           case _ => if (selections.toList.length > 1) {
-            controllers.auth.routes.AuthController.redirectToSMN
+            controllers.auth.routes.AuthController.redirectToSMN()
           } else {
             controllers.routes.PostLetterController.onPageLoad()
           }

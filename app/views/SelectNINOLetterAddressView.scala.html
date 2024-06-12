@@ -46,7 +46,7 @@
         <p class="govuk-body">@messages("selectNINOLetterAddress.inset")</p>
     </div>
 
-    @formHelper(action = routes.SelectNINOLetterAddressController.onSubmit(mode), 'autoComplete -> "off") {
+    @formHelper(action = routes.SelectNINOLetterAddressController.onSubmit(mode), Symbol("autoComplete") -> "off") {
         @govukRadios(
             RadiosViewModel.yesNo(
                 field = form("value"),

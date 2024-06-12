@@ -27,6 +27,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class JourneyClosedActionImpl @Inject()(implicit val executionContext: ExecutionContext) extends CL50DataRequiredAction {
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {
-      Future.successful(Left(Redirect(controllers.auth.routes.AuthController.redirectToSMN)))
+      Future.successful(Left(Redirect(controllers.auth.routes.AuthController.redirectToSMN())))
   }
 }

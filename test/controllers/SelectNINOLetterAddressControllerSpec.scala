@@ -107,7 +107,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[SelectNINOLetterAddressView]
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form, NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
       }
     }
 
@@ -132,7 +132,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form.fill(true), NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form.fill(true), NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
       }
     }
 
@@ -260,7 +260,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result).removeAllNonces mustEqual view(boundForm, NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(boundForm, NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
       }
     }
 
@@ -373,7 +373,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
 
         val view = application.injector.instanceOf[SelectNINOLetterAddressView]
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form, NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
       }
     }
   }

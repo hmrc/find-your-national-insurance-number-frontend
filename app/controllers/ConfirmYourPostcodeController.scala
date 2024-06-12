@@ -97,6 +97,8 @@ class ConfirmYourPostcodeController @Inject()(
         idAddress match {
           case Right(idAddr) =>
             auditService.findYourNinoConfirmPostcode(userEnteredPostCode, Some(idAddr), Some(pdvValidData), Some("true"), userAnswers.get(OriginCacheable))
+          case _ =>
+            throw new IllegalArgumentException("Failed to parse the address from Individual Details")
         }
         Future(Redirect(routes.SelectNINOLetterAddressController.onPageLoad()))
       case None =>
