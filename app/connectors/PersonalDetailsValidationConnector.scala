@@ -17,17 +17,17 @@
 package connectors
 
 import cacheables.OriginCacheable
-import config.FrontendAppConfig
-import uk.gov.hmrc.http.{HeaderCarrier, HttpException, HttpResponse}
 import com.google.inject.{Inject, Singleton}
+import config.FrontendAppConfig
 import models.pdv.PDVRequest
-import play.api.Logging
-import uk.gov.hmrc.http.client.HttpClientV2
 import models.pdv.PDVRequest._
 import models.requests.DataRequest
+import play.api.Logging
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND}
 import play.api.mvc.AnyContent
 import services.AuditService
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpException, HttpResponse}
 
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}

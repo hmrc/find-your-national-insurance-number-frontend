@@ -31,7 +31,6 @@ import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext
-import scala.language.implicitConversions
 
 trait ConnectorSpec
     extends AnyWordSpec
