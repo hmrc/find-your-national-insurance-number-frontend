@@ -14,6 +14,20 @@ error.required=Nodwch werth
 error.summary.title=Mae problem wedi codi
 error.message.prefix = Gwall:
 
+month.january=Ionawr
+month.february=Chwefror
+month.march=Mawrth
+month.april=Ebrill
+month.may=Mai
+month.june=Mehefin
+month.july=Gorffennaf
+month.august=Awst
+month.september=Medi
+month.october=Hydref
+month.november=Tachwedd
+month.december=Rhagfyr
+
+
 journeyRecovery.continue.title=Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
 journeyRecovery.continue.heading=Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
 journeyRecovery.startAgain.title=Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth
@@ -33,8 +47,17 @@ selectNINOLetterAddress.error.required=Dewiswch ‘Iawn’ os hoffech i’r llyt
 
 ninoLetterPostedConfirmation.title=Bydd eich rhif Yswiriant Gwladol yn cael ei anfon drwy’r post
 ninoLetterPostedConfirmation.heading=Bydd eich rhif Yswiriant Gwladol yn cael ei anfon drwy’r post
-ninoLetterPostedConfirmation.letterArrival=Byddwn yn postio’r llythyr sy’n cadarnhau’ch rhif. Bydd hwn yn cyrraedd cyn pen 15 diwrnod.
-ninoLetterPostedConfirmation.goBackToGovUK=Gadael ac yn ôl i GOV.UK
+ninoLetterPostedConfirmation.heading2 = Yr hyn sy’n digwydd nesaf
+ninoLetterPostedConfirmation.p1 = Bydd CThEF yn postio’r llythyr sy’n cadarnhau’ch rhif.
+ninoLetterPostedConfirmation.p2 = Bydd hwnnw yn cyrraedd cyn pen 10 diwrnod gwaith ar ôl {0}.
+ninoLetterPostedConfirmation.p3 = Does dim rhaid i chi wneud dim byd arall.
+ninoLetterPostedConfirmation.heading3 = Os hoffech gofnod o pryd y gwnaethoch gais
+ninoLetterPostedConfirmation.printLink = Argraffu neu gadw copi o’r dudalen hon
+ninoLetterPostedConfirmation.inset = Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
+ninoLetterPostedConfirmation.beforeYouGo.heading = Cyn i chi fynd
+ninoLetterPostedConfirmation.beforeYouGo.p1 = Mae’ch adborth yn ein helpu i wella ein gwasanaeth.
+ninoLetterPostedConfirmation.beforeYouGo.p2.part1 = Llenwch arolwg byr
+ninoLetterPostedConfirmation.beforeYouGo.p2.part2 = i rannu’ch adborth ar y gwasanaeth.
 
 selectAlternativeService.title = Bydd angen i chi gysylltu â CThEF am eich rhif Yswiriant Gwladol
 selectAlternativeService.heading = Bydd angen i chi gysylltu â CThEF am eich rhif Yswiriant Gwladol
