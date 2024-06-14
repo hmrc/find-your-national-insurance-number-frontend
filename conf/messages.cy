@@ -1,4 +1,5 @@
 service.name=Dod o hyd i’ch rhif Yswiriant Gwladol
+
 site.back=Yn ôl
 site.change=Newid
 site.no=Na
@@ -8,7 +9,8 @@ site.start=Dechrau nawr
 site.startAgain=Dechrau eto
 site.signIn=Mewngofnodi
 site.govuk=GOV.UK
-error.browser.title.prefix=Gwall:
+
+error.prefix = Gwall:
 error.boolean=Rhowch ateb
 error.required=Nodwch werth
 error.summary.title=Mae problem wedi codi

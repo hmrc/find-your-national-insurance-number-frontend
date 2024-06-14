@@ -10,7 +10,7 @@ site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
 
-error.browser.title.prefix = Error:
+error.prefix = Error:
 error.boolean = Please give an answer
 error.required = Please enter a value
 error.summary.title = There is a problem
