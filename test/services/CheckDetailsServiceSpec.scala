@@ -18,13 +18,13 @@ package services
 
 import config.FrontendAppConfig
 import connectors.IndividualDetailsConnector
-import models.{AddressLine, individualdetails}
 import models.individualdetails._
+import models.{AddressLine, individualdetails}
+import org.mockito.MockitoSugar
 import org.mockito.MockitoSugar.mock
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
-import org.mockito.MockitoSugar
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
@@ -121,12 +121,11 @@ class CheckDetailsServiceSpec extends AsyncWordSpec with Matchers with MockitoSu
 }
 
 object CheckDetailsServiceSpec {
-  import scala.concurrent.ExecutionContext.Implicits.global
   implicit val hc: HeaderCarrier         = HeaderCarrier()
   private val mockFrontendAppConfig = mock[FrontendAppConfig]
   private val personalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
   private val individualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
-  private val npsFMNService = new CheckDetailsServiceImpl()(global)
+  private val npsFMNService = new CheckDetailsServiceImpl()
 
   val fakeName: individualdetails.Name = models.individualdetails.Name(
     nameSequenceNumber = NameSequenceNumber(1),

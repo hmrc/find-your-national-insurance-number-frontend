@@ -105,15 +105,15 @@ class NPSFMNConnectorSpec
   "NPS FMN Connector" must {
 
     trait LocalSetup extends SpecSetup {
-      def url(nino: String) = s"/find-your-national-insurance-number/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/${nino}"
+      def url(nino: String) = s"/find-your-national-insurance-number/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/$nino"
     }
 
-    "return Ok (200) when called with an invalid nino" in new LocalSetup {
+    "return ACCEPTED (202) when called with an invalid nino" in new LocalSetup {
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
       val body: NPSFMNRequest = mock[NPSFMNRequest]
-      stubPost(url(nino.nino), OK, Some(Json.toJson(body).toString()), Some(""))
+      stubPost(url(nino.nino), ACCEPTED, Some(Json.toJson(body).toString()), Some(""))
       val result: HttpResponse = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
-      result.status mustBe OK
+      result.status mustBe ACCEPTED
       result.body mustBe ""
     }
 

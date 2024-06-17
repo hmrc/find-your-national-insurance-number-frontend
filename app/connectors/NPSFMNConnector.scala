@@ -16,17 +16,14 @@
 
 package connectors
 
-import cats.syntax.all._
 import com.google.inject.ImplementedBy
 import config.FrontendAppConfig
 import models.CorrelationId
-import models.errors.{ConnectorError, IndividualDetailsError}
 import models.nps.NPSFMNRequest
-import models.upstreamfailure.{Failure, UpstreamFailures}
+import play.api.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import util.FMNConstants.EmptyString
 
 import java.net.URL
 import javax.inject.{Inject, Singleton}
@@ -42,7 +39,7 @@ trait NPSFMNConnector {
 @Singleton
 class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2, appConfig: FrontendAppConfig)
   extends  NPSFMNConnector
-  with HttpReadsWrapper[UpstreamFailures, Failure] {
+  with Logging {
 
   def sendLetter(nino: String, body: NPSFMNRequest
                    )(implicit hc: HeaderCarrier,correlationId: CorrelationId, ec: ExecutionContext): Future[HttpResponse] = {
@@ -59,38 +56,5 @@ class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2, appConfig: Fr
         Future.successful(response)
       }
   }
-
-  // $COVERAGE-OFF$
-  override def fromUpstreamErrorToIndividualDetailsError(
-    connectorName:     String,
-    status:            Int,
-    upstreamError:     UpstreamFailures,
-    additionalLogInfo: Option[AdditionalLogInfo]
-  ): ConnectorError = {
-    val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse(EmptyString)
-    logger.debug(s"$additionalLogInformation$connectorName with status: $status, ${upstreamError.failures
-      .map(f => s"code: ${f.code}. reason: ${f.reason}")
-      .mkString(";")}")
-
-    ConnectorError(
-      status,
-      s"$connectorName, ${upstreamError.failures.map(f => s"code: ${f.code}. reason: ${f.reason}").mkString(";")}"
-    )
-  }
-
-  override def fromSingleUpstreamErrorToIndividualDetailsError(
-    connectorName:     String,
-    status:            Int,
-    upstreamError:     Failure,
-    additionalLogInfo: Option[AdditionalLogInfo]
-  ): Option[IndividualDetailsError] = {
-    val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse(EmptyString)
-
-    logger.debug(
-      s"$additionalLogInformation$connectorName with status: $status, ${upstreamError.code} - ${upstreamError.reason}"
-    )
-    ConnectorError(status, s"$connectorName, ${upstreamError.code} - ${upstreamError.reason}").some
-  }
-  // $COVERAGE-ON$
 
 }

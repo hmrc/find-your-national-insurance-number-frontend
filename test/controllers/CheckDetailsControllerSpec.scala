@@ -48,13 +48,11 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(
-      mockAuthConnector,
-      mockIndividualDetailsService,
-      mockPersonalDetailsValidationService,
-      auditService,
-      mockCheckDetailsService
-    )
+    reset(mockAuthConnector)
+    reset(mockIndividualDetailsService)
+    reset(mockPersonalDetailsValidationService)
+    reset(auditService)
+    reset(mockCheckDetailsService)
   }
 
   "CheckDetailsController" - {

@@ -156,7 +156,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[ConfirmYourPostcodeView]
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode)(request, messages).toString
       }
     }
 
@@ -273,7 +273,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form.fill("answer"), NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form.fill("answer"), NormalMode)(request, messages).toString
       }
     }
 
@@ -300,7 +300,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result).removeAllNonces mustEqual view(boundForm, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(boundForm, NormalMode)(request, messages).toString
       }
     }
 
