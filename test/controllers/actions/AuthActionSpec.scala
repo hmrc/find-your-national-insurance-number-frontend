@@ -48,7 +48,7 @@ class AuthActionSpec extends SpecBase {
 
         running(application) {
           val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
+          val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
           val authAction = new SessionIdentifierAction(new FakeFailingAuthConnector(new MissingBearerToken), appConfig, bodyParsers)
           val controller = new Harness(authAction)
@@ -68,7 +68,7 @@ class AuthActionSpec extends SpecBase {
 
         running(application) {
           val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
+          val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
           val authAction = new SessionIdentifierAction(new FakeFailingAuthConnector(new BearerTokenExpired), appConfig, bodyParsers)
           val controller = new Harness(authAction)
@@ -88,7 +88,7 @@ class AuthActionSpec extends SpecBase {
 
         running(application) {
           val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
+          val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
           val authAction = new SessionIdentifierAction(new FakeFailingAuthConnector(new InsufficientEnrolments), appConfig, bodyParsers)
           val controller = new Harness(authAction)
@@ -108,7 +108,7 @@ class AuthActionSpec extends SpecBase {
 
         running(application) {
           val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
+          val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
           val authAction = new SessionIdentifierAction(new FakeFailingAuthConnector(new InsufficientConfidenceLevel), appConfig, bodyParsers)
           val controller = new Harness(authAction)
@@ -128,7 +128,7 @@ class AuthActionSpec extends SpecBase {
 
         running(application) {
           val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
+          val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
           val authAction = new SessionIdentifierAction(new FakeFailingAuthConnector(new UnsupportedAuthProvider), appConfig, bodyParsers)
           val controller = new Harness(authAction)
@@ -148,7 +148,7 @@ class AuthActionSpec extends SpecBase {
 
         running(application) {
           val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
+          val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
           val authAction = new SessionIdentifierAction(new FakeFailingAuthConnector(new UnsupportedAffinityGroup), appConfig, bodyParsers)
           val controller = new Harness(authAction)
@@ -168,7 +168,7 @@ class AuthActionSpec extends SpecBase {
 
         running(application) {
           val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
+          val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
           val authAction = new SessionIdentifierAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole), appConfig, bodyParsers)
           val controller = new Harness(authAction)
@@ -200,45 +200,19 @@ class AuthActionSpec extends SpecBase {
 
     "when the user has a confidence level > 50" - {
 
-      "when the feature is toggled on" - {
+      "will redirect to store" in {
+        val application = applicationBuilder(userAnswers = None).build()
 
-        "will redirect to store" in {
-          val application = applicationBuilderWithConfig(
-            Map("features.confidenceLevelToggle" -> true), userAnswers = None
-          ).build()
+        running(application) {
+          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
-          running(application) {
-            val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-            val appConfig = application.injector.instanceOf[FrontendAppConfig]
+          val authAction = new SessionIdentifierAction(fakeAuthConnector(retrievals200), appConfig, bodyParsers)
+          val controller = new Harness(authAction)
+          val result = controller.onPageLoad()(fakeRequest.withSession("sessionId" -> "SomeSession"))
 
-            val authAction = new SessionIdentifierAction(fakeAuthConnector(retrievals200), appConfig, bodyParsers)
-            val controller = new Harness(authAction)
-            val result = controller.onPageLoad()(fakeRequest.withSession("sessionId" -> "SomeSession"))
-
-            status(result) mustBe SEE_OTHER
-            redirectLocation(result).value must startWith(appConfig.storeMyNinoUrl)
-          }
-        }
-      }
-
-
-      "when the feature is toggled off" - {
-
-        "will grant access" in {
-          val application = applicationBuilderWithConfig(
-            Map("features.confidenceLevelToggle" -> false), userAnswers = None
-          ).build()
-
-          running(application) {
-            val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-            val appConfig = application.injector.instanceOf[FrontendAppConfig]
-
-            val authAction = new SessionIdentifierAction(fakeAuthConnector(retrievals200), appConfig, bodyParsers)
-            val controller = new Harness(authAction)
-            val result = controller.onPageLoad()(fakeRequest.withSession("sessionId" -> "SomeSession"))
-
-            status(result) mustBe OK
-          }
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value must startWith(appConfig.storeMyNinoUrl)
         }
       }
     }
