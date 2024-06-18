@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.ValidDataNINOMatchedNINOHelpFormProvider
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
@@ -49,7 +49,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
-    validationStatus = "success",
+    validationStatus = ValidationStatus.Success,
     personalDetails = Some(PersonalDetails(
       firstName = "John",
       lastName = "Doe",
@@ -86,7 +86,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
         val view = application.injector.instanceOf[ValidDataNINOMatchedNINOHelpView]
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode)(request, messages).toString
       }
     }
 
@@ -110,7 +110,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form.fill(true), NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form.fill(true), NormalMode)(request, messages).toString
       }
     }
 
@@ -165,7 +165,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result).removeAllNonces mustEqual view(boundForm, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(boundForm, NormalMode)(request, messages).toString
       }
     }
 

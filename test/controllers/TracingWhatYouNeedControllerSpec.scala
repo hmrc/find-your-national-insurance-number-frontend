@@ -55,7 +55,7 @@ class TracingWhatYouNeedControllerSpec extends SpecBase with MockitoSugar {
 
           status(result) mustEqual SEE_OTHER
 
-          redirectLocation(result).value mustEqual controllers.auth.routes.AuthController.redirectToSMN.url
+          redirectLocation(result).value mustEqual controllers.auth.routes.AuthController.redirectToSMN().url
         }
       }
     }

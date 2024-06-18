@@ -18,7 +18,7 @@ package services
 
 import models.errors.IndividualDetailsError
 import models.individualdetails.{Address, IndividualDetails}
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.{PDVResponseData, ValidationStatus}
 import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
@@ -50,7 +50,7 @@ class AuditService @Inject()(auditConnector: AuditConnector
       AuditUtils.buildAuditEvent(
         personDetails = pdvData.personalDetails,
         auditType = "FindYourNinoPDVMatchFailed",
-        validationOutcome = pdvData.validationStatus,
+        validationOutcome = pdvData.validationStatus.toString,
         identifierType = EmptyString,
         origin = origin
       )
@@ -76,7 +76,7 @@ class AuditService @Inject()(auditConnector: AuditConnector
       AuditUtils.buildAuditEvent(
         personDetails = pdvData.personalDetails,
         auditType = "FindYourNinoError",
-        validationOutcome = pdvData.validationStatus,
+        validationOutcome = pdvData.validationStatus.toString,
         identifierType = EmptyString,
         pageErrorGeneratedFrom = Some("/checkDetails"),
         errorStatus = errorStatusCode,
@@ -104,32 +104,16 @@ class AuditService @Inject()(auditConnector: AuditConnector
 
   def findYourNinoPDVMatched(pdvData: PDVResponseData,
                              origin: Option[String],
-                             idData: IndividualDetails)(implicit hc: HeaderCarrier): Unit = {
+                             idData: Option[IndividualDetails])(implicit hc: HeaderCarrier): Unit = {
     audit(
       AuditUtils.buildAuditEvent(
         personDetails = pdvData.personalDetails,
         auditType = "FindYourNinoPDVMatched",
-        validationOutcome = pdvData.validationStatus,
-        identifierType = idData.crnIndicator.asString,
+        validationOutcome = pdvData.validationStatus.toString,
+        identifierType = idData.map(_.crnIndicator.asString).getOrElse(EmptyString),
         origin = origin
       )
     )
-  }
-
-  def findYourNinoTechnicalError(personalDetailsResponse: PDVResponseData,
-                                 personalDetails: PersonalDetails,
-                                 responseStatus: Int,
-                                 responseMessage: String,
-                                 origin: Option[String])(implicit hc: HeaderCarrier): Unit = {
-    audit(AuditUtils.buildAuditEvent(Some(personalDetails),
-      auditType = "FindYourNinoError",
-      validationOutcome = personalDetailsResponse.validationStatus,
-      identifierType = personalDetailsResponse.CRN.getOrElse(EmptyString),
-      pageErrorGeneratedFrom = Some("/confirm-your-postcode"),
-      errorStatus = Some(responseStatus.toString),
-      errorReason = Some(responseMessage),
-      origin = origin
-    ))
   }
 
   def findYourNinoOptionChosen(pdvData: Option[PDVResponseData],
@@ -138,7 +122,7 @@ class AuditService @Inject()(auditConnector: AuditConnector
     audit(AuditUtils.buildAuditEvent(
       pdvData.flatMap(_.personalDetails),
       auditType = "FindYourNinoOptionChosen",
-      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
+      validationOutcome = pdvData.map(_.validationStatus).getOrElse(ValidationStatus.Failure).toString,
       identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
       findMyNinoOption = Some(optionChosen),
       origin = origin
@@ -154,7 +138,7 @@ class AuditService @Inject()(auditConnector: AuditConnector
       pdvData.flatMap(_.personalDetails),
       individualDetailsAddress = individualDetailsAddress,
       auditType = "FindYourNinoConfirmPostcode",
-      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
+      validationOutcome = pdvData.map(_.validationStatus).getOrElse(ValidationStatus.Failure).toString,
       identifierType = pdvData.map(_.CRN.getOrElse(EmptyString)).getOrElse(EmptyString),
       findMyNinoPostcodeEntered = Some(userEnteredPostCode),
       findMyNinoPostcodeMatched = findMyNinoPostcodeMatched,
@@ -169,7 +153,7 @@ class AuditService @Inject()(auditConnector: AuditConnector
     audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
       individualDetailsAddress = Some(idAddress),
       auditType = "FindYourNinoOnlineLetterOption",
-      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
+      validationOutcome = pdvData.map(_.validationStatus).getOrElse(ValidationStatus.Failure).toString,
       identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
       findMyNinoOption = Some(value),
       origin = origin
@@ -182,7 +166,7 @@ class AuditService @Inject()(auditConnector: AuditConnector
                         origin: Option[String])(implicit headerCarrier: HeaderCarrier): Unit = {
     audit(AuditUtils.buildAuditEvent(pdvData.flatMap(_.personalDetails),
       auditType = "FindYourNinoError",
-      validationOutcome = pdvData.map(_.validationStatus).getOrElse("failure"),
+      validationOutcome = pdvData.map(_.validationStatus).getOrElse(ValidationStatus.Failure).toString,
       identifierType = pdvData.map(_.CRN.getOrElse("")).getOrElse(""),
       pageErrorGeneratedFrom = Some("/postcode"),
       errorStatus = responseStatus,

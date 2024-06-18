@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package controllers.actions
-
-import models.requests.{DataRequest, OptionalDataRequest}
-import play.api.mvc.Result
-import play.api.mvc.Results.Redirect
+package forms
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
 
-// TODO - can be removed when the CL50 journey toggle is removed
-class JourneyClosedActionImpl @Inject()(implicit val executionContext: ExecutionContext) extends CL50DataRequiredAction {
+import forms.mappings.Mappings
+import play.api.data.Form
 
-  override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {
-      Future.successful(Left(Redirect(controllers.auth.routes.AuthController.redirectToSMN())))
-  }
+class ConfirmIdentityFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[Boolean] =
+    Form(
+      "value" -> boolean("confirmIdentity.error.required")
+    )
 }

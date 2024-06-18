@@ -71,7 +71,7 @@ class TryAgainCountRepository @Inject()(
         replacement = updatedCount,
         options = ReplaceOptions().upsert(true)
       )
-      .toFuture
+      .toFuture()
       .map(_ => true)
   }
 

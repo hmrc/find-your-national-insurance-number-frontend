@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package models.errors
+package pages
 
-import models.IndividualDetailsIdentifier
+import pages.behaviours.PageBehaviours
 
-sealed abstract class IndividualDetailsError(message: String)
-  extends Throwable {
-  val errorMessage: String = message
+class ConfirmIdentityPageSpec extends PageBehaviours {
+
+  "ConfirmIdentityPage" - {
+
+    beRetrievable[Boolean](ConfirmIdentityPage)
+
+    beSettable[Boolean](ConfirmIdentityPage)
+
+    beRemovable[Boolean](ConfirmIdentityPage)
+  }
 }
-
-final case class ConnectorError(statusCode: Int, message: String)
-  extends IndividualDetailsError(message)
-
-final case class InvalidIdentifier(identifier: IndividualDetailsIdentifier)
-  extends IndividualDetailsError(s"Invalid identifier: $identifier")

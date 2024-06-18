@@ -72,9 +72,7 @@ trait HttpReadsWrapper[E, EE] {
     (_, _, response) => {
       val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse("")
       response.status match {
-        case Status.NO_CONTENT =>
-          Right(().asInstanceOf[T])
-        case Status.OK | Status.CREATED => {
+        case Status.OK =>
           Try(response.json) match {
             case Success(value) =>
               value
@@ -98,9 +96,7 @@ trait HttpReadsWrapper[E, EE] {
               ).asLeft[T]
             }
           }
-        }
-
-        case status => {
+        case status =>
           Try(response.json) match {
             case Success(value) =>
               value
@@ -109,15 +105,13 @@ trait HttpReadsWrapper[E, EE] {
                   e => validateAdditionalError(name, status, value.validate[EE], e, additionalLogInfo),
                   error => fromUpstreamErrorToIndividualDetailsError(name, status, error, additionalLogInfo).asLeft[T]
                 )
-            case Failure(e) => {
+            case Failure(e) =>
               logger.debug(s"$additionalLogInformation$name couldn't parse error body from upstream", e)
               ConnectorError(
                 Status.INTERNAL_SERVER_ERROR,
                 s"$name couldn't parse error body from upstream"
               ).asLeft[T]
-            }
           }
-        }
       }
     }
 

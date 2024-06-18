@@ -35,7 +35,7 @@ class PDVResponseDataSpec extends AnyFlatSpec with Matchers {
 
     val pdvResponseData: PDVResponseData = PDVResponseData(
       "id",
-      "success",
+      ValidationStatus.Success,
       Some(personalDetails),
       Instant.now,
       Some("reason"),
@@ -44,7 +44,7 @@ class PDVResponseDataSpec extends AnyFlatSpec with Matchers {
       None
     )
     import uk.gov.hmrc.domain.Nino.isValid
-    pdvResponseData.validationStatus should be ("success")
+    pdvResponseData.validationStatus should be (ValidationStatus.Success)
     pdvResponseData.validCustomer should be (Some("true"))
     isValid(personalDetails.nino.nino) should be (true)
     pdvResponseData.getFirstName should be ("firstName")
@@ -66,7 +66,7 @@ class PDVResponseDataSpec extends AnyFlatSpec with Matchers {
     )
     val pdvResponseData2: PDVResponseData = PDVResponseData(
       "id",
-      "success",
+      ValidationStatus.Success,
       Some(emptyPersonalDetails),
       Instant.now,
       Some("reason"),

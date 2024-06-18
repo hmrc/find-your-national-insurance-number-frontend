@@ -32,6 +32,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
   private lazy val getNINOByPost = "/fill-online/get-your-national-insurance-number-by-post"
 
   private val normalRoutes: Page => UserAnswers => Call = {
+    case ConfirmIdentityPage                => userAnswers => navigateConformIdentity(userAnswers)
     case ServiceIvPage                      => userAnswers => navigateIvEvidence(userAnswers)
     case ServiceIvAppPage                   => userAnswers => navigateCanDownloadApp(userAnswers)
     case PostLetterPage                     => userAnswers => navigatePostLetter(userAnswers)
@@ -50,6 +51,11 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
       normalRoutes(page)(userAnswers)
   }
 
+  private def navigateConformIdentity(userAnswers: UserAnswers): Call =
+    userAnswers.get(ConfirmIdentityPage) match {
+      case Some(true) => controllers.auth.routes.AuthController.redirectToSMN()
+      case _          => controllers.routes.PostLetterController.onPageLoad()
+    }
   private def navigatePostLetter(userAnswers: UserAnswers): Call =
     userAnswers.get(PostLetterPage) match {
       case Some(true) => controllers.routes.TracingWhatYouNeedController.onPageLoad()
@@ -57,7 +63,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     }
   private def navigateCanDownloadApp(userAnswers: UserAnswers): Call =
     userAnswers.get(ServiceIvAppPage) match {
-      case Some(true) => controllers.auth.routes.AuthController.redirectToSMN
+      case Some(true) => controllers.auth.routes.AuthController.redirectToSMN()
       case _          => controllers.routes.PostLetterController.onPageLoad()
     }
 
@@ -72,7 +78,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
                | Seq(UkBiometricResidenceCard) =>
             controllers.routes.ServiceIvAppController.onPageLoad()
           case _ => if (selections.toList.length > 1) {
-            controllers.auth.routes.AuthController.redirectToSMN
+            controllers.auth.routes.AuthController.redirectToSMN()
           } else {
             controllers.routes.PostLetterController.onPageLoad()
           }

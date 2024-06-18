@@ -14,17 +14,32 @@
  * limitations under the License.
  */
 
-package models.errors
+package forms
 
-import models.IndividualDetailsIdentifier
+import forms.behaviours.BooleanFieldBehaviours
+import play.api.data.FormError
 
-sealed abstract class IndividualDetailsError(message: String)
-  extends Throwable {
-  val errorMessage: String = message
+class ConfirmIdentityFormProviderSpec extends BooleanFieldBehaviours {
+
+  val requiredKey = "confirmIdentity.error.required"
+  val invalidKey = "error.boolean"
+
+  val form = new ConfirmIdentityFormProvider()()
+
+  ".value" - {
+
+    val fieldName = "value"
+
+    behave like booleanField(
+      form,
+      fieldName,
+      invalidError = FormError(fieldName, invalidKey)
+    )
+
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
 }
-
-final case class ConnectorError(statusCode: Int, message: String)
-  extends IndividualDetailsError(message)
-
-final case class InvalidIdentifier(identifier: IndividualDetailsIdentifier)
-  extends IndividualDetailsError(s"Invalid identifier: $identifier")

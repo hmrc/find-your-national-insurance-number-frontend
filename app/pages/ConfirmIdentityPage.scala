@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package models.errors
+package pages
 
-import models.IndividualDetailsIdentifier
+import play.api.libs.json.JsPath
 
-sealed abstract class IndividualDetailsError(message: String)
-  extends Throwable {
-  val errorMessage: String = message
+case object ConfirmIdentityPage extends QuestionPage[Boolean] {
+
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "confirmIdentity"
 }
-
-final case class ConnectorError(statusCode: Int, message: String)
-  extends IndividualDetailsError(message)
-
-final case class InvalidIdentifier(identifier: IndividualDetailsIdentifier)
-  extends IndividualDetailsError(s"Invalid identifier: $identifier")

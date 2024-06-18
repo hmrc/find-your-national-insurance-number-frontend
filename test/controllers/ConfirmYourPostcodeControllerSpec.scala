@@ -21,7 +21,7 @@ import connectors.{IndividualDetailsConnector, NPSFMNConnector}
 import forms.ConfirmYourPostcodeFormProvider
 import models.individualdetails._
 import models.nps.LetterIssuedResponse
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
 import models.{AddressLine, CorrelationId, IndividualDetailsResponseEnvelope, NormalMode, UserAnswers, individualdetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.when
@@ -58,7 +58,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
-    validationStatus = "success",
+    validationStatus = ValidationStatus.Success,
     personalDetails = Some(PersonalDetails(
       firstName = "John",
       lastName = "Doe",
@@ -78,7 +78,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
 
   val fakePDVResponseDataNoNpsPostcode: PDVResponseData = PDVResponseData(
     id = "fakeId",
-    validationStatus = "failure",
+    validationStatus = ValidationStatus.Failure,
     personalDetails = None,
     validCustomer = Some("true"),
     CRN = None,
@@ -156,7 +156,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[ConfirmYourPostcodeView]
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode)(request, messages).toString
       }
     }
 
@@ -273,7 +273,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form.fill("answer"), NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form.fill("answer"), NormalMode)(request, messages).toString
       }
     }
 
@@ -300,7 +300,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result).removeAllNonces mustEqual view(boundForm, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(boundForm, NormalMode)(request, messages).toString
       }
     }
 

@@ -17,7 +17,7 @@
 package models.encryption.pdv
 
 import models.encryption.EncryptedValueFormat._
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{OFormat, __}
 import uk.gov.hmrc.crypto.{EncryptedValue, SymmetricCryptoFactory}
@@ -79,7 +79,7 @@ object EncryptedPDVResponseData {
 
     EncryptedPDVResponseData(
       id = pDVResponseData.id,
-      validationStatus = e(pDVResponseData.validationStatus),
+      validationStatus = e(pDVResponseData.validationStatus.toString),
       personalDetails = pDVResponseData.personalDetails.map(pd => EncryptedPersonalDetails(e(pd.firstName), e(pd.lastName), pd.nino.nino, pd.postCode map e, e(pd.dateOfBirth.toString))),
       lastUpdated = pDVResponseData.lastUpdated,
       reason = pDVResponseData.reason map e,
@@ -96,7 +96,7 @@ object EncryptedPDVResponseData {
 
     PDVResponseData(
       id = encryptedRowPersonDetails.id,
-      validationStatus = d(encryptedRowPersonDetails.validationStatus),
+      validationStatus = ValidationStatus.withName(d(encryptedRowPersonDetails.validationStatus)),
       personalDetails = encryptedRowPersonDetails.personalDetails.map(pd => PersonalDetails(d(pd.firstName), d(pd.lastName), Nino(pd.nino), pd.postCode map d, LocalDate.parse(d(pd.dateOfBirth)))),
       lastUpdated = encryptedRowPersonDetails.lastUpdated,
       reason = encryptedRowPersonDetails.reason map d,

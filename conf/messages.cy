@@ -1,4 +1,5 @@
 service.name=Dod o hyd i’ch rhif Yswiriant Gwladol
+
 site.back=Yn ôl
 site.change=Newid
 site.no=Na
@@ -8,7 +9,8 @@ site.start=Dechrau nawr
 site.startAgain=Dechrau eto
 site.signIn=Mewngofnodi
 site.govuk=GOV.UK
-error.browser.title.prefix=Gwall:
+
+error.prefix = Gwall:
 error.boolean=Rhowch ateb
 error.required=Nodwch werth
 error.summary.title=Mae problem wedi codi
@@ -190,3 +192,20 @@ tracingWhatYouNeed.li2 = dyddiad geni
 tracingWhatYouNeed.li3 = rhif Yswiriant Gwladol (dewisol)
 tracingWhatYouNeed.li4 = cod post
 tracingWhatYouNeed.p3 = Os yw’r manylion a roddwch i ni yn cyd-fynd â’n cofnodion, gallwn bostio llythyr atoch gyda’ch rhif Yswiriant Gwladol arno.
+
+confirmIdentity.title = Cadarnhau pwy ydych i gael eich rhif Yswiriant Gwladol ar-lein
+confirmIdentity.heading = Cadarnhau pwy ydych i gael eich rhif Yswiriant Gwladol ar-lein
+confirmIdentity.p1 = I gadw eich rhif yn ddiogel a’ch diogelu rhag twyll, byddwn yn gofyn i chi am hyd at ddwy eitem i gadarnhau pwy ydych.
+confirmIdentity.h2 = Eitemau y gallech eu defnyddio
+confirmIdentity.p2 = ID ffotograffig, er enghraifft:
+confirmIdentity.options.passport = pasbort
+confirmIdentity.options.drivingLicence = trwydded yrru cerdyn-llun yn y DU neu drwydded yrru cerdyn-llun yn yr Ardal Economaidd Ewropeaidd (AEE)
+confirmIdentity.options.biometric = trwydded breswylio fiometrig y DU neu Gerdyn Adnabod Cenedlaethol o wlad yn yr AEE
+confirmIdentity.p3 = Gwybodaeth arall, er enghraifft manylion ynghylch y canlynol:
+confirmIdentity.options.mobile = cytundeb ffôn symudol, cyfrif banc neu forgais
+confirmIdentity.options.payslip = slip cyflog neu P60
+confirmIdentity.options.selfAssessment = Ffurflen Dreth Hunanasesiad wedi’i llenwi ar gyfer y flwyddyn dreth flaenorol
+confirmIdentity.options.taxClaim = hawliad Credyd Treth (ID Llais dewisol)
+confirmIdentity.legend = A oes gennych ID neu unrhyw wybodaeth arall sy’n barod i’w defnyddio?
+confirmIdentity.error.required = Dewiswch ‘Iawn’ os oes gennych ID neu wybodaeth arall sy’n barod i’w defnyddio
+confirmIdentity.hint = Gallwch gael eich rhif Yswiriant Gwladol drwy’r post o hyd os gallwch gadarnhau ychydig o fanylion personol.

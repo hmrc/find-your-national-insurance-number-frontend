@@ -94,26 +94,6 @@ class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar w
       }
     }
 
-    "handle successful response with NO_CONTENT" in {
-
-      val wrapper = new TestHttpReadsWrapper
-
-      when(response.status).thenReturn(Status.NO_CONTENT)
-      when(response.body).thenReturn("")
-
-      val result = wrapper.withHttpReads("test", metricRegistry) {
-        httpReads: HttpReads[Either[IndividualDetailsError, Unit]] =>
-          IndividualDetailsResponseEnvelope(httpReads.read("GET", "/", response))
-      }(
-        readsSuccessUnit,
-        implicitly,
-        implicitly
-      ).value.futureValue
-
-      result shouldBe Right(())
-
-    }
-
     "handle failed response with HTTP error" in {
       val wrapper = new TestHttpReadsWrapper
       val httpException = new HttpException("HTTP Error", Status.BAD_REQUEST)

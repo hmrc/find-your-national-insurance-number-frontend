@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.EnteredPostCodeNotFoundFormProvider
-import models.pdv.{PDVResponseData, PersonalDetails}
+import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
 import models.{EnteredPostCodeNotFound, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
@@ -47,7 +47,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
-    validationStatus = "success",
+    validationStatus = ValidationStatus.Success,
     personalDetails = Some(PersonalDetails(
       firstName = "John",
       lastName = "Doe",
@@ -88,7 +88,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[EnteredPostCodeNotFoundView]
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode)(request, messages).toString
       }
     }
 
@@ -111,7 +111,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form.fill(EnteredPostCodeNotFound.values.head), NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form.fill(EnteredPostCodeNotFound.values.head), NormalMode)(request, messages).toString
       }
     }
 
@@ -166,7 +166,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result).removeAllNonces mustEqual view(boundForm, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(boundForm, NormalMode)(request, messages).toString
       }
     }
 

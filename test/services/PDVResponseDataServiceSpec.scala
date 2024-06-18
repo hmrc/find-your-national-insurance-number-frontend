@@ -17,7 +17,7 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.pdv.{PDVNotFoundResponse, PDVRequest, PDVResponseData, PDVSuccessResponse, PersonalDetails}
+import models.pdv.{PDVNotFoundResponse, PDVRequest, PDVResponseData, PDVSuccessResponse, PersonalDetails, ValidationStatus}
 import models.requests.DataRequest
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
@@ -174,7 +174,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
 
         val pdvResponseData: PDVResponseData = PDVResponseData(
           id = "abcd01234",
-          validationStatus = "success",
+          validationStatus = ValidationStatus.Success,
           personalDetails = Some(personalDetails),
           reason = None,
           validCustomer = None,
@@ -366,7 +366,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
 
         val pdvResponseData: PDVResponseData = PDVResponseData(
           id = "abcd01234",
-          validationStatus = "success",
+          validationStatus = ValidationStatus.Success,
           personalDetails = Some(personalDetails),
           reason = None,
           validCustomer = None,
@@ -414,7 +414,7 @@ object PDVResponseDataServiceSpec {
 
   val pdvSuccessResponse: PDVSuccessResponse = PDVSuccessResponse(PDVResponseData(
       validationId,
-      "success",
+      ValidationStatus.Success,
       Some(personalDetails),
       reason = None,
       validCustomer = None,
@@ -424,7 +424,7 @@ object PDVResponseDataServiceSpec {
 
   val personalDetailsValidation: PDVResponseData = PDVResponseData(
       validationId,
-      "success",
+      ValidationStatus.Success,
       Some(personalDetails),
       reason = None,
       validCustomer = None,
@@ -435,7 +435,7 @@ object PDVResponseDataServiceSpec {
   val personalDetailsValidation2: PDVResponseData =
     PDVResponseData(
       validationId,
-      "success",
+      ValidationStatus.Success,
       Some(personalDetails),
       reason = None,
       validCustomer = Some("true"),

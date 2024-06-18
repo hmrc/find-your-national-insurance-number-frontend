@@ -17,11 +17,11 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.pdv.{PDVBadRequestResponse, PDVNotFoundResponse, PDVRequest, PDVResponse, PDVResponseData, PDVSuccessResponse}
+import models.pdv._
 import models.requests.DataRequest
 import org.mongodb.scala.MongoException
 import play.api.Logging
-import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
+import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.libs.json.Json
 import play.api.mvc.AnyContent
 import repositories.PersonalDetailsValidationRepoTrait
@@ -57,8 +57,12 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
         case NOT_FOUND =>
           logger.warn("Unable to find personal details record in personal-details-validation")
           PDVNotFoundResponse(response)
+        case INTERNAL_SERVER_ERROR =>
+          logger.error("Internal server error personal-details-validation")
+          PDVErrorResponse(response)
         case _ =>
-          throw new RuntimeException(s"Failed getting PDV data.")
+          logger.error("Unexpected response from personal-details-validation")
+          PDVUnexpectedResponse(response)
       }
     }
   }
@@ -67,8 +71,8 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
   def createPDVDataRow(personalDetailsValidation: PDVResponse): Future[PDVResponse] = {
     personalDetailsValidation match {
       case _@PDVSuccessResponse(pdvResponseData) =>
-        (pdvResponseData.validationStatus.trim.toLowerCase, pdvResponseData.personalDetails) match {
-          case ("success", Some(personalDetails)) =>
+        (pdvResponseData.validationStatus, pdvResponseData.personalDetails) match {
+          case (ValidationStatus.Success, Some(personalDetails)) =>
             val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(EmptyString))
             if (reformattedPostCode.strip().nonEmpty) {
               val newPersonalDetails = personalDetails.copy(postCode = Some(reformattedPostCode))
@@ -80,22 +84,33 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
               pdvRepository.insertOrReplacePDVResultData(pdvResponseData)
               Future.successful(PDVSuccessResponse(pdvResponseData))
             }
-          case ("failure", None) =>
+          case (ValidationStatus.Failure, None) =>
             pdvRepository.insertOrReplacePDVResultData(pdvResponseData)
             Future.successful(PDVSuccessResponse(pdvResponseData))
           case (_, None) =>
             Future.failed(new RuntimeException("PersonalDetails is None in PDVResponseData"))
+          case _ =>
+            Future.failed(new RuntimeException("PersonalDetails could not be parsed"))
         }
       case pdvNotFoundResponse@PDVNotFoundResponse(_) =>
         logger.warn(s"Failed creating PDV data row. PDV data not found.")
         Future.successful(pdvNotFoundResponse)
+      case pdvBadRequestResponse@PDVBadRequestResponse(_) =>
+        logger.warn(s"Failed creating PDV data row. Bad PDV request.")
+        Future.successful(pdvBadRequestResponse)
+      case pdvUnexpectedResponse@PDVUnexpectedResponse(_) =>
+        logger.warn(s"Failed creating PDV data row. PDV unexpected response.")
+        Future.successful(pdvUnexpectedResponse)
+      case pdvErrorResponse@PDVErrorResponse(_) =>
+        logger.warn(s"Failed creating PDV data row. PDV Internal server error.")
+        Future.successful(pdvErrorResponse)
       case _ =>
         logger.warn(s"Failed creating PDV data row.")
         throw new RuntimeException(s"Failed creating PDV data row.")
     }
   }
 
-  // Update the PDV data row with the a validationStatus which is boolean value
+  // Update the PDV data row with the a validCustomer which is boolean value
   def updatePDVDataRowWithValidCustomer(nino: String, isValidCustomer: Boolean, reason:String): Future[Boolean] =
     pdvRepository.updateCustomerValidityWithReason(nino, isValidCustomer, reason) map {
       case str:String => if(str.length > 8) true else false
@@ -134,17 +149,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
   }
 
   def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[PDVResponse] = {
-    val p = for {
-      pdv <- createPDVDataFromPDVMatch(body)
-    } yield pdv match {
-      case pdvResponse: PDVResponse => pdvResponse
-      case _ => throw new Exception("PDV response could not be parsed.")
-    }
-    p.recover {
-      case ex: Exception =>
-        logger.debug(ex.getMessage)
-        throw ex
-    }
+    createPDVDataFromPDVMatch(body)
   }
 
 }

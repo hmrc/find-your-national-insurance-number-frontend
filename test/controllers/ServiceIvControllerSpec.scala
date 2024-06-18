@@ -46,7 +46,10 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilderCl50On(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilderCl50OnWithConfig(
+        Map("features.extendedIvJourney" -> true),
+        userAnswers = Some(emptyUserAnswers)
+      ).build()
 
       running(application) {
         val request = FakeRequest(GET, serviceIvRoute)
@@ -57,7 +60,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
 
-        contentAsString(result).removeAllNonces mustEqual view(form, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode)(request, messages).toString
       }
     }
 
@@ -65,7 +68,10 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
       val userAnswers = UserAnswers(userAnswersId).set(ServiceIvPage, ServiceIv.values.toSet).success.value
 
-      val application = applicationBuilderCl50On(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilderCl50OnWithConfig(
+        Map("features.extendedIvJourney" -> true),
+        userAnswers = Some(userAnswers)
+      ).build()
 
       running(application) {
         val request = FakeRequest(GET, serviceIvRoute)
@@ -75,7 +81,7 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(form.fill(ServiceIv.values.toSet), NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(form.fill(ServiceIv.values.toSet), NormalMode)(request, messages).toString
       }
     }
 
@@ -121,11 +127,11 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result).removeAllNonces mustEqual view(boundForm, NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(boundForm, NormalMode)(request, messages).toString
       }
     }
 
-    "CL50 feature toggle on" - {
+    "CL50 feature toggled off" - {
       "must redirect to store" in {
 
         val application = applicationBuilderCl50Off(userAnswers = Some(emptyUserAnswers)).build()
@@ -137,7 +143,27 @@ class ServiceIvControllerSpec extends SpecBase with MockitoSugar {
 
           status(result) mustEqual SEE_OTHER
 
-          redirectLocation(result).value mustEqual controllers.auth.routes.AuthController.redirectToSMN.url
+          redirectLocation(result).value mustEqual controllers.auth.routes.AuthController.redirectToSMN().url
+        }
+      }
+    }
+
+    "Extended IV journey toggled off" - {
+      "must redirect to the Confirm Identity Page" in {
+
+        val application = applicationBuilderCl50OnWithConfig(
+          Map("features.extendedIvJourney" -> false),
+          userAnswers = Some(emptyUserAnswers)
+        ).build()
+
+        running(application) {
+          val request = FakeRequest(GET, serviceIvRoute)
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+
+          redirectLocation(result).value mustEqual controllers.routes.ConfirmIdentityController.onPageLoad().url
         }
       }
     }
