@@ -21,7 +21,9 @@ import controllers.actions.IdentifierAction
 import controllers.bindable.Origin
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.binders.{RedirectUrl, SafeRedirectUrl}
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrlPolicy.Id
+import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromAllowlist, RedirectUrl, RedirectUrlPolicy}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.sca.services.WrapperService
 
@@ -36,11 +38,14 @@ class AuthController @Inject()(
 
   def signout(continueUrl: Option[RedirectUrl], origin: Option[Origin]): Action[AnyContent] =
     Action {
-      val safeUrl = wrapperService.safeSignoutUrl(continueUrl)
+      val mdtpTrustedDomains: Set[String] = config.trustedDomains
+      val policy: RedirectUrlPolicy[Id]   = AbsoluteWithHostnameFromAllowlist(mdtpTrustedDomains)
+      val safeUrl: Option[String]         = wrapperService.safeSignoutUrl(continueUrl)
+
       safeUrl
         .orElse(origin.map(config.getFeedbackSurveyUrl))
         .fold(BadRequest("Missing origin")) { url: String =>
-          Redirect(config.getBasGatewayFrontendSignOutUrl(url))
+          Redirect(config.getBasGatewayFrontendSignOutUrl(RedirectUrl(url).get(policy).url))
         }
     }
 
@@ -52,8 +57,10 @@ class AuthController @Inject()(
     Redirect(config.storeMyNinoUrl)
   }
 
-  def redirectToRegister(continueUrl: Option[SafeRedirectUrl]): Action[AnyContent] = {
-    val url = continueUrl.map(_.url).getOrElse(config.registerUrl)
+  def redirectToRegister(continueUrl: Option[RedirectUrl]): Action[AnyContent] = {
+    val mdtpTrustedDomains: Set[String] = config.trustedDomains
+    val policy: RedirectUrlPolicy[Id]   = AbsoluteWithHostnameFromAllowlist(mdtpTrustedDomains)
+    val url: String                     = continueUrl.getOrElse(RedirectUrl(config.registerUrl)).get(policy).url
 
     val params: Map[String, Seq[Serializable]] = Map(
       "origin" -> Seq(config.appName),
