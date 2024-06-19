@@ -163,13 +163,14 @@ serviceIvApp.error.required = Select yes if you can download an app to your mobi
 serviceIvApp.p1 = You will need to use an app and your mobile device’s camera to match your face to the picture on your passport or UK driving licence.
 serviceIvApp.h2 = Can you download an app to your mobile device?
 
-postLetter.title = You will not be able to access your National Insurance number online
-postLetter.heading = You will not be able to access your National Insurance number online
-postLetter.p1 = This is because you are unable to prove your identity.
+postLetter.title = We can send you a letter confirming your National Insurance number
+postLetter.heading = We can send you a letter confirming your National Insurance number
+postLetter.p1 = Because you are unable to prove your identity, you cannot access your National Insurance number online.
 postLetter.p2 = You can instead use this service to get your number posted to the address HMRC has on record for you.
 postLetter.p3 = We will not tell you your National Insurance number over the phone or on webchat.
-postLetter.error.required = Select yes if you like us to post your number to you
+postLetter.error.required = Select yes if you would like us to post your number to you
 postLetter.h2 = Would you like us to post your number to you?
+postLetter.yesHint = You will need to confirm some personal details.
 
 tracingWhatYouNeed.heading = We need you to check your identity
 tracingWhatYouNeed.title = We need you to check your identity
