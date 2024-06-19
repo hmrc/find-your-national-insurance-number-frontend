@@ -43,9 +43,10 @@
         </div>
 
         @govukRadios(
-            RadiosViewModel.yesNo(
+            RadiosViewModel.yesNoWithHint(
                 field = form("value"),
-                legend = LegendViewModel(messages("postLetter.h2")).asPageSubHeading(LegendSize.Medium)
+                legend = LegendViewModel(messages("postLetter.h2")).asPageSubHeading(LegendSize.Medium),
+                yesHint = Some(messages("postLetter.yesHint"))
             )
         )
 
