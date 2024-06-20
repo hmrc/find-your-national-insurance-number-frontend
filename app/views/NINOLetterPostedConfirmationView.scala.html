@@ -49,7 +49,7 @@
     <h2 class="govuk-heading-m govuk-!-display-none-print">@messages("ninoLetterPostedConfirmation.beforeYouGo.heading")</h2>
     <p class="govuk-body govuk-!-display-none-print">@messages("ninoLetterPostedConfirmation.beforeYouGo.p1")</p>
     <p class="print-this govuk-body govuk-!-display-none-print">
-        <a href='#' class="govuk-link">@messages("ninoLetterPostedConfirmation.beforeYouGo.p2.part1")</a>
+        <a href='@appConfig.exitSurveyURL' class="govuk-link">@messages("ninoLetterPostedConfirmation.beforeYouGo.p2.part1")</a>
         <span> @messages("ninoLetterPostedConfirmation.beforeYouGo.p2.part2")</span>
     </p>
 }
