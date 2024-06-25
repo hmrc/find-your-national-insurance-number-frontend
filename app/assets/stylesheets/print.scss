@@ -10,6 +10,10 @@
 }
 
 @media print {
+  h1 {
+    font-size: 2em !important;
+  }
+
   [href]:after {
     display: none;
   }
