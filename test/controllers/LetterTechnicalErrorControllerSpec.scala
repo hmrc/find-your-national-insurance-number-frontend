@@ -62,7 +62,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       postCode = Some("AA1 1AA"),
       dateOfBirth = LocalDate.of(1990, 1, 1)
     )),
-    validCustomer = Some("true"),
+    validCustomer = Some(true),
     CRN = Some("fakeCRN"),
     npsPostCode = Some("AA1 1AA"),
     reason = None
@@ -78,14 +78,14 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       postCode = None,
       dateOfBirth = LocalDate.of(1990, 1, 1)
     )),
-    validCustomer = Some("true"),
+    validCustomer = Some(true),
     CRN = Some("fakeCRN"),
     npsPostCode = Some("AA1 1AA"),
     reason = None
   )
 
   val fakePDVResponseDataInvalidCustomer: PDVResponseData = fakePDVResponseDataWithPostcode.copy(
-    validCustomer = Some("false")
+    validCustomer = Some(false)
   )
 
   "LetterTechnicalErrorController" - {

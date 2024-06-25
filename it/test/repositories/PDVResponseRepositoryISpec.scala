@@ -54,13 +54,13 @@ class PDVResponseRepositoryISpec
     )
 
   private val pdvResponseData = PDVResponseData(
-    "id", ValidationStatus.Success, Some(personalDetails), Instant.ofEpochSecond(1), None, Some("false"), Some("false"),Some("somePostcode"))
+    "id", ValidationStatus.Success, Some(personalDetails), Instant.ofEpochSecond(1), None, Some(false), Some("false"),Some("somePostcode"))
 
   private val validCustomerPDVResponseData = PDVResponseData(
-    "id", ValidationStatus.Success, Some(personalDetails), Instant.ofEpochSecond(1), Some("Valid Reason"), Some("true"), Some("false"),Some("somePostcode"))
+    "id", ValidationStatus.Success, Some(personalDetails), Instant.ofEpochSecond(1), Some("Valid Reason"), Some(true), Some("false"),Some("somePostcode"))
 
   private val invalidCustomerPDVResponseData = PDVResponseData(
-    "id", ValidationStatus.Success, Some(personalDetails), Instant.ofEpochSecond(1), Some("Invalid Reason"), Some("false"), Some("false"),Some("somePostcode"))
+    "id", ValidationStatus.Success, Some(personalDetails), Instant.ofEpochSecond(1), Some("Invalid Reason"), Some(false), Some("false"),Some("somePostcode"))
 
   private val mockAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1

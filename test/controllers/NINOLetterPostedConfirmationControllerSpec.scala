@@ -46,7 +46,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
       postCode = Some("AA1 1AA"),
       dateOfBirth = LocalDate.of(1990, 1, 1)
     )),
-    validCustomer = Some("true"),
+    validCustomer = Some(true),
     CRN = Some("fakeCRN"),
     npsPostCode = Some("AA1 1AA"),
     reason = None
@@ -59,7 +59,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
   }
 
   val fakePDVResponseDataInvalidCustomer: PDVResponseData = fakePDVResponseData.copy(
-    validCustomer = Some("false")
+    validCustomer = Some(false)
   )
 
   "NINOLetterPostedConfirmation Controller" - {

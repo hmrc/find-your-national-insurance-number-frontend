@@ -139,12 +139,12 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
         None
     }
 
-  def getValidCustomerStatus(nino: String): Future[String] = {
+  def getValidCustomerStatus(nino: String): Future[Boolean] = {
     getPersonalDetailsValidationByNino(nino) map {
-      case Some(pdvData) => pdvData.validCustomer.getOrElse("false")
-      case None => "false"
+      case Some(pdvData) => pdvData.validCustomer.getOrElse(false)
+      case None => false
     } recover {
-      case _: Exception => "false"
+      case _: Exception => false
     }
   }
 
