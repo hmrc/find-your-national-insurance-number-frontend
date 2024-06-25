@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ class PostLetterViewSpec extends ViewBehaviours with Generators {
 
   behave like pageWithHeading()
 
-  behave like pageWithContent("p", "This is because you are unable to prove your identity.")
+  behave like pageWithContent("p", "Because you are unable to prove your identity, you cannot access your National Insurance number online.")
   behave like pageWithContent("p", "You can instead use this service to get your number posted to the address HMRC has on record for you.")
   behave like pageWithContent("div", "We will not tell you your National Insurance number over the phone or on webchat.")
 

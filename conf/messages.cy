@@ -153,13 +153,14 @@ serviceIvApp.error.required = Dewiswch ‘Iawn’ os gallwch lawrlwytho ap i’c
 serviceIvApp.p1 = Bydd angen i chi ddefnyddio ap a chamera eich dyfais symudol i baru’ch wyneb â’r llun ar eich pasbort neu drwydded yrru’r DU.
 serviceIvApp.h2 = Allwch chi lawrlwytho ap i’ch dyfais symudol?
 
-postLetter.title = Ni allwch gael mynediad i’ch rhif Yswiriant Gwladol ar-lein
-postLetter.heading = Ni allwch gael mynediad i’ch rhif Yswiriant Gwladol ar-lein
-postLetter.p1 = Mae hyn oherwydd na allwch brofi pwy ydych chi.
+postLetter.title = Gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol
+postLetter.heading = Gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol
+postLetter.p1 = Oherwydd na allwch brofi pwy ydych chi, ni allwch gael mynediad at eich rhif Yswiriant Gwladol ar-lein.
 postLetter.p2 = Yn lle hynny, gallwch ddefnyddio’r gwasanaeth hwn i gael eich rhif wedi’i bostio i’r cyfeiriad sydd gan CThEF ar eich cyfer.
 postLetter.p3 = Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn na thrwy sgwrs dros y we.
 postLetter.error.required = Dewiswch ‘Iawn’ os hoffech i ni bostio eich rhif atoch
 postLetter.h2 = A hoffech i ni anfon eich rhif atoch drwy’r post?
+postLetter.yesHint = Bydd angen i chi gadarnhau rhywfaint o fanylion personol.
 
 tracingWhatYouNeed.heading = Mae angen i ni wirio pwy ydych chi
 tracingWhatYouNeed.title = Mae angen i ni wirio pwy ydych chi
