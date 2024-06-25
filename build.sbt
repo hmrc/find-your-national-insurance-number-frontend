@@ -30,8 +30,7 @@ lazy val root = (project in file("."))
     name := appName,
     RoutesKeys.routesImport ++= Seq(
       "models._",
-      "uk.gov.hmrc.play.bootstrap.binders.RedirectUrl",
-      "uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl"
+      "uk.gov.hmrc.play.bootstrap.binders.RedirectUrl"
     ),
     TwirlKeys.templateImports ++= Seq(
       "play.twirl.api.HtmlFormat",
@@ -46,12 +45,10 @@ lazy val root = (project in file("."))
       "viewmodels.govuk.all._"
     ),
     scalacOptions ++= Seq(
-      "-feature",
-      "-language:postfixOps",
-      "-rootdir",
-      baseDirectory.value.getCanonicalPath,
       "-Wconf:cat=deprecation:ws,cat=feature:ws,cat=optimizer:ws,src=target/.*:s",
-      "-Ypatmat-exhaust-depth", "40"
+      "-unchecked",
+      "-deprecation",
+      "-feature"
     ),
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     retrieveManaged := true,

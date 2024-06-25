@@ -134,7 +134,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockEncryptedPersonalDetailsValidationRepository.findByNino(any())(any()))
           .thenReturn(Future.successful(Option(personalDetailsValidation2)))
 
-        when(mockConnector.retrieveMatchingDetails(any())(any(), any(), any()))
+        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation2).toString())))
 
         personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
@@ -147,7 +147,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockEncryptedPersonalDetailsValidationRepository.findByNino(any())(any()))
           .thenReturn(Future.successful(Option(personalDetailsValidation)))
 
-        when(mockConnector.retrieveMatchingDetails(any())(any(), any(), any()))
+        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation).toString())))
 
         personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
@@ -201,12 +201,12 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
 
         val response = HttpResponse(200, Json.toJson(pdvSuccessResponse).toString())
 
-        when(mockConnector.retrieveMatchingDetails(any())(any(), any(), any()))
+        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(response))
 
-        when(personalDetailsValidationService.getPDVMatchResult(mockPDVRequest)(hc, mockDataRequest))
+        when(personalDetailsValidationService.getPDVMatchResult(mockPDVRequest)(hc))
           .thenReturn(Future.successful(pdvSuccessResponse))
-        when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc, mockDataRequest))
+        when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest)(hc))
           .thenReturn(Future.successful(pdvSuccessResponse))
 
         val result = personalDetailsValidationService.getPDVData(mockPDVRequest)
@@ -219,7 +219,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
       "throw an exception when personalDetailsValidationService returns an error" in {
         val mockPDVRequest = PDVRequest("1234567890", "1234567890")
 
-        when(mockConnector.retrieveMatchingDetails(any())(any(), any(), any()))
+        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation).toString())))
 
         when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest))
@@ -326,7 +326,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockPersonalDetailsValidationRepository.findByNino(any())(any()))
           .thenReturn(Future.successful(Option(personalDetailsValidation2)))
 
-        when(mockConnector.retrieveMatchingDetails(any())(any(), any(), any()))
+        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation2).toString())))
 
         personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
@@ -339,7 +339,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockPersonalDetailsValidationRepository.findByNino(any())(any()))
           .thenReturn(Future.successful(Option(personalDetailsValidation)))
 
-        when(mockConnector.retrieveMatchingDetails(any())(any(), any(), any()))
+        when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(200, Json.toJson(personalDetailsValidation).toString())))
 
         personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
