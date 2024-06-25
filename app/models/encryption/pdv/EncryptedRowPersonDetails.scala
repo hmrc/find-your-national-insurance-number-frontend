@@ -73,44 +73,56 @@ object EncryptedPDVResponseData {
   }
 
   def encrypt(pDVResponseData: PDVResponseData, key: String): EncryptedPDVResponseData = {
-    def e(fieldValue: String): EncryptedValue = {
+    def encryptStringField(fieldValue: String): EncryptedValue = {
       SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(fieldValue, key)
     }
 
-    def e2(fieldValue: Boolean): EncryptedValue = {
+    def encryptBooleanField(fieldValue: Boolean): EncryptedValue = {
       SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(fieldValue.toString, key)
     }
 
     EncryptedPDVResponseData(
       id = pDVResponseData.id,
-      validationStatus = e(pDVResponseData.validationStatus.toString),
-      personalDetails = pDVResponseData.personalDetails.map(pd => EncryptedPersonalDetails(e(pd.firstName), e(pd.lastName), pd.nino.nino, pd.postCode map e, e(pd.dateOfBirth.toString))),
+      validationStatus = encryptStringField(pDVResponseData.validationStatus.toString),
+      personalDetails = pDVResponseData.personalDetails.map(pd =>
+        EncryptedPersonalDetails(
+          encryptStringField(pd.firstName),
+          encryptStringField(pd.lastName),
+          pd.nino.nino,
+          pd.postCode map encryptStringField,
+          encryptStringField(pd.dateOfBirth.toString))
+      ),
       lastUpdated = pDVResponseData.lastUpdated,
-      reason = pDVResponseData.reason map e,
-      validCustomer = pDVResponseData.validCustomer map e2,
-      CRN = pDVResponseData.CRN map e,
-      npsPostCode = pDVResponseData.npsPostCode map e
+      reason = pDVResponseData.reason map encryptStringField,
+      validCustomer = pDVResponseData.validCustomer map encryptBooleanField,
+      CRN = pDVResponseData.CRN map encryptStringField,
+      npsPostCode = pDVResponseData.npsPostCode map encryptStringField
     )
   }
 
   def decrypt(encryptedRowPersonDetails: EncryptedPDVResponseData, key: String): PDVResponseData = {
-    def d(field: EncryptedValue): String = {
+    def decryptStringField(field: EncryptedValue): String = {
       SymmetricCryptoFactory.aesGcmAdCrypto(key).decrypt(field, key)
     }
 
-    def d2(field: EncryptedValue): Boolean = {
+    def decryptBooleanField(field: EncryptedValue): Boolean = {
       SymmetricCryptoFactory.aesGcmAdCrypto(key).decrypt(field, key).toBoolean
     }
 
     PDVResponseData(
       id = encryptedRowPersonDetails.id,
-      validationStatus = ValidationStatus.withName(d(encryptedRowPersonDetails.validationStatus)),
-      personalDetails = encryptedRowPersonDetails.personalDetails.map(pd => PersonalDetails(d(pd.firstName), d(pd.lastName), Nino(pd.nino), pd.postCode map d, LocalDate.parse(d(pd.dateOfBirth)))),
+      validationStatus = ValidationStatus.withName(decryptStringField(encryptedRowPersonDetails.validationStatus)),
+      personalDetails = encryptedRowPersonDetails.personalDetails.map(pd =>
+        PersonalDetails(decryptStringField(pd.firstName),
+          decryptStringField(pd.lastName),
+          Nino(pd.nino),
+          pd.postCode map decryptStringField,
+          LocalDate.parse(decryptStringField(pd.dateOfBirth)))),
       lastUpdated = encryptedRowPersonDetails.lastUpdated,
-      reason = encryptedRowPersonDetails.reason map d,
-      validCustomer = encryptedRowPersonDetails.validCustomer map d2,
-      CRN = encryptedRowPersonDetails.CRN map d,
-      npsPostCode = encryptedRowPersonDetails.npsPostCode map d
+      reason = encryptedRowPersonDetails.reason map decryptStringField,
+      validCustomer = encryptedRowPersonDetails.validCustomer map decryptBooleanField,
+      CRN = encryptedRowPersonDetails.CRN map decryptStringField,
+      npsPostCode = encryptedRowPersonDetails.npsPostCode map decryptStringField
     )
   }
 }
