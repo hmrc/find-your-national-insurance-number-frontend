@@ -80,10 +80,10 @@ trait HttpReadsWrapper[E, EE] {
                 .fold(
                   error => {
                     logger
-                      .debug(s"$additionalLogInformation$name couldn't parse body from upstream: error= ${error.show}")
+                      .debug(s"$additionalLogInformation$name could not parse response body from json response: error= ${error.show}")
                     ConnectorError(
                       Status.UNPROCESSABLE_ENTITY,
-                      s"$name could not parse individuals detail response."
+                      s"$name could not parse response from json response."
                     ).asLeft[T]
                   },
                   Right(_)
