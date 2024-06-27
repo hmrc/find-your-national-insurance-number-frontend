@@ -82,8 +82,8 @@ trait HttpReadsWrapper[E, EE] {
                     logger
                       .debug(s"$additionalLogInformation$name couldn't parse body from upstream: error= ${error.show}")
                     ConnectorError(
-                      Status.SERVICE_UNAVAILABLE,
-                      s"$name couldn't parse body from upstream."
+                      Status.UNPROCESSABLE_ENTITY,
+                      s"$name could not parse individuals detail response."
                     ).asLeft[T]
                   },
                   Right(_)

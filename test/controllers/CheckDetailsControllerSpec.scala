@@ -673,7 +673,41 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
           contentAsString(result) must include("Please try again in a few minutes.")
 
-          verify(auditService, times(1)).start()(any())
+          verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
+          verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
+        }
+      }
+
+      "when pdvData validationStatus is success but idDataError exists with UNPROCESSABLE_ENTITY" in {
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+          .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
+        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
+            inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+            inject.bind[AuditService].toInstance(auditService),
+            inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService)
+          )
+          .build()
+
+        val mockConnectorError = ConnectorError(UNPROCESSABLE_ENTITY, "Could not parse individuals details response")
+
+        when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
+          .thenReturn(Future(Left(mockConnectorError)))
+
+        when(mockPersonalDetailsValidationService.getPDVData(any())(any()))
+          .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
+        running(app) {
+          val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(ivOrigin, NormalMode).url)
+          val result = route(app, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.SelectAlternativeServiceController.onPageLoad().url
+
+          verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
+          verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
         }
       }
     }
