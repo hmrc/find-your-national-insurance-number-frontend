@@ -37,8 +37,17 @@ selectNINOLetterAddress.error.required = Select yes if you would like the letter
 
 ninoLetterPostedConfirmation.title = Your National Insurance number will be sent by post
 ninoLetterPostedConfirmation.heading = Your National Insurance number will be sent by post
-ninoLetterPostedConfirmation.letterArrival = We’ll post the letter confirming your number. It will arrive within 15 days.
-ninoLetterPostedConfirmation.goBackToGovUK = Exit and go back to GOV.UK
+ninoLetterPostedConfirmation.heading2 = What happens next
+ninoLetterPostedConfirmation.p1 = HMRC will post the letter confirming your number.
+ninoLetterPostedConfirmation.p2 = It will arrive within 10 working days from {0}.
+ninoLetterPostedConfirmation.p3 = You do not need to do anything else.
+ninoLetterPostedConfirmation.heading3 = If you want a record of when you applied
+ninoLetterPostedConfirmation.printLink = Print or save a copy of this page
+ninoLetterPostedConfirmation.inset = We will not tell you your National Insurance number over the phone.
+ninoLetterPostedConfirmation.beforeYouGo.heading = Before you go
+ninoLetterPostedConfirmation.beforeYouGo.p1 = Your feedback helps us make our service better.
+ninoLetterPostedConfirmation.beforeYouGo.p2.part1 = Take a short survey
+ninoLetterPostedConfirmation.beforeYouGo.p2.part2 = to share your feedback on this service.
 
 selectAlternativeService.title = You will need to contact HMRC for your National Insurance number
 selectAlternativeService.heading = You will need to contact HMRC for your National Insurance number

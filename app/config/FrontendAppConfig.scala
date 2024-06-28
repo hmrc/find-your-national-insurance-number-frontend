@@ -28,6 +28,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
 
   val host: String    = configuration.get[String]("host")
   val appName: String = configuration.get[String]("appName")
+  val exitSurveyURL: String = configuration.get[String]("sca-wrapper.signout.url")
 
   val enc = URLEncoder.encode(_: String, "UTF-8")
 
