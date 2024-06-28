@@ -704,7 +704,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           val result = route(app, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.SelectAlternativeServiceController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad().url
 
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
           verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())

@@ -167,7 +167,7 @@ class CheckDetailsController @Inject()(
           BadRequest(errorHandler.standardErrorTemplate())
         case UNPROCESSABLE_ENTITY =>
           auditService.findYourNinoIdDataError(PDVResponseData, Some(conError.statusCode.toString), error, origin)
-          Redirect(routes.SelectAlternativeServiceController.onPageLoad())
+          Redirect(routes.InvalidDataNINOHelpController.onPageLoad())
         case code =>
           auditService.findYourNinoIdDataError(PDVResponseData, Some(code.toString), error, origin)
           logger.error(s"Failed to retrieve Individual Details data: ${error.errorMessage}")
