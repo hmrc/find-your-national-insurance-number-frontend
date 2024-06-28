@@ -39,7 +39,7 @@ case class PDVResponseData(
       personalDetails: Option[PersonalDetails],
       lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC),
       reason: Option[String],
-      validCustomer: Option[String],
+      validCustomer: Option[Boolean],
       CRN: Option[String],
       npsPostCode: Option[String]
   )
@@ -83,7 +83,7 @@ object PDVResponseData {
         (__ \ "personalDetails").readNullable[PersonalDetails] and
           Reads.pure(Instant.now) and
         (__ \ "reason").readNullable[String] and
-        (__ \ "validCustomer").readNullable[String] and
+        (__ \ "validCustomer").readNullable[Boolean] and
         (__ \ "CRN").readNullable[String] and
         (__ \ "npsPostCode").readNullable[String]
       )(PDVResponseData.apply _)
@@ -99,7 +99,7 @@ object PDVResponseData {
         (__ \ "personalDetails").writeNullable[PersonalDetails] and
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat) and
         (__ \ "reason").writeNullable[String] and
-        (__ \ "validCustomer").writeNullable[String] and
+        (__ \ "validCustomer").writeNullable[Boolean] and
         (__ \ "CRN").writeNullable[String] and
         (__ \ "npsPostCode").writeNullable[String]
       )((pdv: PDVResponseData) => (pdv.id, pdv.validationStatus.toString, pdv.personalDetails, pdv.lastUpdated, pdv.reason, pdv.validCustomer, pdv.CRN, pdv.npsPostCode))

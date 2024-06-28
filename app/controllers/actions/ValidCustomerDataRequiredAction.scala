@@ -32,7 +32,7 @@ class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationSer
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {
     personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map {
       case Some(pdvData) =>
-        if (pdvData.validCustomer.getOrElse("").equals("true")) {
+        if (pdvData.validCustomer.getOrElse(false)) {
           request.userAnswers match {
             case None =>
               val userAnswers = UserAnswers(

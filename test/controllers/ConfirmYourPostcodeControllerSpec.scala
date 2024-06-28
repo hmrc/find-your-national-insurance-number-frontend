@@ -66,21 +66,21 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       postCode = None,
       dateOfBirth = LocalDate.of(1990, 1, 1)
     )),
-    validCustomer = Some("true"),
+    validCustomer = Some(true),
     CRN = Some("fakeCRN"),
     npsPostCode = Some("AA1 1  AA"),
     reason = None
   )
 
   val fakePDVResponseDataInvalidCustomer: PDVResponseData = fakePDVResponseData.copy(
-    validCustomer = Some("false")
+    validCustomer = Some(false)
   )
 
   val fakePDVResponseDataNoNpsPostcode: PDVResponseData = PDVResponseData(
     id = "fakeId",
     validationStatus = ValidationStatus.Failure,
     personalDetails = None,
-    validCustomer = Some("true"),
+    validCustomer = Some(true),
     CRN = None,
     npsPostCode = None,
     reason = None
