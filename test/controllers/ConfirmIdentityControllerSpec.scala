@@ -63,6 +63,25 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "must return OK and the correct view for a GET (no user answers object)" in {
+
+      val application = applicationBuilderCl50OnWithConfig(
+        Map("features.extendedIvJourney" -> false),
+        userAnswers = None
+      ).build()
+
+      running(application) {
+        val request = FakeRequest(GET, confirmIdentityRoute)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[ConfirmIdentityView]
+
+        status(result) mustEqual OK
+        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode)(request, messages).toString
+      }
+    }
+
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
       val userAnswers = UserAnswers(userAnswersId).set(ConfirmIdentityPage, true).success.value

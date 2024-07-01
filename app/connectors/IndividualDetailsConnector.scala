@@ -23,9 +23,9 @@ import config.FrontendAppConfig
 import connectors.HttpReadsWrapper.Recovered
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
 import models.errors.{ConnectorError, IndividualDetailsError, InvalidIdentifier}
-import models.{CorrelationId, IndividualDetailsIdentifier, IndividualDetailsResponseEnvelope}
 import models.individualdetails.{IndividualDetails, ResolveMerge}
 import models.upstreamfailure.{Failure, UpstreamFailures}
+import models.{CorrelationId, IndividualDetailsIdentifier, IndividualDetailsResponseEnvelope}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 

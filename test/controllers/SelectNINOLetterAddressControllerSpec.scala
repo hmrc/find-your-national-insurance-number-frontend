@@ -80,6 +80,8 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
     reason = None
   )
 
+  val fakePDVResponseDataWithoutPostcodeNoMatch: PDVResponseData = fakePDVResponseDataWithoutPostcode.copy(npsPostCode = Some("AA2 2BB"))
+
   val fakePDVResponseDataInvalidCustomer: PDVResponseData = fakePDVResponseData.copy(
     validCustomer = Some("false")
   )
@@ -374,6 +376,27 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[SelectNINOLetterAddressView]
         status(result) mustEqual OK
         contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode, fakePDVResponseData.personalDetails.get.postCode.get)(request, messages).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when user has come from confirm-your-postcode no match" in {
+      val userAnswers: UserAnswers = UserAnswers(userAnswersId).set(ConfirmYourPostcodePage, "AA1 1AA").success.value
+
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseDataWithoutPostcodeNoMatch)))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, selectNINOLetterAddressRoute)
+
+        intercept[IllegalArgumentException] {
+          await(route(application, request).value)
+        }
       }
     }
   }
