@@ -87,7 +87,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[NINOLetterPostedConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(LocalDate.now.format(DateTimeFormatter.ofPattern("d MMMM uuuu")))(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(LocalDate.now.format(DateTimeFormatter.ofPattern("d MMMM uuuu")))(request, messages).toString
 
         verify(mockSessionCacheService, times(1)).invalidateCache(any(), any())
       }
@@ -115,7 +115,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[NINOLetterPostedConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces mustEqual view(LocalDate.now.format(DateTimeFormatter.ofPattern("d MMMM uuuu")))(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(LocalDate.now.format(DateTimeFormatter.ofPattern("d MMMM uuuu")))(request, messages).toString
 
         verify(mockSessionCacheService, times(1)).invalidateCache(any(), any())
       }
