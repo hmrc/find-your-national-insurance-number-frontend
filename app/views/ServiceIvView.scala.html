@@ -51,7 +51,7 @@
 
                     @form.errors.map { error =>
                         <p class="govuk-error-message margin-bottom-small" id="error-message-input">
-                            <span class="govuk-visually-hidden">@messages("error.message.prefix")</span>
+                            <span class="govuk-visually-hidden">@messages("error.prefix"):</span>
                             @messages(error.message, error.args: _*)
                         </p>
                     }
