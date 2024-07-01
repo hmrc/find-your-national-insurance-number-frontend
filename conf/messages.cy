@@ -10,11 +10,11 @@ site.startAgain=Dechrau eto
 site.signIn=Mewngofnodi
 site.govuk=GOV.UK
 
-error.prefix = Gwall:
+error.prefix = Gwall
+error.title.prefix = Gwall:
 error.boolean=Rhowch ateb
 error.required=Nodwch werth
 error.summary.title=Mae problem wedi codi
-error.message.prefix = Gwall:
 
 month.january=Ionawr
 month.february=Chwefror
