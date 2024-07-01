@@ -87,8 +87,8 @@ phoneHMRCDetails.outsideUK.number=+44 191 203 7010
 phoneHMRCDetails.openingTimes.label=Oriau agor:
 phoneHMRCDetails.openingTimes.mondayToFriday=Dydd Llun i ddydd Gwener: 08:30 tan 17:00
 phoneHMRCDetails.openingTimes.weekendAndBankHoliday=Ar gau ar y penwythnos ac ar wyliau banc.
-phoneHMRCDetails.hmrcExtraHelp=Cael help <a href="{0}" class="govuk-link" target="_blank"> wrth ddelio â CThEF os oes gennych anghenion ychwanegol</a>
-phoneHMRCDetails.findOutCallCharges=<a href="{0}" class="govuk-link" target="_blank">Cael gwybod am gostau galwadau.</a>
+phoneHMRCDetails.hmrcExtraHelp=Cael help <a href="{0}" class="govuk-link"> wrth ddelio â CThEF os oes gennych anghenion ychwanegol</a>
+phoneHMRCDetails.findOutCallCharges=<a href="{0}" class="govuk-link">Cael gwybod am gostau galwadau.</a>
 
 ninoHelpView.title=Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
 ninoHelpView.heading=Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
