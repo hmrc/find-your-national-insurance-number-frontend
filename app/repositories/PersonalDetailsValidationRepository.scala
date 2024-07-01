@@ -74,7 +74,7 @@ class PersonalDetailsValidationRepository @Inject()(
     logger.info(s"Updating one in $collectionName table")
     collection.updateMany(Filters.equal("personalDetails.nino", nino),
         Updates.combine(
-          Updates.set("validCustomer", validCustomer.toString),
+          Updates.set("validCustomer", validCustomer),
           Updates.set("reason", reason),
           Updates.set("CRN", if(reason.contains("CRN;")) "true" else "false")))
       .toFuture()

@@ -39,13 +39,13 @@ class PDVResponseDataSpec extends AnyFlatSpec with Matchers {
       Some(personalDetails),
       Instant.now,
       Some("reason"),
-      Some("true"),
+      Some(true),
       Some("CRN"),
       None
     )
     import uk.gov.hmrc.domain.Nino.isValid
     pdvResponseData.validationStatus should be (ValidationStatus.Success)
-    pdvResponseData.validCustomer should be (Some("true"))
+    pdvResponseData.validCustomer should be (Some(true))
     isValid(personalDetails.nino.nino) should be (true)
     pdvResponseData.getFirstName should be ("firstName")
     pdvResponseData.getLastName should be ("lastName")
@@ -70,7 +70,7 @@ class PDVResponseDataSpec extends AnyFlatSpec with Matchers {
       Some(emptyPersonalDetails),
       Instant.now,
       Some("reason"),
-      Some("true"),
+      Some(true),
       Some("CRN"),
       None
     )

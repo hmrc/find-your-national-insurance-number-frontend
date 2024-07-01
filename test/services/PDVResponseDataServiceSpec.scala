@@ -97,7 +97,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
           .thenReturn(Future.successful(Option(personalDetailsValidation2)))
 
         personalDetailsValidationService.getValidCustomerStatus(validationId).map { result =>
-          result mustBe "true"
+          result mustBe true
         }(ec)
       }
       "return None when valid customer status does NOT exist" in {
@@ -105,7 +105,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
           .thenReturn(Future.successful(None))
 
         personalDetailsValidationService.getValidCustomerStatus(validationId).map { result =>
-          result mustBe "false"
+          result mustBe false
         }(ec)
       }
     }
@@ -288,7 +288,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
           .thenReturn(Future.successful(Option(personalDetailsValidation2)))
 
         personalDetailsValidationService.getValidCustomerStatus(validationId).map { result =>
-          result mustBe "true"
+          result mustBe true
         }(ec)
       }
       "return None when valid customer status does NOT exist" in {
@@ -296,7 +296,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
           .thenReturn(Future.successful(None))
 
         personalDetailsValidationService.getValidCustomerStatus(validationId).map { result =>
-          result mustBe "false"
+          result mustBe false
         }(ec)
       }
     }
@@ -438,7 +438,7 @@ object PDVResponseDataServiceSpec {
       ValidationStatus.Success,
       Some(personalDetails),
       reason = None,
-      validCustomer = Some("true"),
+      validCustomer = Some(true),
       CRN = None,
       npsPostCode = None,
       lastUpdated = Instant.ofEpochSecond(1234567890)

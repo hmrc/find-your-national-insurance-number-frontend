@@ -28,6 +28,7 @@ import uk.gov.hmrc.domain.Nino
 import views.html.NINOLetterPostedConfirmationView
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import scala.concurrent.Future
 
 class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
@@ -46,7 +47,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
       postCode = Some("AA1 1AA"),
       dateOfBirth = LocalDate.of(1990, 1, 1)
     )),
-    validCustomer = Some("true"),
+    validCustomer = Some(true),
     CRN = Some("fakeCRN"),
     npsPostCode = Some("AA1 1AA"),
     reason = None
@@ -59,7 +60,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
   }
 
   val fakePDVResponseDataInvalidCustomer: PDVResponseData = fakePDVResponseData.copy(
-    validCustomer = Some("false")
+    validCustomer = Some(false)
   )
 
   "NINOLetterPostedConfirmation Controller" - {
@@ -86,7 +87,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[NINOLetterPostedConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view()(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view(LocalDate.now.format(DateTimeFormatter.ofPattern("d MMMM uuuu")))(request, messages).toString
 
         verify(mockSessionCacheService, times(1)).invalidateCache(any(), any())
       }
@@ -114,7 +115,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[NINOLetterPostedConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view()(request, messages).toString
+        contentAsString(result).removeAllNonces mustEqual view(LocalDate.now.format(DateTimeFormatter.ofPattern("d MMMM uuuu")))(request, messages).toString
 
         verify(mockSessionCacheService, times(1)).invalidateCache(any(), any())
       }
