@@ -23,17 +23,33 @@
     appConfig: FrontendAppConfig
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(dateString: String)(implicit request: Request[_], messages: Messages)
+@stylesheet = {
+    <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/print.css")'>
+}
 
-@layout(pageTitle = titleNoForm(messages("ninoLetterPostedConfirmation.title")), showBackLinkJS = false, fullWidth = false) {
+@layout(pageTitle = titleNoForm(messages("ninoLetterPostedConfirmation.title")), showBackLinkJS = false, fullWidth = false, stylesheets = Some(stylesheet)) {
 
     @govukPanel(Panel(title = messages("ninoLetterPostedConfirmation.heading")))
+    <h2 class="govuk-heading-m">@messages("ninoLetterPostedConfirmation.heading2")</h2>
+    <p class="govuk-body">@messages("ninoLetterPostedConfirmation.p1")</p>
+    <p class="govuk-body">@messages("ninoLetterPostedConfirmation.p2", dateString)</p>
+    <p class="govuk-body">@messages("ninoLetterPostedConfirmation.p3")</p>
+    <div class="print-this govuk-!-display-none-print">
+        <h3 class="govuk-heading-s">@messages("ninoLetterPostedConfirmation.heading3")</h3>
+        <p class="govuk-body govuk-!-display-none-print">
+            <img class="print-this__icon" src='@routes.Assets.versioned("images/icon-print.svg")' alt="" aria-hidden="true"/>
+            <a id="print-this" href="#" class="govuk-link">
+                @messages("ninoLetterPostedConfirmation.printLink")
+            </a>
+        </p>
+    </div>
 
-    <p class="govuk-body">@messages("ninoLetterPostedConfirmation.letterArrival")</p>
-
-    <p class="govuk-body">
-        <a href="@appConfig.fmnGuidancePageUrl" class="govuk-link" target="_blank">
-            @messages("ninoLetterPostedConfirmation.goBackToGovUK")
-        </a>
+    <div class="govuk-inset-text">@messages("ninoLetterPostedConfirmation.inset")</div>
+    <h2 class="govuk-heading-m govuk-!-display-none-print">@messages("ninoLetterPostedConfirmation.beforeYouGo.heading")</h2>
+    <p class="govuk-body govuk-!-display-none-print">@messages("ninoLetterPostedConfirmation.beforeYouGo.p1")</p>
+    <p class="print-this govuk-body govuk-!-display-none-print">
+        <a href='@appConfig.exitSurveyURL' class="govuk-link">@messages("ninoLetterPostedConfirmation.beforeYouGo.p2.part1")</a>
+        <span> @messages("ninoLetterPostedConfirmation.beforeYouGo.p2.part2")</span>
     </p>
 }
