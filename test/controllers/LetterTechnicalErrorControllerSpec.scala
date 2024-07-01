@@ -172,6 +172,64 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "must return a Bad Request and errors when invalid data is submitted anr retry count < 5" in {
+
+      val mockSessionRepository       = mock[SessionRepository]
+      val mockTryAgainCountRepository = mock[TryAgainCountRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
+
+      val application =
+        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+            bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository),
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, letterTechnicalErrorRoute)
+            .withFormUrlEncodedBody(("value", "invalid"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual BAD_REQUEST
+      }
+    }
+
+    "must return a Bad Request and errors when invalid data is submitted anr retry count > 5" in {
+      val mockSessionRepository       = mock[SessionRepository]
+      val mockTryAgainCountRepository = mock[TryAgainCountRepository]
+      val retryCount: Int             = 5
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = retryCount)))
+
+      val application =
+        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository),
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, letterTechnicalErrorRoute)
+            .withFormUrlEncodedBody(("value", "invalid"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual BAD_REQUEST
+      }
+    }
+
     "redirect to SelectNINOLetterAddress page for a POST if user selects Try again option with a postcode" in {
 
       val mockTryAgainCountRepository = mock[TryAgainCountRepository]
