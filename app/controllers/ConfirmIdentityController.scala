@@ -31,16 +31,16 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmIdentityController @Inject()(
-                                         override val messagesApi: MessagesApi,
-                                         sessionRepository: SessionRepository,
-                                         navigator: Navigator,
-                                         identify: IdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         formProvider: ConfirmIdentityFormProvider,
-                                         val controllerComponents: MessagesControllerComponents,
-                                         view: ConfirmIdentityView,
-                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                           override val messagesApi: MessagesApi,
+                                           sessionRepository: SessionRepository,
+                                           navigator: Navigator,
+                                           identify: IdentifierAction,
+                                           getData: DataRetrievalAction,
+                                           requireData: DataRequiredAction,
+                                           formProvider: ConfirmIdentityFormProvider,
+                                           val controllerComponents: MessagesControllerComponents,
+                                           view: ConfirmIdentityView
+                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
 
@@ -51,6 +51,7 @@ class ConfirmIdentityController @Inject()(
         case None => form
         case Some(value) => form.fill(value)
       }
+
       Ok(view(preparedForm, mode))
   }
 
