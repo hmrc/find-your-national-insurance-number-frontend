@@ -19,18 +19,18 @@ package base
 import config.FrontendAppConfig
 import controllers.actions._
 import models.UserAnswers
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
-import play.api.inject.{Injector, bind}
 import play.api.inject.guice.GuiceApplicationBuilder
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.inject.{Injector, bind}
 import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import util.WireMockSupport
 
 import scala.reflect.ClassTag
-import org.scalatestplus.mockito.MockitoSugar
 
 class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuite {
 
@@ -53,24 +53,6 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
     new GuiceApplicationBuilder()
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
-        bind[ValidCustomerDataRequiredAction].to[ValidCustomerDataRequiredActionImpl],
-        bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
-      )
-
-  protected def applicationBuilderCl50Off(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
-    new GuiceApplicationBuilder()
-      .overrides(
-        bind[CL50DataRequiredAction].to[JourneyClosedActionImpl],
-        bind[ValidCustomerDataRequiredAction].to[ValidCustomerDataRequiredActionImpl],
-        bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
-      )
-
-  protected def applicationBuilderCl50On(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
-    new GuiceApplicationBuilder()
-      .overrides(
-        bind[CL50DataRequiredAction].to[CL50DataRequiredActionImpl],
         bind[ValidCustomerDataRequiredAction].to[ValidCustomerDataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
