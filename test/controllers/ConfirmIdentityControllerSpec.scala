@@ -91,7 +91,7 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val application =
-        applicationBuilderCl50On(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
@@ -112,7 +112,7 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilderCl50On(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
         val request =
@@ -127,43 +127,6 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result).removeAllNonces() mustEqual view(boundForm, NormalMode)(request, messages).toString
-      }
-    }
-
-    "CL50 feature toggled off" - {
-      "must redirect to store" in {
-
-        val application = applicationBuilderCl50Off(userAnswers = Some(emptyUserAnswers)).build()
-
-        running(application) {
-          val request = FakeRequest(GET, confirmIdentityRoute)
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-
-          redirectLocation(result).value mustEqual controllers.auth.routes.AuthController.redirectToSMN().url
-        }
-      }
-    }
-
-    "Extended IV journey toggled on" - {
-      "must redirect to the Service IV Page" in {
-
-        val application = applicationBuilderCl50OnWithConfig(
-          Map("features.extendedIvJourney" -> true),
-          userAnswers = Some(emptyUserAnswers)
-        ).build()
-
-        running(application) {
-          val request = FakeRequest(GET, confirmIdentityRoute)
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-
-          redirectLocation(result).value mustEqual controllers.routes.ServiceIvController.onPageLoad().url
-        }
       }
     }
   }

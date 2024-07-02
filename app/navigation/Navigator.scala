@@ -18,7 +18,6 @@ package navigation
 
 import config.FrontendAppConfig
 import controllers.routes
-import models.ServiceIv._
 import models._
 import pages._
 import play.api.mvc.Call
@@ -33,8 +32,6 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
 
   private val normalRoutes: Page => UserAnswers => Call = {
     case ConfirmIdentityPage                => userAnswers => navigateConformIdentity(userAnswers)
-    case ServiceIvPage                      => userAnswers => navigateIvEvidence(userAnswers)
-    case ServiceIvAppPage                   => userAnswers => navigateCanDownloadApp(userAnswers)
     case PostLetterPage                     => userAnswers => navigatePostLetter(userAnswers)
     case SelectNINOLetterAddressPage        => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
     case SelectAlternativeServicePage       => userAnswers => navigateSelectAlternativeService(userAnswers)
@@ -60,30 +57,6 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     userAnswers.get(PostLetterPage) match {
       case Some(true) => controllers.routes.TracingWhatYouNeedController.onPageLoad()
       case _          => routes.SelectAlternativeServiceController.onPageLoad()
-    }
-  private def navigateCanDownloadApp(userAnswers: UserAnswers): Call =
-    userAnswers.get(ServiceIvAppPage) match {
-      case Some(true) => controllers.auth.routes.AuthController.redirectToSMN()
-      case _          => controllers.routes.PostLetterController.onPageLoad()
-    }
-
-  private def navigateIvEvidence(userAnswers: UserAnswers): Call =
-    userAnswers.get(ServiceIvPage) match {
-      case Some(selections) =>
-        selections.toSeq match {
-          case Seq(NoneOfTheAbove) => controllers.routes.PostLetterController.onPageLoad()
-          case Seq(UkPhotocardDrivingLicence)
-               | Seq(ValidUkPassport)
-               | Seq(NonUkPassport)
-               | Seq(UkBiometricResidenceCard) =>
-            controllers.routes.ServiceIvAppController.onPageLoad()
-          case _ => if (selections.toList.length > 1) {
-            controllers.auth.routes.AuthController.redirectToSMN()
-          } else {
-            controllers.routes.PostLetterController.onPageLoad()
-          }
-        }
-      case _ => routes.SelectAlternativeServiceController.onPageLoad()
     }
 
   private def navigateSelectNINOLetterAddress(userAnswers: UserAnswers): Call =

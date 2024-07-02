@@ -149,33 +149,6 @@ confirmYourPostcode.hint=Er enghraifft SW1A 2AA
 confirmYourPostcode.error.required=Nodwch eich cod post
 confirmYourPostcode.error.invalid=Nodwch god post yn y DU sy’n ddilys
 
-# Service IV check (CL50)
-ServiceIv.title = Bydd angen i chi gadarnhau pwy ydych er mwyn cael eich rhif Yswiriant Gwladol ar-lein
-ServiceIv.heading = Bydd angen i chi gadarnhau pwy ydych er mwyn cael eich rhif Yswiriant Gwladol ar-lein
-ServiceIv.p1 = Mae hyn er mwyn cadw eich rhif yn ddiogel a’ch diogelu rhag twyll.
-ServiceIv.p2 = Gallwch ddefnyddio’r eitemau hyn i helpu i gadarnhau pwy ydych.
-ServiceIv.h2 = Dewiswch yr eitemau sydd gennych wrth law:
-ServiceIv.error.required = Dewiswch yr eitemau sydd gennych wrth law i helpu i gadarnhau pwy ydych
-
-# Options
-ServiceIv.validUkPassport = Pasbort dilys y DU
-ServiceIv.ukPhotocardDrivingLicence = Trwydded yrru cerdyn-llun yn y DU (llawn neu dros dro)
-ServiceIv.nonUkPassport = Pasbort nad yw o’r DU
-ServiceIv.ukBiometricResidenceCard = Cerdyn neu drwydded breswylio fiometrig (BRP)
-ServiceIv.taxCreditsClaim = Manylion hawliad credyd treth (ID Llais dewisol)
-ServiceIv.payslipOrP60 = Slip cyflog neu P60
-ServiceIv.hint.payslipOrP60 = Bydd llawer o gyflogwyr yn rhoi P60 i chi sy’n dangos y dreth rydych wedi’i thalu ar eich cyflog yn ystod y flwyddyn dreth.
-ServiceIv.selfAssessment = Ffurflen Dreth Hunanasesiad wedi’i llenwi ar gyfer y flwyddyn dreth ddiwethaf
-#Or
-ServiceIv.or = neu
-ServiceIv.noneOfTheAbove = Nid oes gennyf yr un o’r eitemau hyn
-
-serviceIvApp.title = Lawrlwythwch ap i gadarnhau pwy ydych
-serviceIvApp.heading = Lawrlwythwch ap i gadarnhau pwy ydych
-serviceIvApp.error.required = Dewiswch ‘Iawn’ os gallwch lawrlwytho ap i’ch dyfais symudol
-serviceIvApp.p1 = Bydd angen i chi ddefnyddio ap a chamera eich dyfais symudol i baru’ch wyneb â’r llun ar eich pasbort neu drwydded yrru’r DU.
-serviceIvApp.h2 = Allwch chi lawrlwytho ap i’ch dyfais symudol?
-
 postLetter.title = Gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol
 postLetter.heading = Gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol
 postLetter.p1 = Oherwydd na allwch brofi pwy ydych chi, ni allwch gael mynediad at eich rhif Yswiriant Gwladol ar-lein.

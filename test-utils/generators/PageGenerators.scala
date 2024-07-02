@@ -27,12 +27,6 @@ trait PageGenerators {
   implicit lazy val arbitraryPostLetterPage: Arbitrary[PostLetterPage.type] =
     Arbitrary(PostLetterPage)
 
-  implicit lazy val arbitraryServiceIvAppPage: Arbitrary[ServiceIvAppPage.type] =
-    Arbitrary(ServiceIvAppPage)
-
-  implicit lazy val arbitraryUpliftOrLetterPage: Arbitrary[ServiceIvPage.type] =
-    Arbitrary(ServiceIvPage)
-
   implicit lazy val arbitraryEnteredPostCodeNotFoundPage: Arbitrary[EnteredPostCodeNotFoundPage.type] =
     Arbitrary(EnteredPostCodeNotFoundPage)
 
