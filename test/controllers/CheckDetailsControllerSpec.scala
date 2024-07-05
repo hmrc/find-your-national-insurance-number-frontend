@@ -17,11 +17,11 @@
 package controllers
 
 import base.SpecBase
-import models.errors.ConnectorError
+import models.errors._
 import models.individualdetails._
 import models.pdv._
 import models.requests.DataRequest
-import models.{AddressLine, NormalMode, individualdetails}
+import models.{AddressLine, IndividualDetailsIdentifier, IndividualDetailsNino, NormalMode, individualdetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -78,6 +78,20 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         verify(auditService, times(1)).start()(any())
       }
 
+      "when invalid origin and no user answers" in {
+
+        val app = applicationBuilder(userAnswers = None).build()
+
+        val invalidOrigin: Option[String] = Some("test")
+
+        val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(invalidOrigin, NormalMode).url)
+        val result = route(app, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
+
+      }
+
       "when PDVResponseData validationStatus is failure" in {
 
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -100,6 +114,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
           verify(auditService, times(1)).start()(any())
+          verify(auditService, times(1)).findYourNinoPDVMatchFailed(any(), any())(any())
         }
       }
 
@@ -705,6 +720,77 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad().url
+
+          verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
+          verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
+        }
+      }
+
+      "when pdvData validationStatus is success but idDataError exists with UNPROCESSABLE_ENTITY" in {
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+          .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
+        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
+            inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+            inject.bind[AuditService].toInstance(auditService),
+            inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService)
+          )
+          .build()
+
+        val mockConnectorError = ConnectorError(UNPROCESSABLE_ENTITY, "UNPROCESSABLE ENTITY")
+
+        when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
+          .thenReturn(Future(Left(mockConnectorError)))
+
+        when(mockPersonalDetailsValidationService.getPDVData(any())(any()))
+          .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
+        running(app) {
+          val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(ivOrigin, NormalMode).url)
+          val result = route(app, request).value
+
+          status(result) mustEqual INTERNAL_SERVER_ERROR
+
+          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
+          contentAsString(result) must include("Please try again in a few minutes.")
+
+          verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
+          verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
+        }
+      }
+
+      "when pdvData validationStatus is success but idDataError exists with other exception type" in {
+        when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
+          .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
+        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
+            inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+            inject.bind[AuditService].toInstance(auditService),
+            inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService)
+          )
+          .build()
+
+        val emptyNino: IndividualDetailsIdentifier = IndividualDetailsNino("")
+        val mockConnectorError: InvalidIdentifier  = InvalidIdentifier(emptyNino)
+
+        when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
+          .thenReturn(Future(Left(mockConnectorError)))
+
+        when(mockPersonalDetailsValidationService.getPDVData(any())(any()))
+          .thenReturn(Future.successful(mockPDVResponseDataSuccess))
+
+        running(app) {
+          val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(ivOrigin, NormalMode).url)
+          val result = route(app, request).value
+
+          status(result) mustEqual INTERNAL_SERVER_ERROR
+
+          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
+          contentAsString(result) must include("Please try again in a few minutes.")
 
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
           verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
