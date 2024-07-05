@@ -34,7 +34,7 @@ class ErrorHandler @Inject()(
 
   def standardErrorTemplate()(implicit rh: Request[_]): Html =
     standardErrorTemplate(
-      Messages("global.error.InternalServerError500.title"),
+      Messages("global.error.InternalServerError500.heading"),
       Messages("global.error.InternalServerError500.heading"),
       Messages("global.error.InternalServerError500.message")
     )
