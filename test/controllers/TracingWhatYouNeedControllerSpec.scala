@@ -28,11 +28,11 @@ class TracingWhatYouNeedControllerSpec extends SpecBase with MockitoSugar {
 
   lazy val whatYouNeedRoute: String = routes.TracingWhatYouNeedController.onPageLoad().url
 
-  "UpliftOrLetter Controller" - {
+  "TracingWhatYouNeedController Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilderCl50On(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, whatYouNeedRoute)
@@ -40,23 +40,6 @@ class TracingWhatYouNeedControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-      }
-    }
-
-    "CL50 feature toggle on" - {
-      "must redirect to store" in {
-
-        val application = applicationBuilderCl50Off(userAnswers = Some(emptyUserAnswers)).build()
-
-        running(application) {
-          val request = FakeRequest(GET, whatYouNeedRoute)
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-
-          redirectLocation(result).value mustEqual controllers.auth.routes.AuthController.redirectToSMN().url
-        }
       }
     }
   }

@@ -16,11 +16,8 @@
 
 package controllers
 
-import config.FrontendAppConfig
 import controllers.actions._
 import forms.ConfirmIdentityFormProvider
-
-import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
 import pages.ConfirmIdentityPage
@@ -30,36 +27,32 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ConfirmIdentityView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmIdentityController @Inject()(
-                                         override val messagesApi: MessagesApi,
-                                         sessionRepository: SessionRepository,
-                                         navigator: Navigator,
-                                         identify: IdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: CL50DataRequiredAction,
-                                         formProvider: ConfirmIdentityFormProvider,
-                                         val controllerComponents: MessagesControllerComponents,
-                                         view: ConfirmIdentityView,
-                                         config: FrontendAppConfig
-                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                           override val messagesApi: MessagesApi,
+                                           sessionRepository: SessionRepository,
+                                           navigator: Navigator,
+                                           identify: IdentifierAction,
+                                           getData: DataRetrievalAction,
+                                           requireData: DataRequiredAction,
+                                           formProvider: ConfirmIdentityFormProvider,
+                                           val controllerComponents: MessagesControllerComponents,
+                                           view: ConfirmIdentityView
+                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
 
-      if(config.extendedIvJourney){
-        Redirect(controllers.routes.ServiceIvController.onPageLoad())
-      } else {
-        val preparedForm = request.userAnswers.get(ConfirmIdentityPage) match {
-          case None => form
-          case Some(value) => form.fill(value)
-        }
-
-        Ok(view(preparedForm, mode))
+      val preparedForm = request.userAnswers.get(ConfirmIdentityPage) match {
+        case None => form
+        case Some(value) => form.fill(value)
       }
+
+      Ok(view(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {

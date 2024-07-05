@@ -21,6 +21,7 @@ import controllers.bindable.Origin
 import play.api.Configuration
 import play.api.i18n.Lang
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
 import java.net.URLEncoder
 
 @Singleton
@@ -89,10 +90,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   val showHelpImproveBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-help-improve")
 
   val npsFMNAppStatusMessageList:String = configuration.get[String]("npsfmn.app-status-message-list")
-
   val encryptionKey: String = configuration.get[String]("mongodb.encryption.key")
-
-  val extendedIvJourney: Boolean = configuration.get[Boolean]("features.extendedIvJourney")
-
   val trustedDomains: Set[String] = configuration.get[Seq[String]]("mdtp.trustedDomains").toSet
 }
