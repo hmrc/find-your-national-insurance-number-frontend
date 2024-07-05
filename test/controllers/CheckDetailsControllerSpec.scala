@@ -726,7 +726,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
 
-      "when pdvData validationStatus is success but idDataError exists with UNPROCESSABLE_ENTITY" in {
+      "when pdvData validationStatus is success but idDataError exists with INTERNAL_SERVER_ERROR" in {
         when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
@@ -739,7 +739,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           )
           .build()
 
-        val mockConnectorError = ConnectorError(UNPROCESSABLE_ENTITY, "UNPROCESSABLE ENTITY")
+        val mockConnectorError = ConnectorError(INTERNAL_SERVER_ERROR, "Something went wrong")
 
         when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
           .thenReturn(Future(Left(mockConnectorError)))
