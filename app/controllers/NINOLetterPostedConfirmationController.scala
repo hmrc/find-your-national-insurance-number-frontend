@@ -31,14 +31,12 @@ import javax.inject.Inject
 class NINOLetterPostedConfirmationController @Inject()(
                                                         override val messagesApi: MessagesApi,
                                                         identify: IdentifierAction,
-                                                        getData: DataRetrievalAction,
-                                                        requireValidData: ValidCustomerDataRequiredAction,
                                                         val controllerComponents: MessagesControllerComponents,
                                                         view: NINOLetterPostedConfirmationView,
                                                         sessionCacheService: SessionCacheService
                                                       ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireValidData) {
+  def onPageLoad: Action[AnyContent] = (identify) {
     implicit request =>
       val nino = request.session.data.getOrElse("nino", EmptyString)
       sessionCacheService.invalidateCache(nino, request.userId)
