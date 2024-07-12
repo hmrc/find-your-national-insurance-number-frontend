@@ -42,9 +42,8 @@ trait ConnectorSpec
     with ScalaFutures
     with IntegrationPatience {
 
-  implicit val hc: HeaderCarrier         = HeaderCarrier()
-  implicit lazy val ec: ExecutionContext =
-    scala.concurrent.ExecutionContext.global //TODO: remove lazy keyword when Caching spec is done.
+  implicit val hc: HeaderCarrier    = HeaderCarrier()
+  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global
 
   val server: WireMockServer
 
