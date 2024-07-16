@@ -165,7 +165,7 @@ tracingWhatYouNeed.p3 = If the details you give us match our records, then we ca
 
 confirmIdentity.title = Confirm your identity to get your National Insurance number online
 confirmIdentity.heading = Confirm your identity to get your National Insurance number online
-confirmIdentity.p1 = To keep your number safe and protect you against fraud, we will ask you for up to two items to confirm your identity.
+confirmIdentity.p1 = To keep your number safe and protect you against fraud, we will ask you to confirm your identity.
 confirmIdentity.h2 = Items you may be able to use
 confirmIdentity.p2 = Photo ID, for example:
 confirmIdentity.options.passport = a passport
@@ -176,6 +176,7 @@ confirmIdentity.options.mobile = a mobile phone contract, bank account, or mortg
 confirmIdentity.options.payslip = a payslip or P60
 confirmIdentity.options.selfAssessment = a completed Self Assessment tax return for the previous tax year
 confirmIdentity.options.taxClaim = a Tax Credit claim (optional Voice ID)
+confirmIdentity.inset = You may need to provide 2 items.
 confirmIdentity.legend = Do you have ID or other information ready to use?
 confirmIdentity.error.required = Select yes if you have ID or other information ready to use
 confirmIdentity.hint = You can still get your National Insurance number by post if you can confirm some personal details.
