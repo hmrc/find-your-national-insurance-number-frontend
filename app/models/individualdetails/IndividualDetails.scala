@@ -196,9 +196,9 @@ object IndividualDetails {
     (__ \ "addressList").format[AddressList])(IndividualDetails.apply, unlift(IndividualDetails.unapply))
 
   implicit class IndividualDetailsOps(idData: IndividualDetails) {
-    def getAddressTypeResidential: Address = idData.addressList.getAddress.filter(_.addressType.equals(ResidentialAddress)).head
+    def getAddressTypeResidential: Option[Address] = idData.addressList.getAddress.filter(_.addressType.equals(ResidentialAddress)).headOption
 
-    def getPostCode: String = getAddressTypeResidential.addressPostcode.map(_.value).getOrElse("")
+    def getPostCode: String = getAddressTypeResidential.map(_.addressPostcode.map(_.value).getOrElse("")).getOrElse("")
 
     def getNinoWithoutSuffix: String = idData.ninoWithoutSuffix
 

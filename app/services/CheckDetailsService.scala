@@ -39,24 +39,28 @@ class CheckDetailsServiceImpl @Inject() extends CheckDetailsService with Logging
      var reason = EmptyString
      val isValidNino:Boolean = idData.crnIndicator.equals(False)
      val isValidAccountStatus:Boolean = idData.accountStatusType.exists(_.equals(FullLive))
-     val isValidAddressStatus:Boolean =  getAddressTypeResidential(idData.addressList).addressStatus match {
-       case Some(NotDlo) => true
-       case None => true
-       case _ => false
-     }
+     val hasResidentialAddress: Boolean = idData.getAddressTypeResidential.isDefined
+     val isValidAddressStatus = getAddressTypeResidential(idData.addressList).map(_.addressStatus) match {
+         case Some(addressStatus) => addressStatus match {
+           case Some(status) => if (status == NotDlo) {true} else {false}
+           case _ => true
+         }
+         case None => true
+         case _ => false
+       }
 
      if (!isValidAccountStatus) reason += "AccountStatus is not FullLive;"
      if (!isValidNino) reason += "CRN;"
-     if (!isValidAddressStatus) reason += "AddressStatus is Dlo or NFa;"
+     if (!hasResidentialAddress) reason += "No residential address;"
+     if (!isValidAddressStatus && hasResidentialAddress) reason += "AddressStatus is Dlo or NFa;"
 
-    val isValidCustomer = isValidAccountStatus && isValidNino && isValidAddressStatus
-
+    val isValidCustomer = isValidAccountStatus && isValidNino && isValidAddressStatus && hasResidentialAddress
     (isValidCustomer, reason)
   }
 
-  private def getAddressTypeResidential(addressList: AddressList): Address = {
+  private def getAddressTypeResidential(addressList: AddressList): Option[Address] = {
     val residentialAddress = addressList.getAddress.filter(_.addressType.equals(ResidentialAddress))
-    residentialAddress.head
+    residentialAddress.headOption
   }
 
 }

@@ -83,6 +83,15 @@ class CheckDetailsServiceSpec extends AsyncWordSpec with Matchers with MockitoSu
         result mustBe (false, "AccountStatus is not FullLive;")
       }
 
+      "return false and reason when address is missing" in {
+        val fakeIndividualDetailsWithFewConditionsNotMet = fakeIndividualDetails.copy(
+          addressList = AddressList(None)
+        )
+
+        val result = npsFMNService.checkConditions(fakeIndividualDetailsWithFewConditionsNotMet)
+        result mustBe(false, "No residential address;")
+      }
+
       "return false and reason when crnIndicator is True" in {
         val fakeIndividualDetailsWithFewConditionsNotMet = fakeIndividualDetails.copy(
           accountStatusType = Some(AccountStatusType.FullLive),
