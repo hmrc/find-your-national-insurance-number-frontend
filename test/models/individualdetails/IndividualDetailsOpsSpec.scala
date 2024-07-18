@@ -74,7 +74,7 @@ class IndividualDetailsOpsSpec extends AnyFlatSpec with Matchers with OptionValu
 
   "IndividualDetailsOps" should "get residential address" in {
     val ops = new IndividualDetailsOps(individualDetails)
-    ops.getAddressTypeResidential shouldEqual individualDetails.addressList.getAddress.head
+    ops.getAddressTypeResidential shouldEqual individualDetails.addressList.getAddress.headOption
   }
 
   it should "get postcode" in {
