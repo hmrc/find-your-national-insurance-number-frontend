@@ -36,26 +36,25 @@ trait CheckDetailsService {
 class CheckDetailsServiceImpl @Inject() extends CheckDetailsService with Logging {
 
    def checkConditions(idData: IndividualDetails): (Boolean, String) = {
-     var reason = EmptyString
-     val isValidNino:Boolean = idData.crnIndicator.equals(False)
-     val isValidAccountStatus:Boolean = idData.accountStatusType.exists(_.equals(FullLive))
+     var reason: String                 = EmptyString
+     val isValidNino:Boolean            = idData.crnIndicator.equals(False)
+     val isValidAccountStatus:Boolean   = idData.accountStatusType.exists(_.equals(FullLive))
      val hasResidentialAddress: Boolean = idData.getAddressTypeResidential.isDefined
-     val isValidAddressStatus = getAddressTypeResidential(idData.addressList).map(_.addressStatus) match {
-         case Some(addressStatus) => addressStatus match {
-           case Some(status) => if (status == NotDlo) {true} else {false}
-           case _ => true
-         }
-         case None => true
-         case _ => false
-       }
+     val validStatus: Boolean           = isValidAddressStatus(idData)
 
      if (!isValidAccountStatus) reason += "AccountStatus is not FullLive;"
      if (!isValidNino) reason += "CRN;"
      if (!hasResidentialAddress) reason += "No residential address;"
-     if (!isValidAddressStatus && hasResidentialAddress) reason += "AddressStatus is Dlo or NFa;"
+     if (!validStatus && hasResidentialAddress) reason += "AddressStatus is Dlo or NFa;"
 
-    val isValidCustomer = isValidAccountStatus && isValidNino && isValidAddressStatus && hasResidentialAddress
+    val isValidCustomer = isValidAccountStatus && isValidNino && validStatus && hasResidentialAddress
     (isValidCustomer, reason)
+  }
+
+  private def isValidAddressStatus(idData: IndividualDetails): Boolean = {
+    getAddressTypeResidential(idData.addressList).exists(
+      status => status.addressStatus.isEmpty || status.addressStatus.get.equals(NotDlo)
+    )
   }
 
   private def getAddressTypeResidential(addressList: AddressList): Option[Address] = {
