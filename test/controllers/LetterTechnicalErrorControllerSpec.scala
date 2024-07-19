@@ -25,7 +25,7 @@ import models.{LetterTechnicalError, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.Answers
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.LetterTechnicalErrorPage
 import play.api.data.Form
@@ -42,11 +42,6 @@ import java.time.LocalDate
 import scala.concurrent.Future
 
 class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
-
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    reset(mockDataRequest)
-  }
 
   def onwardRoute: Call = Call("GET", "/foo")
 
@@ -95,7 +90,6 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
   val fakePDVResponseDataInvalidCustomer: PDVResponseData = fakePDVResponseDataWithPostcode.copy(
     validCustomer = Some(false)
   )
-  implicit val mockDataRequest: DataRequest[AnyContent]  = mock[DataRequest[AnyContent]](Answers.RETURNS_DEEP_STUBS)
 
   "LetterTechnicalErrorController" - {
 
