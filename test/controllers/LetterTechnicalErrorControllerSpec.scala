@@ -17,20 +17,23 @@
 package controllers
 
 import base.SpecBase
+import cacheables.TryAgainCountCacheable
 import forms.LetterTechnicalErrorFormProvider
 import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
-import models.{LetterTechnicalError, NormalMode, TryAgainCount, UserAnswers}
+import models.requests.DataRequest
+import models.{LetterTechnicalError, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
+import org.mockito.Answers
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{reset, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.LetterTechnicalErrorPage
 import play.api.data.Form
 import play.api.inject.bind
-import play.api.mvc.Call
+import play.api.mvc.{AnyContent, Call}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.{SessionRepository, TryAgainCountRepository}
+import repositories.SessionRepository
 import services.PersonalDetailsValidationService
 import uk.gov.hmrc.domain.Nino
 import views.html.LetterTechnicalErrorView
@@ -39,6 +42,11 @@ import java.time.LocalDate
 import scala.concurrent.Future
 
 class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockDataRequest)
+  }
 
   def onwardRoute: Call = Call("GET", "/foo")
 
@@ -87,18 +95,17 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
   val fakePDVResponseDataInvalidCustomer: PDVResponseData = fakePDVResponseDataWithPostcode.copy(
     validCustomer = Some(false)
   )
+  implicit val mockDataRequest: DataRequest[AnyContent]  = mock[DataRequest[AnyContent]](Answers.RETURNS_DEEP_STUBS)
 
   "LetterTechnicalErrorController" - {
 
     "must return OK and the correct view for a GET" in {
-      val mockTryAgainCountRepository = mock[TryAgainCountRepository]
-      when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
+
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataWithPostcode)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value))
         .overrides(
-          bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository),
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
         .build()
@@ -115,18 +122,43 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must not populate any value in the view on a GET when the question has previously been answered" in {
+    "must set retry allowed to false when count is greater than 5" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(LetterTechnicalErrorPage, LetterTechnicalError.values.head).success.value
-      val mockTryAgainCountRepository = mock[TryAgainCountRepository]
+      val tryAgainCount = 7
 
-      when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataWithPostcode)))
 
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers.set(TryAgainCountCacheable, tryAgainCount).success.value))
+        .overrides(
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, letterTechnicalErrorRoute)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[LetterTechnicalErrorView]
+
+        status(result) mustEqual OK
+        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode, retryAllowed = false)(request, messages).toString
+      }
+    }
+
+    "must not populate any value in the view on a GET when the question has previously been answered" in {
+
+      val userAnswers = UserAnswers(userAnswersId).set(LetterTechnicalErrorPage, LetterTechnicalError.values.head)
+        .success.value
+        .set(TryAgainCountCacheable, 0)
+        .success.value
+
+
+      when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
+        .thenReturn(Future.successful(Some(fakePDVResponseDataWithPostcode)))
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
-          bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository),
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
         .build()
@@ -172,49 +204,17 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return a Bad Request and errors when invalid data is submitted anr retry count < 5" in {
+    "must return a Bad Request and errors when invalid data is submitted and retry count < 5" in {
 
       val mockSessionRepository       = mock[SessionRepository]
-      val mockTryAgainCountRepository = mock[TryAgainCountRepository]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-      when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository),
-            bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-          )
-          .build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, letterTechnicalErrorRoute)
-            .withFormUrlEncodedBody(("value", "invalid"))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual BAD_REQUEST
-      }
-    }
-
-    "must return a Bad Request and errors when invalid data is submitted anr retry count > 5" in {
-      val mockSessionRepository       = mock[SessionRepository]
-      val mockTryAgainCountRepository = mock[TryAgainCountRepository]
-      val retryCount: Int             = 5
-
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-      when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = retryCount)))
-
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder(userAnswers = Some(emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository),
             bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
           )
           .build()
@@ -232,15 +232,11 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
     "redirect to SelectNINOLetterAddress page for a POST if user selects Try again option with a postcode" in {
 
-      val mockTryAgainCountRepository = mock[TryAgainCountRepository]
-
-      when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseDataWithPostcode)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value))
         .overrides(
-          bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository),
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
         .build()
@@ -260,15 +256,11 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
     "redirect to ConfirmYourPostcode page for a POST if user selects Try again option without a postcode" in {
 
-      val mockTryAgainCountRepository = mock[TryAgainCountRepository]
-
-      when(mockTryAgainCountRepository.findById(any())(any())) thenReturn Future.successful(Some(TryAgainCount(id = "", count = 0)))
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseDataWithoutPostcode)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value))
         .overrides(
-          bind[TryAgainCountRepository].toInstance(mockTryAgainCountRepository),
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
         .build()
