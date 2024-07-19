@@ -61,8 +61,8 @@ ninoLetterPostedConfirmation.beforeYouGo.p1 = Mae’ch adborth yn ein helpu i we
 ninoLetterPostedConfirmation.beforeYouGo.p2.part1 = Llenwch arolwg byr
 ninoLetterPostedConfirmation.beforeYouGo.p2.part2 = i rannu’ch adborth ar y gwasanaeth.
 
-selectAlternativeService.title = Bydd angen i chi gysylltu â CThEF am eich rhif Yswiriant Gwladol
-selectAlternativeService.heading = Bydd angen i chi gysylltu â CThEF am eich rhif Yswiriant Gwladol
+selectAlternativeService.title = Bydd angen i chi gysylltu â CThEF i gael eich rhif Yswiriant Gwladol
+selectAlternativeService.heading = Bydd angen i chi gysylltu â CThEF i gael eich rhif Yswiriant Gwladol
 selectAlternativeService.heading.2 = Beth yr hoffech ei wneud?
 selectAlternativeService.printForm = Argraffu ac anfon ffurflen
 selectAlternativeService.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol.
