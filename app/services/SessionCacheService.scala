@@ -31,8 +31,7 @@ class SessionCacheService @Inject()(sessionRepository: SessionRepository,
     sessionRepository.clear(userId)
   }
 
-  def invalidatePdvId(nino: String): Future[Boolean] = {
-    personalDetailsValidationRepository.clear(nino)
+  def invalidateIndividualDetailsCache(nino: String): Future[Boolean] = {
     individualDetailsRepository.clear(nino)
   }
 

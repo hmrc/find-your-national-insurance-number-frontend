@@ -26,7 +26,7 @@ import models.requests.DataRequest
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import services.{AuditService, CheckDetailsService, IndividualDetailsService, PersonalDetailsValidationService}
+import services.{AuditService, CheckDetailsService, IndividualDetailsService, PersonalDetailsValidationService, SessionCacheService}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -47,7 +47,8 @@ class CheckDetailsController @Inject()(
                                         individualDetailsService: IndividualDetailsService,
                                         val controllerComponents: MessagesControllerComponents,
                                         val authConnector: AuthConnector,
-                                        errorHandler: ErrorHandler
+                                        errorHandler: ErrorHandler,
+                                        sessionCacheService: SessionCacheService
                                       )(implicit ec: ExecutionContext)
   extends FrontendBaseController with AuthorisedFunctions with I18nSupport with Logging {
 
@@ -73,14 +74,15 @@ class CheckDetailsController @Inject()(
       request.credId.getOrElse(EmptyString),
       request.session.data.getOrElse("sessionId", EmptyString)
     )
-
     personalDetailsValidationService.getPDVData(pdvRequest) flatMap {
       case PDVSuccessResponse(pdvResponseData) =>
         val sessionWithNINO = request.session + ("nino" -> pdvResponseData.getNino)
-
         pdvResponseData.validationStatus match {
           case ValidationStatus.Success =>
-            individualsDetailsChecks(pdvResponseData, mode, sessionWithNINO, origin)
+            sessionCacheService.invalidateIndividualDetailsCache(pdvResponseData.getNino).flatMap {
+              case true =>  individualsDetailsChecks(pdvResponseData, mode, sessionWithNINO, origin)
+              case _    => throw new RuntimeException("Failed to invalidate individual details data cache")
+            }
           case _ =>
             logger.info(s"PDV matched failed: ${pdvResponseData.validationStatus}")
             auditService.findYourNinoPDVMatchFailed(pdvResponseData, origin)
