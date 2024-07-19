@@ -30,7 +30,7 @@ case class EncryptedPDVResponseData(
                                      id: String,
                                      validationStatus: EncryptedValue,
                                      personalDetails: Option[EncryptedPersonalDetails],
-                                     lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC),
+                                     lastUpdated: Instant = Instant.now(java.time.Clock.systemUTC()),
                                      reason: Option[EncryptedValue],
                                      validCustomer: Option[EncryptedValue],
                                      CRN: Option[EncryptedValue],

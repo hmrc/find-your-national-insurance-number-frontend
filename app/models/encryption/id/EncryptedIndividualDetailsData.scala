@@ -18,13 +18,13 @@ package models.encryption.id
 
 import models.encryption.EncryptedValueFormat._
 import models.individualdetails.{IndividualDetailsData, IndividualDetailsDataCache}
+import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{OFormat, __}
 import uk.gov.hmrc.crypto.{EncryptedValue, SymmetricCryptoFactory}
-import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
 import util.FMNConstants.EmptyString
 
-import java.time.{Instant, LocalDateTime, ZoneId, ZoneOffset}
+import java.time.Instant
 
 case class EncryptedIndividualDetailsData(
                                   firstForename: EncryptedValue,
@@ -37,7 +37,7 @@ case class EncryptedIndividualDetailsData(
 case class EncryptedIndividualDetailsDataCache(
   id: String,
   individualDetails: Option[EncryptedIndividualDetailsData],
-  lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC)
+  lastUpdated: Instant = Instant.now(java.time.Clock.systemUTC())
 )
 
 object EncryptedIndividualDetailsDataCache {

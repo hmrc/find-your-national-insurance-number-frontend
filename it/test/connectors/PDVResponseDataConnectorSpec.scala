@@ -34,7 +34,7 @@ import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.client.HttpClientV2
 
-import java.time.{LocalDate, LocalDateTime, ZoneId, ZoneOffset}
+import java.time.{Instant, LocalDate}
 import scala.util.Random
 
 class PDVResponseDataConnectorSpec
@@ -118,7 +118,7 @@ class PDVResponseDataConnectorSpec
         id,
         ValidationStatus.Success,
         Some(personalDetails),
-        lastUpdated = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC),
+        lastUpdated = Instant.now(java.time.Clock.systemUTC()),
         reason = None,
         validCustomer = None,
         CRN = None,

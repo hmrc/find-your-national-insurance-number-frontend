@@ -21,7 +21,7 @@ import play.api.libs.json.{OFormat, __}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
 import util.FMNConstants.EmptyString
 
-import java.time.{Instant, LocalDateTime, ZoneId, ZoneOffset}
+import java.time.Instant
 
 case class IndividualDetailsData(
                               firstForename: String,
@@ -34,7 +34,7 @@ case class IndividualDetailsData(
 case class IndividualDetailsDataCache(
    id: String,
    individualDetails: Option[IndividualDetailsData],
-   lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC)
+   lastUpdated: Instant = Instant.now(java.time.Clock.systemUTC())
  )
 
 object IndividualDetailsDataCache {

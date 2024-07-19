@@ -37,7 +37,7 @@ case class PDVResponseData(
       id: String,
       validationStatus: ValidationStatus,
       personalDetails: Option[PersonalDetails],
-      lastUpdated: Instant = LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC),
+      lastUpdated: Instant = Instant.now(java.time.Clock.systemUTC()),
       reason: Option[String],
       validCustomer: Option[Boolean],
       CRN: Option[String],
