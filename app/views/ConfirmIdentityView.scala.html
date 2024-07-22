@@ -55,6 +55,8 @@
             <li>@messages("confirmIdentity.options.taxClaim")</li>
         </ul>
 
+        <div class="govuk-inset-text">@messages("confirmIdentity.inset")</div>
+
         @govukRadios(
             RadiosViewModel.yesNoWithHint(
                 field = form("value"),

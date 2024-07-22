@@ -169,7 +169,7 @@ tracingWhatYouNeed.p3 = Os yw’r manylion a roddwch i ni yn cyd-fynd â’n cof
 
 confirmIdentity.title = Cadarnhau pwy ydych i gael eich rhif Yswiriant Gwladol ar-lein
 confirmIdentity.heading = Cadarnhau pwy ydych i gael eich rhif Yswiriant Gwladol ar-lein
-confirmIdentity.p1 = I gadw eich rhif yn ddiogel a’ch diogelu rhag twyll, byddwn yn gofyn i chi am hyd at ddwy eitem i gadarnhau pwy ydych.
+confirmIdentity.p1 = I gadw eich rhif yn ddiogel a’ch diogelu rhag twyll, byddwn yn gofyn i chi gadarnhau pwy ydych.
 confirmIdentity.h2 = Eitemau y gallech eu defnyddio
 confirmIdentity.p2 = ID ffotograffig, er enghraifft:
 confirmIdentity.options.passport = pasbort
@@ -180,6 +180,7 @@ confirmIdentity.options.mobile = cytundeb ffôn symudol, cyfrif banc neu forgais
 confirmIdentity.options.payslip = slip cyflog neu P60
 confirmIdentity.options.selfAssessment = Ffurflen Dreth Hunanasesiad wedi’i llenwi ar gyfer y flwyddyn dreth flaenorol
 confirmIdentity.options.taxClaim = hawliad Credyd Treth (ID Llais dewisol)
+confirmIdentity.inset = Mae’n bosibl y bydd angen i chi roi dwy eitem.
 confirmIdentity.legend = A oes gennych ID neu unrhyw wybodaeth arall sy’n barod i’w defnyddio?
 confirmIdentity.error.required = Dewiswch ‘Iawn’ os oes gennych ID neu wybodaeth arall sy’n barod i’w defnyddio
 confirmIdentity.hint = Gallwch gael eich rhif Yswiriant Gwladol drwy’r post o hyd os gallwch gadarnhau ychydig o fanylion personol.
