@@ -31,8 +31,4 @@ class SessionCacheService @Inject()(sessionRepository: SessionRepository,
     sessionRepository.clear(userId)
   }
 
-  def invalidateIndividualDetailsCache(nino: String): Future[Boolean] = {
-    individualDetailsRepository.clear(nino)
-  }
-
 }

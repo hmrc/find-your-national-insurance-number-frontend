@@ -79,10 +79,7 @@ class CheckDetailsController @Inject()(
         val sessionWithNINO = request.session + ("nino" -> pdvResponseData.getNino)
         pdvResponseData.validationStatus match {
           case ValidationStatus.Success =>
-            sessionCacheService.invalidateIndividualDetailsCache(pdvResponseData.getNino).flatMap {
-              case true =>  individualsDetailsChecks(pdvResponseData, mode, sessionWithNINO, origin)
-              case _    => throw new RuntimeException("Failed to invalidate individual details data cache")
-            }
+            individualsDetailsChecks(pdvResponseData, mode, sessionWithNINO, origin)
           case _ =>
             logger.info(s"PDV matched failed: ${pdvResponseData.validationStatus}")
             auditService.findYourNinoPDVMatchFailed(pdvResponseData, origin)
