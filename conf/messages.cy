@@ -61,15 +61,15 @@ ninoLetterPostedConfirmation.beforeYouGo.p1 = Mae’ch adborth yn ein helpu i we
 ninoLetterPostedConfirmation.beforeYouGo.p2.part1 = Llenwch arolwg byr
 ninoLetterPostedConfirmation.beforeYouGo.p2.part2 = i rannu’ch adborth ar y gwasanaeth.
 
-selectAlternativeService.title = Bydd angen i chi gysylltu â CThEF am eich rhif Yswiriant Gwladol
-selectAlternativeService.heading = Bydd angen i chi gysylltu â CThEF am eich rhif Yswiriant Gwladol
+selectAlternativeService.title = Bydd angen i chi gysylltu â CThEF i gael eich rhif Yswiriant Gwladol
+selectAlternativeService.heading = Bydd angen i chi gysylltu â CThEF i gael eich rhif Yswiriant Gwladol
 selectAlternativeService.heading.2 = Beth yr hoffech ei wneud?
 selectAlternativeService.printForm = Argraffu ac anfon ffurflen
 selectAlternativeService.printForm.hint = Unwaith bod gennym y ffurflen wedi’i llenwi, gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol.
 selectAlternativeService.phoneHMRC = Ffonio CThEF
 selectAlternativeService.phoneHMRC.hint = Bydd angen i chi ateb ychydig o gwestiynau, yna byddwn yn anfon llythyr atoch drwy’r post gyda’ch rhif arno.
 selectAlternativeService.error.required = Rhowch wybod i ni beth yr hoffech ei wneud
-selectAlternativeService.p1 = Ni fydd CThEF yn rhoi gwybod i chi am eich rhif Yswiriant Gwladol dros y ffôn na thrwy sgwrs dros y we.
+selectAlternativeService.p1 = Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
 selectAlternativeService.p2 = Byddwn yn ei bostio atoch a bydd yn cyrraedd cyn pen 15 diwrnod gwaith.
 
 phoneHMRCDetails.title=Ffoniwch CThEF i gael llythyr gyda’ch rhif Yswiriant Gwladol arno
@@ -92,13 +92,13 @@ phoneHMRCDetails.findOutCallCharges=<a href="{0}" class="govuk-link">Cael gwybod
 
 ninoHelpView.title=Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
 ninoHelpView.heading=Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
-ninoHelpView.inset=Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn na thrwy sgwrs dros y we.
+ninoHelpView.inset=Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
 ninoHelpView.p1=Gallwch ddefnyddio’r gwasanaeth hwn i gael eich rhif wedi’i bostio i’r cyfeiriad sydd gan CThEF ar eich cyfer.
 ninoHelpView.h2=A hoffech i’ch rhif gael ei bostio atoch?
 ninoHelpView.error.required=Dewiswch ‘Iawn’ os hoffech i’ch rhif gael ei bostio atoch
 invalidDataNinoHelp.title=Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
 invalidDataNinoHelp.heading=Gall CThEF anfon eich rhif Yswiriant Gwladol atoch drwy’r post
-invalidDataNinoHelp.inset=Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn na thrwy sgwrs dros y we.
+invalidDataNinoHelp.inset=Ni fydd CThEF yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
 invalidDataNinoHelp.p1=Gallwch ofyn am gael llythyr sy’n dangos eich rhif. Bydd hwnnw yn cyrraedd cyn pen 15 diwrnod gwaith.
 invalidDataNinoHelp.h2=Sut hoffech chi ofyn i CThEF bostio’ch rhif atoch?
 invalidDataNinoHelp.printForm=Argraffu ac anfon ffurflen
@@ -153,7 +153,7 @@ postLetter.title = Gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant G
 postLetter.heading = Gallwn anfon llythyr atoch yn cadarnhau eich rhif Yswiriant Gwladol
 postLetter.p1 = Oherwydd na allwch brofi pwy ydych chi, ni allwch gael mynediad at eich rhif Yswiriant Gwladol ar-lein.
 postLetter.p2 = Yn lle hynny, gallwch ddefnyddio’r gwasanaeth hwn i gael eich rhif wedi’i bostio i’r cyfeiriad sydd gan CThEF ar eich cyfer.
-postLetter.p3 = Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn na thrwy sgwrs dros y we.
+postLetter.p3 = Ni fyddwn yn rhoi’ch rhif Yswiriant Gwladol i chi dros y ffôn.
 postLetter.error.required = Dewiswch ‘Iawn’ os hoffech i ni bostio eich rhif atoch
 postLetter.h2 = A hoffech i ni anfon eich rhif atoch drwy’r post?
 postLetter.yesHint = Bydd angen i chi gadarnhau rhywfaint o fanylion personol.

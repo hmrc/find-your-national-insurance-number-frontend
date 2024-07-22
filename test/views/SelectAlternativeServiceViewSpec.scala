@@ -38,7 +38,7 @@ class SelectAlternativeServiceViewSpec extends ViewBehaviours with Generators {
 
   behave like pageWithHeading()
 
-  behave like pageWithContent("p", "HMRC will not tell you your National Insurance number over the phone or on webchat.")
+  behave like pageWithContent("p", "HMRC will not tell you your National Insurance number over the phone.")
   behave like pageWithContent("p", "We will post it to you and it will arrive within 15 working days.")
 
   behave like pageWithContent("legend", "What would you like to do?")
