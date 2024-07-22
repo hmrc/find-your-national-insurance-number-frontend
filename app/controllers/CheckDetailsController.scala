@@ -47,7 +47,7 @@ class CheckDetailsController @Inject()(
                                         individualDetailsService: IndividualDetailsService,
                                         val controllerComponents: MessagesControllerComponents,
                                         val authConnector: AuthConnector,
-                                        errorHandler: ErrorHandler,
+                                        errorHandler: ErrorHandler
                                       )(implicit ec: ExecutionContext)
   extends FrontendBaseController with AuthorisedFunctions with I18nSupport with Logging {
 
