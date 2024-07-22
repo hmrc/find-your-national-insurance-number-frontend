@@ -73,11 +73,9 @@ class CheckDetailsController @Inject()(
       request.credId.getOrElse(EmptyString),
       request.session.data.getOrElse("sessionId", EmptyString)
     )
-
     personalDetailsValidationService.getPDVData(pdvRequest) flatMap {
       case PDVSuccessResponse(pdvResponseData) =>
         val sessionWithNINO = request.session + ("nino" -> pdvResponseData.getNino)
-
         pdvResponseData.validationStatus match {
           case ValidationStatus.Success =>
             individualsDetailsChecks(pdvResponseData, mode, sessionWithNINO, origin)

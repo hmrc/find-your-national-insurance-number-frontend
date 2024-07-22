@@ -17,28 +17,27 @@
 package services
 
 import connectors.DefaultIndividualDetailsConnector
-import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar
-import org.mockito.Mockito._
-
-import scala.concurrent.Future
-import models.individualdetails.{AccountStatusType, Address, AddressList, AddressPostcode, AddressSequenceNumber, AddressSource, AddressStatus, AddressType, CountryCode, CrnIndicator, DateOfBirthStatus, DateOfDeathStatus, DeliveryInfo, FirstForename, Honours, IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache, Name, NameEndDate, NameList, NameSequenceNumber, NameStartDate, NameType, NinoSuffix, OtherTitle, PafReference, RequestedName, ResolveMerge, SecondForename, Surname, TitleType, VpaMail}
-import models.{AddressLine, CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope}
 import models.errors.ConnectorError
+import models.individualdetails._
 import models.pdv.{PDVResponseData, ValidationStatus}
+import models.{AddressLine, CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope}
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito._
 import org.mockito.MockitoSugar.mock
 import org.mongodb.scala.MongoException
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import repositories.{EncryptedIndividualDetailsRepository, SessionRepository}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import util.AnyValueTypeMatcher.anyValueType
 
-import java.time.{LocalDate, LocalDateTime, ZoneId, ZoneOffset}
+import java.time.{Instant, LocalDate}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class IndividualDetailsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar {
 
@@ -110,7 +109,7 @@ class IndividualDetailsServiceSpec extends AsyncWordSpec with Matchers with Mock
           "1234567890",
           ValidationStatus.Success,
           Some(models.pdv.PersonalDetails("Abc", "Pqr", Nino("AA123456D"), None, LocalDate.now())),
-          LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
+          Instant.now(java.time.Clock.systemUTC()), None, None, None, None
       )
 
       when(individualDetailsConnector.getIndividualDetails(
@@ -131,7 +130,7 @@ class IndividualDetailsServiceSpec extends AsyncWordSpec with Matchers with Mock
           "1234567890",
           ValidationStatus.Success,
           Some(models.pdv.PersonalDetails("Abc", "Pqr", Nino("AA123456D"), None, LocalDate.now())),
-          LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
+          Instant.now(java.time.Clock.systemUTC()), None, None, None, None
         )
 
       when(individualDetailsConnector.getIndividualDetails(IndividualDetailsNino(any[String]), anyValueType[ResolveMerge])

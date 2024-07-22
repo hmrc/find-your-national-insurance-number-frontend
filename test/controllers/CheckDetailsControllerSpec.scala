@@ -518,7 +518,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
-
         val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
@@ -549,7 +548,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           "01234",
           ValidationStatus.Success,
           Some(fakePersonDetails),
-          LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
+          Instant.now(java.time.Clock.systemUTC()), None, None, None, None
         ))
 
         val mockConnectorError = ConnectorError(INTERNAL_SERVER_ERROR, "Internal server error")
@@ -587,7 +586,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           "01234",
           ValidationStatus.Success,
           Some(fakePersonDetails),
-          LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
+          Instant.now(java.time.Clock.systemUTC()), None, None, None, None
         ))
 
         val mockConnectorError = ConnectorError(BAD_GATEWAY, "BAD GATEWAY")
@@ -625,7 +624,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           "01234",
           ValidationStatus.Success,
           Some(fakePersonDetails),
-          LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
+          Instant.now(java.time.Clock.systemUTC()), None, None, None, None
         ))
 
         val mockConnectorError = ConnectorError(SERVICE_UNAVAILABLE, "SERVICE UNAVAILABLE")
@@ -864,13 +863,13 @@ object CheckDetailsControllerSpec {
     "01234",
     ValidationStatus.Success,
     Some(fakePersonDetails),
-    LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
+    Instant.now(java.time.Clock.systemUTC()), None, None, None, None
   ))
   val mockPDVResponseDataFail: PDVSuccessResponse = PDVSuccessResponse(PDVResponseData(
     "01234",
     ValidationStatus.Failure,
     Some(fakePersonDetails),
-    LocalDateTime.now(ZoneId.systemDefault()).toInstant(ZoneOffset.UTC), None, None, None, None
+    Instant.now(java.time.Clock.systemUTC()), None, None, None, None
   ))
 
   val mockPdvErrorResponse: PDVErrorResponse = PDVErrorResponse(HttpResponse(INTERNAL_SERVER_ERROR, "Something went wrong"))

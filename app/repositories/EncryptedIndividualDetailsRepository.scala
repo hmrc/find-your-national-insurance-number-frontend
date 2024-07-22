@@ -51,7 +51,7 @@ class EncryptedIndividualDetailsRepository @Inject()(mongoComponent: MongoCompon
       Indexes.ascending("lastUpdated"),
       IndexOptions()
         .name("lastUpdatedIdx")
-        .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
+        .expireAfter(appConfig.individualDetailsCacheTtl, TimeUnit.SECONDS)
     )
   ),
   replaceIndexes = true
