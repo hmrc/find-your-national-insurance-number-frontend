@@ -26,7 +26,7 @@ import models.requests.DataRequest
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import services.{AuditService, CheckDetailsService, IndividualDetailsService, PersonalDetailsValidationService, SessionCacheService}
+import services.{AuditService, CheckDetailsService, IndividualDetailsService, PersonalDetailsValidationService}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -48,7 +48,6 @@ class CheckDetailsController @Inject()(
                                         val controllerComponents: MessagesControllerComponents,
                                         val authConnector: AuthConnector,
                                         errorHandler: ErrorHandler,
-                                        sessionCacheService: SessionCacheService
                                       )(implicit ec: ExecutionContext)
   extends FrontendBaseController with AuthorisedFunctions with I18nSupport with Logging {
 
