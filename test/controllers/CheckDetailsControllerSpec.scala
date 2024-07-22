@@ -29,7 +29,7 @@ import play.api.inject
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.{AuditService, CheckDetailsService, IndividualDetailsService, PersonalDetailsValidationService, SessionCacheService}
+import services.{AuditService, CheckDetailsService, IndividualDetailsService, PersonalDetailsValidationService}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpResponse
 import viewmodels.govuk.SummaryListFluency
