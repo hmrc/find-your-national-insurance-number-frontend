@@ -409,7 +409,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
             inject.bind[AuditService].toInstance(auditService),
-            inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService),
+            inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService)
           )
           .build()
 
