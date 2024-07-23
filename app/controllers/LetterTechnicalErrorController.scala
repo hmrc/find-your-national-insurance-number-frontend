@@ -16,18 +16,20 @@
 
 package controllers
 
-import cacheables.OriginCacheable
+import cacheables.{OriginCacheable, TryAgainCountCacheable}
 import controllers.actions._
 import forms.LetterTechnicalErrorFormProvider
-import models.{LetterTechnicalError, Mode}
+import models.requests.DataRequest
+import models.{LetterTechnicalError, Mode, UserAnswers}
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
 import pages.LetterTechnicalErrorPage
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.json.Format.GenericFormat
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import repositories.{SessionRepository, TryAgainCountRepository}
+import repositories.SessionRepository
 import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.LetterTechnicalErrorView
@@ -38,7 +40,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class LetterTechnicalErrorController @Inject()(
                                                 override val messagesApi: MessagesApi,
                                                 sessionRepository: SessionRepository,
-                                                tryAgainCountRepository: TryAgainCountRepository,
                                                 navigator: Navigator,
                                                 identify: IdentifierAction,
                                                 getData: DataRetrievalAction,
@@ -52,30 +53,29 @@ class LetterTechnicalErrorController @Inject()(
 
   val form: Form[LetterTechnicalError] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) async {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>
-      for {
-        retryAllowed <- tryAgainCountRepository.findById(request.userId).map {
-          case Some (value) => if (value.count >= 5) {false} else {true}
-          case None => true
+      val count = request.userAnswers.get(TryAgainCountCacheable)
+      val retryAllowed = count match {
+        case Some(i) => if (i >= 5) {
+          false
+        } else {
+          true
         }
-      } yield Ok(view(form, mode, retryAllowed))
+        case _ => true
+      }
+      Ok(view(form, mode, retryAllowed))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
+      val retryAllowed = request.userAnswers.get(TryAgainCountCacheable) match {
+        case Some(i) => if (i >= 5) {false} else {true}
+        case _ => true
+      }
       form.bindFromRequest().fold(
         formWithErrors =>
-          for {
-            retryAllowed <- tryAgainCountRepository.findById(request.userId).map {
-              case Some(value) => if (value.count >= 5) {
-                false
-              } else {
-                true
-              }
-              case None => true
-            }
-          } yield BadRequest(view(formWithErrors, mode, retryAllowed)),
+          Future.successful(BadRequest(view(formWithErrors, mode, retryAllowed))),
 
         value => {
           for {
@@ -87,7 +87,7 @@ class LetterTechnicalErrorController @Inject()(
             val postcode: String = personalDetails.flatMap(_.postCode).getOrElse(StringUtils.EMPTY)
             auditService.findYourNinoOptionChosen(pdvData, value.toString, request.userAnswers.get(OriginCacheable))
             if (value.toString == "tryAgain") {
-              tryAgainCountRepository.insertOrIncrement(request.userId)
+              incrementTryAgainCount()
               if (postcode.nonEmpty) {
                 Redirect(routes.SelectNINOLetterAddressController.onPageLoad())
               } else {
@@ -99,5 +99,13 @@ class LetterTechnicalErrorController @Inject()(
           }
         }
       )
+  }
+
+  private def incrementTryAgainCount()(implicit request: DataRequest[AnyContent]): Future[UserAnswers] = {
+    val count: Int = request.userAnswers.get(TryAgainCountCacheable).getOrElse(0)
+    for {
+      updatedAnswers <- Future.fromTry(request.userAnswers.set(TryAgainCountCacheable, count + 1))
+      _ <- sessionRepository.set(updatedAnswers)
+    } yield updatedAnswers
   }
 }
