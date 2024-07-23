@@ -98,7 +98,7 @@ class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar w
       val wrapper = new TestHttpReadsWrapper
       val httpException = new HttpException("HTTP Error", Status.BAD_REQUEST)
       when(response.status).thenReturn(httpException.responseCode)
-      when(response.body).thenReturn("test http exception error with response code: 400")
+      when(response.body).thenReturn("""{"test upstream error with response code:": 400}""")
 
       wrapper.withHttpReads("test", metricRegistry) {
         httpReads: HttpReads[Either[IndividualDetailsError, Unit]] =>
@@ -136,7 +136,7 @@ class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar w
       val upstreamErrorResponse = UpstreamErrorResponse("Upstream Error", Status.BAD_REQUEST, Status.BAD_REQUEST)
 
       when(response.status).thenReturn(upstreamErrorResponse.statusCode)
-      when(response.body).thenReturn("test upstream error with response code: 400")
+      when(response.body).thenReturn("""{"test upstream error with response code:": 400}""")
 
       wrapper.withHttpReads("test", metricRegistry) {
         httpReads: HttpReads[Either[IndividualDetailsError, Unit]] =>
@@ -155,7 +155,7 @@ class HttpReadsWrapperSpec extends AnyWordSpec with Matchers with MockitoSugar w
       val upstreamErrorResponse = UpstreamErrorResponse("Upstream Error", Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR)
 
       when(response.status).thenReturn(upstreamErrorResponse.statusCode)
-      when(response.body).thenReturn("test upstream error with response code: 500")
+      when(response.body).thenReturn("""{"test upstream error with response code:": 500}""")
 
       wrapper.withHttpReads("test", metricRegistry) {
         httpReads: HttpReads[Either[IndividualDetailsError, Unit]] =>
