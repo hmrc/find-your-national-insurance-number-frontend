@@ -21,8 +21,7 @@ import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
 import models.errors._
 import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
-import models.pdv.PDVResponseData
-import models.requests.DataRequest
+import models.pdv.{PDVDataRequestWithUserAnswers, PDVResponseData}
 import models.{IndividualDetailsNino, Mode, UserAnswers}
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
@@ -49,27 +48,28 @@ class SelectNINOLetterAddressController @Inject()(
                                                    sessionRepository: SessionRepository,
                                                    navigator: Navigator,
                                                    identify: IdentifierAction,
-                                                   getData: DataRetrievalAction,
-                                                   requireValidData: ValidCustomerDataRequiredAction,
                                                    individualDetailsService: IndividualDetailsService,
                                                    formProvider: SelectNINOLetterAddressFormProvider,
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: SelectNINOLetterAddressView,
                                                    personalDetailsValidationService: PersonalDetailsValidationService,
                                                    auditService: AuditService,
-                                                   npsFMNService: NPSFMNService
+                                                   npsFMNService: NPSFMNService,
+                                                   pdvDataRetrievalAction: PDVDataRetrievalAction,
+                                                   requireValidPdvData: ValidPDVDataRequiredAction,
+                                                   pdvResponseHandler: PDVResponseHandler
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen requireValidPdvData).async {
     implicit request =>
       val preparedForm = request.userAnswers.get(SelectNINOLetterAddressPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
       for {
-        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", EmptyString))
+        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse).getOrElse(EmptyString))
       } yield {
         val pdvPostcode = getPostCode(pdvData)
         if (pdvPostcode.isEmpty) {
@@ -87,9 +87,10 @@ class SelectNINOLetterAddressController @Inject()(
       }
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen requireValidPdvData).async {
     implicit request =>
-      val nino = request.session.data.getOrElse("nino", EmptyString)
+
+      val nino = pdvResponseHandler.getNino(request.pdvResponse).getOrElse(EmptyString)
 
       personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).flatMap(pdvData =>
         form.bindFromRequest().fold(
@@ -115,7 +116,7 @@ class SelectNINOLetterAddressController @Inject()(
       )
   }
 
-  private def confirmYourPostcodeValue(request: DataRequest[AnyContent]): String = {
+  private def confirmYourPostcodeValue(request: PDVDataRequestWithUserAnswers[AnyContent]): String = {
     request.userAnswers.get(ConfirmYourPostcodePage) match {
       case Some(value) => value
       case _ => ""

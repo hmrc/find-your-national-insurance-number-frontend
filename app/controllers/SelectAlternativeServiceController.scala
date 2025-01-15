@@ -45,7 +45,10 @@ class SelectAlternativeServiceController @Inject()(
                                        personalDetailsValidationService: PersonalDetailsValidationService,
                                        auditService: AuditService,
                                        val controllerComponents: MessagesControllerComponents,
-                                       view: SelectAlternativeServiceView
+                                       view: SelectAlternativeServiceView,
+                                       pdvDataRetrievalAction: PDVDataRetrievalAction,
+                                       pdvDataRequiredAction: PDVDataRequiredAction,
+                                       pdvResponseHandler: PDVResponseHandler
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging{
 
   val form: Form[SelectAlternativeService] = formProvider()
@@ -61,13 +64,14 @@ class SelectAlternativeServiceController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen pdvDataRequiredAction).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode))),
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map(
+
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse).getOrElse("")).map(
             pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
           )
           for {

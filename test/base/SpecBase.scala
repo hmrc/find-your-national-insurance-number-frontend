@@ -19,6 +19,7 @@ package base
 import config.FrontendAppConfig
 import controllers.actions._
 import models.UserAnswers
+import models.pdv.PDVResponse
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
@@ -49,14 +50,18 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
   def messagesApi: MessagesApi    = injector.instanceOf[MessagesApi]
   implicit def messages: Messages = messagesApi.preferred(fakeRequest)
 
-  protected def applicationBuilder(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+  protected def applicationBuilder(userAnswers: Option[UserAnswers] = None, pdvResponse: Option[PDVResponse] = None): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[PDVDataRequiredAction].to[PDVDataRequiredActionImpl],
         bind[ValidCustomerDataRequiredAction].to[ValidCustomerDataRequiredActionImpl],
+        bind[ValidPDVDataRequiredAction].to[ValidPDVDataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
-      )
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
+        bind[PDVDataRetrievalAction].toInstance(new FakePDVDataRetrievalAction(userAnswers, pdvResponse))
+
+  )
 
   protected def applicationBuilderWithConfig(
                                               config: Map[String, Any] = Map(),
@@ -70,6 +75,7 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
       )
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[PDVDataRequiredAction].to[PDVDataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
       )
@@ -85,7 +91,8 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
         )
       )
       .overrides(
-        bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[DataRequiredAction].to[DataRequiredActionImpl],        bind[PDVDataRequiredAction].to[PDVDataRequiredActionImpl],
+        bind[PDVDataRequiredAction].to[PDVDataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
       )

@@ -16,43 +16,50 @@
 
 package controllers.actions
 
+import controllers.PDVResponseHandler
 import models.UserAnswers
+import models.pdv.PDVRequest
 import models.requests.{DataRequest, OptionalDataRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
 import services.PersonalDetailsValidationService
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import util.FMNConstants.EmptyString
 
 import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationService: PersonalDetailsValidationService)
+class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationService: PersonalDetailsValidationService, pdvResponseHandler: PDVResponseHandler)
                                                    (implicit val executionContext: ExecutionContext) extends ValidCustomerDataRequiredAction {
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {
-    personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map {
-      case Some(pdvData) =>
-        if (pdvData.validCustomer.getOrElse(false)) {
-          request.userAnswers match {
-            case None =>
-              val userAnswers = UserAnswers(
-                id = request.userId,
-                lastUpdated = Instant.now(java.time.Clock.systemUTC())
-              )
-              Right(DataRequest(request.request, request.userId, userAnswers, request.credId))
-            case Some(data) =>
-              Right(DataRequest(request.request, request.userId, data, request.credId))
-          }
-        } else {
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+
+    val pdvRequest = PDVRequest(
+      credentialId = request.credId.getOrElse(""),
+      sessionId = hc.sessionId.map(_.value).getOrElse(EmptyString)
+    )
+
+    personalDetailsValidationService.getPDVData(pdvRequest).flatMap { pdvResponse =>
+      val nino = pdvResponseHandler.getNino(pdvResponse)
+      personalDetailsValidationService.getPersonalDetailsValidationByNino(nino.getOrElse("")).map {
+        case Some(pdvData) if pdvData.validCustomer.getOrElse(false) =>
+          val userAnswers = request.userAnswers.getOrElse(
+            UserAnswers(id = request.userId, lastUpdated = Instant.now(java.time.Clock.systemUTC()))
+          )
+          Right(DataRequest(request.request, request.userId, userAnswers, request.credId))
+
+        case Some(_) =>
           Left(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
-        }
-      case _ =>
-        // No PDV data; check the user answers cache. If no user answers then no session.
-        if (request.userAnswers.isEmpty) {
+
+        case None if request.userAnswers.isEmpty =>
           Left(Redirect(controllers.auth.routes.SignedOutController.onPageLoad).withNewSession)
-        } else {
+
+        case None =>
           Left(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
-        }
+      }
     }
   }
 }

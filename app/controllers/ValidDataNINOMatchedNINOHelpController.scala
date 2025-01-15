@@ -29,6 +29,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import util.FMNConstants.EmptyString
 import views.html.ValidDataNINOMatchedNINOHelpView
 
 import javax.inject.Inject
@@ -39,14 +40,17 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
                                          sessionRepository: SessionRepository,
                                          navigator: Navigator,
                                          identify: IdentifierAction,
+                                         pdvDataRetrievalAction: PDVDataRetrievalAction,
                                          getData: DataRetrievalAction,
                                          requireValidData: ValidCustomerDataRequiredAction,
+                                         requireValidPdvData: ValidPDVDataRequiredAction,
                                          formProvider: ValidDataNINOMatchedNINOHelpFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
                                          view: ValidDataNINOMatchedNINOHelpView,
                                          auditService: AuditService,
-                                         personalDetailsValidationService: PersonalDetailsValidationService
-                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+                                         personalDetailsValidationService: PersonalDetailsValidationService,
+                                         pdvResponseHandler: PDVResponseHandler
+                                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[Boolean] = formProvider()
 
@@ -60,13 +64,13 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen requireValidPdvData).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode))),
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map(
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse).getOrElse(EmptyString)).map(
             pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
           )
           for {
