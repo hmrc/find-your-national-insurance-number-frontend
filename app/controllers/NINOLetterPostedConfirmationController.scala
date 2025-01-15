@@ -35,7 +35,7 @@ class NINOLetterPostedConfirmationController @Inject()(
                                                         view: NINOLetterPostedConfirmationView,
                                                         sessionCacheService: SessionCacheService,
                                                         pdvDataRetrievalAction: PDVDataRetrievalAction,
-                                                        pdvResponseHandler: PDVResponseHandler
+                                                        pdvResponseHandler: PDVNinoExtractor
                                                       ) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify andThen  pdvDataRetrievalAction) {

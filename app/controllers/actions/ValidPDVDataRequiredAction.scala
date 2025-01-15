@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import controllers.PDVResponseHandler
+import controllers.PDVNinoExtractor
 import models.UserAnswers
 import models.pdv.{PDVDataRequestWithOptionalUserAnswers, PDVDataRequestWithUserAnswers}
 import play.api.mvc.Results.Redirect
@@ -27,11 +27,11 @@ import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ValidPDVDataRequiredActionImpl @Inject()(personalDetailsValidationService: PersonalDetailsValidationService, pdvResponseHandler: PDVResponseHandler)
+class ValidPDVDataRequiredActionImpl @Inject()(personalDetailsValidationService: PersonalDetailsValidationService, pdvResponseHandler: PDVNinoExtractor)
                                               (implicit val executionContext: ExecutionContext) extends ValidPDVDataRequiredAction {
 
   override protected def refine[A](request: PDVDataRequestWithOptionalUserAnswers[A]): Future[Either[Result, PDVDataRequestWithUserAnswers[A]]] = {
-    personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse).get).map {
+    personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse).getOrElse("")).map {
       case Some(pdvData) =>
         if (pdvData.validCustomer.getOrElse(false)) {
           request.userAnswers match {

@@ -49,8 +49,8 @@ class SendLetterErrorController @Inject()(
                                            auditService: AuditService,
                                            val controllerComponents: MessagesControllerComponents,
                                            pdvDataRetrievalAction: PDVDataRetrievalAction,
-                                           pdvDataRequiredAction: PDVDataRequiredAction,
-                                           pdvResponseHandler: PDVResponseHandler
+                                           validPDVDataRequiredAction: ValidPDVDataRequiredAction,
+                                           pdvResponseHandler: PDVNinoExtractor
                                          )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[SelectAlternativeService] = formProvider()
@@ -65,7 +65,7 @@ class SendLetterErrorController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen pdvDataRequiredAction).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen validPDVDataRequiredAction).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>

@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import controllers.PDVResponseHandler
+import controllers.PDVNinoExtractor
 import models.UserAnswers
 import models.pdv.PDVRequest
 import models.requests.{DataRequest, OptionalDataRequest}
@@ -31,7 +31,7 @@ import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationService: PersonalDetailsValidationService, pdvResponseHandler: PDVResponseHandler)
+class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationService: PersonalDetailsValidationService, pdvResponseHandler: PDVNinoExtractor)
                                                    (implicit val executionContext: ExecutionContext) extends ValidCustomerDataRequiredAction {
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {

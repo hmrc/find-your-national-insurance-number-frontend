@@ -49,7 +49,7 @@ class InvalidDataNINOHelpController @Inject()(
                                                val controllerComponents: MessagesControllerComponents,
                                                pdvDataRetrievalAction: PDVDataRetrievalAction,
                                                pdvDataRequiredAction: PDVDataRequiredAction,
-                                               pdvResponseHandler: PDVResponseHandler
+                                               pdvResponseHandler: PDVNinoExtractor
                                   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[InvalidDataNINOHelp] = formProvider()

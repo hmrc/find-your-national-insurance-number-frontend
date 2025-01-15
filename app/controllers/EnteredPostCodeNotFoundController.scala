@@ -47,8 +47,8 @@ class EnteredPostCodeNotFoundController @Inject()(
                                        personalDetailsValidationService: PersonalDetailsValidationService,
                                        auditService: AuditService,
                                        pdvDataRetrievalAction: PDVDataRetrievalAction,
-                                       pdvDataRequiredAction: PDVDataRequiredAction,
-                                       pdvResponseHandler: PDVResponseHandler
+                                       validPDVDataRequiredAction: ValidPDVDataRequiredAction,
+                                       pdvResponseHandler: PDVNinoExtractor
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[EnteredPostCodeNotFound] = formProvider()
@@ -64,7 +64,7 @@ class EnteredPostCodeNotFoundController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen pdvDataRequiredAction).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen validPDVDataRequiredAction).async {
     implicit request =>
 
       form.bindFromRequest().fold(

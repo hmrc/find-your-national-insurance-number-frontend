@@ -50,8 +50,8 @@ class LetterTechnicalErrorController @Inject()(
                                                 val controllerComponents: MessagesControllerComponents,
                                                 view: LetterTechnicalErrorView,
                                                 pdvDataRetrievalAction: PDVDataRetrievalAction,
-                                                pdvDataRequiredAction: PDVDataRequiredAction,
-                                                pdvResponseHandler: PDVResponseHandler
+                                                validPDVDataRequiredAction: ValidPDVDataRequiredAction,
+                                                pdvResponseHandler: PDVNinoExtractor
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[LetterTechnicalError] = formProvider()
@@ -70,7 +70,7 @@ class LetterTechnicalErrorController @Inject()(
       Ok(view(form, mode, retryAllowed))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen pdvDataRequiredAction).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen validPDVDataRequiredAction).async {
     implicit request =>
       val retryAllowed = request.userAnswers.get(TryAgainCountCacheable) match {
         case Some(i) => if (i >= 5) {false} else {true}

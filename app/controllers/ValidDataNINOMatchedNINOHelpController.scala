@@ -29,7 +29,6 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import services.{AuditService, PersonalDetailsValidationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import util.FMNConstants.EmptyString
 import views.html.ValidDataNINOMatchedNINOHelpView
 
 import javax.inject.Inject
@@ -49,7 +48,7 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
                                          view: ValidDataNINOMatchedNINOHelpView,
                                          auditService: AuditService,
                                          personalDetailsValidationService: PersonalDetailsValidationService,
-                                         pdvResponseHandler: PDVResponseHandler
+                                         pdvResponseHandler: PDVNinoExtractor
                                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[Boolean] = formProvider()
@@ -70,7 +69,7 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode))),
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse).getOrElse(EmptyString)).map(
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse).getOrElse("")).map(
             pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
           )
           for {

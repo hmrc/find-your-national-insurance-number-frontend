@@ -48,7 +48,7 @@ class SelectAlternativeServiceController @Inject()(
                                        view: SelectAlternativeServiceView,
                                        pdvDataRetrievalAction: PDVDataRetrievalAction,
                                        pdvDataRequiredAction: PDVDataRequiredAction,
-                                       pdvResponseHandler: PDVResponseHandler
+                                       pdvResponseHandler: PDVNinoExtractor
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging{
 
   val form: Form[SelectAlternativeService] = formProvider()

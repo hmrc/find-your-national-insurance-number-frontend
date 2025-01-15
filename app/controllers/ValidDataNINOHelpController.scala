@@ -18,7 +18,7 @@ package controllers
 
 import cacheables.OriginCacheable
 import config.FrontendAppConfig
-import controllers.actions.{DataRetrievalAction, IdentifierAction, PDVDataRequiredAction, PDVDataRetrievalAction, ValidCustomerDataRequiredAction}
+import controllers.actions.{DataRetrievalAction, IdentifierAction, PDVDataRetrievalAction, ValidCustomerDataRequiredAction, ValidPDVDataRequiredAction}
 import forms.ValidDataNINOHelpFormProvider
 import models.{Mode, NormalMode}
 import navigation.Navigator
@@ -49,8 +49,8 @@ class ValidDataNINOHelpController @Inject()(
                                              personalDetailsValidationService: PersonalDetailsValidationService,
                                              val controllerComponents: MessagesControllerComponents,
                                              pdvDataRetrievalAction: PDVDataRetrievalAction,
-                                             pdvDataRequiredAction: PDVDataRequiredAction,
-                                             pdvResponseHandler: PDVResponseHandler
+                                             validPDVDataRequiredAction: ValidPDVDataRequiredAction,
+                                             pdvResponseHandler: PDVNinoExtractor
                                   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[Boolean] = formProvider()
@@ -64,7 +64,7 @@ class ValidDataNINOHelpController @Inject()(
         Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen pdvDataRequiredAction).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen validPDVDataRequiredAction).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>

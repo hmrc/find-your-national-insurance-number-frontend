@@ -39,7 +39,7 @@ class PDVDataRetrievalActionImpl @Inject()(
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     val pdvRequest = PDVRequest(
-      credentialId = request.credId.getOrElse(""),
+      credentialId = request.credId.getOrElse(EmptyString),
       sessionId = hc.sessionId.map(_.value).getOrElse(EmptyString)
     )
 
