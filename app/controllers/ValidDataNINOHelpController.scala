@@ -69,7 +69,8 @@ class ValidDataNINOHelpController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse("")).map(
+          val nino = request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse("")
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).map(
             pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
           )
           for {

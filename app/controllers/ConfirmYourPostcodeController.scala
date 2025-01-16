@@ -76,7 +76,7 @@ class ConfirmYourPostcodeController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmYourPostcodePage, userEnteredPostCode))
             _ <- sessionRepository.set(updatedAnswers)
-            nino = pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse(EmptyString)
+            nino = request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse(EmptyString)
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
             idAddress <- individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino))
             redirectBasedOnMatch <- pdvData match {

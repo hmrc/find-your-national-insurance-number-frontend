@@ -56,13 +56,13 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[ValidDataRequiredAction].to[ValidDataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers, pdvResponse)),
 
   )
 
   protected def applicationBuilderWithConfig(
                                               config: Map[String, Any] = Map(),
-                                              userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+                                              userAnswers: Option[UserAnswers] = None, pdvResponse: Option[PDVResponse] = None): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(
         config ++ Map(
@@ -74,12 +74,12 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers, pdvResponse))
       )
 
   protected def applicationBuilderCl50OnWithConfig(
                                               config: Map[String, Any] = Map(),
-                                              userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+                                              userAnswers: Option[UserAnswers] = None, pdvResponse: Option[PDVResponse] = None): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(
         config ++ Map(
@@ -91,7 +91,7 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
         bind[DataRequiredAction].to[DataRequiredActionImpl],        bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers, pdvResponse))
       )
 
   def injected[T](c: Class[T]): T = app.injector.instanceOf(c)

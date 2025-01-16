@@ -82,7 +82,7 @@ class LetterTechnicalErrorController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(LetterTechnicalErrorPage, value))
             _ <- sessionRepository.set(updatedAnswers)
-            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse(StringUtils.EMPTY))
+            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse(StringUtils.EMPTY))
           } yield {
             val personalDetails = pdvData.flatMap(_.personalDetails)
             val postcode: String = personalDetails.flatMap(_.postCode).getOrElse(StringUtils.EMPTY)

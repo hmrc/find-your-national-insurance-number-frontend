@@ -40,7 +40,7 @@ class NINOLetterPostedConfirmationController @Inject()(
 
   def onPageLoad: Action[AnyContent] = (identify andThen  getData) {
     implicit request =>
-      val nino =  pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse(EmptyString)
+      val nino = request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse(EmptyString)
       sessionCacheService.invalidateCache(nino, request.userId)
       val lang = request.lang(messagesApi)
       if (lang.language.equals("cy")) {

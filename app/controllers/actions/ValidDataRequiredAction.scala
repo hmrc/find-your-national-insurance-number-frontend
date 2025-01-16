@@ -31,7 +31,8 @@ class ValidDataRequiredActionImpl @Inject()(personalDetailsValidationService: Pe
                                            (implicit val executionContext: ExecutionContext) extends ValidDataRequiredAction {
 
   override protected def refine[A](request: DataRequestWithOptionalUserAnswers[A]): Future[Either[Result, DataRequestWithUserAnswers[A]]] = {
-    personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse("")).map {
+    val nino = request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse("")
+    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).map {
       case Some(pdvData) =>
         if (pdvData.validCustomer.getOrElse(false)) {
           request.userAnswers match {

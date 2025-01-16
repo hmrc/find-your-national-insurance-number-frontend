@@ -56,12 +56,7 @@ class CheckDetailsController @Inject()(
         origin.map(_.toUpperCase) match {
           case Some(PDVOrigin) | Some(IVOrigin) | Some(FMNOrigin) =>
             individualDetailsService.cacheOrigin(request.userAnswers, origin)
-            request.pdvResponse match {
-              case Some(pdvResponse) => pdvCheck(mode, origin, pdvResponse)
-              case None =>
-                logger.error("PDV response is missing")
-                Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
-            }
+            pdvCheck(mode, origin)
           case _ =>
             logger.error(s"Invalid origin: $origin")
             Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
@@ -71,9 +66,13 @@ class CheckDetailsController @Inject()(
 
 
   private def pdvCheck(mode: Mode,
-                       origin: Option[String], pdvResponse: PDVResponse)
+                       origin: Option[String])
                       (implicit hc: HeaderCarrier, request: DataRequestWithUserAnswers[AnyContent]): Future[Result] = {
-    pdvResponse match {
+    val pdvRequest = PDVRequest(
+      request.credId.getOrElse(EmptyString),
+      hc.sessionId.map(_.value).getOrElse(EmptyString)
+    )
+    personalDetailsValidationService.getPDVData(pdvRequest) flatMap {
       case PDVSuccessResponse(pdvResponseData) =>
         pdvResponseData.validationStatus match {
           case ValidationStatus.Success =>

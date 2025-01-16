@@ -18,7 +18,6 @@ package services
 
 import connectors.PersonalDetailsValidationConnector
 import models.pdv._
-import models.requests.DataRequest
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.MockitoSugar
@@ -40,7 +39,7 @@ import scala.util.Random
 class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach{
 
   import PDVResponseDataServiceSpec._
-  implicit val mockDataRequest: DataRequest[AnyContent]  = mock[DataRequest[AnyContent]]
+  implicit val mockDataRequest: DataRequestWithUserAnswers[AnyContent]  = mock[DataRequestWithUserAnswers[AnyContent]]
 
   override def beforeEach(): Unit = {
     reset(mockConnector, mockEncryptedPersonalDetailsValidationRepository, mockPersonalDetailsValidationRepository)

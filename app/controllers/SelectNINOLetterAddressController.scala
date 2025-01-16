@@ -69,7 +69,7 @@ class SelectNINOLetterAddressController @Inject()(
         case Some(value) => form.fill(value)
       }
       for {
-        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse(EmptyString))
+        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse(EmptyString))
       } yield {
         val pdvPostcode = getPostCode(pdvData)
         if (pdvPostcode.isEmpty) {
@@ -90,7 +90,7 @@ class SelectNINOLetterAddressController @Inject()(
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
 
-      val nino = pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse(EmptyString)
+      val nino = request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse("")
 
       personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).flatMap(pdvData =>
         form.bindFromRequest().fold(

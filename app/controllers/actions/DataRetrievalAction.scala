@@ -43,7 +43,7 @@ class DataRetrievalActionImpl @Inject()(
           credentialId = credId,
           sessionId = hc.sessionId.map(_.value).getOrElse("")
         )
-        personalDetailsValidationService.getPDVData(pdvRequest).map(Some(_))
+        personalDetailsValidationService.getPDVMatchResult(pdvRequest).map(Some(_))
       case None => Future.successful(None)
     }
 
