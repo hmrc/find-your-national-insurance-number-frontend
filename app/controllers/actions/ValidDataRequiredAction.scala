@@ -18,7 +18,7 @@ package controllers.actions
 
 import controllers.PDVNinoExtractor
 import models.UserAnswers
-import models.pdv.{PDVDataRequestWithOptionalUserAnswers, PDVDataRequestWithUserAnswers}
+import models.pdv.{DataRequestWithOptionalUserAnswers, DataRequestWithUserAnswers}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
 import services.PersonalDetailsValidationService
@@ -27,11 +27,11 @@ import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ValidPDVDataRequiredActionImpl @Inject()(personalDetailsValidationService: PersonalDetailsValidationService, pdvResponseHandler: PDVNinoExtractor)
-                                              (implicit val executionContext: ExecutionContext) extends ValidPDVDataRequiredAction {
+class ValidDataRequiredActionImpl @Inject()(personalDetailsValidationService: PersonalDetailsValidationService, pdvResponseHandler: PDVNinoExtractor)
+                                           (implicit val executionContext: ExecutionContext) extends ValidDataRequiredAction {
 
-  override protected def refine[A](request: PDVDataRequestWithOptionalUserAnswers[A]): Future[Either[Result, PDVDataRequestWithUserAnswers[A]]] = {
-    personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse).getOrElse("")).map {
+  override protected def refine[A](request: DataRequestWithOptionalUserAnswers[A]): Future[Either[Result, DataRequestWithUserAnswers[A]]] = {
+    personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse("")).map {
       case Some(pdvData) =>
         if (pdvData.validCustomer.getOrElse(false)) {
           request.userAnswers match {
@@ -40,9 +40,9 @@ class ValidPDVDataRequiredActionImpl @Inject()(personalDetailsValidationService:
                 id = request.userId,
                 lastUpdated = Instant.now(java.time.Clock.systemUTC())
               )
-              Right(PDVDataRequestWithUserAnswers(request.request, request.userId, request.pdvResponse, request.credId, userAnswers))
+              Right(DataRequestWithUserAnswers(request.request, request.userId, request.pdvResponse, request.credId, userAnswers))
             case Some(data) =>
-              Right(PDVDataRequestWithUserAnswers(request.request, request.userId, request.pdvResponse, request.credId, data))
+              Right(DataRequestWithUserAnswers(request.request, request.userId, request.pdvResponse, request.credId, data))
           }
         } else {
           Left(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
@@ -57,4 +57,4 @@ class ValidPDVDataRequiredActionImpl @Inject()(personalDetailsValidationService:
   }
 }
 
-trait ValidPDVDataRequiredAction extends ActionRefiner[PDVDataRequestWithOptionalUserAnswers, PDVDataRequestWithUserAnswers]
+trait ValidDataRequiredAction extends ActionRefiner[DataRequestWithOptionalUserAnswers, DataRequestWithUserAnswers]

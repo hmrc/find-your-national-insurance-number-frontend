@@ -18,7 +18,7 @@ package controllers
 
 import cacheables.OriginCacheable
 import config.FrontendAppConfig
-import controllers.actions.{DataRetrievalAction, IdentifierAction, PDVDataRetrievalAction, ValidCustomerDataRequiredAction, ValidPDVDataRequiredAction}
+import controllers.actions.{DataRetrievalAction, IdentifierAction, ValidDataRequiredAction}
 import forms.ValidDataNINOHelpFormProvider
 import models.{Mode, NormalMode}
 import navigation.Navigator
@@ -42,14 +42,12 @@ class ValidDataNINOHelpController @Inject()(
                                              navigator: Navigator,
                                              identify: IdentifierAction,
                                              getData: DataRetrievalAction,
-                                             requireValidData: ValidCustomerDataRequiredAction,
+                                             requireValidData: ValidDataRequiredAction,
                                              formProvider: ValidDataNINOHelpFormProvider,
                                              view: ValidDataNINOHelpView,
                                              auditService: AuditService,
                                              personalDetailsValidationService: PersonalDetailsValidationService,
                                              val controllerComponents: MessagesControllerComponents,
-                                             pdvDataRetrievalAction: PDVDataRetrievalAction,
-                                             validPDVDataRequiredAction: ValidPDVDataRequiredAction,
                                              pdvResponseHandler: PDVNinoExtractor
                                   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
@@ -64,14 +62,14 @@ class ValidDataNINOHelpController @Inject()(
         Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen validPDVDataRequiredAction).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse).getOrElse("")).map(
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse("")).map(
             pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
           )
           for {

@@ -54,12 +54,9 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
     new GuiceApplicationBuilder()
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
-        bind[PDVDataRequiredAction].to[PDVDataRequiredActionImpl],
-        bind[ValidCustomerDataRequiredAction].to[ValidCustomerDataRequiredActionImpl],
-        bind[ValidPDVDataRequiredAction].to[ValidPDVDataRequiredActionImpl],
+        bind[ValidDataRequiredAction].to[ValidDataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
-        bind[PDVDataRetrievalAction].toInstance(new FakePDVDataRetrievalAction(userAnswers, pdvResponse))
 
   )
 
@@ -75,7 +72,7 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
       )
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
-        bind[PDVDataRequiredAction].to[PDVDataRequiredActionImpl],
+        bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
       )
@@ -91,8 +88,8 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
         )
       )
       .overrides(
-        bind[DataRequiredAction].to[DataRequiredActionImpl],        bind[PDVDataRequiredAction].to[PDVDataRequiredActionImpl],
-        bind[PDVDataRequiredAction].to[PDVDataRequiredActionImpl],
+        bind[DataRequiredAction].to[DataRequiredActionImpl],        bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
       )

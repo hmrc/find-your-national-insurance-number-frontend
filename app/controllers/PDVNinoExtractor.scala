@@ -20,9 +20,8 @@ import models.pdv._
 import play.api.Logging
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
 
-class PDVNinoExtractor @Inject()()(implicit ec: ExecutionContext) extends Logging {
+class PDVNinoExtractor @Inject() extends Logging {
 
   def getNino(pdvResponse: PDVResponse): Option[String] = pdvResponse match {
     case PDVSuccessResponse(pdvResponseData) if pdvResponseData.validationStatus == ValidationStatus.Success =>

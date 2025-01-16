@@ -35,20 +35,18 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class EnteredPostCodeNotFoundController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       sessionRepository: SessionRepository,
-                                       navigator: Navigator,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireValidData: ValidCustomerDataRequiredAction,
-                                       formProvider: EnteredPostCodeNotFoundFormProvider,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: EnteredPostCodeNotFoundView,
-                                       personalDetailsValidationService: PersonalDetailsValidationService,
-                                       auditService: AuditService,
-                                       pdvDataRetrievalAction: PDVDataRetrievalAction,
-                                       validPDVDataRequiredAction: ValidPDVDataRequiredAction,
-                                       pdvResponseHandler: PDVNinoExtractor
+                                                   override val messagesApi: MessagesApi,
+                                                   sessionRepository: SessionRepository,
+                                                   navigator: Navigator,
+                                                   identify: IdentifierAction,
+                                                   getData: DataRetrievalAction,
+                                                   requireValidData: ValidDataRequiredAction,
+                                                   formProvider: EnteredPostCodeNotFoundFormProvider,
+                                                   val controllerComponents: MessagesControllerComponents,
+                                                   view: EnteredPostCodeNotFoundView,
+                                                   personalDetailsValidationService: PersonalDetailsValidationService,
+                                                   auditService: AuditService,
+                                                   pdvResponseHandler: PDVNinoExtractor
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[EnteredPostCodeNotFound] = formProvider()
@@ -64,7 +62,7 @@ class EnteredPostCodeNotFoundController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen validPDVDataRequiredAction).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
@@ -73,7 +71,7 @@ class EnteredPostCodeNotFoundController @Inject()(
 
         value => {
 
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse).getOrElse("")).map(
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse("")).map(
             pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
           )
           for {

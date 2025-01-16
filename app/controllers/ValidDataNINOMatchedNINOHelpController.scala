@@ -35,20 +35,18 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ValidDataNINOMatchedNINOHelpController @Inject()(
-                                         override val messagesApi: MessagesApi,
-                                         sessionRepository: SessionRepository,
-                                         navigator: Navigator,
-                                         identify: IdentifierAction,
-                                         pdvDataRetrievalAction: PDVDataRetrievalAction,
-                                         getData: DataRetrievalAction,
-                                         requireValidData: ValidCustomerDataRequiredAction,
-                                         requireValidPdvData: ValidPDVDataRequiredAction,
-                                         formProvider: ValidDataNINOMatchedNINOHelpFormProvider,
-                                         val controllerComponents: MessagesControllerComponents,
-                                         view: ValidDataNINOMatchedNINOHelpView,
-                                         auditService: AuditService,
-                                         personalDetailsValidationService: PersonalDetailsValidationService,
-                                         pdvResponseHandler: PDVNinoExtractor
+                                                        override val messagesApi: MessagesApi,
+                                                        sessionRepository: SessionRepository,
+                                                        navigator: Navigator,
+                                                        identify: IdentifierAction,
+                                                        getData: DataRetrievalAction,
+                                                        requireValidData: ValidDataRequiredAction,
+                                                        formProvider: ValidDataNINOMatchedNINOHelpFormProvider,
+                                                        val controllerComponents: MessagesControllerComponents,
+                                                        view: ValidDataNINOMatchedNINOHelpView,
+                                                        auditService: AuditService,
+                                                        personalDetailsValidationService: PersonalDetailsValidationService,
+                                                        pdvResponseHandler: PDVNinoExtractor
                                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[Boolean] = formProvider()
@@ -63,13 +61,13 @@ class ValidDataNINOMatchedNINOHelpController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen requireValidPdvData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode))),
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse).getOrElse("")).map(
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse("")).map(
             pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
           )
           for {

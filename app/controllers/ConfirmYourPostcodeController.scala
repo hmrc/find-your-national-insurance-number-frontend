@@ -44,9 +44,7 @@ class ConfirmYourPostcodeController @Inject()(
                                                sessionRepository: SessionRepository,
                                                identify: IdentifierAction,
                                                getData: DataRetrievalAction,
-                                               pdvDataRetrievalAction: PDVDataRetrievalAction,
-                                               requireValidData: ValidCustomerDataRequiredAction,
-                                               requireValidPdvData: ValidPDVDataRequiredAction,
+                                               requireValidData: ValidDataRequiredAction,
                                                formProvider: ConfirmYourPostcodeFormProvider,
                                                val controllerComponents: MessagesControllerComponents,
                                                view: ConfirmYourPostcodeView,
@@ -67,7 +65,7 @@ class ConfirmYourPostcodeController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen requireValidPdvData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
@@ -78,7 +76,7 @@ class ConfirmYourPostcodeController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmYourPostcodePage, userEnteredPostCode))
             _ <- sessionRepository.set(updatedAnswers)
-            nino = pdvResponseHandler.getNino(request.pdvResponse).getOrElse(EmptyString)
+            nino = pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse(EmptyString)
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
             idAddress <- individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino))
             redirectBasedOnMatch <- pdvData match {

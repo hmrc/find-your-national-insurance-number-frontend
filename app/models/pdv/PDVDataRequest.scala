@@ -21,22 +21,22 @@ import play.api.mvc.{Request, WrappedRequest}
 
 trait BasePDVDataRequest[A] extends WrappedRequest[A] {
   def userId: String
-  def pdvResponse: PDVResponse
+  def pdvResponse: Option[PDVResponse]
   def credId: Option[String]
 }
 
-case class PDVDataRequestWithOptionalUserAnswers[A](
+case class DataRequestWithOptionalUserAnswers[A](
                                                      request: Request[A],
                                                      userId: String,
-                                                     pdvResponse: PDVResponse,
+                                                     pdvResponse: Option[PDVResponse],
                                                      credId: Option[String],
                                                      userAnswers: Option[UserAnswers]
                                                    ) extends WrappedRequest[A](request) with BasePDVDataRequest[A]
 
-case class PDVDataRequestWithUserAnswers[A](
+case class DataRequestWithUserAnswers[A](
                                              request: Request[A],
                                              userId: String,
-                                             pdvResponse: PDVResponse,
+                                             pdvResponse: Option[PDVResponse],
                                              credId: Option[String],
                                              userAnswers: UserAnswers
                                            ) extends WrappedRequest[A](request) with BasePDVDataRequest[A]

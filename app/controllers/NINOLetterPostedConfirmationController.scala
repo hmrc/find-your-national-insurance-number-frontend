@@ -34,13 +34,13 @@ class NINOLetterPostedConfirmationController @Inject()(
                                                         val controllerComponents: MessagesControllerComponents,
                                                         view: NINOLetterPostedConfirmationView,
                                                         sessionCacheService: SessionCacheService,
-                                                        pdvDataRetrievalAction: PDVDataRetrievalAction,
+                                                        getData: DataRetrievalAction,
                                                         pdvResponseHandler: PDVNinoExtractor
                                                       ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen  pdvDataRetrievalAction) {
+  def onPageLoad: Action[AnyContent] = (identify andThen  getData) {
     implicit request =>
-      val nino =  pdvResponseHandler.getNino(request.pdvResponse).getOrElse(EmptyString)
+      val nino =  pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse(EmptyString)
       sessionCacheService.invalidateCache(nino, request.userId)
       val lang = request.lang(messagesApi)
       if (lang.language.equals("cy")) {

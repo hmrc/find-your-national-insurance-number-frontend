@@ -32,11 +32,8 @@ class Module(environment: Environment, config: Configuration) extends AbstractMo
   override def configure(): Unit = {
 
     bind(classOf[DataRetrievalAction]).to(classOf[DataRetrievalActionImpl]).asEagerSingleton()
-    bind(classOf[PDVDataRetrievalAction]).to(classOf[PDVDataRetrievalActionImpl]).asEagerSingleton()
     bind(classOf[DataRequiredAction]).to(classOf[DataRequiredActionImpl]).asEagerSingleton()
-    bind(classOf[PDVDataRequiredAction]).to(classOf[PDVDataRequiredActionImpl]).asEagerSingleton()
-    bind(classOf[ValidCustomerDataRequiredAction]).to(classOf[ValidCustomerDataRequiredActionImpl]).asEagerSingleton()
-    bind(classOf[ValidPDVDataRequiredAction]).to(classOf[ValidPDVDataRequiredActionImpl]).asEagerSingleton()
+    bind(classOf[ValidDataRequiredAction]).to(classOf[ValidDataRequiredActionImpl]).asEagerSingleton()
     // For session based storage instead of cred based, change to SessionIdentifierAction
     bind(classOf[IdentifierAction]).to(classOf[SessionIdentifierAction]).asEagerSingleton()
 

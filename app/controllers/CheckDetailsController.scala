@@ -17,7 +17,7 @@
 package controllers
 
 import cacheables.OriginCacheable
-import controllers.actions.{IdentifierAction, PDVDataRequiredAction, PDVDataRetrievalAction}
+import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import handlers.ErrorHandler
 import models.Mode
 import models.errors.{ConnectorError, IndividualDetailsError}
@@ -38,8 +38,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class CheckDetailsController @Inject()(
                                         override val messagesApi: MessagesApi,
                                         identify: IdentifierAction,
-                                        pdvDataRetrievalAction: PDVDataRetrievalAction,
-                                        pdvDataRequiredAction: PDVDataRequiredAction,
+                                        getData: DataRetrievalAction,
+                                        requireData: DataRequiredAction,
                                         personalDetailsValidationService: PersonalDetailsValidationService,
                                         auditService: AuditService,
                                         checkDetailsService: CheckDetailsService,
@@ -50,13 +50,18 @@ class CheckDetailsController @Inject()(
   extends FrontendBaseController with AuthorisedFunctions with I18nSupport with Logging {
 
   def onPageLoad(origin: Option[String], mode: Mode): Action[AnyContent] =
-    (identify andThen pdvDataRetrievalAction andThen pdvDataRequiredAction).async {
+    (identify andThen getData andThen requireData).async {
       implicit request => {
         auditService.start()
         origin.map(_.toUpperCase) match {
           case Some(PDVOrigin) | Some(IVOrigin) | Some(FMNOrigin) =>
             individualDetailsService.cacheOrigin(request.userAnswers, origin)
-            pdvCheck(mode, origin, request.pdvResponse)
+            request.pdvResponse match {
+              case Some(pdvResponse) => pdvCheck(mode, origin, pdvResponse)
+              case None =>
+                logger.error("PDV response is missing")
+                Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
+            }
           case _ =>
             logger.error(s"Invalid origin: $origin")
             Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
@@ -64,9 +69,10 @@ class CheckDetailsController @Inject()(
       }
     }
 
+
   private def pdvCheck(mode: Mode,
                        origin: Option[String], pdvResponse: PDVResponse)
-                      (implicit hc: HeaderCarrier, request: PDVDataRequestWithUserAnswers[AnyContent]): Future[Result] = {
+                      (implicit hc: HeaderCarrier, request: DataRequestWithUserAnswers[AnyContent]): Future[Result] = {
     pdvResponse match {
       case PDVSuccessResponse(pdvResponseData) =>
         pdvResponseData.validationStatus match {
@@ -103,11 +109,12 @@ class CheckDetailsController @Inject()(
   private def individualsDetailsChecks(pdvData: PDVResponseData,
                                        mode: Mode,
                                        origin: Option[String])
-                                      (implicit hc: HeaderCarrier, request: PDVDataRequestWithUserAnswers[AnyContent]): Future[Result] = {
+                                      (implicit hc: HeaderCarrier, request: DataRequestWithUserAnswers[AnyContent]): Future[Result] = {
     individualDetailsService.getIdData(pdvData) flatMap {
       case Right(idData) =>
         auditService.findYourNinoPDVMatched(pdvData, origin, Some(idData))
-        val sessionId = hc.sessionId.map(_.value).getOrElse(EmptyString)
+        val sessionId =       hc.sessionId.map(_.value).getOrElse(EmptyString)
+
 
         val checksf: Future[(Boolean, String)] = for {
           _ <- individualDetailsService.createIndividualDetailsData(sessionId, idData)
@@ -144,7 +151,7 @@ class CheckDetailsController @Inject()(
   private def individualsDetailsError(error: IndividualDetailsError,
                                       PDVResponseData: PDVResponseData,
                                       origin: Option[String])
-                                     (implicit hc: HeaderCarrier, request: PDVDataRequestWithUserAnswers[AnyContent]): Result = {
+                                     (implicit hc: HeaderCarrier, request: DataRequestWithUserAnswers[AnyContent]): Result = {
     error match {
       case conError: ConnectorError => conError.statusCode match {
         case INTERNAL_SERVER_ERROR | BAD_GATEWAY | SERVICE_UNAVAILABLE =>

@@ -42,14 +42,12 @@ class SendLetterErrorController @Inject()(
                                            navigator: Navigator,
                                            identify: IdentifierAction,
                                            getData: DataRetrievalAction,
-                                           requireValidData: ValidCustomerDataRequiredAction,
+                                           requireValidData: ValidDataRequiredAction,
                                            view: SendLetterErrorView,
                                            formProvider: SelectAlternativeServiceFormProvider,
                                            personalDetailsValidationService: PersonalDetailsValidationService,
                                            auditService: AuditService,
                                            val controllerComponents: MessagesControllerComponents,
-                                           pdvDataRetrievalAction: PDVDataRetrievalAction,
-                                           validPDVDataRequiredAction: ValidPDVDataRequiredAction,
                                            pdvResponseHandler: PDVNinoExtractor
                                          )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
@@ -65,14 +63,14 @@ class SendLetterErrorController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen validPDVDataRequiredAction).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse).getOrElse(StringUtils.EMPTY)).map(
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse(StringUtils.EMPTY)).map(
             pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
           )
           for {

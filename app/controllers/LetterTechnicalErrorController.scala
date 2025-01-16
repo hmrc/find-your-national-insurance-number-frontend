@@ -19,7 +19,7 @@ package controllers
 import cacheables.{OriginCacheable, TryAgainCountCacheable}
 import controllers.actions._
 import forms.LetterTechnicalErrorFormProvider
-import models.pdv.PDVDataRequestWithUserAnswers
+import models.pdv.DataRequestWithUserAnswers
 import models.{LetterTechnicalError, Mode, UserAnswers}
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
@@ -43,14 +43,12 @@ class LetterTechnicalErrorController @Inject()(
                                                 navigator: Navigator,
                                                 identify: IdentifierAction,
                                                 getData: DataRetrievalAction,
-                                                requireValidData: ValidCustomerDataRequiredAction,
+                                                requireValidData: ValidDataRequiredAction,
                                                 formProvider: LetterTechnicalErrorFormProvider,
                                                 personalDetailsValidationService: PersonalDetailsValidationService,
                                                 auditService: AuditService,
                                                 val controllerComponents: MessagesControllerComponents,
                                                 view: LetterTechnicalErrorView,
-                                                pdvDataRetrievalAction: PDVDataRetrievalAction,
-                                                validPDVDataRequiredAction: ValidPDVDataRequiredAction,
                                                 pdvResponseHandler: PDVNinoExtractor
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
@@ -70,7 +68,7 @@ class LetterTechnicalErrorController @Inject()(
       Ok(view(form, mode, retryAllowed))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen pdvDataRetrievalAction andThen validPDVDataRequiredAction).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
       val retryAllowed = request.userAnswers.get(TryAgainCountCacheable) match {
         case Some(i) => if (i >= 5) {false} else {true}
@@ -84,7 +82,7 @@ class LetterTechnicalErrorController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(LetterTechnicalErrorPage, value))
             _ <- sessionRepository.set(updatedAnswers)
-            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse).getOrElse(StringUtils.EMPTY))
+            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(pdvResponseHandler.getNino(request.pdvResponse.get).getOrElse(StringUtils.EMPTY))
           } yield {
             val personalDetails = pdvData.flatMap(_.personalDetails)
             val postcode: String = personalDetails.flatMap(_.postCode).getOrElse(StringUtils.EMPTY)
@@ -104,7 +102,7 @@ class LetterTechnicalErrorController @Inject()(
       )
   }
 
-  private def incrementTryAgainCount()(implicit request: PDVDataRequestWithUserAnswers[AnyContent]): Future[UserAnswers] = {
+  private def incrementTryAgainCount()(implicit request: DataRequestWithUserAnswers[AnyContent]): Future[UserAnswers] = {
     val count: Int = request.userAnswers.get(TryAgainCountCacheable).getOrElse(0)
     for {
       updatedAnswers <- Future.fromTry(request.userAnswers.set(TryAgainCountCacheable, count + 1))
