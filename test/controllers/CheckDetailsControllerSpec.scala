@@ -20,7 +20,6 @@ import base.SpecBase
 import models.errors._
 import models.individualdetails._
 import models.pdv._
-import models.requests.DataRequest
 import models.{AddressLine, IndividualDetailsIdentifier, IndividualDetailsNino, NormalMode, individualdetails}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
@@ -44,7 +43,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
   val controller: CheckDetailsController = application.injector.instanceOf[CheckDetailsController]
 
-  implicit val dataRequest: DataRequest[AnyContent]  = mock[DataRequest[AnyContent]]
+  implicit val dataRequest: DataRequestWithUserAnswers[AnyContent]  = mock[DataRequestWithUserAnswers[AnyContent]]
 
   override def beforeEach(): Unit = {
     super.beforeEach()

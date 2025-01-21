@@ -21,8 +21,7 @@ import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
 import models.errors._
 import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
-import models.pdv.PDVResponseData
-import models.requests.DataRequest
+import models.pdv.{DataRequestWithUserAnswers, PDVResponseData}
 import models.{IndividualDetailsNino, Mode, UserAnswers}
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
@@ -50,14 +49,15 @@ class SelectNINOLetterAddressController @Inject()(
                                                    navigator: Navigator,
                                                    identify: IdentifierAction,
                                                    getData: DataRetrievalAction,
-                                                   requireValidData: ValidCustomerDataRequiredAction,
+                                                   requireValidData: ValidDataRequiredAction,
                                                    individualDetailsService: IndividualDetailsService,
                                                    formProvider: SelectNINOLetterAddressFormProvider,
                                                    val controllerComponents: MessagesControllerComponents,
                                                    view: SelectNINOLetterAddressView,
                                                    personalDetailsValidationService: PersonalDetailsValidationService,
                                                    auditService: AuditService,
-                                                   npsFMNService: NPSFMNService
+                                                   npsFMNService: NPSFMNService,
+                                                   pdvResponseHandler: PDVNinoExtractor
                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[Boolean] = formProvider()
@@ -69,7 +69,7 @@ class SelectNINOLetterAddressController @Inject()(
         case Some(value) => form.fill(value)
       }
       for {
-        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", EmptyString))
+        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse(EmptyString))
       } yield {
         val pdvPostcode = getPostCode(pdvData)
         if (pdvPostcode.isEmpty) {
@@ -89,7 +89,8 @@ class SelectNINOLetterAddressController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
-      val nino = request.session.data.getOrElse("nino", EmptyString)
+
+      val nino = request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse("")
 
       personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).flatMap(pdvData =>
         form.bindFromRequest().fold(
@@ -115,7 +116,7 @@ class SelectNINOLetterAddressController @Inject()(
       )
   }
 
-  private def confirmYourPostcodeValue(request: DataRequest[AnyContent]): String = {
+  private def confirmYourPostcodeValue(request: DataRequestWithUserAnswers[AnyContent]): String = {
     request.userAnswers.get(ConfirmYourPostcodePage) match {
       case Some(value) => value
       case _ => ""

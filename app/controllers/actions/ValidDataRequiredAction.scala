@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package controllers.actions
 
+import controllers.PDVNinoExtractor
 import models.UserAnswers
-import models.requests.{DataRequest, OptionalDataRequest}
+import models.pdv.{DataRequestWithOptionalUserAnswers, DataRequestWithUserAnswers}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
 import services.PersonalDetailsValidationService
@@ -26,11 +27,12 @@ import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationService: PersonalDetailsValidationService)
-                                                   (implicit val executionContext: ExecutionContext) extends ValidCustomerDataRequiredAction {
+class ValidDataRequiredActionImpl @Inject()(personalDetailsValidationService: PersonalDetailsValidationService, pdvResponseHandler: PDVNinoExtractor)
+                                           (implicit val executionContext: ExecutionContext) extends ValidDataRequiredAction {
 
-  override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {
-    personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map {
+  override protected def refine[A](request: DataRequestWithOptionalUserAnswers[A]): Future[Either[Result, DataRequestWithUserAnswers[A]]] = {
+    val nino = request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse("")
+    personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).map {
       case Some(pdvData) =>
         if (pdvData.validCustomer.getOrElse(false)) {
           request.userAnswers match {
@@ -39,15 +41,14 @@ class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationSer
                 id = request.userId,
                 lastUpdated = Instant.now(java.time.Clock.systemUTC())
               )
-              Right(DataRequest(request.request, request.userId, userAnswers, request.credId))
+              Right(DataRequestWithUserAnswers(request.request, request.userId, request.pdvResponse, request.credId, userAnswers))
             case Some(data) =>
-              Right(DataRequest(request.request, request.userId, data, request.credId))
+              Right(DataRequestWithUserAnswers(request.request, request.userId, request.pdvResponse, request.credId, data))
           }
         } else {
           Left(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
         }
       case _ =>
-        // No PDV data; check the user answers cache. If no user answers then no session.
         if (request.userAnswers.isEmpty) {
           Left(Redirect(controllers.auth.routes.SignedOutController.onPageLoad).withNewSession)
         } else {
@@ -57,4 +58,4 @@ class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationSer
   }
 }
 
-trait ValidCustomerDataRequiredAction extends ActionRefiner[OptionalDataRequest, DataRequest]
+trait ValidDataRequiredAction extends ActionRefiner[DataRequestWithOptionalUserAnswers, DataRequestWithUserAnswers]

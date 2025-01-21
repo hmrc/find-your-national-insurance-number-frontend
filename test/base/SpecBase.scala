@@ -19,6 +19,7 @@ package base
 import config.FrontendAppConfig
 import controllers.actions._
 import models.UserAnswers
+import models.pdv.PDVResponse
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
@@ -49,18 +50,19 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
   def messagesApi: MessagesApi    = injector.instanceOf[MessagesApi]
   implicit def messages: Messages = messagesApi.preferred(fakeRequest)
 
-  protected def applicationBuilder(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+  protected def applicationBuilder(userAnswers: Option[UserAnswers] = None, pdvResponse: Option[PDVResponse] = None): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
-        bind[ValidCustomerDataRequiredAction].to[ValidCustomerDataRequiredActionImpl],
+        bind[ValidDataRequiredAction].to[ValidDataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
-      )
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers, pdvResponse)),
+
+  )
 
   protected def applicationBuilderWithConfig(
                                               config: Map[String, Any] = Map(),
-                                              userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+                                              userAnswers: Option[UserAnswers] = None, pdvResponse: Option[PDVResponse] = None): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(
         config ++ Map(
@@ -70,13 +72,14 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
       )
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers, pdvResponse))
       )
 
   protected def applicationBuilderCl50OnWithConfig(
                                               config: Map[String, Any] = Map(),
-                                              userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+                                              userAnswers: Option[UserAnswers] = None, pdvResponse: Option[PDVResponse] = None): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(
         config ++ Map(
@@ -85,9 +88,10 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
         )
       )
       .overrides(
+        bind[DataRequiredAction].to[DataRequiredActionImpl],        bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers, pdvResponse))
       )
 
   def injected[T](c: Class[T]): T = app.injector.instanceOf(c)

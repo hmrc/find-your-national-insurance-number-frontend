@@ -18,7 +18,7 @@ package controllers
 
 import cacheables.OriginCacheable
 import config.FrontendAppConfig
-import controllers.actions.{DataRetrievalAction, IdentifierAction, ValidCustomerDataRequiredAction}
+import controllers.actions.{DataRetrievalAction, IdentifierAction, ValidDataRequiredAction}
 import forms.ValidDataNINOHelpFormProvider
 import models.{Mode, NormalMode}
 import navigation.Navigator
@@ -42,12 +42,13 @@ class ValidDataNINOHelpController @Inject()(
                                              navigator: Navigator,
                                              identify: IdentifierAction,
                                              getData: DataRetrievalAction,
-                                             requireValidData: ValidCustomerDataRequiredAction,
+                                             requireValidData: ValidDataRequiredAction,
                                              formProvider: ValidDataNINOHelpFormProvider,
                                              view: ValidDataNINOHelpView,
                                              auditService: AuditService,
                                              personalDetailsValidationService: PersonalDetailsValidationService,
-                                             val controllerComponents: MessagesControllerComponents
+                                             val controllerComponents: MessagesControllerComponents,
+                                             pdvResponseHandler: PDVNinoExtractor
                                   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[Boolean] = formProvider()
@@ -68,7 +69,8 @@ class ValidDataNINOHelpController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map(
+          val nino = request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse("")
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).map(
             pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
           )
           for {

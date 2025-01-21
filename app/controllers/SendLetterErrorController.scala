@@ -42,12 +42,13 @@ class SendLetterErrorController @Inject()(
                                            navigator: Navigator,
                                            identify: IdentifierAction,
                                            getData: DataRetrievalAction,
-                                           requireValidData: ValidCustomerDataRequiredAction,
+                                           requireValidData: ValidDataRequiredAction,
                                            view: SendLetterErrorView,
                                            formProvider: SelectAlternativeServiceFormProvider,
                                            personalDetailsValidationService: PersonalDetailsValidationService,
                                            auditService: AuditService,
-                                           val controllerComponents: MessagesControllerComponents
+                                           val controllerComponents: MessagesControllerComponents,
+                                           pdvResponseHandler: PDVNinoExtractor
                                          )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[SelectAlternativeService] = formProvider()
@@ -69,7 +70,8 @@ class SendLetterErrorController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY)).map(
+          val nino = request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse(StringUtils.EMPTY)
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).map(
             pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
           )
           for {
