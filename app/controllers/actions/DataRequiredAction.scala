@@ -17,17 +17,16 @@
 package controllers.actions
 
 import models.UserAnswers
-import models.pdv.{DataRequestWithOptionalUserAnswers, DataRequestWithUserAnswers}
+import models.requests.{DataRequest, OptionalDataRequest}
 import play.api.mvc.{ActionRefiner, Result}
 
 import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class DataRequiredActionImpl @Inject()(implicit val executionContext: ExecutionContext)
-  extends DataRequiredAction {
+class DataRequiredActionImpl @Inject()(implicit val executionContext: ExecutionContext) extends DataRequiredAction {
 
-  override protected def refine[A](request: DataRequestWithOptionalUserAnswers[A]): Future[Either[Result, DataRequestWithUserAnswers[A]]] = {
+  override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {
 
     request.userAnswers match {
       case None =>
@@ -35,11 +34,11 @@ class DataRequiredActionImpl @Inject()(implicit val executionContext: ExecutionC
           id = request.userId,
           lastUpdated = Instant.now(java.time.Clock.systemUTC())
         )
-        Future.successful(Right(DataRequestWithUserAnswers(request.request, request.userId, request.pdvResponse, request.credId, userAnswers)))
+        Future.successful(Right(DataRequest(request.request, request.userId, userAnswers, request.credId)))
       case Some(data) =>
-        Future.successful(Right(DataRequestWithUserAnswers(request.request, request.userId, request.pdvResponse, request.credId, data)))
+        Future.successful(Right(DataRequest(request.request, request.userId, data, request.credId)))
     }
   }
 }
 
-trait DataRequiredAction extends ActionRefiner[DataRequestWithOptionalUserAnswers, DataRequestWithUserAnswers]
+trait DataRequiredAction extends ActionRefiner[OptionalDataRequest, DataRequest]

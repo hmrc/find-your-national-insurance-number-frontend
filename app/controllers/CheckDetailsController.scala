@@ -22,6 +22,7 @@ import handlers.ErrorHandler
 import models.Mode
 import models.errors.{ConnectorError, IndividualDetailsError}
 import models.pdv._
+import models.requests.DataRequest
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
@@ -46,7 +47,8 @@ class CheckDetailsController @Inject()(
                                         individualDetailsService: IndividualDetailsService,
                                         val controllerComponents: MessagesControllerComponents,
                                         val authConnector: AuthConnector,
-                                        errorHandler: ErrorHandler)(implicit ec: ExecutionContext)
+                                        errorHandler: ErrorHandler
+                                      )(implicit ec: ExecutionContext)
   extends FrontendBaseController with AuthorisedFunctions with I18nSupport with Logging {
 
   def onPageLoad(origin: Option[String], mode: Mode): Action[AnyContent] =
@@ -64,23 +66,23 @@ class CheckDetailsController @Inject()(
       }
     }
 
-
   private def pdvCheck(mode: Mode,
                        origin: Option[String])
-                      (implicit hc: HeaderCarrier, request: DataRequestWithUserAnswers[AnyContent]): Future[Result] = {
+                      (implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[Result] = {
     val pdvRequest = PDVRequest(
       request.credId.getOrElse(EmptyString),
-      hc.sessionId.map(_.value).getOrElse(EmptyString)
+      request.session.data.getOrElse("sessionId", EmptyString)
     )
     personalDetailsValidationService.getPDVData(pdvRequest) flatMap {
       case PDVSuccessResponse(pdvResponseData) =>
+        val sessionWithNINO = request.session + ("nino" -> pdvResponseData.getNino)
         pdvResponseData.validationStatus match {
           case ValidationStatus.Success =>
-            individualsDetailsChecks(pdvResponseData, mode, origin)
+            individualsDetailsChecks(pdvResponseData, mode, sessionWithNINO, origin)
           case _ =>
             logger.info(s"PDV matched failed: ${pdvResponseData.validationStatus}")
             auditService.findYourNinoPDVMatchFailed(pdvResponseData, origin)
-            Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
+            Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO))
         }
       case PDVNotFoundResponse(r) =>
         logger.info(s"No PDV data found: ${r.status}")
@@ -106,14 +108,14 @@ class CheckDetailsController @Inject()(
   }
 
   private def individualsDetailsChecks(pdvData: PDVResponseData,
-                                       mode: Mode,
-                                       origin: Option[String])
-                                      (implicit hc: HeaderCarrier, request: DataRequestWithUserAnswers[AnyContent]): Future[Result] = {
+                                      mode: Mode,
+                                      sessionWithNINO: Session,
+                                      origin: Option[String])
+                                     (implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[Result] = {
     individualDetailsService.getIdData(pdvData) flatMap {
       case Right(idData) =>
         auditService.findYourNinoPDVMatched(pdvData, origin, Some(idData))
-        val sessionId =       hc.sessionId.map(_.value).getOrElse(EmptyString)
-
+        val sessionId = sessionWithNINO.data.getOrElse("sessionId", EmptyString)
 
         val checksf: Future[(Boolean, String)] = for {
           _ <- individualDetailsService.createIndividualDetailsData(sessionId, idData)
@@ -127,18 +129,18 @@ class CheckDetailsController @Inject()(
             if (pdvData.getPostCode.nonEmpty) {
               if (comparePostCode(idPostCode, pdvData.getPostCode)) {
                 logger.info(s"PDV and API 1694 postcodes matched")
-                Future.successful(Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode)))
+                Future.successful(Redirect(routes.ValidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO))
               } else {
                 logger.info(s"PDV and API 1694 postcodes not matched")
-                Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
+                Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO))
               }
             } else {
               personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(pdvData.getNino, idPostCode)
-              Future.successful(Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode)))
+              Future.successful(Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO))
             }
           } else {
             logger.info(s"API 1694 checks failed: ${api1694Checks._2}")
-            Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
+            Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)).withSession(sessionWithNINO))
           }
         }
       case Left(error) =>
@@ -150,7 +152,7 @@ class CheckDetailsController @Inject()(
   private def individualsDetailsError(error: IndividualDetailsError,
                                       PDVResponseData: PDVResponseData,
                                       origin: Option[String])
-                                     (implicit hc: HeaderCarrier, request: DataRequestWithUserAnswers[AnyContent]): Result = {
+                                     (implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Result = {
     error match {
       case conError: ConnectorError => conError.statusCode match {
         case INTERNAL_SERVER_ERROR | BAD_GATEWAY | SERVICE_UNAVAILABLE =>

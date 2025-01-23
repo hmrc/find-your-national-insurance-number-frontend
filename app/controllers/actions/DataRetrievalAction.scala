@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,48 +16,23 @@
 
 package controllers.actions
 
-import models.pdv._
-import models.requests.IdentifierRequest
+import javax.inject.Inject
+import models.requests.{IdentifierRequest, OptionalDataRequest}
 import play.api.mvc.ActionTransformer
 import repositories.SessionRepository
-import services.PersonalDetailsValidationService
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DataRetrievalActionImpl @Inject()(
-                                            val sessionRepository: SessionRepository,
-                                             personalDetailsValidationService: PersonalDetailsValidationService
-                                           )(implicit val executionContext: ExecutionContext)
-  extends DataRetrievalAction {
+                                         val sessionRepository: SessionRepository
+                                       )(implicit val executionContext: ExecutionContext) extends DataRetrievalAction {
 
-  override protected def transform[A](request: IdentifierRequest[A]): Future[DataRequestWithOptionalUserAnswers[A]] = {
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+  override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] = {
 
-    val userAnswersF = sessionRepository.get(request.userId)
-    val pdvResponseF = request.credId match {
-      case Some(credId) =>
-        val pdvRequest = PDVRequest(
-          credentialId = credId,
-          sessionId = hc.sessionId.map(_.value).getOrElse("")
-        )
-        personalDetailsValidationService.getPDVMatchResult(pdvRequest).map(Some(_))
-      case None => Future.successful(None)
+    sessionRepository.get(request.userId).map { userAnswers =>
+      OptionalDataRequest(request.request, request.userId, userAnswers, request.credId)
     }
-
-    for {
-      userAnswers <- userAnswersF
-      pdvResponse <- pdvResponseF
-    } yield DataRequestWithOptionalUserAnswers(
-      request = request.request,
-      userId = request.userId,
-      credId = request.credId,
-      userAnswers = userAnswers,
-      pdvResponse = pdvResponse
-    )
   }
 }
 
-trait DataRetrievalAction extends ActionTransformer[IdentifierRequest, DataRequestWithOptionalUserAnswers]
+trait DataRetrievalAction extends ActionTransformer[IdentifierRequest, OptionalDataRequest]

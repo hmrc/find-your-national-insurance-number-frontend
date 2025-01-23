@@ -46,8 +46,7 @@ class InvalidDataNINOHelpController @Inject()(
                                                formProvider: InvalidDataNINOHelpFormProvider,
                                                personalDetailsValidationService: PersonalDetailsValidationService,
                                                auditService: AuditService,
-                                               val controllerComponents: MessagesControllerComponents,
-                                               pdvResponseHandler: PDVNinoExtractor
+                                               val controllerComponents: MessagesControllerComponents
                                   )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[InvalidDataNINOHelp] = formProvider()
@@ -70,8 +69,7 @@ class InvalidDataNINOHelpController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value => {
-          val nino = request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse("")
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).map(
+          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map(
             pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
           )
           for {

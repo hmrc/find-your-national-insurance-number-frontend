@@ -40,19 +40,18 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmYourPostcodeController @Inject()(
-                                               override val messagesApi: MessagesApi,
-                                               sessionRepository: SessionRepository,
-                                               identify: IdentifierAction,
-                                               getData: DataRetrievalAction,
-                                               requireValidData: ValidDataRequiredAction,
-                                               formProvider: ConfirmYourPostcodeFormProvider,
-                                               val controllerComponents: MessagesControllerComponents,
-                                               view: ConfirmYourPostcodeView,
-                                               personalDetailsValidationService: PersonalDetailsValidationService,
-                                               individualDetailsService: IndividualDetailsService,
-                                               auditService: AuditService,
-                                               pdvResponseHandler: PDVNinoExtractor
-                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+                                        override val messagesApi: MessagesApi,
+                                        sessionRepository: SessionRepository,
+                                        identify: IdentifierAction,
+                                        getData: DataRetrievalAction,
+                                        requireValidData: ValidCustomerDataRequiredAction,
+                                        formProvider: ConfirmYourPostcodeFormProvider,
+                                        val controllerComponents: MessagesControllerComponents,
+                                        view: ConfirmYourPostcodeView,
+                                        personalDetailsValidationService: PersonalDetailsValidationService,
+                                        individualDetailsService: IndividualDetailsService,
+                                        auditService: AuditService
+                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[String] = formProvider()
 
@@ -76,7 +75,7 @@ class ConfirmYourPostcodeController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmYourPostcodePage, userEnteredPostCode))
             _ <- sessionRepository.set(updatedAnswers)
-            nino = request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse(EmptyString)
+            nino = request.session.data.getOrElse("nino", EmptyString)
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
             idAddress <- individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino))
             redirectBasedOnMatch <- pdvData match {

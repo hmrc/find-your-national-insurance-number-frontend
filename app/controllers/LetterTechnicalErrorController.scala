@@ -19,7 +19,7 @@ package controllers
 import cacheables.{OriginCacheable, TryAgainCountCacheable}
 import controllers.actions._
 import forms.LetterTechnicalErrorFormProvider
-import models.pdv.DataRequestWithUserAnswers
+import models.requests.DataRequest
 import models.{LetterTechnicalError, Mode, UserAnswers}
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
@@ -43,13 +43,12 @@ class LetterTechnicalErrorController @Inject()(
                                                 navigator: Navigator,
                                                 identify: IdentifierAction,
                                                 getData: DataRetrievalAction,
-                                                requireValidData: ValidDataRequiredAction,
+                                                requireValidData: ValidCustomerDataRequiredAction,
                                                 formProvider: LetterTechnicalErrorFormProvider,
                                                 personalDetailsValidationService: PersonalDetailsValidationService,
                                                 auditService: AuditService,
                                                 val controllerComponents: MessagesControllerComponents,
-                                                view: LetterTechnicalErrorView,
-                                                pdvResponseHandler: PDVNinoExtractor
+                                                view: LetterTechnicalErrorView
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[LetterTechnicalError] = formProvider()
@@ -82,7 +81,7 @@ class LetterTechnicalErrorController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(LetterTechnicalErrorPage, value))
             _ <- sessionRepository.set(updatedAnswers)
-            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.pdvResponse.flatMap(pdvResponseHandler.getNino).getOrElse(StringUtils.EMPTY))
+            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY))
           } yield {
             val personalDetails = pdvData.flatMap(_.personalDetails)
             val postcode: String = personalDetails.flatMap(_.postCode).getOrElse(StringUtils.EMPTY)
@@ -102,7 +101,7 @@ class LetterTechnicalErrorController @Inject()(
       )
   }
 
-  private def incrementTryAgainCount()(implicit request: DataRequestWithUserAnswers[AnyContent]): Future[UserAnswers] = {
+  private def incrementTryAgainCount()(implicit request: DataRequest[AnyContent]): Future[UserAnswers] = {
     val count: Int = request.userAnswers.get(TryAgainCountCacheable).getOrElse(0)
     for {
       updatedAnswers <- Future.fromTry(request.userAnswers.set(TryAgainCountCacheable, count + 1))
