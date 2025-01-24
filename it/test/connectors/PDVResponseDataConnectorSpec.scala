@@ -19,7 +19,8 @@ package connectors
 import base.WireMockHelper
 import cacheables.OriginCacheable
 import config.FrontendAppConfig
-import models.pdv.{DataRequestWithUserAnswers, PDVRequest, PDVResponseData, PersonalDetails, ValidationStatus}
+import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails, ValidationStatus}
+import models.requests.DataRequest
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import org.mockito.{Answers, ArgumentMatchers}
@@ -64,7 +65,7 @@ class PDVResponseDataConnectorSpec
 
   val id =  "10123456789"
 
-  def PDV200SuccessResponseForCRNFailure: Result = Ok(
+  def PDV200SuccessResponseforCRNFailure: Result = Ok(
     s"""
        |{
        |  "id": $id,
@@ -98,7 +99,7 @@ class PDVResponseDataConnectorSpec
 
   val httpResponse: HttpResponse = HttpResponse(200, body, headers2)
 
-  private val mockDataRequest: DataRequestWithUserAnswers[AnyContent]  = mock[DataRequestWithUserAnswers[AnyContent]](Answers.RETURNS_DEEP_STUBS)
+  private val mockDataRequest: DataRequest[AnyContent]  = mock[DataRequest[AnyContent]](Answers.RETURNS_DEEP_STUBS)
 
   trait SpecSetup {
     def url: String
