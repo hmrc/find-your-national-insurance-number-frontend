@@ -16,7 +16,6 @@
 
 package controllers
 
-import cacheables.OriginCacheable
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
 import models.errors._
@@ -103,10 +102,10 @@ class SelectNINOLetterAddressController @Inject()(
                 val auditValue = if (value.toString.equals("true")) "postCode" else "notThisAddress"
                 uA.get(SelectNINOLetterAddressPage) match {
                   case Some(false) =>
-                    auditAddress(pdvData, nino, auditValue, uA)
+                    auditAddress(pdvData, nino, auditValue, uA, request.origin)
                     Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA)))
                   case Some(true) =>
-                    sendLetter(nino, pdvData, auditValue, uA, mode)
+                    sendLetter(nino, pdvData, auditValue, uA, mode, request.origin)
                   case _ => throw new IllegalArgumentException("Failed to get SelectNINOLetterAddressPage")
                 }
             }
@@ -133,19 +132,19 @@ class SelectNINOLetterAddressController @Inject()(
     }
   }
 
-  private def sendLetter(nino: String, pdvData: Option[PDVResponseData], value: String, uA: UserAnswers, mode: Mode)
+  private def sendLetter(nino: String, pdvData: Option[PDVResponseData], value: String, uA: UserAnswers, mode: Mode, origin: Option[String])
                         (implicit headerCarrier: HeaderCarrier): Future[Result] = {
-    auditAddress(pdvData, nino, value, uA)
+    auditAddress(pdvData, nino, value, uA, origin)
     individualDetailsService.getIndividualDetailsData(nino) flatMap {
       idData => {
         npsFMNService.sendLetter(nino, FMNHelper.createNPSFMNRequest(idData)) map {
           case LetterIssuedResponse() =>
             Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA))
           case RLSDLONFAResponse(responseStatus, responseMessage) =>
-            auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage, uA.get(OriginCacheable))
+            auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage, origin)
             Redirect(routes.SendLetterErrorController.onPageLoad(mode))
           case TechnicalIssueResponse(responseStatus, responseMessage) =>
-            auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage, uA.get(OriginCacheable))
+            auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage, origin)
             Redirect(routes.LetterTechnicalErrorController.onPageLoad())
           case _ =>
             logger.warn("Unknown NPS FMN API response")
@@ -161,17 +160,17 @@ class SelectNINOLetterAddressController @Inject()(
       case _ => StringUtils.EMPTY
     }
 
-  private def auditAddress(pdvData: Option[PDVResponseData], nino: String, value: String, userAnswers: UserAnswers)(
+  private def auditAddress(pdvData: Option[PDVResponseData], nino: String, value: String, userAnswers: UserAnswers, origin: Option[String])(
     implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Unit] = {
     individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino)) map {
-      case Right(idAddress) => auditService.findYourNinoOnlineLetterOption(pdvData, idAddress, value, userAnswers.get(OriginCacheable))
+      case Right(idAddress) => auditService.findYourNinoOnlineLetterOption(pdvData, idAddress, value, origin)
       case Left(individualDetailsError) =>
         val statusCode = individualDetailsError match {
           case conError: ConnectorError => Some(conError.statusCode.toString)
           case _ => None
         }
         val responseMessage = "Could not get individuals address"
-        auditService.findYourNinoError(pdvData, statusCode, responseMessage, userAnswers.get(OriginCacheable))
+        auditService.findYourNinoError(pdvData, statusCode, responseMessage, origin)
         throw new IllegalArgumentException(responseMessage)
     }
   }

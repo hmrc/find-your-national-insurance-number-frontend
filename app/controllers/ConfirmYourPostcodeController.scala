@@ -16,13 +16,12 @@
 
 package controllers
 
-import cacheables.OriginCacheable
 import controllers.actions._
 import forms.ConfirmYourPostcodeFormProvider
 import models.errors.IndividualDetailsError
 import models.individualdetails.Address
 import models.pdv.PDVResponseData
-import models.{IndividualDetailsNino, Mode, NormalMode, UserAnswers}
+import models.{IndividualDetailsNino, Mode, NormalMode}
 import pages.ConfirmYourPostcodePage
 import play.api.Logging
 import play.api.data.Form
@@ -80,7 +79,7 @@ class ConfirmYourPostcodeController @Inject()(
             idAddress <- individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino))
             redirectBasedOnMatch <- pdvData match {
               case Some(pdvValidData) =>
-                checkUserEnteredPostcodeMatchWithNPSPostCode(userEnteredPostCode, idAddress, pdvValidData, updatedAnswers)
+                checkUserEnteredPostcodeMatchWithNPSPostCode(userEnteredPostCode, idAddress, pdvValidData, request.origin)
               case None => throw new IllegalArgumentException("No pdv data found")
             }
           } yield redirectBasedOnMatch
@@ -91,12 +90,13 @@ class ConfirmYourPostcodeController @Inject()(
   private def checkUserEnteredPostcodeMatchWithNPSPostCode(userEnteredPostCode: String,
                                                            idAddress: Either[IndividualDetailsError, Address],
                                                            pdvValidData: PDVResponseData,
-                                                           userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Result] =
+                                                           origin: Option[String]
+                                                           )(implicit hc: HeaderCarrier): Future[Result] =
     pdvValidData.npsPostCode match {
       case Some(npsPostCode) if comparePostCode(npsPostCode, userEnteredPostCode) =>
         idAddress match {
           case Right(idAddr) =>
-            auditService.findYourNinoConfirmPostcode(userEnteredPostCode, Some(idAddr), Some(pdvValidData), Some("true"), userAnswers.get(OriginCacheable))
+            auditService.findYourNinoConfirmPostcode(userEnteredPostCode, Some(idAddr), Some(pdvValidData), Some("true"), origin)
           case _ =>
             throw new IllegalArgumentException("Failed to parse the address from Individual Details")
         }
@@ -104,7 +104,7 @@ class ConfirmYourPostcodeController @Inject()(
       case None =>
         throw new IllegalArgumentException("nps postcode missing")
       case _ =>
-        auditService.findYourNinoConfirmPostcode(userEnteredPostCode, None, Some(pdvValidData), Some("false"), userAnswers.get(OriginCacheable))
+        auditService.findYourNinoConfirmPostcode(userEnteredPostCode, None, Some(pdvValidData), Some("false"), origin)
         Future(Redirect(routes.EnteredPostCodeNotFoundController.onPageLoad(mode = NormalMode)))
     }
 }

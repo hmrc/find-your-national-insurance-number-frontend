@@ -39,9 +39,9 @@ class ValidCustomerDataRequiredActionImpl @Inject()(personalDetailsValidationSer
                 id = request.userId,
                 lastUpdated = Instant.now(java.time.Clock.systemUTC())
               )
-              Right(DataRequest(request.request, request.userId, userAnswers, request.credId))
+              Right(DataRequest(request.request, request.userId, userAnswers, request.credId, request.origin))
             case Some(data) =>
-              Right(DataRequest(request.request, request.userId, data, request.credId))
+              Right(DataRequest(request.request, request.userId, data, request.credId, request.origin))
           }
         } else {
           Left(Redirect(controllers.routes.UnauthorisedController.onPageLoad))

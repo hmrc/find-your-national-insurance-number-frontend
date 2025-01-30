@@ -34,9 +34,9 @@ class DataRequiredActionImpl @Inject()(implicit val executionContext: ExecutionC
           id = request.userId,
           lastUpdated = Instant.now(java.time.Clock.systemUTC())
         )
-        Future.successful(Right(DataRequest(request.request, request.userId, userAnswers, request.credId)))
+        Future.successful(Right(DataRequest(request.request, request.userId, userAnswers, request.credId, request.origin)))
       case Some(data) =>
-        Future.successful(Right(DataRequest(request.request, request.userId, data, request.credId)))
+        Future.successful(Right(DataRequest(request.request, request.userId, data, request.credId, request.origin)))
     }
   }
 }

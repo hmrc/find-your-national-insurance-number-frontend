@@ -16,7 +16,6 @@
 
 package controllers
 
-import cacheables.OriginCacheable
 import controllers.actions._
 import forms.SelectAlternativeServiceFormProvider
 import models.{Mode, SelectAlternativeService}
@@ -68,7 +67,7 @@ class SelectAlternativeServiceController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode))),
         value => {
           personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map(
-            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
+            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.origin)
           )
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectAlternativeServicePage, value))

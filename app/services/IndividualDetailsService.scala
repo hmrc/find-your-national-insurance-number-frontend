@@ -22,9 +22,9 @@ import connectors.IndividualDetailsConnector
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
 import models.errors.{IndividualDetailsError, InvalidIdentifier}
 import models.individualdetails.AddressType.ResidentialAddress
-import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, UserAnswers}
-import models.individualdetails.{Address, AddressList, IndividualDetails, IndividualDetailsData, IndividualDetailsDataCache, ResolveMerge}
+import models.individualdetails._
 import models.pdv.PDVResponseData
+import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, UserAnswers}
 import org.mongodb.scala.MongoException
 import play.api.Logging
 import repositories.{IndividualDetailsRepoTrait, SessionRepository}

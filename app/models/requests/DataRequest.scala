@@ -22,9 +22,11 @@ import models.UserAnswers
 case class OptionalDataRequest[A] (request: Request[A],
                                    userId: String,
                                    userAnswers: Option[UserAnswers],
-                                   credId: Option[String]) extends WrappedRequest[A](request)
+                                   credId: Option[String],
+                                   origin: Option[String]) extends WrappedRequest[A](request)
 
 case class DataRequest[A] (request: Request[A],
                            userId: String,
                            userAnswers: UserAnswers,
-                           credId: Option[String]) extends WrappedRequest[A](request)
+                           credId: Option[String],
+                           origin: Option[String]) extends WrappedRequest[A](request)

@@ -16,7 +16,6 @@
 
 package controllers
 
-import cacheables.OriginCacheable
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import handlers.ErrorHandler
 import models.Mode
@@ -87,22 +86,22 @@ class CheckDetailsController @Inject()(
       case PDVNotFoundResponse(r) =>
         logger.info(s"No PDV data found: ${r.status}")
         if (!r.body.contains("No association found") && !r.body.contains("No record found using validation ID")) {
-          auditService.findYourNinoGetPdvDataHttpError(r.status.toString, r.body, request.userAnswers.get(OriginCacheable))
+          auditService.findYourNinoGetPdvDataHttpError(r.status.toString, r.body, request.origin)
         } else {
           auditService.findYourNinoPDVNoMatchData(origin)
         }
         Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
       case PDVBadRequestResponse(r) =>
         logger.error(s"Bad request: ${r.status}")
-        auditService.findYourNinoGetPdvDataHttpError(r.status.toString, r.body, request.userAnswers.get(OriginCacheable))
+        auditService.findYourNinoGetPdvDataHttpError(r.status.toString, r.body, request.origin)
         Future.successful(BadRequest(errorHandler.standardErrorTemplate()))
       case PDVUnexpectedResponse(r) =>
         logger.error(s"Unexpected response: ${r.status}")
-        auditService.findYourNinoGetPdvDataHttpError(r.status.toString, r.body, request.userAnswers.get(OriginCacheable))
+        auditService.findYourNinoGetPdvDataHttpError(r.status.toString, r.body, request.origin)
         Future.successful(InternalServerError(errorHandler.standardErrorTemplate()))
       case PDVErrorResponse(cause) =>
         logger.error(s"Error response: $cause")
-        auditService.findYourNinoGetPdvDataHttpError(cause.status.toString, cause.body, request.userAnswers.get(OriginCacheable))
+        auditService.findYourNinoGetPdvDataHttpError(cause.status.toString, cause.body, request.origin)
         Future.successful(InternalServerError(errorHandler.standardErrorTemplate()))
     }
   }

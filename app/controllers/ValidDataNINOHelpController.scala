@@ -16,7 +16,6 @@
 
 package controllers
 
-import cacheables.OriginCacheable
 import config.FrontendAppConfig
 import controllers.actions.{DataRetrievalAction, IdentifierAction, ValidCustomerDataRequiredAction}
 import forms.ValidDataNINOHelpFormProvider
@@ -69,7 +68,7 @@ class ValidDataNINOHelpController @Inject()(
 
         value => {
           personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map(
-            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
+            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.origin)
           )
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(ValidDataNINOHelpPage, value))
