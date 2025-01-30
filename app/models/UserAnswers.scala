@@ -48,6 +48,12 @@ final case class UserAnswers(
     }
   }
 
+  def setOrException[A](page: Settable[A], value: A)(implicit writes: Writes[A]): UserAnswers =
+    set(page, value) match {
+      case Success(ua) => ua
+      case Failure(ex) => throw ex
+    }
+
   def remove[A](page: Settable[A]): Try[UserAnswers] = {
 
     val updatedData = data.removeObject(page.path) match {

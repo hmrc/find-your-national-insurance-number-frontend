@@ -16,7 +16,6 @@
 
 package services
 
-import cacheables.OriginCacheable
 import com.google.inject.ImplementedBy
 import connectors.IndividualDetailsConnector
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
@@ -30,6 +29,7 @@ import play.api.Logging
 import repositories.{IndividualDetailsRepoTrait, SessionRepository}
 import uk.gov.hmrc.http.HeaderCarrier
 import util.FMNConstants.EmptyString
+import util.OriginCacheHelper
 
 import java.util.UUID
 import javax.inject.Inject
@@ -65,10 +65,7 @@ class IndividualDetailsServiceImpl @Inject()(
   extends IndividualDetailsService with Logging {
 
   override def cacheOrigin(userAnswers: UserAnswers, origin: Option[String]): Future[Unit] = {
-    for {
-      updatedAnswers <- Future.fromTry(userAnswers.set(OriginCacheable, origin.getOrElse("None")))
-      _ <- sessionRepository.set(updatedAnswers)
-    } yield ():Unit
+    OriginCacheHelper.storeOrigin(origin)(sessionRepository, userAnswers)
   }
 
   override def getNPSPostCode(idData: IndividualDetails): String =

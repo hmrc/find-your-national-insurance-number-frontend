@@ -16,10 +16,10 @@
 
 package controllers.actions
 
-import cacheables.OriginCacheable
 import models.requests.{IdentifierRequest, OptionalDataRequest}
 import play.api.mvc.ActionTransformer
 import repositories.SessionRepository
+import util.OriginCacheHelper
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,10 +31,7 @@ class DataRetrievalActionImpl @Inject()(
   override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] = {
 
     sessionRepository.get(request.userId).map { userAnswers =>
-    
-    val origin = userAnswers.flatMap(_.get(OriginCacheable))
-    
-      OptionalDataRequest(request.request, request.userId, userAnswers, request.credId, origin)
+      OptionalDataRequest(request.request, request.userId, userAnswers, request.credId, OriginCacheHelper.getOrigin(userAnswers))
     }
   }
 }
