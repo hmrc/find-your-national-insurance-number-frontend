@@ -56,8 +56,9 @@ class CheckDetailsController @Inject()(
         auditService.start()
         origin.map(_.toUpperCase) match {
           case Some(PDVOrigin) | Some(IVOrigin) | Some(FMNOrigin) =>
-            individualDetailsService.cacheOrigin(request.userAnswers, origin)
-            pdvCheck(mode, origin)
+            individualDetailsService.cacheOrigin(request.userAnswers, origin).flatMap{ _ =>
+              pdvCheck(mode, origin)
+            }
           case _ =>
             logger.error(s"Invalid origin: $origin")
             Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))

@@ -38,7 +38,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[IndividualDetailsServiceImpl])
 trait IndividualDetailsService {
 
-  def cacheOrigin(userAnswers: UserAnswers, origin: Option[String]): Future[UserAnswers]
+  def cacheOrigin(userAnswers: UserAnswers, origin: Option[String]): Future[Unit]
 
   def getNPSPostCode(idData: IndividualDetails): String
 
@@ -64,11 +64,11 @@ class IndividualDetailsServiceImpl @Inject()(
                                             )(implicit ec: ExecutionContext)
   extends IndividualDetailsService with Logging {
 
-  override def cacheOrigin(userAnswers: UserAnswers, origin: Option[String]): Future[UserAnswers] = {
+  override def cacheOrigin(userAnswers: UserAnswers, origin: Option[String]): Future[Unit] = {
     for {
       updatedAnswers <- Future.fromTry(userAnswers.set(OriginCacheable, origin.getOrElse("None")))
       _ <- sessionRepository.set(updatedAnswers)
-    } yield updatedAnswers
+    } yield ():Unit
   }
 
   override def getNPSPostCode(idData: IndividualDetails): String =

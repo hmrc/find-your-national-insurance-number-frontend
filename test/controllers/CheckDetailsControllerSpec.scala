@@ -53,6 +53,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
     reset(mockPersonalDetailsValidationService)
     reset(auditService)
     reset(mockCheckDetailsService)
+    when(mockIndividualDetailsService.cacheOrigin(any(), any())).thenReturn(Future.successful(():Unit))
   }
 
   "CheckDetailsController" - {
