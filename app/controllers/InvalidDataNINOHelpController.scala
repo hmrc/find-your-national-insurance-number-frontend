@@ -50,7 +50,7 @@ class InvalidDataNINOHelpController @Inject()(
 
   val form: Form[InvalidDataNINOHelp] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireData) {
     implicit request =>
 
       val preparedForm = request.userAnswers.get(InvalidDataNINOHelpPage) match {
@@ -61,7 +61,7 @@ class InvalidDataNINOHelpController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireData).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>

@@ -53,7 +53,7 @@ class LetterTechnicalErrorController @Inject()(
 
   val form: Form[LetterTechnicalError] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData) {
     implicit request =>
       val count = request.userAnswers.get(TryAgainCountCacheable)
       val retryAllowed = count match {
@@ -67,7 +67,7 @@ class LetterTechnicalErrorController @Inject()(
       Ok(view(form, mode, retryAllowed))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData).async {
     implicit request =>
       val retryAllowed = request.userAnswers.get(TryAgainCountCacheable) match {
         case Some(i) => if (i >= 5) {false} else {true}

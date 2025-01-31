@@ -34,7 +34,7 @@ class PhoneHMRCDetailsController @Inject()(
                                        view: PhoneHMRCDetailsView
                                      )(implicit config: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad: Action[AnyContent] = (identify andThen getData() andThen requireData) {
     implicit request =>
       Ok(view())
   }

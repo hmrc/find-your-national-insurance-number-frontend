@@ -57,7 +57,7 @@ class ConfirmYourPostcodeController @Inject() (
 
   val form: Form[String] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData) {
     implicit request =>
       val preparedForm = request.userAnswers.get(ConfirmYourPostcodePage) match {
         case None        => form
@@ -66,7 +66,7 @@ class ConfirmYourPostcodeController @Inject() (
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData).async {
     implicit request =>
       form
         .bindFromRequest()

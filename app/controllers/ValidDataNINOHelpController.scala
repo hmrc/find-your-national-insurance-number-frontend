@@ -51,7 +51,7 @@ class ValidDataNINOHelpController @Inject()(
 
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
+  def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData() andThen requireValidData) {
     implicit request =>
         val preparedForm = request.userAnswers.get(ValidDataNINOHelpPage) match {
           case None => form
@@ -60,7 +60,7 @@ class ValidDataNINOHelpController @Inject()(
         Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>

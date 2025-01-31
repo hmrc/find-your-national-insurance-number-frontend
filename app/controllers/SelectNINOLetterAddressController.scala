@@ -63,7 +63,7 @@ class SelectNINOLetterAddressController @Inject() (
 
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData).async {
     implicit request =>
       val preparedForm = request.userAnswers.get(SelectNINOLetterAddressPage) match {
         case None        => form
@@ -89,7 +89,7 @@ class SelectNINOLetterAddressController @Inject() (
       }
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData).async {
     implicit request =>
       val nino = request.session.data.getOrElse("nino", StringUtils.EMPTY)
 

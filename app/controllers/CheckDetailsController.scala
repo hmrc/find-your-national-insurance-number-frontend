@@ -54,14 +54,11 @@ class CheckDetailsController @Inject() (
     with Logging {
 
   def onPageLoad(optOrigin: Option[OriginType], mode: Mode): Action[AnyContent] =
-    (identify andThen getData andThen requireData).async { implicit request =>
+    (identify andThen getData(optOrigin) andThen requireData).async { implicit request =>
       auditService.start()
       optOrigin match {
-        case Some(origin) =>
-          individualDetailsService.cacheOrigin(request.userAnswers, origin).flatMap { _ =>
-            pdvCheck(mode, optOrigin)
-          }
-        case _            =>
+        case Some(_) => pdvCheck(mode, optOrigin)
+        case _       =>
           logger.error(s"Missing valid origin: $optOrigin")
           Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
       }

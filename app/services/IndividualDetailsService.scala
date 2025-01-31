@@ -23,13 +23,12 @@ import models.errors.{IndividualDetailsError, InvalidIdentifier}
 import models.individualdetails.AddressType.ResidentialAddress
 import models.individualdetails._
 import models.pdv.PDVResponseData
-import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope, OriginType, UserAnswers}
+import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope}
 import org.apache.commons.lang3.StringUtils
 import org.mongodb.scala.MongoException
 import play.api.Logging
-import repositories.{IndividualDetailsRepoTrait, SessionRepository}
+import repositories.IndividualDetailsRepoTrait
 import uk.gov.hmrc.http.HeaderCarrier
-import util.OriginCacheHelper
 
 import java.util.UUID
 import javax.inject.Inject
@@ -37,8 +36,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[IndividualDetailsServiceImpl])
 trait IndividualDetailsService {
-
-  def cacheOrigin(userAnswers: UserAnswers, origin: OriginType): Future[Unit]
 
   def getNPSPostCode(idData: IndividualDetails): String
 
@@ -62,14 +59,10 @@ trait IndividualDetailsService {
 
 class IndividualDetailsServiceImpl @Inject() (
   individualDetailsConnector: IndividualDetailsConnector,
-  individualDetailsRepository: IndividualDetailsRepoTrait,
-  sessionRepository: SessionRepository
+  individualDetailsRepository: IndividualDetailsRepoTrait
 )(implicit ec: ExecutionContext)
     extends IndividualDetailsService
     with Logging {
-
-  override def cacheOrigin(userAnswers: UserAnswers, origin: OriginType): Future[Unit] =
-    OriginCacheHelper.storeOrigin(origin)(sessionRepository, userAnswers)
 
   override def getNPSPostCode(idData: IndividualDetails): String =
     getAddressTypeResidential(idData.addressList).addressPostcode.map(_.value).getOrElse("")
