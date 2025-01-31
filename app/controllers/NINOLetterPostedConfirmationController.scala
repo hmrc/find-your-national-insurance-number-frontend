@@ -17,11 +17,11 @@
 package controllers
 
 import controllers.actions._
+import org.apache.commons.lang3.StringUtils
 import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.SessionCacheService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import util.FMNConstants.EmptyString
 import views.html.NINOLetterPostedConfirmationView
 
 import java.time.LocalDate
@@ -38,7 +38,7 @@ class NINOLetterPostedConfirmationController @Inject()(
 
   def onPageLoad: Action[AnyContent] = (identify) {
     implicit request =>
-      val nino = request.session.data.getOrElse("nino", EmptyString)
+      val nino = request.session.data.getOrElse("nino", StringUtils.EMPTY)
       sessionCacheService.invalidateCache(nino, request.userId)
       val lang = request.lang(messagesApi)
       if (lang.language.equals("cy")) {

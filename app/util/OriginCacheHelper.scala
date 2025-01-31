@@ -16,7 +16,7 @@
 
 package util
 
-import models.UserAnswers
+import models.{OriginType, UserAnswers}
 import play.api.libs.json.JsPath
 import queries.{Gettable, Settable}
 import repositories.SessionRepository
@@ -24,18 +24,19 @@ import repositories.SessionRepository
 import scala.concurrent.{ExecutionContext, Future}
 
 object OriginCacheHelper {
-
-  private case object OriginCacheable extends Gettable[String] with Settable[String] {
+// TODO: Change origin to enum type?
+  private case object OriginCacheable extends Gettable[OriginType] with Settable[OriginType] {
     override def path: JsPath = JsPath \ toString
 
     override def toString: String = "origin"
   }
 
-  def storeOrigin(origin: Option[String])(sessionRepository: SessionRepository, userAnswers: UserAnswers)(implicit ec: ExecutionContext): Future[Unit] ={
-    sessionRepository.set(userAnswers.setOrException(OriginCacheable, origin.getOrElse("None"))).map(_ => ():Unit)
+  def storeOrigin(origin: OriginType)(sessionRepository: SessionRepository, userAnswers: UserAnswers)(implicit ec: ExecutionContext): Future[Unit] ={
+    sessionRepository.set(userAnswers.setOrException(OriginCacheable, origin)).map(_ => ():Unit)
+    //origin.getOrElse("None")
   }
   
-  def getOrigin(userAnswers: Option[UserAnswers]): Option[String] = {
+  def getOrigin(userAnswers: Option[UserAnswers]): Option[OriginType] = {
     userAnswers.flatMap(_.get(OriginCacheable))
   }
 }

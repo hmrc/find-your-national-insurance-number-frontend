@@ -21,7 +21,8 @@ import forms.ConfirmYourPostcodeFormProvider
 import models.errors.IndividualDetailsError
 import models.individualdetails.Address
 import models.pdv.PDVResponseData
-import models.{IndividualDetailsNino, Mode, NormalMode}
+import models.{IndividualDetailsNino, Mode, NormalMode, OriginType}
+import org.apache.commons.lang3.StringUtils
 import pages.ConfirmYourPostcodePage
 import play.api.Logging
 import play.api.data.Form
@@ -31,33 +32,35 @@ import repositories.SessionRepository
 import services.{AuditService, IndividualDetailsService, PersonalDetailsValidationService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import util.FMNConstants.EmptyString
 import util.FMNHelper.comparePostCode
 import views.html.ConfirmYourPostcodeView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ConfirmYourPostcodeController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        sessionRepository: SessionRepository,
-                                        identify: IdentifierAction,
-                                        getData: DataRetrievalAction,
-                                        requireValidData: ValidCustomerDataRequiredAction,
-                                        formProvider: ConfirmYourPostcodeFormProvider,
-                                        val controllerComponents: MessagesControllerComponents,
-                                        view: ConfirmYourPostcodeView,
-                                        personalDetailsValidationService: PersonalDetailsValidationService,
-                                        individualDetailsService: IndividualDetailsService,
-                                        auditService: AuditService
-                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+class ConfirmYourPostcodeController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireValidData: ValidCustomerDataRequiredAction,
+  formProvider: ConfirmYourPostcodeFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: ConfirmYourPostcodeView,
+  personalDetailsValidationService: PersonalDetailsValidationService,
+  individualDetailsService: IndividualDetailsService,
+  auditService: AuditService
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
   val form: Form[String] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
     implicit request =>
       val preparedForm = request.userAnswers.get(ConfirmYourPostcodePage) match {
-        case None => form
+        case None        => form
         case Some(value) => form.fill(value)
       }
       Ok(view(preparedForm, mode))
@@ -65,45 +68,55 @@ class ConfirmYourPostcodeController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
     implicit request =>
-
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
-
-        userEnteredPostCode => {
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmYourPostcodePage, userEnteredPostCode))
-            _ <- sessionRepository.set(updatedAnswers)
-            nino = request.session.data.getOrElse("nino", EmptyString)
-            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
-            idAddress <- individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino))
-            redirectBasedOnMatch <- pdvData match {
-              case Some(pdvValidData) =>
-                checkUserEnteredPostcodeMatchWithNPSPostCode(userEnteredPostCode, idAddress, pdvValidData, request.origin)
-              case None => throw new IllegalArgumentException("No pdv data found")
-            }
-          } yield redirectBasedOnMatch
-        }
-      )
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+          userEnteredPostCode =>
+            for {
+              updatedAnswers       <- Future.fromTry(request.userAnswers.set(ConfirmYourPostcodePage, userEnteredPostCode))
+              _                    <- sessionRepository.set(updatedAnswers)
+              nino                  = request.session.data.getOrElse("nino", StringUtils.EMPTY)
+              pdvData              <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
+              idAddress            <- individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino))
+              redirectBasedOnMatch <- pdvData match {
+                                        case Some(pdvValidData) =>
+                                          checkUserEnteredPostcodeMatchWithNPSPostCode(
+                                            userEnteredPostCode,
+                                            idAddress,
+                                            pdvValidData,
+                                            request.origin
+                                          )
+                                        case None               => throw new IllegalArgumentException("No pdv data found")
+                                      }
+            } yield redirectBasedOnMatch
+        )
   }
 
-  private def checkUserEnteredPostcodeMatchWithNPSPostCode(userEnteredPostCode: String,
-                                                           idAddress: Either[IndividualDetailsError, Address],
-                                                           pdvValidData: PDVResponseData,
-                                                           origin: Option[String]
-                                                           )(implicit hc: HeaderCarrier): Future[Result] =
+  private def checkUserEnteredPostcodeMatchWithNPSPostCode(
+    userEnteredPostCode: String,
+    idAddress: Either[IndividualDetailsError, Address],
+    pdvValidData: PDVResponseData,
+    origin: Option[OriginType]
+  )(implicit hc: HeaderCarrier): Future[Result] =
     pdvValidData.npsPostCode match {
       case Some(npsPostCode) if comparePostCode(npsPostCode, userEnteredPostCode) =>
         idAddress match {
           case Right(idAddr) =>
-            auditService.findYourNinoConfirmPostcode(userEnteredPostCode, Some(idAddr), Some(pdvValidData), Some("true"), origin)
-          case _ =>
+            auditService.findYourNinoConfirmPostcode(
+              userEnteredPostCode,
+              Some(idAddr),
+              Some(pdvValidData),
+              Some("true"),
+              origin
+            )
+          case _             =>
             throw new IllegalArgumentException("Failed to parse the address from Individual Details")
         }
         Future(Redirect(routes.SelectNINOLetterAddressController.onPageLoad()))
-      case None =>
+      case None                                                                   =>
         throw new IllegalArgumentException("nps postcode missing")
-      case _ =>
+      case _                                                                      =>
         auditService.findYourNinoConfirmPostcode(userEnteredPostCode, None, Some(pdvValidData), Some("false"), origin)
         Future(Redirect(routes.EnteredPostCodeNotFoundController.onPageLoad(mode = NormalMode)))
     }

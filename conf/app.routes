@@ -36,7 +36,7 @@ POST        /contact-hmrc                                   controllers.SelectAl
 
 GET         /phone-hmrc                                     controllers.PhoneHMRCDetailsController.onPageLoad()
 
-GET         /checkDetails                                   controllers.CheckDetailsController.onPageLoad(origin: Option[String] ?= None, mode: Mode ?= NormalMode)
+GET         /checkDetails                                   controllers.CheckDetailsController.onPageLoad(origin: Option[OriginType] ?= None, mode: Mode ?= NormalMode)
 
 GET         /issue                                          controllers.SendLetterErrorController.onPageLoad(mode: Mode ?= NormalMode)
 POST        /issue                                          controllers.SendLetterErrorController.onSubmit(mode: Mode ?= NormalMode)

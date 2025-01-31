@@ -22,8 +22,8 @@ import models.individualdetails.AddressStatus.NotDlo
 import models.individualdetails.AddressType.ResidentialAddress
 import models.individualdetails.CrnIndicator.False
 import models.individualdetails.{Address, AddressList, IndividualDetails}
+import org.apache.commons.lang3.StringUtils
 import play.api.Logging
-import util.FMNConstants.EmptyString
 
 import javax.inject.Inject
 
@@ -36,7 +36,7 @@ trait CheckDetailsService {
 class CheckDetailsServiceImpl @Inject() extends CheckDetailsService with Logging {
 
    def checkConditions(idData: IndividualDetails): (Boolean, String) = {
-     var reason: String                 = EmptyString
+     var reason: String                 = StringUtils.EMPTY
      val isValidNino:Boolean            = idData.crnIndicator.equals(False)
      val isValidAccountStatus:Boolean   = idData.accountStatusType.exists(_.equals(FullLive))
      val hasResidentialAddress: Boolean = idData.getAddressTypeResidential.isDefined
