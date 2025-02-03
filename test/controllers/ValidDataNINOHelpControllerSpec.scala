@@ -229,7 +229,7 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
 
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
-      when(mockSessionRepository.setUserAnswers(any[UserAnswers])(any)).thenReturn(Future.successful(true))
+      when(mockSessionRepository.setUserAnswers(any, any[UserAnswers])).thenReturn(Future.successful(true))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(

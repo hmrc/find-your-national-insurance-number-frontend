@@ -71,7 +71,7 @@ class SelectAlternativeServiceController @Inject()(
           )
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectAlternativeServicePage, value))
-            _ <- sessionRepository.setUserAnswers(updatedAnswers)
+            _ <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
           } yield Redirect(navigator.nextPage(SelectAlternativeServicePage, mode, updatedAnswers))
         }
       )

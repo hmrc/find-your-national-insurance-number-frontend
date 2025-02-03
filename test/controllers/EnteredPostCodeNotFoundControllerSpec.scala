@@ -119,7 +119,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository = mock[SessionRepository]
 
-      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 

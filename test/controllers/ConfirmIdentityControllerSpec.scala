@@ -107,7 +107,7 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository = mock[SessionRepository]
 
-      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))

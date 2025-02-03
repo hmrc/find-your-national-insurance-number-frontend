@@ -17,7 +17,6 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.requests.DataRequest
 import models.{OriginType, SessionData, UserAnswers}
 import org.mockito.Mockito.when
 import org.mongodb.scala.model.Filters
@@ -27,12 +26,13 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
-import play.api.test.FakeRequest
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.temporal.ChronoUnit
 import java.time.{Clock, Instant, ZoneId}
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
 
 class SessionRepositorySpec
     extends AnyFreeSpec
@@ -48,7 +48,7 @@ class SessionRepositorySpec
 
   private val userAnswers = UserAnswers(Json.obj("foo" -> "bar"))
   private val sessionData = SessionData(userAnswers, OriginType.PDV, Instant.ofEpochSecond(1), "id")
-  private val request     = DataRequest(FakeRequest(), "id", userAnswers, Some("credid-01234"), Some(OriginType.FMN))
+//  private val request     = DataRequest(FakeRequest(), "id", userAnswers, Some("credid-01234"), Some(OriginType.FMN))
 
   private val mockAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1
@@ -73,24 +73,26 @@ class SessionRepositorySpec
   }
 
   ".setUserAnswers" - {
-    "must set the last updated time and the origin on the supplied user answers to `now`, and save them" in {
+    "must throw an exception if there is no Mongo document to update" in {
+      a[RuntimeException] mustBe thrownBy {
+        Await.result(repository.setUserAnswers("id", userAnswers), Duration.Inf)
+      }
+    }
+    "must set the last updated time to now or greater and the user answers and save them" in {
+      val expectedResult = sessionData.copy(lastUpdated = instant, origin = OriginType.PDV)
 
-      val expectedResult = sessionData.copy (lastUpdated = instant, origin = OriginType.FMN)
+      insert(sessionData).futureValue
 
-      val setResult     = repository.setUserAnswers(userAnswers)(request).futureValue
+      val setResult     = repository.setUserAnswers("id", userAnswers).futureValue
       val updatedRecord = find(Filters.equal("_id", sessionData.id)).futureValue.headOption.value
 
       setResult mustEqual true
-      updatedRecord mustEqual expectedResult
+      updatedRecord.id mustEqual expectedResult.id
+      updatedRecord.origin mustEqual expectedResult.origin
+      updatedRecord.userAnswers mustEqual expectedResult.userAnswers
+      updatedRecord.lastUpdated.compareTo(instant) >= 0 mustBe true
     }
 
-    "must throw exception when request is missing origin" in {
-
-      a[IllegalArgumentException] mustBe thrownBy {
-        repository.setUserAnswers(userAnswers)(request copy (origin = None)).futureValue
-      }
-
-    }
   }
 
   ".get" - {

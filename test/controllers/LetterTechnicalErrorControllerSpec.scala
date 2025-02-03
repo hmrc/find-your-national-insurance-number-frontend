@@ -171,7 +171,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository = mock[SessionRepository]
 
-      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataWithPostcode)))
 
@@ -200,7 +200,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository       = mock[SessionRepository]
 
-      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value))
@@ -223,13 +223,16 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "redirect to SelectNINOLetterAddress page for a POST if user selects Try again option with a postcode" in {
-
+      val mockSessionRepository       = mock[SessionRepository]
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
+      
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseDataWithPostcode)))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value))
         .overrides(
-          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+          bind[SessionRepository].toInstance(mockSessionRepository)
         )
         .build()
 
@@ -247,13 +250,15 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "redirect to ConfirmYourPostcode page for a POST if user selects Try again option without a postcode" in {
-
+      val mockSessionRepository       = mock[SessionRepository]
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseDataWithoutPostcode)))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value))
         .overrides(
-          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+          bind[SessionRepository].toInstance(mockSessionRepository)
         )
         .build()
 
@@ -271,12 +276,15 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "redirect to PhoneHMRCDetails page for a POST if user selects Phone HMRC option" in {
+      val mockSessionRepository       = mock[SessionRepository]
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseDataWithPostcode)))
 
       val application = applicationBuilder(userAnswers = None)
         .overrides(
-          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+          bind[SessionRepository].toInstance(mockSessionRepository)
         )
         .build()
 
@@ -294,12 +302,15 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "redirect to Print and Post page for a POST if user selects P&P Service option" in {
+      val mockSessionRepository       = mock[SessionRepository]
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseDataWithPostcode)))
 
       val application = applicationBuilder(userAnswers = None)
         .overrides(
-          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+          bind[SessionRepository].toInstance(mockSessionRepository)
         )
         .build()
 

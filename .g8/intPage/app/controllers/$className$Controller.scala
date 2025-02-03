@@ -49,7 +49,7 @@ class $className$Controller @Inject()(
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set($className$Page, value))
-            _              <- sessionRepository.setUserAnswers(updatedAnswers)
+            _              <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
           } yield Redirect(navigator.nextPage($className$Page, mode, updatedAnswers))
       )
   }

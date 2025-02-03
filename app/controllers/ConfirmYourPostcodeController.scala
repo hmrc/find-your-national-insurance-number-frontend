@@ -75,7 +75,7 @@ class ConfirmYourPostcodeController @Inject() (
           userEnteredPostCode =>
             for {
               updatedAnswers       <- Future.fromTry(request.userAnswers.set(ConfirmYourPostcodePage, userEnteredPostCode))
-              _                    <- sessionRepository.setUserAnswers(updatedAnswers)
+              _                    <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
               nino                  = request.session.data.getOrElse("nino", StringUtils.EMPTY)
               pdvData              <- personalDetailsValidationService.getPersonalDetailsValidationByNino(nino)
               idAddress            <- individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino))

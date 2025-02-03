@@ -80,7 +80,7 @@ class LetterTechnicalErrorController @Inject()(
         value => {
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(LetterTechnicalErrorPage, value))
-            _ <- sessionRepository.setUserAnswers(updatedAnswers)
+            _ <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY))
           } yield {
             val personalDetails = pdvData.flatMap(_.personalDetails)
@@ -105,7 +105,7 @@ class LetterTechnicalErrorController @Inject()(
     val count: Int = request.userAnswers.get(TryAgainCountCacheable).getOrElse(0)
     for {
       updatedAnswers <- Future.fromTry(request.userAnswers.set(TryAgainCountCacheable, count + 1))
-      _ <- sessionRepository.setUserAnswers(updatedAnswers)
+      _ <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
     } yield updatedAnswers
   }
 }

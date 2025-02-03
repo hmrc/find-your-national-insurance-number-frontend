@@ -104,7 +104,7 @@ class SelectNINOLetterAddressController @Inject() (
                 request.userAnswers.set(SelectNINOLetterAddressPage, value) match {
                   case Failure(_)  => Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
                   case Success(uA) =>
-                    sessionRepository.setUserAnswers(uA)
+                    sessionRepository.setUserAnswers(request.userId, uA)
                     val auditValue = if (value.toString.equals("true")) "postCode" else "notThisAddress"
                     uA.get(SelectNINOLetterAddressPage) match {
                       case Some(false) =>

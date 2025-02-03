@@ -74,7 +74,7 @@ class EnteredPostCodeNotFoundController @Inject() (
               .map(pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.origin))
             for {
               updatedAnswers <- Future.fromTry(request.userAnswers.set(EnteredPostCodeNotFoundPage, value))
-              _              <- sessionRepository.setUserAnswers(updatedAnswers)
+              _              <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
             } yield Redirect(navigator.nextPage(EnteredPostCodeNotFoundPage, mode, updatedAnswers))
           }
         )

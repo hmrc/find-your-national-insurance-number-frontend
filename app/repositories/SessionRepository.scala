@@ -21,10 +21,10 @@ import models.requests.DataRequest
 import models.{SessionData, UserAnswers}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model._
-import play.api.libs.json.Format
+import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
 import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
@@ -85,22 +85,24 @@ class SessionRepository @Inject() (
       .map(_ => true)
   }
 
-  def setUserAnswers(userAnswers: UserAnswers)(implicit request: DataRequest[_]): Future[Boolean] =
-    request.origin match {
-      case None         => throw new IllegalArgumentException("Missing origin in request")
-      case Some(origin) =>
-        val updatedSessionData =
-          SessionData(userAnswers = userAnswers, origin, lastUpdated = Instant.now(clock), id = request.userId)
-
-        collection
-          .replaceOne(
-            filter = byId(request.userId),
-            replacement = updatedSessionData,
-            options = ReplaceOptions().upsert(true)
-          )
-          .toFuture()
-          .map(_ => true)
-    }
+  def setUserAnswers(id: String, userAnswers: UserAnswers): Future[Boolean] =
+    collection
+      .updateOne(
+        filter = byId(id),
+        update = Updates.combine(
+          Updates.set("userAnswers", Codecs.toBson(Json.toJson(userAnswers))),
+          Updates.set("lastUpdated", Instant.now(clock))
+        ),
+        options = UpdateOptions().upsert(false)
+      )
+      .toFuture()
+      .map { updateResult =>
+        if (updateResult.getModifiedCount == 0) {
+          throw new RuntimeException("Nothing matches in Mongo collection to update")
+        } else {
+          true
+        }
+      }
 
   def clear(id: String): Future[Boolean] =
     collection

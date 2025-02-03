@@ -157,7 +157,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       val mockNPSFMNConnector   = mock[NPSFMNConnector]
       val mockNPSFMNService     = mock[NPSFMNService]
 
-      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
       when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
         .thenReturn(Future.successful(LetterIssuedResponse()))
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
@@ -191,7 +191,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       val mockNPSFMNConnector   = mock[NPSFMNConnector]
       val mockNPSFMNService     = mock[NPSFMNService]
 
-      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
       when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
         .thenReturn(Future.successful(LetterIssuedResponse()))
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
@@ -225,7 +225,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       val mockNPSFMNConnector   = mock[NPSFMNConnector]
       val mockNPSFMNService     = mock[NPSFMNService]
 
-      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
       when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
         .thenReturn(Future.successful(RLSDLONFAResponse(SEE_OTHER, "some message")))
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
@@ -300,7 +300,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
           )
           .build()
 
-      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
       when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
         .thenReturn(Future.successful(TechnicalIssueResponse(SEE_OTHER, "some message")))
 
