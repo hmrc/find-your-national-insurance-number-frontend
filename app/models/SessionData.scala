@@ -16,6 +16,7 @@
 
 package models
 
+import org.bson.json.JsonParseException
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
@@ -32,6 +33,7 @@ object SessionData {
       (__ \ "_id").read[String]
   )(SessionData.apply _)
 
+  // TODO: Remove this old format reads once the changes have been live for a day
   private val readsOldFormat: Reads[SessionData] = (
     (__ \ "data").read[UserAnswers] and
       (__ \ "data" \ "origin").read[String] and
@@ -40,12 +42,12 @@ object SessionData {
   ) { (ua, o, lastUpdated, id) =>
     val origin = OriginType.values.find(_.toString == o) match {
       case Some(origin) => origin
-      case None         => throw new IllegalArgumentException("Missing origin type")
+      case None         => throw new JsonParseException("Missing origin type")
     }
-
     SessionData(ua, origin, lastUpdated, id)
   }
 
+  // TODO: Remove the old format reads once the changes have been live for a day
   val reads: Reads[SessionData] = Reads { js =>
     if ((js \ "userAnswers").isDefined) {
       readsNewFormat.reads(js)
