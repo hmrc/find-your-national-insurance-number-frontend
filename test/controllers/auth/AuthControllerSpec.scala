@@ -57,7 +57,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
             FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), Some(OriginType.FMN)).url)
 
           val result = route(application, request).value
-
           status(result) mustEqual SEE_OTHER
 
         }
@@ -79,7 +78,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
           val request      = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), None).url)
 
           val result = route(application, request).value
-
           status(result) mustEqual SEE_OTHER
         }
       }
