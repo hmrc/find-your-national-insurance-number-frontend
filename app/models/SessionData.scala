@@ -26,7 +26,7 @@ case class SessionData(userAnswers: UserAnswers, origin: OriginType, lastUpdated
 object SessionData {
   import play.api.libs.functional.syntax._
   val reads: Reads[SessionData] = (
-    (__ \ "userAnswers").read[JsObject].map(UserAnswers(_)) and
+    (__ \ "userAnswers").read[UserAnswers] and
       (__ \ "origin").read[OriginType] and
       (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat) and
       (__ \ "_id").read[String]

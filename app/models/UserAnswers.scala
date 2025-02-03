@@ -66,38 +66,7 @@ final case class UserAnswers(
 }
 
 object UserAnswers {
-
-
-/*
-
-  val reads: Reads[UserAnswers] = {
-
-    import play.api.libs.functional.syntax._
-
-    (
-      (__ \ "_id").read[String] and
-      (__ \ "data").read[JsObject] and
-      (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
-    ) (UserAnswers.apply _)
-  }
-
-  val writes: OWrites[UserAnswers] = {
-
-    import play.api.libs.functional.syntax._
-
-    (
-      (__ \ "_id").write[String] and
-      (__ \ "data").write[JsObject] and
-      (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat)
-    ) (unlift(UserAnswers.unapply))
-  }
-
-  implicit val format: OFormat[UserAnswers] = OFormat(reads, writes)
- */
-
-  val reads: Reads[UserAnswers] = Reads[UserAnswers] { jsValue =>
-  JsSuccess(UserAnswers(jsValue.as[JsObject]))
-  }
+  val reads: Reads[UserAnswers] = Reads[UserAnswers]( jsValue => JsSuccess(UserAnswers(jsValue.as[JsObject])))
 
   val writes: OWrites[UserAnswers] = OWrites[UserAnswers] (_.data)
 
