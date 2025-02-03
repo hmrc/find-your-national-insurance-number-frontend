@@ -14,7 +14,7 @@ GET         /there-is-a-problem                             controllers.JourneyR
 GET         /account/register                               controllers.auth.AuthController.redirectToRegister(continueUrl: Option[RedirectUrl])
 GET         /redirect-to-save                               controllers.auth.AuthController.redirectToSMN()
 GET         /account/signin                                 controllers.auth.SignedOutController.onPageLoad
-GET         /account/signout                                controllers.auth.AuthController.signout(continueUrl: Option[RedirectUrl], origin: Option[controllers.bindable.Origin])
+GET         /account/signout                                controllers.auth.AuthController.signout(continueUrl: Option[RedirectUrl], origin: Option[OriginType])
 
 GET         /unauthorised                                   controllers.UnauthorisedController.onPageLoad
 

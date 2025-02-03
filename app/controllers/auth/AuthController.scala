@@ -18,7 +18,7 @@ package controllers.auth
 
 import config.FrontendAppConfig
 import controllers.actions.IdentifierAction
-import controllers.bindable.Origin
+import models.OriginType
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
@@ -29,14 +29,15 @@ import uk.gov.hmrc.sca.services.WrapperService
 
 import javax.inject.Inject
 
-class AuthController @Inject()(
-                                val controllerComponents: MessagesControllerComponents,
-                                config: FrontendAppConfig,
-                                identify: IdentifierAction,
-                                wrapperService: WrapperService
-                              ) extends FrontendBaseController with I18nSupport {
+class AuthController @Inject() (
+  val controllerComponents: MessagesControllerComponents,
+  config: FrontendAppConfig,
+  identify: IdentifierAction,
+  wrapperService: WrapperService
+) extends FrontendBaseController
+    with I18nSupport {
 
-  def signout(continueUrl: Option[RedirectUrl], origin: Option[Origin]): Action[AnyContent] =
+  def signout(continueUrl: Option[RedirectUrl], origin: Option[OriginType]): Action[AnyContent] =
     Action {
       val mdtpTrustedDomains: Set[String] = config.trustedDomains
       val policy: RedirectUrlPolicy[Id]   = AbsoluteWithHostnameFromAllowlist(mdtpTrustedDomains)
@@ -44,8 +45,8 @@ class AuthController @Inject()(
 
       safeUrl
         .orElse(origin.map(config.getFeedbackSurveyUrl))
-        .fold(BadRequest("Missing origin")) { url: String =>
-          Redirect(config.getBasGatewayFrontendSignOutUrl(RedirectUrl(url).get(policy).url))
+        .fold(BadRequest("Missing origin")) {
+          url: String => Redirect(config.getBasGatewayFrontendSignOutUrl(RedirectUrl(url).get(policy).url))
         }
     }
 
@@ -63,7 +64,7 @@ class AuthController @Inject()(
     val url: String                     = continueUrl.getOrElse(RedirectUrl(config.registerUrl)).get(policy).url
 
     val params: Map[String, Seq[Serializable]] = Map(
-      "origin" -> Seq(config.appName),
+      "origin"      -> Seq(config.appName),
       "continueUrl" -> Seq(url),
       "accountType" -> Seq("Individual")
     )

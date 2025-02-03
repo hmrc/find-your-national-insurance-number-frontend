@@ -29,6 +29,14 @@ object OriginType extends Enumerable.Implicits {
   case object FMN extends WithName("FMN") with OriginType
 
   val values: Seq[OriginType] = Seq(PDV, IV, FMN)
+  
+  def toFeedbackSource(originType: OriginType): String = {
+  originType match {
+    case PDV => ""
+    case IV => "IDENTITY_VERIFICATION"
+    case _ => "FIND_MY_NINO"
+  }
+  }
 
   private val mappings: Map[String, OriginType] = values.map(v => (v.toString, v)).toMap
 
