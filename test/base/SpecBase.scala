@@ -34,14 +34,14 @@ import scala.reflect.ClassTag
 
 class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuite {
 
-  implicit lazy val application: Application = applicationBuilder().build()
+  implicit lazy val application: Application           = applicationBuilder().build()
   implicit lazy val applicationWithConfig: Application = applicationBuilderWithConfig().build()
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-  val userAnswersId: String = "id"
+  implicit val hc: HeaderCarrier                       = HeaderCarrier()
+  val userAnswersId: String                            = "id"
 
   implicit val config: FrontendAppConfig = mock[FrontendAppConfig]
 
-  def emptyUserAnswers : UserAnswers = UserAnswers(userAnswersId)
+  def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
 
   def injector: Injector                               = app.injector
   def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
@@ -59,13 +59,14 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
       )
 
   protected def applicationBuilderWithConfig(
-                                              config: Map[String, Any] = Map(),
-                                              userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+    config: Map[String, Any] = Map(),
+    userAnswers: Option[UserAnswers] = None
+  ): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(
         config ++ Map(
           "microservice.services.auth.port" -> wiremockPort,
-          "microservice.host" -> "http://localhost:9900/fmn"
+          "microservice.host"               -> "http://localhost:9900/fmn"
         )
       )
       .overrides(
@@ -75,13 +76,14 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
       )
 
   protected def applicationBuilderCl50OnWithConfig(
-                                              config: Map[String, Any] = Map(),
-                                              userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+    config: Map[String, Any] = Map(),
+    userAnswers: Option[UserAnswers] = None
+  ): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(
         config ++ Map(
           "microservice.services.auth.port" -> wiremockPort,
-          "microservice.host" -> "http://localhost:9900/fmn"
+          "microservice.host"               -> "http://localhost:9900/fmn"
         )
       )
       .overrides(
