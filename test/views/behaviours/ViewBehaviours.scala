@@ -42,7 +42,7 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
       assertElementContainsText(link, "Sign out")
       assertElementContainsHref(
         link,
-        "http://localhost:14033/find-your-national-insurance-number/account/signout?continueUrl=http://localhost:9514/feedback/FMN"
+        "http://localhost:14033/find-your-national-insurance-number/account/signout?continueUrl=http://localhost:9514/feedback/FIND_MY_NINO"
       )
     }
 
