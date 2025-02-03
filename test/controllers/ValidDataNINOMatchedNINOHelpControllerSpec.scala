@@ -94,7 +94,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val userAnswers = UserAnswers(userAnswersId).set(ValidDataNINOMatchedNINOHelpPage, true).success.value
+      val userAnswers = UserAnswers().set(ValidDataNINOMatchedNINOHelpPage, true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -120,7 +120,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
 
       val mockSessionRepository = mock[SessionRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))

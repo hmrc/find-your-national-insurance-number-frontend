@@ -84,7 +84,7 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(ConfirmIdentityPage, true).success.value
+      val userAnswers = UserAnswers().set(ConfirmIdentityPage, true).success.value
 
       val application = applicationBuilderCl50OnWithConfig(
         Map("features.extendedIvJourney" -> false),
@@ -107,7 +107,7 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository = mock[SessionRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))

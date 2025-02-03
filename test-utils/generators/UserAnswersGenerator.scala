@@ -28,13 +28,13 @@ trait UserAnswersGenerator extends TryValues {
 
   val generators: Seq[Gen[(QuestionPage[_], JsValue)]] =
     arbitrary[(ConfirmIdentityPage.type, JsValue)] ::
-    arbitrary[(PostLetterPage.type, JsValue)] ::
-    arbitrary[(EnteredPostCodeNotFoundPage.type, JsValue)] ::
-    arbitrary[(ValidDataNINOMatchedNINOHelpPage.type, JsValue)] ::
-    arbitrary[(ConfirmYourPostcodePage.type, JsValue)] ::
-    arbitrary[(SelectAlternativeServicePage.type, JsValue)] ::
-    arbitrary[(SelectNINOLetterAddressPage.type, JsValue)] ::
-    Nil
+      arbitrary[(PostLetterPage.type, JsValue)] ::
+      arbitrary[(EnteredPostCodeNotFoundPage.type, JsValue)] ::
+      arbitrary[(ValidDataNINOMatchedNINOHelpPage.type, JsValue)] ::
+      arbitrary[(ConfirmYourPostcodePage.type, JsValue)] ::
+      arbitrary[(SelectAlternativeServicePage.type, JsValue)] ::
+      arbitrary[(SelectNINOLetterAddressPage.type, JsValue)] ::
+      Nil
 
   implicit lazy val arbitraryUserData: Arbitrary[UserAnswers] = {
 
@@ -42,16 +42,14 @@ trait UserAnswersGenerator extends TryValues {
 
     Arbitrary {
       for {
-        id      <- nonEmptyString
-        data    <- generators match {
-          case Nil => Gen.const(Map[QuestionPage[_], JsValue]())
-          case _   => Gen.mapOf(oneOf(generators))
-        }
-      } yield UserAnswers (
-        id = id,
-        data = data.foldLeft(Json.obj()) {
-          case (obj, (path, value)) =>
-            obj.setObject(path.path, value).get
+        id   <- nonEmptyString
+        data <- generators match {
+                  case Nil => Gen.const(Map[QuestionPage[_], JsValue]())
+                  case _   => Gen.mapOf(oneOf(generators))
+                }
+      } yield UserAnswers(
+        data = data.foldLeft(Json.obj()) { case (obj, (path, value)) =>
+          obj.setObject(path.path, value).get
         }
       )
     }

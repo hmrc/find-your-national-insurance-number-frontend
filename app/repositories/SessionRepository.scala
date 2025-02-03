@@ -17,7 +17,8 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.UserAnswers
+import models.requests.DataRequest
+import models.{SessionData, UserAnswers}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model._
 import play.api.libs.json.Format
@@ -31,24 +32,24 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SessionRepository @Inject()(
-                                   mongoComponent: MongoComponent,
-                                   appConfig: FrontendAppConfig,
-                                   clock: Clock
-                                 )(implicit ec: ExecutionContext)
-  extends PlayMongoRepository[UserAnswers](
-    collectionName = "user-answers",
-    mongoComponent = mongoComponent,
-    domainFormat   = UserAnswers.format,
-    indexes        = Seq(
-      IndexModel(
-        Indexes.ascending("lastUpdated"),
-        IndexOptions()
-          .name("lastUpdatedIdx")
-          .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
+class SessionRepository @Inject() (
+  mongoComponent: MongoComponent,
+  appConfig: FrontendAppConfig,
+  clock: Clock
+)(implicit ec: ExecutionContext)
+    extends PlayMongoRepository[SessionData](
+      collectionName = "user-answers",
+      mongoComponent = mongoComponent,
+      domainFormat = SessionData.format,
+      indexes = Seq(
+        IndexModel(
+          Indexes.ascending("lastUpdated"),
+          IndexOptions()
+            .name("lastUpdatedIdx")
+            .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
+        )
       )
-    )
-  ) {
+    ) {
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
@@ -59,30 +60,47 @@ class SessionRepository @Inject()(
       .updateOne(
         filter = byId(id),
         update = Updates.set("lastUpdated", Instant.now(clock))
-      ).toFuture()
+      )
+      .toFuture()
       .map(_ => true)
 
-  def get(id: String): Future[Option[UserAnswers]] =
-    keepAlive(id).flatMap {
-      _ =>
-        collection
-          .find(byId(id))
-          .headOption()
+  def get(id: String): Future[Option[SessionData]] =
+    keepAlive(id).flatMap { _ =>
+      collection
+        .find(byId(id))
+        .headOption()
     }
 
-  def set(answers: UserAnswers): Future[Boolean] = {
+  def set(sessionData: SessionData): Future[Boolean] = {
 
-    val updatedAnswers = answers copy (lastUpdated = Instant.now(clock))
+    val updatedSessionData = sessionData copy (lastUpdated = Instant.now(clock))
 
     collection
       .replaceOne(
-        filter      = byId(updatedAnswers.id),
-        replacement = updatedAnswers,
-        options     = ReplaceOptions().upsert(true)
+        filter = byId(updatedSessionData.id),
+        replacement = updatedSessionData,
+        options = ReplaceOptions().upsert(true)
       )
       .toFuture()
       .map(_ => true)
   }
+
+  def setUserAnswers(userAnswers: UserAnswers)(implicit request: DataRequest[_]): Future[Boolean] =
+    request.origin match {
+      case None         => throw new IllegalArgumentException("Missing origin in request")
+      case Some(origin) =>
+        val updatedSessionData =
+          SessionData(userAnswers = userAnswers, origin, lastUpdated = Instant.now(clock), id = request.userId)
+
+        collection
+          .replaceOne(
+            filter = byId(request.userId),
+            replacement = updatedSessionData,
+            options = ReplaceOptions().upsert(true)
+          )
+          .toFuture()
+          .map(_ => true)
+    }
 
   def clear(id: String): Future[Boolean] =
     collection

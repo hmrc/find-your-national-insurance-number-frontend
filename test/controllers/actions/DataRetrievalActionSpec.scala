@@ -17,10 +17,13 @@
 package controllers.actions
 
 import base.SpecBase
-import models.UserAnswers
 import models.requests.{IdentifierRequest, OptionalDataRequest}
+import models.{OriginType, SessionData, UserAnswers}
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
+import pages.ConfirmYourPostcodePage
 import play.api.test.FakeRequest
 import repositories.SessionRepository
 
@@ -28,8 +31,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
-
-  class Harness(sessionRepository: SessionRepository) extends DataRetrievalImpl(sessionRepository, None) {
+  private val dummyValue               = "ZZ11ZZ"
+  private val userAnswers: UserAnswers = UserAnswers().setOrException(ConfirmYourPostcodePage, dummyValue)
+  class HarnessNoOrigin(sessionRepository: SessionRepository) extends DataRetrievalImpl(sessionRepository, None) {
+    def callTransform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
+  }
+  class HarnessWithOrigin(sessionRepository: SessionRepository)
+      extends DataRetrievalImpl(sessionRepository, Some(OriginType.FMN)) {
     def callTransform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
   }
 
@@ -41,7 +49,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
 
         val sessionRepository = mock[SessionRepository]
         when(sessionRepository.get("id")) thenReturn Future(None)
-        val action            = new Harness(sessionRepository)
+        val action            = new HarnessNoOrigin(sessionRepository)
 
         val result = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
 
@@ -50,19 +58,57 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
 
     }
 
-    "when there is data in the cache" - {
-
-      "must build a userAnswers object and add it to the request" in {
-
+    "when there is data in the cache and no origin passed in" - {
+      "must add user answers and origin to the requestand not update cache" in {
         val sessionRepository = mock[SessionRepository]
-        when(sessionRepository.get("id")) thenReturn Future(Some(UserAnswers("id")))
-        val action            = new Harness(sessionRepository)
+        when(sessionRepository.get("id")) thenReturn Future(
+          Some(SessionData(userAnswers = userAnswers, origin = OriginType.PDV, id = "id"))
+        )
+        val action            = new HarnessNoOrigin(sessionRepository)
+        val result            = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
 
-        val result = action.callTransform(new IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
-
-        result.userAnswers mustBe defined
+        result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe Some(dummyValue)
+        result.origin mustBe Some(OriginType.PDV)
+        verify(sessionRepository, never).set(any())
       }
+    }
 
+    "when there is data in the cache and an origin passed in" - {
+      "must keep existing user answers and update origin to the new origin" in {
+        val sessionRepository                              = mock[SessionRepository]
+        when(sessionRepository.get("id")) thenReturn Future(
+          Some(SessionData(userAnswers = userAnswers, origin = OriginType.PDV, id = "id"))
+        )
+        when(sessionRepository.set(any())) thenReturn Future(true)
+        val action                                         = new HarnessWithOrigin(sessionRepository)
+        val sessionDataCaptor: ArgumentCaptor[SessionData] = ArgumentCaptor.forClass(classOf[SessionData])
+        val result                                         = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
+
+        result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe Some(dummyValue)
+        result.origin mustBe Some(OriginType.FMN)
+        verify(sessionRepository, times(1)).set(sessionDataCaptor.capture())
+        val actualSessionDataUpdated = sessionDataCaptor.getValue
+        actualSessionDataUpdated.userAnswers mustBe userAnswers
+        actualSessionDataUpdated.origin mustBe OriginType.FMN
+      }
+    }
+
+    "when there is no data in the cache and an origin passed in" - {
+      "must create a new user empty answers with specified origin" in {
+        val sessionRepository                              = mock[SessionRepository]
+        when(sessionRepository.get("id")) thenReturn Future(None)
+        when(sessionRepository.set(any())) thenReturn Future(true)
+        val action                                         = new HarnessWithOrigin(sessionRepository)
+        val sessionDataCaptor: ArgumentCaptor[SessionData] = ArgumentCaptor.forClass(classOf[SessionData])
+        val result                                         = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
+
+        result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe None
+        result.origin mustBe Some(OriginType.FMN)
+        verify(sessionRepository, times(1)).set(sessionDataCaptor.capture())
+        val actualSessionDataUpdated = sessionDataCaptor.getValue
+        actualSessionDataUpdated.userAnswers mustBe UserAnswers()
+        actualSessionDataUpdated.origin mustBe OriginType.FMN
+      }
     }
   }
 }

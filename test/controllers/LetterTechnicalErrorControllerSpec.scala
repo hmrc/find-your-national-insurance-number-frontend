@@ -141,7 +141,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
     "must not populate any value in the view on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(LetterTechnicalErrorPage, LetterTechnicalError.values.head)
+      val userAnswers = UserAnswers().set(LetterTechnicalErrorPage, LetterTechnicalError.values.head)
         .success.value
         .set(TryAgainCountCacheable, 0)
         .success.value
@@ -171,7 +171,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository = mock[SessionRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataWithPostcode)))
 
@@ -200,7 +200,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository       = mock[SessionRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value))

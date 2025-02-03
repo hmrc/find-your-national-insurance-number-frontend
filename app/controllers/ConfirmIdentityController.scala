@@ -66,7 +66,7 @@ class ConfirmIdentityController @Inject() (
           value =>
             for {
               updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmIdentityPage, value))
-              _              <- sessionRepository.set(updatedAnswers)
+              _              <- sessionRepository.setUserAnswers(updatedAnswers)
             } yield Redirect(navigator.nextPage(ConfirmIdentityPage, mode, updatedAnswers))
         )
   }

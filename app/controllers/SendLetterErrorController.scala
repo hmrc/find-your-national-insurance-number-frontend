@@ -73,7 +73,7 @@ class SendLetterErrorController @Inject()(
           )
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectAlternativeServicePage, value))
-            _ <- sessionRepository.set(updatedAnswers)
+            _ <- sessionRepository.setUserAnswers(updatedAnswers)
           } yield Redirect(navigator.nextPage(SelectAlternativeServicePage, mode, updatedAnswers))
         }
       )

@@ -94,7 +94,7 @@ class SendLetterErrorControllerSpec extends SpecBase {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val userAnswers = UserAnswers(userAnswersId).set(SelectAlternativeServicePage, SelectAlternativeService.values.head).success.value
+      val userAnswers = UserAnswers().set(SelectAlternativeServicePage, SelectAlternativeService.values.head).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -120,7 +120,7 @@ class SendLetterErrorControllerSpec extends SpecBase {
 
       val mockSessionRepository = mock[SessionRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))

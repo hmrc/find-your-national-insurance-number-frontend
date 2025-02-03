@@ -65,7 +65,7 @@ class PostLetterController @Inject()(
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PostLetterPage, value))
-            _              <- sessionRepository.set(updatedAnswers)
+            _              <- sessionRepository.setUserAnswers(updatedAnswers)
           } yield Redirect(navigator.nextPage(PostLetterPage, mode, updatedAnswers))
       )
   }

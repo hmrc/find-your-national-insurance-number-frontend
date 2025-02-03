@@ -94,7 +94,7 @@ class SelectAlternativeServiceControllerSpec extends SpecBase with MockitoSugar 
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(SelectAlternativeServicePage, SelectAlternativeService.values.head).success.value
+      val userAnswers = UserAnswers().set(SelectAlternativeServicePage, SelectAlternativeService.values.head).success.value
 
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
@@ -121,7 +121,7 @@ class SelectAlternativeServiceControllerSpec extends SpecBase with MockitoSugar 
 
       val mockSessionRepository = mock[SessionRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 

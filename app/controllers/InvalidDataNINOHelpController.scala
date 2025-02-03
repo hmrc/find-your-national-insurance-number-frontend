@@ -73,7 +73,7 @@ class InvalidDataNINOHelpController @Inject()(
           )
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(InvalidDataNINOHelpPage, value))
-            _ <- sessionRepository.set(updatedAnswers)
+            _ <- sessionRepository.setUserAnswers(updatedAnswers)
           } yield Redirect(navigator.nextPage(InvalidDataNINOHelpPage, mode, updatedAnswers))
         }
       )

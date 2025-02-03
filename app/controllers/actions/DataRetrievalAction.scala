@@ -18,11 +18,9 @@ package controllers.actions
 
 import com.google.inject.ImplementedBy
 import models.requests.{IdentifierRequest, OptionalDataRequest}
-import models.{OriginType, UserAnswers}
+import models.{OriginType, SessionData, UserAnswers}
 import play.api.Logging
-import play.api.libs.json.JsPath
 import play.api.mvc.ActionTransformer
-import queries.{Gettable, Settable}
 import repositories.SessionRepository
 
 import java.time.Instant
@@ -34,30 +32,31 @@ class DataRetrievalImpl(sessionRepository: SessionRepository, originType: Option
 ) extends DataRetrieval
     with Logging {
 
-  private case object OriginCacheable extends Gettable[OriginType] with Settable[OriginType] {
-    override def path: JsPath = JsPath \ toString
-
-    override def toString: String = "origin"
-  }
-
   override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] = {
-    def getOrCreateUserAnswers(optUserAnswers: Option[UserAnswers]) =
-      optUserAnswers match {
+    def getOrCreateSessionData(optSessionData: Option[SessionData], origin: OriginType): SessionData =
+      optSessionData match {
         case None     =>
-          UserAnswers(
-            id = request.userId,
-            lastUpdated = Instant.now(java.time.Clock.systemUTC())
+          SessionData(
+            userAnswers = UserAnswers(),
+            origin = origin,
+            lastUpdated = Instant.now(java.time.Clock.systemUTC()),
+            id = request.userId
           )
-        case Some(ua) => ua
+        case Some(sd) => sd copy (origin = origin)
       }
 
-    sessionRepository.get(request.userId).flatMap { optUserAnswers =>
+    sessionRepository.get(request.userId).flatMap { optSessionData =>
       val futureOptionOriginType = originType match {
         case optOriginType @ Some(origin) =>
-          val updatedUA = getOrCreateUserAnswers(optUserAnswers).setOrException(OriginCacheable, origin)
-          sessionRepository.set(updatedUA).map(_ => Tuple2(Some(updatedUA), optOriginType))
+
+          val sessionData = getOrCreateSessionData(optSessionData, origin)
+          sessionRepository
+            .set(sessionData)
+            .map(_ => Tuple2(Some(sessionData.userAnswers), optOriginType))
         case None                         =>
-          Future.successful(Tuple2(optUserAnswers, optUserAnswers.flatMap(_.get(OriginCacheable))))
+          Future.successful(
+            Tuple2(optSessionData.map(_.userAnswers), optSessionData.map(_.origin))
+          )
       }
 
       futureOptionOriginType.map { case (optUA, optOriginType) =>

@@ -163,7 +163,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
     "must redirect to the postcode page when valid data is submitted" in {
       val mockSessionRepository = mock[SessionRepository]
       val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
-      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseData)))
 
@@ -194,7 +194,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
     "must redirect to postcode issue page when postcode entered doesn't match NPS postcode" in {
       val mockSessionRepository = mock[SessionRepository]
       val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
-      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseData)))
 
@@ -225,7 +225,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
     "must throw an exception when nps postcode missing" in {
       val mockSessionRepository = mock[SessionRepository]
       val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
-      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseDataNoNpsPostcode)))
 
@@ -254,7 +254,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(ConfirmYourPostcodePage, "answer").success.value
+      val userAnswers = UserAnswers().set(ConfirmYourPostcodePage, "answer").success.value
 
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
@@ -366,7 +366,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       val mockNPSFMNConnector = mock[NPSFMNConnector]
       val mockNPSFMNService = mock[NPSFMNService]
       val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
-      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseData)))
       when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))
@@ -406,7 +406,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       val mockNPSFMNConnector = mock[NPSFMNConnector]
       val mockNPSFMNService = mock[NPSFMNService]
       val mockIndividualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
-      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseData)))
       when(mockNPSFMNService.sendLetter(any(), any())(any(), any()))

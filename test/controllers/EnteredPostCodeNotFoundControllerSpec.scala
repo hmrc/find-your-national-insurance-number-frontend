@@ -95,7 +95,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
     "must populate the view correctly on a GET when the question has previously been answered" in {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
-      val userAnswers = UserAnswers(userAnswersId).set(EnteredPostCodeNotFoundPage, EnteredPostCodeNotFound.values.head).success.value
+      val userAnswers = UserAnswers().set(EnteredPostCodeNotFoundPage, EnteredPostCodeNotFound.values.head).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -119,7 +119,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository = mock[SessionRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any())(any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
