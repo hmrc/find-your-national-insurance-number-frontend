@@ -16,11 +16,12 @@
 
 package models
 
+import models.InvalidDataNINOHelp.PhoneHmrc
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import pages.ConfirmIdentityPage
+import pages.{ConfirmIdentityPage, InvalidDataNINOHelpPage}
 import play.api.libs.json.{JsValue, Json}
 
 class SessionDataSpec extends AnyWordSpec with GuiceOneAppPerSuite with Matchers with BeforeAndAfterEach {
@@ -37,13 +38,20 @@ class SessionDataSpec extends AnyWordSpec with GuiceOneAppPerSuite with Matchers
     }
 
     "read correctly in old format" in {
-      val userAnswers          = UserAnswers().setOrException(ConfirmIdentityPage, true)
-      val sessionData          = SessionData(userAnswers = userAnswers, origin = OriginType.PDV, id = "id")
-      val sessionJson: JsValue = Json.toJson(sessionData)
-      val readInSessionData    = sessionJson.as[SessionData]
-      readInSessionData.origin mustBe sessionData.origin
-      readInSessionData.userAnswers mustBe sessionData.userAnswers
-      readInSessionData.id mustBe sessionData.id
+      val sessionJson: JsValue = Json.parse("""{
+        |    "_id" : "session-43ee12c0-7aa8-4027-8cfb-de8a0f1a1c75",
+        |    "data" : {
+        |        "origin" : "PDV",
+        |        "invalidDataNinoHelp" : "phoneHMRC"
+        |    },
+        |    "lastUpdated" : ISODate("2025-02-03T11:18:01.960Z")
+        |}""".stripMargin)
+
+
+      val readInSessionData = sessionJson.as[SessionData]
+      readInSessionData.origin mustBe OriginType.PDV
+      readInSessionData.userAnswers.get(InvalidDataNINOHelpPage) mustBe Some(PhoneHmrc)
+      readInSessionData.id mustBe "session-43ee12c0-7aa8-4027-8cfb-de8a0f1a1c75"
     }
   }
 

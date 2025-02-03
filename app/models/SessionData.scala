@@ -25,12 +25,34 @@ case class SessionData(userAnswers: UserAnswers, origin: OriginType, lastUpdated
 
 object SessionData {
   import play.api.libs.functional.syntax._
-  val reads: Reads[SessionData] = (
+  private val readsNewFormat: Reads[SessionData] = (
     (__ \ "userAnswers").read[UserAnswers] and
       (__ \ "origin").read[OriginType] and
       (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat) and
       (__ \ "_id").read[String]
   )(SessionData.apply _)
+
+  private val readsOldFormat: Reads[SessionData] = (
+    (__ \ "data").read[UserAnswers] and
+      (__ \ "data" \ "origin").read[String] and
+      (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat) and
+      (__ \ "_id").read[String]
+  ) { (ua, o, lastUpdated, id) =>
+    val origin = OriginType.values.find(_.toString == o) match {
+      case Some(origin) => origin
+      case None         => throw new IllegalArgumentException("Missing origin type")
+    }
+
+    SessionData(ua, origin, lastUpdated, id)
+  }
+
+  val reads: Reads[SessionData] = Reads { js =>
+    if ((js \ "userAnswers").isDefined) {
+      readsNewFormat.reads(js)
+    } else {
+      readsOldFormat.reads(js)
+    }
+  }
 
   val writes: OWrites[SessionData] =
     (
