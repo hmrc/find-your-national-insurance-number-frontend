@@ -74,24 +74,21 @@ class SessionRepositoryISpec
   }
 
   ".setUserAnswers" - {
-    "must set the last updated time and the origin on the supplied user answers to `now`, and save them" in {
+    "must set the last updated time to now or greater and the user answers and save them" in {
+      val expectedResult = sessionData.copy(lastUpdated = instant, origin = OriginType.PDV)
 
-      val expectedResult = sessionData.copy(lastUpdated = instant, origin = OriginType.FMN)
+      insert(sessionData).futureValue
 
-      val setResult     = repository.setUserAnswers(userAnswers)(request).futureValue
+      val setResult     = repository.setUserAnswers("id", userAnswers).futureValue
       val updatedRecord = find(Filters.equal("_id", sessionData.id)).futureValue.headOption.value
 
       setResult mustEqual true
-      updatedRecord mustEqual expectedResult
+      updatedRecord.id mustEqual expectedResult.id
+      updatedRecord.origin mustEqual expectedResult.origin
+      updatedRecord.userAnswers mustEqual expectedResult.userAnswers
+      updatedRecord.lastUpdated.compareTo(instant) >= 0 mustBe true
     }
 
-    "must throw exception when request is missing origin" in {
-
-      a[IllegalArgumentException] mustBe thrownBy {
-        repository.setUserAnswers(userAnswers)(request copy (origin = None)).futureValue
-      }
-
-    }
   }
 
   ".get" - {
