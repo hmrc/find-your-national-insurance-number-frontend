@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import models.UserAnswers
+import controllers.routes
 import models.requests.{DataRequest, OptionalDataRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
@@ -37,9 +37,7 @@ class ValidCustomerDataRequiredActionImpl @Inject() (
         case Some(pdvData) =>
           if (pdvData.validCustomer.getOrElse(false)) {
             request.userAnswers match {
-              case None       =>
-                val userAnswers = UserAnswers()
-                Right(DataRequest(request.request, request.userId, userAnswers, request.credId, request.origin))
+              case None       => Left(Redirect(routes.JourneyRecoveryController.onPageLoad()))
               case Some(data) =>
                 Right(DataRequest(request.request, request.userId, data, request.credId, request.origin))
             }
@@ -48,10 +46,9 @@ class ValidCustomerDataRequiredActionImpl @Inject() (
           }
         case _             =>
           // No PDV data; check the user answers cache. If no user answers then no session.
-          if (request.userAnswers.isEmpty) {
-            Left(Redirect(controllers.auth.routes.SignedOutController.onPageLoad).withNewSession)
-          } else {
-            Left(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+          request.userAnswers match {
+            case None    => Left(Redirect(controllers.auth.routes.SignedOutController.onPageLoad).withNewSession)
+            case Some(_) => Left(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
           }
       }
 }

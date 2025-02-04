@@ -281,7 +281,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseDataWithPostcode)))
 
-      val application = applicationBuilder(userAnswers = None)
+      val application = applicationBuilder(userAnswers = Some(UserAnswers()))
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
           bind[SessionRepository].toInstance(mockSessionRepository)
@@ -307,7 +307,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseDataWithPostcode)))
 
-      val application = applicationBuilder(userAnswers = None)
+      val application = applicationBuilder(userAnswers = Some(UserAnswers()))
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
           bind[SessionRepository].toInstance(mockSessionRepository)
