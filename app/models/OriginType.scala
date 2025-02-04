@@ -30,9 +30,8 @@ object OriginType extends Enumerable.Implicits {
 
   def toFeedbackSource(originType: OriginType): String =
     originType match {
-      case PDV => "PERSONAL_DETAILS_VALIDATION"
-      case IV  => "IDENTITY_VERIFICATION"
-      case _   => "FIND_MY_NINO"
+      case FMN   => "FIND_MY_NINO"
+      case s => s.toString
     }
 
   private val mappings: Map[String, OriginType] = values.map(v => (v.toString, v)).toMap
