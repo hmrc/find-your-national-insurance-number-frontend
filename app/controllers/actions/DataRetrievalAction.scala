@@ -32,44 +32,45 @@ class DataRetrievalImpl(sessionRepository: SessionRepository, originType: Option
 ) extends DataRetrieval
     with Logging {
 
-  override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] = {
-    def getOrCreateSessionData(optSessionData: Option[SessionData], origin: OriginType): SessionData =
-      optSessionData match {
-        case None     =>
+  private def consolidateSessionData(
+    optSessionDataFromRepository: Option[SessionData],
+    id: String
+  ): Future[Option[SessionData]] = {
+    val optSD = (originType, optSessionDataFromRepository) match {
+      case (Some(origin), None)     =>
+        Some(
           SessionData(
             userAnswers = UserAnswers(),
             origin = origin,
             lastUpdated = Instant.now(java.time.Clock.systemUTC()),
-            id = request.userId
+            id = id
           )
-        case Some(sd) => sd copy (origin = origin)
-      }
+        )
+      case (Some(origin), Some(sd)) => Some(sd copy (origin = origin))
+      case (None, None)             => None
+      case (None, Some(sd))         => Some(sd)
+    }
 
-    sessionRepository.get(request.userId).flatMap { optSessionData =>
-      val futureOptionOriginType = originType match {
-        case optOriginType @ Some(origin) =>
+    (originType, optSD) match {
+      case (Some(_), Some(sd))                => sessionRepository.set(sd).map(_ => optSD)
+      case (None, Some(sd)) if sd.isOldFormat =>
+        sessionRepository.set(sd).map(_ => optSD) // If it's in the old format write back immediately in the new format
+      case _                                  => Future.successful(optSD)
+    }
+  }
 
-          val sessionData = getOrCreateSessionData(optSessionData, origin)
-          sessionRepository
-            .set(sessionData)
-            .map(_ => Tuple2(Some(sessionData.userAnswers), optOriginType))
-        case None                         =>
-          Future.successful(
-            Tuple2(optSessionData.map(_.userAnswers), optSessionData.map(_.origin))
-          )
-      }
-
-      futureOptionOriginType.map { case (optUA, optOriginType) =>
+  override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] =
+    sessionRepository.get(request.userId).flatMap { optSessionDataFromRepository =>
+      consolidateSessionData(optSessionDataFromRepository, request.userId).map { sd =>
         OptionalDataRequest(
           request.request,
           request.userId,
-          optUA,
+          sd.map(_.userAnswers),
           request.credId,
-          optOriginType
+          sd.map(_.origin)
         )
       }
     }
-  }
 }
 
 @ImplementedBy(classOf[DataRetrievalImpl])

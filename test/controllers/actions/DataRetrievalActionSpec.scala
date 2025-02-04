@@ -44,9 +44,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
   "Data Retrieval Action" - {
 
     "when there is no data in the cache" - {
-
       "must set userAnswers to 'None' in the request" in {
-
         val sessionRepository = mock[SessionRepository]
         when(sessionRepository.get("id")) thenReturn Future(None)
         val action            = new HarnessNoOrigin(sessionRepository)
@@ -59,7 +57,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
     }
 
     "when there is data in the cache and no origin passed in" - {
-      "must add user answers and origin to the requestand not update cache" in {
+      "if session data new format must add user answers and origin to the request and not update cache" in {
         val sessionRepository = mock[SessionRepository]
         when(sessionRepository.get("id")) thenReturn Future(
           Some(SessionData(userAnswers = userAnswers, origin = OriginType.PDV, id = "id"))
@@ -70,6 +68,19 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
         result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe Some(dummyValue)
         result.origin mustBe Some(OriginType.PDV)
         verify(sessionRepository, never).set(any())
+      }
+      "if session data old format must add user answers and origin to the request and update cache" in {
+        val sessionRepository = mock[SessionRepository]
+        when(sessionRepository.get("id")) thenReturn Future(
+          Some(SessionData(userAnswers = userAnswers, origin = OriginType.PDV, id = "id", isOldFormat = true))
+        )
+        when(sessionRepository.set(any())) thenReturn Future(true)
+        val action            = new HarnessNoOrigin(sessionRepository)
+        val result            = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
+
+        result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe Some(dummyValue)
+        result.origin mustBe Some(OriginType.PDV)
+        verify(sessionRepository, times(1)).set(any())
       }
     }
 

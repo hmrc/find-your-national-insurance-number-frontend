@@ -22,7 +22,21 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
 
-case class SessionData(userAnswers: UserAnswers, origin: OriginType, lastUpdated: Instant = Instant.now, id: String)
+// TODO: After the changes for DDCNL-9796 have been live for at least a day or so the following should be done:-
+//
+// Remove isOldFormat from the SessionData case class and all code relating to the true value. This will be from
+// this file and the DataRetrievalAction class. This is because this field and program code is purely to cater for
+// any Mongo documents which remain in the session cache (i.e. in the existing/ old format) when these changes
+// go live: they will be gone from this short-lived cache within at most a few hours (TTL is just 15 mins).
+//
+
+case class SessionData(
+  userAnswers: UserAnswers,
+  origin: OriginType,
+  lastUpdated: Instant = Instant.now,
+  id: String,
+  isOldFormat: Boolean = false
+)
 
 object SessionData {
   import play.api.libs.functional.syntax._
@@ -31,9 +45,8 @@ object SessionData {
       (__ \ "origin").read[OriginType] and
       (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat) and
       (__ \ "_id").read[String]
-  )(SessionData.apply _)
+  )((ua, o, l, i) => SessionData(ua, o, l, i))
 
-  // TODO: Remove this old format reads once the changes have been live for a day
   private val readsOldFormat: Reads[SessionData] = (
     (__ \ "data").read[UserAnswers] and
       (__ \ "data" \ "origin").read[String] and
@@ -44,10 +57,9 @@ object SessionData {
       case Some(origin) => origin
       case None         => throw new JsonParseException("Missing origin type")
     }
-    SessionData(ua, origin, lastUpdated, id)
+    SessionData(ua, origin, lastUpdated, id, isOldFormat = true)
   }
 
-  // TODO: Remove the old format reads once the changes have been live for a day
   val reads: Reads[SessionData] = Reads { js =>
     if ((js \ "userAnswers").isDefined) {
       readsNewFormat.reads(js)
@@ -62,7 +74,7 @@ object SessionData {
         (__ \ "origin").write[OriginType] and
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat) and
         (__ \ "_id").write[String]
-    )(unlift(SessionData.unapply))
+    ).apply(sd => Tuple4(sd.userAnswers, sd.origin, sd.lastUpdated, sd.id))
 
   implicit val format: OFormat[SessionData] = OFormat(reads, writes)
 }

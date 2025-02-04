@@ -37,6 +37,7 @@ class SessionDataSpec extends AnyWordSpec with GuiceOneAppPerSuite with Matchers
       readInSessionData.origin mustBe sessionData.origin
       readInSessionData.userAnswers mustBe sessionData.userAnswers
       readInSessionData.id mustBe sessionData.id
+      readInSessionData.isOldFormat mustBe false
     }
 
     "read correctly in old format" in {
@@ -54,6 +55,8 @@ class SessionDataSpec extends AnyWordSpec with GuiceOneAppPerSuite with Matchers
       readInSessionData.userAnswers.get(SelectAlternativeServicePage) mustBe Some(PhoneHmrc)
       readInSessionData.id mustBe "session-803bec74-435d-42a4-8b3f-204baca7e009"
       readInSessionData.lastUpdated mustBe Instant.ofEpochMilli(1738582855820L)
+      readInSessionData.isOldFormat mustBe true
+
     }
   }
 
