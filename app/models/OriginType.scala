@@ -27,8 +27,9 @@ object OriginType extends Enumerable.Implicits {
   case object IV extends WithName("IV") with OriginType
 
   case object FMN extends WithName("FMN") with OriginType
+  case object Unknown extends WithName("Unknown") with OriginType
 
-  val values: Seq[OriginType] = Seq(PDV, IV, FMN)
+  val values: Seq[OriginType] = Seq(PDV, IV, FMN, Unknown)
 
   def toFeedbackSource(originType: OriginType): String =
     originType match {
@@ -54,7 +55,7 @@ object OriginType extends Enumerable.Implicits {
           case Right(s) =>
             values.find(_.toString == s) match {
               case Some(ot) => Some(Right(ot))
-              case _        => None
+              case _        => Some(Right(Unknown))
             }
           case _        => Some(Left(s"Unable to bind query parameter: $key"))
         }

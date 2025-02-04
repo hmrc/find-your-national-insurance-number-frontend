@@ -56,6 +56,7 @@ class CheckDetailsController @Inject() (
   def onPageLoad(optOrigin: Option[OriginType], mode: Mode): Action[AnyContent] =
     (identify andThen getData(optOrigin) andThen requireData).async { implicit request =>
       auditService.start()
+      println("\nopt orig" + optOrigin)
       optOrigin match {
         case Some(_) => pdvCheck(mode, optOrigin)
         case _       =>
