@@ -23,9 +23,7 @@ sealed trait OriginType
 
 object OriginType extends Enumerable.Implicits {
   case object PDV extends WithName("PDV") with OriginType
-
   case object IV extends WithName("IV") with OriginType
-
   case object FMN extends WithName("FMN") with OriginType
   case object Unknown extends WithName("Unknown") with OriginType
 

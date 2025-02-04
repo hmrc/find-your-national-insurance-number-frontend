@@ -18,6 +18,7 @@ package controllers
 
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import handlers.ErrorHandler
+import models.OriginType.Unknown
 import models.errors.{ConnectorError, IndividualDetailsError}
 import models.pdv._
 import models.requests.DataRequest
@@ -54,12 +55,12 @@ class CheckDetailsController @Inject() (
     with Logging {
 
   def onPageLoad(optOrigin: Option[OriginType], mode: Mode): Action[AnyContent] =
-    (identify andThen getData(optOrigin) andThen requireData).async { implicit request =>
+    (identify andThen getData(optOrigin, createSessionData = true) andThen requireData).async { implicit request =>
       auditService.start()
       println("\nopt orig" + optOrigin)
       optOrigin match {
-        case Some(_) => pdvCheck(mode, optOrigin)
-        case _       =>
+        case Some(o) if o != Unknown => pdvCheck(mode, optOrigin)
+        case _                       =>
           logger.error(s"Missing valid origin: $optOrigin")
           Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad(mode = mode)))
       }

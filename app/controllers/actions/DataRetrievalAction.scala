@@ -27,35 +27,41 @@ import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class DataRetrievalImpl(sessionRepository: SessionRepository, originType: Option[OriginType])(implicit
+class DataRetrievalImpl(
+  sessionRepository: SessionRepository,
+  originType: Option[OriginType],
+  createSessionData: Boolean
+)(implicit
   val executionContext: ExecutionContext
 ) extends DataRetrieval
     with Logging {
 
+  private def retrieveOrCreateSessionData(
+    optSessionDataFromRepository: Option[SessionData],
+    id: String
+  ): SessionData =
+    (originType, optSessionDataFromRepository) match {
+      case (_, None)           =>
+        SessionData(
+          userAnswers = UserAnswers(),
+          origin = originType,
+          lastUpdated = Instant.now(java.time.Clock.systemUTC()),
+          id = id
+        )
+      case (Some(_), Some(sd)) => sd copy (origin = originType)
+      case (None, Some(sd))    => sd
+    }
+
   private def consolidateSessionData(
     optSessionDataFromRepository: Option[SessionData],
     id: String
-  ): Future[Option[SessionData]] = {
-    val optSD = (originType, optSessionDataFromRepository) match {
-      case (_, None)          =>
-        Some(
-          SessionData(
-            userAnswers = UserAnswers(),
-            origin = originType,
-            lastUpdated = Instant.now(java.time.Clock.systemUTC()),
-            id = id
-          )
-        )
-      case (Some(_), Some(sd)) => Some(sd copy (origin = originType))
-      case (None, Some(sd))         => Some(sd)
-    }
-
-    (originType, optSD) match {
-      case (Some(_), Some(sd))                => sessionRepository.set(sd).map(_ => optSD)
-      case (None, Some(sd)) if sd.isOldFormat =>
-        sessionRepository.set(sd).map(_ => optSD) // If it's in the old format write back immediately in the new format
-      case _                                  => Future.successful(optSD)
-    }
+  ): Future[SessionData] = {
+    val sd = retrieveOrCreateSessionData(optSessionDataFromRepository, id)
+    ((originType, createSessionData) match {
+      case (_, true)                   => sessionRepository.set(sd)
+      case (None, _) if sd.isOldFormat => sessionRepository.set(sd)
+      case _                           => Future.successful(false)
+    }).map(_ => sd)
   }
 
   override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] =
@@ -64,9 +70,9 @@ class DataRetrievalImpl(sessionRepository: SessionRepository, originType: Option
         OptionalDataRequest(
           request.request,
           request.userId,
-          sd.map(_.userAnswers),
+          Some(sd.userAnswers),
           request.credId,
-          sd.flatMap(_.origin)
+          sd.origin
         )
       }
     }
@@ -79,11 +85,11 @@ class DataRetrievalActionImpl @Inject() (
   val sessionRepository: SessionRepository
 )(implicit val executionContext: ExecutionContext)
     extends DataRetrievalAction {
-  override def apply(originType: Option[OriginType]): DataRetrieval =
-    new DataRetrievalImpl(sessionRepository, originType)
+  override def apply(originType: Option[OriginType], createSessionData: Boolean): DataRetrieval =
+    new DataRetrievalImpl(sessionRepository, originType, createSessionData)
 }
 
 @ImplementedBy(classOf[DataRetrievalActionImpl])
 trait DataRetrievalAction {
-  def apply(originType: Option[OriginType] = None): DataRetrieval
+  def apply(originType: Option[OriginType] = None, createSessionData: Boolean = false): DataRetrieval
 }

@@ -36,8 +36,8 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
   class HarnessNoOrigin(sessionRepository: SessionRepository) extends DataRetrievalImpl(sessionRepository, None) {
     def callTransform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
   }
-  class HarnessWithOrigin(sessionRepository: SessionRepository)
-      extends DataRetrievalImpl(sessionRepository, Some(OriginType.FMN)) {
+  class HarnessWithOrigin(sessionRepository: SessionRepository, optOrigin: Option[OriginType] = Some(OriginType.FMN))
+      extends DataRetrievalImpl(sessionRepository, optOrigin) {
     def callTransform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
   }
 
@@ -91,7 +91,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
     }
 
     "when there is no data in the cache and an origin passed in" - {
-      "must create a new user empty answers with specified origin" in {
+      "must create a new user empty answers with specified origin and save it in Mongo" in {
         val sessionRepository                              = mock[SessionRepository]
         when(sessionRepository.get("id")) thenReturn Future(None)
         when(sessionRepository.set(any())) thenReturn Future(true)
@@ -108,13 +108,27 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "when there is no data in the cache and no origin passed in" - {
-      "must create a new user empty answers with no origin" in {
-        val sessionRepository                              = mock[SessionRepository]
+    "when there is no data in the cache and the UNKNOWN origin passed in" - {
+      "must create a new user empty answers with UNKNOWN origin but NOT save it in Mongo" in {
+        val sessionRepository = mock[SessionRepository]
         when(sessionRepository.get("id")) thenReturn Future(None)
         when(sessionRepository.set(any())) thenReturn Future(true)
-        val action                                         = new HarnessNoOrigin(sessionRepository)
-        val result                                         = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
+        val action            = new HarnessWithOrigin(sessionRepository, Some(OriginType.Unknown))
+        val result            = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
+
+        result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe None
+        result.origin mustBe Some(OriginType.Unknown)
+        verify(sessionRepository, never).set(any)
+      }
+    }
+
+    "when there is no data in the cache and no origin passed in" - {
+      "must create a new user empty answers with no origin" in {
+        val sessionRepository = mock[SessionRepository]
+        when(sessionRepository.get("id")) thenReturn Future(None)
+        when(sessionRepository.set(any())) thenReturn Future(true)
+        val action            = new HarnessNoOrigin(sessionRepository)
+        val result            = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
 
         result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe None
         result.origin mustBe None
