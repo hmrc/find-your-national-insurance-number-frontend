@@ -37,17 +37,16 @@ class DataRetrievalImpl(sessionRepository: SessionRepository, originType: Option
     id: String
   ): Future[Option[SessionData]] = {
     val optSD = (originType, optSessionDataFromRepository) match {
-      case (Some(origin), None)     =>
+      case (_, None)          =>
         Some(
           SessionData(
             userAnswers = UserAnswers(),
-            origin = origin,
+            origin = originType,
             lastUpdated = Instant.now(java.time.Clock.systemUTC()),
             id = id
           )
         )
-      case (Some(origin), Some(sd)) => Some(sd copy (origin = origin))
-      case (None, None)             => None
+      case (Some(_), Some(sd)) => Some(sd copy (origin = originType))
       case (None, Some(sd))         => Some(sd)
     }
 
@@ -67,7 +66,7 @@ class DataRetrievalImpl(sessionRepository: SessionRepository, originType: Option
           request.userId,
           sd.map(_.userAnswers),
           request.credId,
-          sd.map(_.origin)
+          sd.flatMap(_.origin)
         )
       }
     }

@@ -42,25 +42,11 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
   }
 
   "Data Retrieval Action" - {
-
-    "when there is no data in the cache" - {
-      "must set userAnswers to 'None' in the request" in {
-        val sessionRepository = mock[SessionRepository]
-        when(sessionRepository.get("id")) thenReturn Future(None)
-        val action            = new HarnessNoOrigin(sessionRepository)
-
-        val result = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
-
-        result.userAnswers must not be defined
-      }
-
-    }
-
     "when there is data in the cache and no origin passed in" - {
       "if session data new format must add user answers and origin to the request and not update cache" in {
         val sessionRepository = mock[SessionRepository]
         when(sessionRepository.get("id")) thenReturn Future(
-          Some(SessionData(userAnswers = userAnswers, origin = OriginType.PDV, id = "id"))
+          Some(SessionData(userAnswers = userAnswers, origin = Some(OriginType.PDV), id = "id"))
         )
         val action            = new HarnessNoOrigin(sessionRepository)
         val result            = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
@@ -72,7 +58,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
       "if session data old format must add user answers and origin to the request and update cache" in {
         val sessionRepository = mock[SessionRepository]
         when(sessionRepository.get("id")) thenReturn Future(
-          Some(SessionData(userAnswers = userAnswers, origin = OriginType.PDV, id = "id", isOldFormat = true))
+          Some(SessionData(userAnswers = userAnswers, origin = Some(OriginType.PDV), id = "id", isOldFormat = true))
         )
         when(sessionRepository.set(any())) thenReturn Future(true)
         val action            = new HarnessNoOrigin(sessionRepository)
@@ -88,7 +74,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
       "must keep existing user answers and update origin to the new origin" in {
         val sessionRepository                              = mock[SessionRepository]
         when(sessionRepository.get("id")) thenReturn Future(
-          Some(SessionData(userAnswers = userAnswers, origin = OriginType.PDV, id = "id"))
+          Some(SessionData(userAnswers = userAnswers, origin = Some(OriginType.PDV), id = "id"))
         )
         when(sessionRepository.set(any())) thenReturn Future(true)
         val action                                         = new HarnessWithOrigin(sessionRepository)
@@ -100,7 +86,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
         verify(sessionRepository, times(1)).set(sessionDataCaptor.capture())
         val actualSessionDataUpdated = sessionDataCaptor.getValue
         actualSessionDataUpdated.userAnswers mustBe userAnswers
-        actualSessionDataUpdated.origin mustBe OriginType.FMN
+        actualSessionDataUpdated.origin mustBe Some(OriginType.FMN)
       }
     }
 
@@ -118,7 +104,21 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
         verify(sessionRepository, times(1)).set(sessionDataCaptor.capture())
         val actualSessionDataUpdated = sessionDataCaptor.getValue
         actualSessionDataUpdated.userAnswers mustBe UserAnswers()
-        actualSessionDataUpdated.origin mustBe OriginType.FMN
+        actualSessionDataUpdated.origin mustBe Some(OriginType.FMN)
+      }
+    }
+
+    "when there is no data in the cache and no origin passed in" - {
+      "must create a new user empty answers with no origin" in {
+        val sessionRepository                              = mock[SessionRepository]
+        when(sessionRepository.get("id")) thenReturn Future(None)
+        when(sessionRepository.set(any())) thenReturn Future(true)
+        val action                                         = new HarnessNoOrigin(sessionRepository)
+        val result                                         = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
+
+        result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe None
+        result.origin mustBe None
+        verify(sessionRepository, never).set(any)
       }
     }
   }

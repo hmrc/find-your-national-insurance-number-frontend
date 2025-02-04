@@ -16,7 +16,6 @@
 
 package models
 
-import org.bson.json.JsonParseException
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
@@ -32,7 +31,7 @@ import java.time.Instant
 
 case class SessionData(
   userAnswers: UserAnswers,
-  origin: OriginType,
+  origin: Option[OriginType],
   lastUpdated: Instant = Instant.now,
   id: String,
   isOldFormat: Boolean = false
@@ -42,22 +41,19 @@ object SessionData {
   import play.api.libs.functional.syntax._
   private val readsNewFormat: Reads[SessionData] = (
     (__ \ "userAnswers").read[UserAnswers] and
-      (__ \ "origin").read[OriginType] and
+      (__ \ "origin").readNullable[OriginType] and
       (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat) and
       (__ \ "_id").read[String]
   )((ua, o, l, i) => SessionData(ua, o, l, i))
 
   private val readsOldFormat: Reads[SessionData] = (
     (__ \ "data").read[UserAnswers] and
-      (__ \ "data" \ "origin").read[String] and
+      (__ \ "data" \ "origin").readNullable[String] and
       (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat) and
       (__ \ "_id").read[String]
   ) { (ua, o, lastUpdated, id) =>
-    val origin = OriginType.values.find(_.toString == o) match {
-      case Some(origin) => origin
-      case None         => throw new JsonParseException("Missing origin type")
-    }
-    SessionData(ua, origin, lastUpdated, id, isOldFormat = true)
+    val optOriginTYpe = o.flatMap(x => OriginType.values.find(_.toString == x))
+    SessionData(ua, optOriginTYpe, lastUpdated, id, isOldFormat = true)
   }
 
   val reads: Reads[SessionData] = Reads { js =>
@@ -71,7 +67,7 @@ object SessionData {
   val writes: OWrites[SessionData] =
     (
       (__ \ "userAnswers").write[UserAnswers] and
-        (__ \ "origin").write[OriginType] and
+        (__ \ "origin").writeNullable[OriginType] and
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat) and
         (__ \ "_id").write[String]
     ).apply(sd => Tuple4(sd.userAnswers, sd.origin, sd.lastUpdated, sd.id))

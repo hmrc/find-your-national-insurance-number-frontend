@@ -17,7 +17,6 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.requests.DataRequest
 import models.{SessionData, UserAnswers}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model._

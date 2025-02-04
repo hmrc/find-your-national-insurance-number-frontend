@@ -31,7 +31,7 @@ class SessionDataSpec extends AnyWordSpec with GuiceOneAppPerSuite with Matchers
   "reads" must {
     "read correctly in new format" in {
       val userAnswers          = UserAnswers().setOrException(ConfirmIdentityPage, true)
-      val sessionData          = SessionData(userAnswers = userAnswers, origin = OriginType.PDV, id = "id")
+      val sessionData          = SessionData(userAnswers = userAnswers, origin = Some(OriginType.PDV), id = "id")
       val sessionJson: JsValue = Json.toJson(sessionData)
       val readInSessionData    = sessionJson.as[SessionData]
       readInSessionData.origin mustBe sessionData.origin
@@ -49,7 +49,7 @@ class SessionDataSpec extends AnyWordSpec with GuiceOneAppPerSuite with Matchers
       )
 
       val readInSessionData = sessionJson.as[SessionData]
-      readInSessionData.origin mustBe OriginType.PDV
+      readInSessionData.origin mustBe Some(OriginType.PDV)
       readInSessionData.userAnswers.get(ValidDataNINOHelpPage) mustBe Some(true)
       readInSessionData.userAnswers.get(SelectNINOLetterAddressPage) mustBe Some(false)
       readInSessionData.userAnswers.get(SelectAlternativeServicePage) mustBe Some(PhoneHmrc)

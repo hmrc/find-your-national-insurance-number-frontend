@@ -47,7 +47,7 @@ class SessionRepositoryISpec
   private val stubClock: Clock = Clock.fixed(instant, ZoneId.systemDefault)
 
   private val userAnswers = UserAnswers(Json.obj("foo" -> "bar"))
-  private val sessionData = SessionData(userAnswers, OriginType.PDV, Instant.ofEpochSecond(1), "id")
+  private val sessionData = SessionData(userAnswers, Some(OriginType.PDV), Instant.ofEpochSecond(1), "id")
   private val request     = DataRequest(FakeRequest(), "id", userAnswers, Some("credid-01234"), Some(OriginType.FMN))
 
   private val mockAppConfig = mock[FrontendAppConfig]
@@ -75,7 +75,7 @@ class SessionRepositoryISpec
 
   ".setUserAnswers" - {
     "must set the last updated time to now or greater and the user answers and save them" in {
-      val expectedResult = sessionData.copy(lastUpdated = instant, origin = OriginType.PDV)
+      val expectedResult = sessionData.copy(lastUpdated = instant, origin = Some(OriginType.PDV))
 
       insert(sessionData).futureValue
 
