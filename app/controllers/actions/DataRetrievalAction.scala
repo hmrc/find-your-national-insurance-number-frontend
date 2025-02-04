@@ -58,9 +58,10 @@ class DataRetrievalImpl(
   ): Future[SessionData] = {
     val sd = retrieveOrCreateSessionData(optSessionDataFromRepository, id)
     ((originType, createSessionData) match {
-      case (_, true)                   => sessionRepository.set(sd)
-      case (None, _) if sd.isOldFormat => sessionRepository.set(sd)
-      case _                           => Future.successful(false)
+      case (_, true)                                 => sessionRepository.set(sd)
+      case (None, _) if sd.isOldFormat               => sessionRepository.set(sd)
+      case _ if optSessionDataFromRepository.isEmpty => sessionRepository.set(sd)
+      case _                                         => Future.successful(false)
     }).map(_ => sd)
   }
 

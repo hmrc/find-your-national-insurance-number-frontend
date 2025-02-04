@@ -16,8 +16,9 @@
 
 package controllers.actions
 
-import models.UserAnswers
+import controllers.routes
 import models.requests.{DataRequest, OptionalDataRequest}
+import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
 
 import javax.inject.Inject
@@ -27,12 +28,7 @@ class DataRequiredActionImpl @Inject() (implicit val executionContext: Execution
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] =
     request.userAnswers match {
-      case None       =>
-      // TODO: This will never happen!!!!
-        val userAnswers = UserAnswers()
-        Future.successful(
-          Right(DataRequest(request.request, request.userId, userAnswers, request.credId, request.origin))
-        )
+      case None       => Future.successful(Left(Redirect(routes.JourneyRecoveryController.onPageLoad())))
       case Some(data) =>
         Future.successful(Right(DataRequest(request.request, request.userId, data, request.credId, request.origin)))
     }

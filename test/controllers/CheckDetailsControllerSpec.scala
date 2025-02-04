@@ -53,7 +53,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
     reset(mockPersonalDetailsValidationService)
     reset(auditService)
     reset(mockCheckDetailsService)
-    //when(mockIndividualDetailsService.cacheOrigin(any(), any())).thenReturn(Future.successful((): Unit))
+    // when(mockIndividualDetailsService.cacheOrigin(any(), any())).thenReturn(Future.successful((): Unit))
   }
 
   "CheckDetailsController" - {
@@ -89,17 +89,6 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
 
         verify(auditService, times(1)).start()(any())
-      }
-
-      "when missing origin and no user answers" in {
-        val app = applicationBuilder(userAnswers = None).build()
-
-        val request = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(None, NormalMode).url)
-        val result  = route(app, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.InvalidDataNINOHelpController.onPageLoad(NormalMode).url
-
       }
 
       "when PDVResponseData validationStatus is failure" in {
