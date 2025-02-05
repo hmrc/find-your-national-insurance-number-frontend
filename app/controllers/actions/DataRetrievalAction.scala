@@ -52,6 +52,7 @@ class DataRetrievalImpl(
       case (None, Some(sd))    => sd
     }
 
+// TODO: Check it doesn't save on each on page load
   private def consolidateSessionData(
     optSessionDataFromRepository: Option[SessionData],
     id: String
@@ -60,7 +61,7 @@ class DataRetrievalImpl(
     ((originType, createSessionData) match {
       case (_, true)                                 => sessionRepository.set(sd)
       case (None, _) if sd.isOldFormat               => sessionRepository.set(sd)
-      case _ if optSessionDataFromRepository.isEmpty => sessionRepository.set(sd)
+      case _ if optSessionDataFromRepository.isEmpty => sessionRepository.set(sd) // AND createSessionData??? I.e. don't save if don't need to/ not been asked to
       case _                                         => Future.successful(false)
     }).map(_ => sd)
   }

@@ -36,7 +36,7 @@ class NINOLetterPostedConfirmationController @Inject()(
                                                         sessionCacheService: SessionCacheService
                                                       ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify) {
+  def onPageLoad: Action[AnyContent] = identify {
     implicit request =>
       val nino = request.session.data.getOrElse("nino", StringUtils.EMPTY)
       sessionCacheService.invalidateCache(nino, request.userId)
