@@ -52,18 +52,23 @@ class DataRetrievalImpl(
       case (None, Some(sd))    => sd
     }
 
-// TODO: Check it doesn't save on each on page load
   private def consolidateSessionData(
     optSessionDataFromRepository: Option[SessionData],
     id: String
   ): Future[SessionData] = {
     val sd = retrieveOrCreateSessionData(optSessionDataFromRepository, id)
-    ((originType, createSessionData) match {
-      case (_, true)                                 => sessionRepository.set(sd)
-      case (None, _) if sd.isOldFormat               => sessionRepository.set(sd)
-      case _ if optSessionDataFromRepository.isEmpty => sessionRepository.set(sd) // AND createSessionData??? I.e. don't save if don't need to/ not been asked to
-      case _                                         => Future.successful(false)
-    }).map(_ => sd)
+
+    /*
+    Save session data to Mongo if:-
+      controller asked for it (i.e. first page in journey) or
+      existing session data is in old Mongo format or
+      mid-journey the session has timed out
+     */
+    (if (createSessionData || sd.isOldFormat || optSessionDataFromRepository.isEmpty) {
+       sessionRepository.set(sd)
+     } else {
+       Future.successful(false)
+     }).map(_ => sd)
   }
 
   override protected def transform[A](request: IdentifierRequest[A]): Future[DataRequest[A]] =

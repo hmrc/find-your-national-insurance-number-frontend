@@ -30,11 +30,11 @@ import repositories.SessionRepository
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
+class DataRetrievalSpec extends SpecBase with MockitoSugar {
   private val dummyValue               = "ZZ11ZZ"
   private val userAnswers: UserAnswers = UserAnswers().setOrException(ConfirmYourPostcodePage, dummyValue)
 
-  class Harness(sessionRepository: SessionRepository, optOrigin: Option[OriginType], createSessionData: Boolean)
+  private class Harness(sessionRepository: SessionRepository, optOrigin: Option[OriginType], createSessionData: Boolean)
       extends DataRetrievalImpl(sessionRepository, optOrigin, createSessionData) {
     def callTransform[A](request: IdentifierRequest[A]): Future[DataRequest[A]] = transform(request)
   }
