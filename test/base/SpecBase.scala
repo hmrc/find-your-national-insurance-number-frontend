@@ -25,6 +25,7 @@ import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.inject.{Injector, bind}
+import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
@@ -49,10 +50,11 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
   def messagesApi: MessagesApi    = injector.instanceOf[MessagesApi]
   implicit def messages: Messages = messagesApi.preferred(fakeRequest)
 
-  protected def applicationBuilder(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+  protected val nonEmptyUserAnswers: UserAnswers = UserAnswers(Json.obj("test" -> "test"))
+
+  protected def applicationBuilder(userAnswers: UserAnswers = UserAnswers()): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .overrides(
-        bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[ValidCustomerDataRequiredAction].to[ValidCustomerDataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
@@ -60,7 +62,7 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
 
   protected def applicationBuilderWithConfig(
     config: Map[String, Any] = Map(),
-    userAnswers: Option[UserAnswers] = None
+    userAnswers: UserAnswers = UserAnswers()
   ): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(
@@ -70,14 +72,13 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
         )
       )
       .overrides(
-        bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
       )
 
   protected def applicationBuilderCl50OnWithConfig(
     config: Map[String, Any] = Map(),
-    userAnswers: Option[UserAnswers] = None
+    userAnswers: UserAnswers = UserAnswers()
   ): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(
@@ -87,7 +88,6 @@ class SpecBase extends WireMockSupport with MockitoSugar with GuiceOneAppPerSuit
         )
       )
       .overrides(
-        bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
       )

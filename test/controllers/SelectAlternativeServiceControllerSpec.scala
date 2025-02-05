@@ -74,7 +74,7 @@ class SelectAlternativeServiceControllerSpec extends SpecBase with MockitoSugar 
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -99,7 +99,7 @@ class SelectAlternativeServiceControllerSpec extends SpecBase with MockitoSugar 
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
+      val application = applicationBuilder(userAnswers = userAnswers)
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -126,7 +126,7 @@ class SelectAlternativeServiceControllerSpec extends SpecBase with MockitoSugar 
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder()
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository),
@@ -150,7 +150,7 @@ class SelectAlternativeServiceControllerSpec extends SpecBase with MockitoSugar 
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )

@@ -104,7 +104,7 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           inject.bind[AuthConnector].toInstance(mockAuthConnector),
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
@@ -140,7 +140,7 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataInvalidCustomer)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           inject.bind[AuthConnector].toInstance(mockAuthConnector),
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
@@ -172,7 +172,7 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder(nonEmptyUserAnswers)
         .overrides(
           inject.bind[AuthConnector].toInstance(mockAuthConnector),
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
@@ -195,7 +195,7 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 
-      val application = applicationBuilder(userAnswers = None)
+      val application = applicationBuilder()
         .overrides(
           inject.bind[AuthConnector].toInstance(mockAuthConnector),
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
@@ -231,7 +231,7 @@ class ValidDataNINOHelpControllerSpec extends SpecBase {
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
       when(mockSessionRepository.setUserAnswers(any, any[UserAnswers])).thenReturn(Future.successful(true))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           inject.bind[AuthConnector].toInstance(mockAuthConnector),
           inject.bind[SessionRepository].toInstance(mockSessionRepository),

@@ -60,7 +60,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
     "must redirect to InvalidDataNINOHelpController" - {
       "when invalid origin" in {
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[AuditService].toInstance(auditService)
           )
@@ -76,7 +76,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       }
 
       "when missing origin" in {
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[AuditService].toInstance(auditService)
           )
@@ -93,7 +93,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
       "when PDVResponseData validationStatus is failure" in {
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
             inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService),
@@ -118,7 +118,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       }
 
       "when PDV request returns an internal server error" in {
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
             inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService),
@@ -143,7 +143,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       }
 
       "when PDV data not found" in {
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
             inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
@@ -169,7 +169,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       }
 
       "when PDV data not found (other)" in {
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
             inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
@@ -195,7 +195,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       }
 
       "when PDV data returns a bad request" in {
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
             inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
@@ -221,7 +221,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
       }
 
       "when PDV data returns an unknown error" in {
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
             inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
@@ -248,7 +248,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
       "when idPostCode does not equal pdvData.getPostCode" in {
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
@@ -290,7 +290,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
       "when AccountStatusType is not FullLive" in {
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
             inject.bind[AuditService].toInstance(auditService),
@@ -326,7 +326,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
       "when CRN indicator is true" in {
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
             inject.bind[AuditService].toInstance(auditService),
@@ -362,7 +362,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
       "when ResidentialAddressStatus is Dlo" in {
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
             inject.bind[AuditService].toInstance(auditService),
@@ -405,7 +405,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
       "when ResidentialAddressStatus is Nfa" in {
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
             inject.bind[AuditService].toInstance(auditService),
@@ -477,7 +477,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockCheckDetailsService.checkConditions(any()))
           .thenReturn((true, ""))
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService),
             inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
@@ -522,7 +522,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
             inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService),
@@ -569,7 +569,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
           .thenReturn(Future(Left(mockConnectorError)))
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService),
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
@@ -613,7 +613,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
           .thenReturn(Future(Left(mockConnectorError)))
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService),
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
@@ -657,7 +657,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockIndividualDetailsService.getIdData(any[PDVResponseData])(any()))
           .thenReturn(Future(Left(mockConnectorError)))
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[IndividualDetailsService].toInstance(mockIndividualDetailsService),
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
@@ -683,7 +683,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
@@ -718,7 +718,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
@@ -751,7 +751,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
@@ -786,7 +786,7 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
         when(mockPersonalDetailsValidationService.createPDVDataFromPDVMatch(any())(any()))
           .thenReturn(Future.successful(mockPDVResponseDataSuccess))
 
-        val app = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val app = applicationBuilder()
           .overrides(
             inject.bind[CheckDetailsService].toInstance(mockCheckDetailsService),
             inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),

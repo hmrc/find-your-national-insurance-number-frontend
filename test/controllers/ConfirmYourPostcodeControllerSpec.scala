@@ -35,11 +35,11 @@ import play.api.test.Helpers._
 import repositories.SessionRepository
 import services.{NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.domain.Nino
+import util.AnyValueTypeMatcher.anyValueType
 import views.html.ConfirmYourPostcodeView
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
-import util.AnyValueTypeMatcher.anyValueType
 
 class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
 
@@ -142,7 +142,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -171,7 +171,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder()
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
@@ -202,7 +202,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder()
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
@@ -233,7 +233,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder()
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[IndividualDetailsConnector].toInstance(mockIndividualDetailsConnector),
@@ -259,7 +259,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
+      val application = applicationBuilder(userAnswers = userAnswers)
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -282,7 +282,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -308,7 +308,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataInvalidCustomer)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -327,7 +327,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder(nonEmptyUserAnswers)
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -346,7 +346,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 
-      val application = applicationBuilder(userAnswers = None)
+      val application = applicationBuilder()
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -377,7 +377,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder()
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[NPSFMNService].toInstance(mockNPSFMNService),
@@ -417,7 +417,7 @@ class ConfirmYourPostcodeControllerSpec extends SpecBase with MockitoSugar {
         .thenReturn(IndividualDetailsResponseEnvelope(Right(fakeIndividualDetails)))
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder()
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[NPSFMNService].toInstance(mockNPSFMNService),

@@ -36,7 +36,6 @@ class ConfirmIdentityController @Inject() (
   navigator: Navigator,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
   formProvider: ConfirmIdentityFormProvider,
   val controllerComponents: MessagesControllerComponents,
   view: ConfirmIdentityView
@@ -46,28 +45,26 @@ class ConfirmIdentityController @Inject() (
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireData) {
-    implicit request =>
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData()) { implicit request =>
 
-      val preparedForm = request.userAnswers.get(ConfirmIdentityPage) match {
-        case None        => form
-        case Some(value) => form.fill(value)
-      }
+    val preparedForm = request.userAnswers.get(ConfirmIdentityPage) match {
+      case None        => form
+      case Some(value) => form.fill(value)
+    }
 
-      Ok(view(preparedForm, mode))
+    Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireData).async {
-    implicit request =>
-      form
-        .bindFromRequest()
-        .fold(
-          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
-          value =>
-            for {
-              updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmIdentityPage, value))
-              _              <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
-            } yield Redirect(navigator.nextPage(ConfirmIdentityPage, mode, updatedAnswers))
-        )
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData()).async { implicit request =>
+    form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+        value =>
+          for {
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmIdentityPage, value))
+            _              <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
+          } yield Redirect(navigator.nextPage(ConfirmIdentityPage, mode, updatedAnswers))
+      )
   }
 }

@@ -33,9 +33,10 @@ class KeepAliveController @Inject() (
     extends FrontendBaseController {
 
   def keepAlive: Action[AnyContent] = (identify andThen getData()).async { implicit request =>
-    request.userAnswers match {
-      case None     => Future.successful(Ok)
-      case Some(_) => sessionRepository.keepAlive(request.userId).map(_ => Ok)
+    if (request.userAnswers.isEmpty) {
+      Future.successful(Ok)
+    } else {
+      sessionRepository.keepAlive(request.userId).map(_ => Ok)
     }
   }
 }

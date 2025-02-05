@@ -17,7 +17,7 @@
 package controllers.actions
 
 import base.SpecBase
-import models.requests.{IdentifierRequest, OptionalDataRequest}
+import models.requests.{DataRequest, IdentifierRequest}
 import models.{OriginType, SessionData, UserAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
@@ -36,7 +36,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
 
   class Harness(sessionRepository: SessionRepository, optOrigin: Option[OriginType], createSessionData: Boolean)
       extends DataRetrievalImpl(sessionRepository, optOrigin, createSessionData) {
-    def callTransform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
+    def callTransform[A](request: IdentifierRequest[A]): Future[DataRequest[A]] = transform(request)
   }
 
   "transform" - {
@@ -49,7 +49,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
         val action            = new Harness(sessionRepository, None, createSessionData = false)
         val result            = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
 
-        result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe Some(dummyValue)
+        result.userAnswers.get(ConfirmYourPostcodePage) mustBe Some(dummyValue)
         result.origin mustBe Some(OriginType.PDV)
         verify(sessionRepository, never).set(any())
       }
@@ -62,7 +62,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
         val sessionDataCaptor: ArgumentCaptor[SessionData] = ArgumentCaptor.forClass(classOf[SessionData])
         val result                                         = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
 
-        result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe None
+        result.userAnswers.get(ConfirmYourPostcodePage) mustBe None
         result.origin mustBe None
         verify(sessionRepository, times(1)).set(sessionDataCaptor.capture())
         val actualSessionDataUpdated = sessionDataCaptor.getValue
@@ -80,7 +80,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
         val sessionDataCaptor: ArgumentCaptor[SessionData] = ArgumentCaptor.forClass(classOf[SessionData])
         val result                                         = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
 
-        result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe Some(dummyValue)
+        result.userAnswers.get(ConfirmYourPostcodePage) mustBe Some(dummyValue)
         result.origin mustBe Some(OriginType.PDV)
         verify(sessionRepository, times(1)).set(sessionDataCaptor.capture())
         val actualSessionDataUpdated = sessionDataCaptor.getValue
@@ -100,7 +100,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
         val sessionDataCaptor: ArgumentCaptor[SessionData] = ArgumentCaptor.forClass(classOf[SessionData])
         val result                                         = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
 
-        result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe Some(dummyValue)
+        result.userAnswers.get(ConfirmYourPostcodePage) mustBe Some(dummyValue)
         result.origin mustBe Some(OriginType.PDV)
         verify(sessionRepository, times(1)).set(sessionDataCaptor.capture())
         val actualSessionDataUpdated = sessionDataCaptor.getValue
@@ -120,7 +120,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
         val sessionDataCaptor: ArgumentCaptor[SessionData] = ArgumentCaptor.forClass(classOf[SessionData])
         val result                                         = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
 
-        result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe Some(dummyValue)
+        result.userAnswers.get(ConfirmYourPostcodePage) mustBe Some(dummyValue)
         result.origin mustBe Some(OriginType.FMN)
         verify(sessionRepository, times(1)).set(sessionDataCaptor.capture())
         val actualSessionDataUpdated = sessionDataCaptor.getValue
@@ -138,7 +138,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
         val sessionDataCaptor: ArgumentCaptor[SessionData] = ArgumentCaptor.forClass(classOf[SessionData])
         val result                                         = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
 
-        result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe None
+        result.userAnswers.get(ConfirmYourPostcodePage) mustBe None
         result.origin mustBe Some(OriginType.FMN)
         verify(sessionRepository, times(1)).set(sessionDataCaptor.capture())
         val actualSessionDataUpdated = sessionDataCaptor.getValue
@@ -156,7 +156,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
         val sessionDataCaptor: ArgumentCaptor[SessionData] = ArgumentCaptor.forClass(classOf[SessionData])
         val result                                         = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
 
-        result.userAnswers.flatMap(_.get(ConfirmYourPostcodePage)) mustBe None
+        result.userAnswers.get(ConfirmYourPostcodePage) mustBe None
         result.origin mustBe None
         verify(sessionRepository, times(1)).set(sessionDataCaptor.capture())
         val actualSessionDataUpdated = sessionDataCaptor.getValue

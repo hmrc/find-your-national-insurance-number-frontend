@@ -25,6 +25,8 @@ final case class UserAnswers(
   data: JsObject = Json.obj()
 ) {
 
+  def isEmpty: Boolean = data.fields.isEmpty
+
   def get[A](page: Gettable[A])(implicit rds: Reads[A]): Option[A] =
     Reads.optionNoError(Reads.at(page.path)).reads(data).getOrElse(None)
 
@@ -66,9 +68,9 @@ final case class UserAnswers(
 }
 
 object UserAnswers {
-  val reads: Reads[UserAnswers] = Reads[UserAnswers]( jsValue => JsSuccess(UserAnswers(jsValue.as[JsObject])))
+  val reads: Reads[UserAnswers] = Reads[UserAnswers](jsValue => JsSuccess(UserAnswers(jsValue.as[JsObject])))
 
-  val writes: OWrites[UserAnswers] = OWrites[UserAnswers] (_.data)
+  val writes: OWrites[UserAnswers] = OWrites[UserAnswers](_.data)
 
   implicit val format: OFormat[UserAnswers] = OFormat(reads, writes)
 }

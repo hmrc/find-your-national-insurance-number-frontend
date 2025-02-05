@@ -22,7 +22,7 @@ import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{reset, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.ValidDataNINOMatchedNINOHelpPage
 import play.api.inject
@@ -42,21 +42,23 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
   def onwardRoute = Call("GET", "/foo")
 
   val formProvider = new ValidDataNINOMatchedNINOHelpFormProvider()
-  val form = formProvider()
+  val form         = formProvider()
 
-  lazy val validDataNINOMatchedNINOHelpRoute = routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(NormalMode).url
+  lazy val validDataNINOMatchedNINOHelpRoute                                 = routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(NormalMode).url
   val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
     validationStatus = ValidationStatus.Success,
-    personalDetails = Some(PersonalDetails(
-      firstName = "John",
-      lastName = "Doe",
-      nino = Nino("AA000003B"),
-      postCode = Some("AA1 1AA"),
-      dateOfBirth = LocalDate.of(1990, 1, 1)
-    )),
+    personalDetails = Some(
+      PersonalDetails(
+        firstName = "John",
+        lastName = "Doe",
+        nino = Nino("AA000003B"),
+        postCode = Some("AA1 1AA"),
+        dateOfBirth = LocalDate.of(1990, 1, 1)
+      )
+    ),
     validCustomer = Some(true),
     CRN = Some("fakeCRN"),
     npsPostCode = Some("AA1 1AA"),
@@ -67,6 +69,14 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
     validCustomer = Some(false)
   )
 
+  private val userAnswers = UserAnswers().setOrException(ValidDataNINOMatchedNINOHelpPage, true)
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockPersonalDetailsValidationService)
+
+  }
+
   "ValidDataNINOMatchedNINOHelp Controller" - {
 
     "must return OK and the correct view for a GET" in {
@@ -74,7 +84,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -82,8 +92,8 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
 
       running(application) {
         val request = FakeRequest(GET, validDataNINOMatchedNINOHelpRoute)
-        val result = route(application, request).value
-        val view = application.injector.instanceOf[ValidDataNINOMatchedNINOHelpView]
+        val result  = route(application, request).value
+        val view    = application.injector.instanceOf[ValidDataNINOMatchedNINOHelpView]
 
         status(result) mustEqual OK
         contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode)(request, messages).toString
@@ -94,9 +104,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val userAnswers = UserAnswers().set(ValidDataNINOMatchedNINOHelpPage, true).success.value
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
+      val application = applicationBuilder(userAnswers = userAnswers)
         .overrides(
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -110,7 +118,8 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view(form.fill(true), NormalMode)(request, messages).toString
+        contentAsString(result)
+          .removeAllNonces() mustEqual view(form.fill(true), NormalMode)(request, messages).toString
       }
     }
 
@@ -123,7 +132,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
       when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder()
           .overrides(
             inject.bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             inject.bind[SessionRepository].toInstance(mockSessionRepository),
@@ -147,7 +156,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -173,7 +182,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataInvalidCustomer)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -181,7 +190,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
 
       running(application) {
         val request = FakeRequest(GET, validDataNINOMatchedNINOHelpRoute)
-        val result = route(application, request).value
+        val result  = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
@@ -192,7 +201,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder(userAnswers = userAnswers)
         .overrides(
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -200,7 +209,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
 
       running(application) {
         val request = FakeRequest(GET, validDataNINOMatchedNINOHelpRoute)
-        val result = route(application, request).value
+        val result  = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
@@ -211,7 +220,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 
-      val application = applicationBuilder(userAnswers = None)
+      val application = applicationBuilder()
         .overrides(
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -219,7 +228,7 @@ class ValidDataNINOMatchedNINOHelpControllerSpec extends SpecBase with MockitoSu
 
       running(application) {
         val request = FakeRequest(GET, validDataNINOMatchedNINOHelpRoute)
-        val result = route(application, request).value
+        val result  = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual auth.routes.SignedOutController.onPageLoad.url

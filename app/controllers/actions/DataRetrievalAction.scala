@@ -17,7 +17,7 @@
 package controllers.actions
 
 import com.google.inject.ImplementedBy
-import models.requests.{IdentifierRequest, OptionalDataRequest}
+import models.requests.{DataRequest, IdentifierRequest}
 import models.{OriginType, SessionData, UserAnswers}
 import play.api.Logging
 import play.api.mvc.ActionTransformer
@@ -65,13 +65,13 @@ class DataRetrievalImpl(
     }).map(_ => sd)
   }
 
-  override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] =
+  override protected def transform[A](request: IdentifierRequest[A]): Future[DataRequest[A]] =
     sessionRepository.get(request.userId).flatMap { optSessionDataFromRepository =>
       consolidateSessionData(optSessionDataFromRepository, request.userId).map { sd =>
-        OptionalDataRequest(
+        DataRequest(
           request.request,
           request.userId,
-          Some(sd.userAnswers),
+          sd.userAnswers,
           request.credId,
           sd.origin
         )
@@ -80,7 +80,7 @@ class DataRetrievalImpl(
 }
 
 @ImplementedBy(classOf[DataRetrievalImpl])
-trait DataRetrieval extends ActionTransformer[IdentifierRequest, OptionalDataRequest]
+trait DataRetrieval extends ActionTransformer[IdentifierRequest, DataRequest]
 
 class DataRetrievalActionImpl @Inject() (
   val sessionRepository: SessionRepository

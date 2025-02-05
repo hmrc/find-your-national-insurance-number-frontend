@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import handlers.ErrorHandler
 import models.errors.{ConnectorError, IndividualDetailsError}
 import models.pdv._
@@ -39,7 +39,6 @@ class CheckDetailsController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
   personalDetailsValidationService: PersonalDetailsValidationService,
   auditService: AuditService,
   checkDetailsService: CheckDetailsService,
@@ -54,7 +53,7 @@ class CheckDetailsController @Inject() (
     with Logging {
 
   def onPageLoad(optOrigin: Option[OriginType], mode: Mode): Action[AnyContent] =
-    (identify andThen getData(optOrigin, createSessionData = true) andThen requireData).async { implicit request =>
+    (identify andThen getData(optOrigin, createSessionData = true)).async { implicit request =>
       auditService.start()
       optOrigin match {
         case Some(_) => pdvCheck(mode, optOrigin)

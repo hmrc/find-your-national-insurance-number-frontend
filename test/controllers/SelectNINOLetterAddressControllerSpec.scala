@@ -100,7 +100,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -129,7 +129,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
 
       val userAnswers = UserAnswers().set(SelectNINOLetterAddressPage, true).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
+      val application = applicationBuilder(userAnswers = userAnswers)
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -164,7 +164,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         .thenReturn(Future(Some(fakePDVResponseData)))
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder()
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[NPSFMNService].toInstance(mockNPSFMNService),
@@ -198,7 +198,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         .thenReturn(Future(Some(fakePDVResponseData)))
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder()
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[NPSFMNService].toInstance(mockNPSFMNService),
@@ -232,7 +232,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         .thenReturn(Future(Some(fakePDVResponseData)))
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder()
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[NPSFMNService].toInstance(mockNPSFMNService),
@@ -258,7 +258,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseData)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService))
         .build()
 
@@ -291,7 +291,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
         .thenReturn(Future(Some(fakePDVResponseData)))
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder()
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[NPSFMNService].toInstance(mockNPSFMNService),
@@ -320,7 +320,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataInvalidCustomer)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -339,7 +339,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder(nonEmptyUserAnswers)
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -358,7 +358,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 
-      val application = applicationBuilder(userAnswers = None)
+      val application = applicationBuilder()
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -379,7 +379,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataWithoutPostcode)))
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
+      val application = applicationBuilder(userAnswers = userAnswers)
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -405,7 +405,7 @@ class SelectNINOLetterAddressControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataWithoutPostcodeNoMatch)))
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
+      val application = applicationBuilder(userAnswers = userAnswers)
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )

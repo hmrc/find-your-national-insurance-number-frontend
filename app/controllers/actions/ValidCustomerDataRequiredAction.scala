@@ -16,8 +16,7 @@
 
 package controllers.actions
 
-import controllers.routes
-import models.requests.{DataRequest, OptionalDataRequest}
+import models.requests.DataRequest
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
 import services.PersonalDetailsValidationService
@@ -30,27 +29,23 @@ class ValidCustomerDataRequiredActionImpl @Inject() (
 )(implicit val executionContext: ExecutionContext)
     extends ValidCustomerDataRequiredAction {
 
-  override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] =
+  override protected def refine[A](request: DataRequest[A]): Future[Either[Result, DataRequest[A]]] =
     personalDetailsValidationService
       .getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", ""))
       .map {
         case Some(pdvData) =>
           if (pdvData.validCustomer.getOrElse(false)) {
-            request.userAnswers match {
-              case None       => Left(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-              case Some(data) =>
-                Right(DataRequest(request.request, request.userId, data, request.credId, request.origin))
-            }
+            Right(DataRequest(request.request, request.userId, request.userAnswers, request.credId, request.origin))
           } else {
             Left(Redirect(controllers.routes.UnauthorisedController.onPageLoad))
           }
         case _             =>
-          // No PDV data; check the user answers cache. If no user answers then no session.
-          request.userAnswers match {
-            case None    => Left(Redirect(controllers.auth.routes.SignedOutController.onPageLoad).withNewSession)
-            case Some(_) => Left(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+          if (request.userAnswers.isEmpty) {
+            Left(Redirect(controllers.auth.routes.SignedOutController.onPageLoad).withNewSession)
+          } else {
+            Left(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
           }
       }
 }
 
-trait ValidCustomerDataRequiredAction extends ActionRefiner[OptionalDataRequest, DataRequest]
+trait ValidCustomerDataRequiredAction extends ActionRefiner[DataRequest, DataRequest]

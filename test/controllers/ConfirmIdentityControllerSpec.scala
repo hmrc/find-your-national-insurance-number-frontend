@@ -48,7 +48,7 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilderCl50OnWithConfig(
         Map("features.extendedIvJourney" -> false),
-        userAnswers = Some(emptyUserAnswers)
+        userAnswers = emptyUserAnswers
       ).build()
 
       running(application) {
@@ -69,7 +69,7 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilderCl50OnWithConfig(
         Map("features.extendedIvJourney" -> false),
-        userAnswers = Some(userAnswers)
+        userAnswers = userAnswers
       ).build()
 
       running(application) {
@@ -92,7 +92,7 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder()
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
@@ -113,7 +113,7 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder().build()
 
       running(application) {
         val request =
