@@ -31,6 +31,6 @@ class FakeDataRetrieval(dataToReturn: UserAnswers) extends DataRetrieval {
 }
 
 class FakeDataRetrievalAction(dataToReturn: UserAnswers) extends DataRetrievalAction {
-  def apply(originType: Option[OriginType] = None, createSessionData: Boolean = false): DataRetrieval =
+  def apply(originType: Option[OriginType] = None): DataRetrieval =
     new FakeDataRetrieval(dataToReturn)
 }
