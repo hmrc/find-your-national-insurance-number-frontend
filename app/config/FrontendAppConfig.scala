@@ -43,7 +43,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   private def getExternalUrl(key: String): Option[String] =
     configuration.getOptional[String](s"external-url.$key")
   def getFeedbackSurveyUrl(origin: OriginType): String    =
-    feedbackSurveyFrontendHost + "/feedback/" + enc(OriginType.toFeedbackSource(origin))
+    feedbackSurveyFrontendHost + "/feedback/" + enc(origin.toString)
 
   def getBasGatewayFrontendSignOutUrl(continueUrl: String): String =
     basGatewayFrontendHost + s"/bas-gateway/sign-out-without-state?continue=$continueUrl"
