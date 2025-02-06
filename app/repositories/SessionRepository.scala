@@ -30,9 +30,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-// TODO: Ideally the collection should be renamed to "session" rather than "user-answers" but 
-//  it would cause problems for any open sessions when the changes go live so I'm leaving it for now. 
-//  If we get time in future this would be a worthwhile improvement.
+// TODO: DDCNL-10013 Rename collection from user-answers to session-data
 @Singleton
 class SessionRepository @Inject() (
   mongoComponent: MongoComponent,
