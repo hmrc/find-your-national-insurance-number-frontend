@@ -24,7 +24,7 @@ import play.api.mvc.ActionTransformer
 import repositories.SessionRepository
 
 import java.time.Instant
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 class DataRetrievalImpl(
@@ -34,74 +34,42 @@ class DataRetrievalImpl(
   val executionContext: ExecutionContext
 ) extends DataRetrieval
     with Logging {
-  /*
-    sessionRepository.get(request.userId).flatMap { optSessionDataFromRepository =>
-      val sd = (originType, optSessionDataFromRepository) match {
-        case (_, None) =>
+
+  private def updateSessionData[A](
+    optSessionDataFromRepository: Option[SessionData],
+    request: IdentifierRequest[A]
+  ): (SessionData, Boolean) = {
+    (originType, optSessionDataFromRepository) match {
+      case (_, None) =>
+        (
           SessionData(
             userAnswers = UserAnswers(),
             origin = originType,
             lastUpdated = Instant.now(java.time.Clock.systemUTC()),
             id = request.userId
-          )
-        case (Some(_), Some(sd)) => sd copy (origin = originType)
-        case (None, Some(sd)) => sd
-      }
-
-      /*
-        Save session data to Mongo if:-
-          controller asked for it (i.e. first page in journey) or
-          existing session data is in old Mongo format or
-          mid-journey the session has timed out
-   */
-      val xx = (if (sd.isOldFormat || optSessionDataFromRepository.isEmpty) {
-        sessionRepository.set(sd)
-      } else {
-        Future.successful(false)
-      }).map(_ => sd)
-
-      xx.map { sd =>
-        DataRequest(
-          request.request,
-          request.userId,
-          sd.userAnswers,
-          request.credId,
-          sd.origin
+          ),
+          true
         )
-      }
-    }
-   */
-
-  private def updateSessionData[A](
-    optSessionDataFromRepository: Option[SessionData],
-    request: IdentifierRequest[A]
-  ): SessionData =
-    (originType, optSessionDataFromRepository) match {
-      case (_, None)                                      =>
-        SessionData(
-          userAnswers = UserAnswers(),
-          origin = originType,
-          lastUpdated = Instant.now(java.time.Clock.systemUTC()),
-          id = request.userId
-        )
-      case (Some(_), Some(sd)) if sd.origin != originType => sd copy (origin = originType)
-      case (_, Some(sd))                                  => sd
-    }
-
-  private def saveSessionData(sd: SessionData, optSessionDataFromRepository: Option[SessionData]): Future[Boolean] = {
-    val originalOrigin = optSessionDataFromRepository.flatMap(_.origin)
-    if (sd.isOldFormat || optSessionDataFromRepository.isEmpty || (originalOrigin.isDefined && originalOrigin != originType)) {
-      sessionRepository.set(sd)
-    } else {
-      Future.successful(false)
+      case (Some(ot), Some(sd)) if !sd.origin.contains(ot) => (sd copy (origin = originType), true)
+      case (_, Some(sd)) => (sd, false)
     }
   }
 
+  private def saveSessionData(
+    updatedSessionData: SessionData,
+    isChanged: Boolean
+  ): Future[Unit] =
+    if (isChanged || updatedSessionData.isOldFormat) {
+      sessionRepository.set(updatedSessionData).map(_ => (): Unit)
+    } else {
+      Future.successful((): Unit)
+    }
+
   override protected def transform[A](request: IdentifierRequest[A]): Future[DataRequest[A]] =
     for {
-      optSessionDataFromRepository <- sessionRepository.get(request.userId)
-      updatedSessionData            = updateSessionData(optSessionDataFromRepository, request)
-      _                            <- saveSessionData(updatedSessionData, optSessionDataFromRepository)
+      optSessionDataFromRepository   <- sessionRepository.get(request.userId)
+      (updatedSessionData, isChanged) = updateSessionData(optSessionDataFromRepository, request)
+      _                              <- saveSessionData(updatedSessionData, isChanged)
     } yield DataRequest(
       request.request,
       request.userId,
@@ -115,6 +83,7 @@ class DataRetrievalImpl(
 @ImplementedBy(classOf[DataRetrievalImpl])
 trait DataRetrieval extends ActionTransformer[IdentifierRequest, DataRequest]
 
+@Singleton
 class DataRetrievalActionImpl @Inject() (
   val sessionRepository: SessionRepository
 )(implicit val executionContext: ExecutionContext)
