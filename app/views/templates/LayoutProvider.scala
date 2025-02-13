@@ -30,7 +30,7 @@ import javax.inject.Inject
 
 trait LayoutProvider {
 
-  lazy val defaultBannerConfig: BannerConfig = BannerConfig(
+  private lazy val defaultBannerConfig: BannerConfig = BannerConfig(
     showAlphaBanner = false,
     showBetaBanner = false,
     showHelpImproveBanner = true
@@ -64,31 +64,49 @@ class NewLayoutProvider @Inject()(wrapperService: WrapperService,
                                   appConfig: FrontendAppConfig
                                  ) extends LayoutProvider with Logging {
 
-  lazy val newLayoutBannerConfig: BannerConfig = BannerConfig(
+  private lazy val newLayoutBannerConfig: BannerConfig = BannerConfig(
     showAlphaBanner = appConfig.showAlphaBanner,
     showBetaBanner = appConfig.showBetaBanner,
     showHelpImproveBanner = appConfig.showHelpImproveBanner
   )
 
   //noinspection ScalaStyle
-  override def apply(pageTitle: String, showBackLinkJS: Boolean, timeout: Boolean, showSignOut: Boolean,
-                     stylesheets: Option[Html], fullWidth: Boolean, accountHome: Boolean, yourProfileActive: Boolean,
-                     hideAccountMenu: Boolean, backLinkUrl: Option[String],
-                     disableSessionExpired: Boolean, sidebarContent: Option[Html], messagesActive: Boolean,
-                     showSignOutInHeader: Boolean, bannerConfig: BannerConfig)(contentBlock: Html)
-                    (implicit request: Request[_], messages: Messages): HtmlFormat.Appendable = {
+  override def apply(
+                      pageTitle: String,
+                      showBackLinkJS: Boolean,
+                      timeout: Boolean,
+                      showSignOut: Boolean,
+                      stylesheets: Option[Html],
+                      fullWidth: Boolean,
+                      accountHome: Boolean,
+                      yourProfileActive: Boolean,
+                      hideAccountMenu: Boolean,
+                      backLinkUrl: Option[String],
+                      disableSessionExpired: Boolean,
+                      sidebarContent: Option[Html],
+                      messagesActive: Boolean,
+                      showSignOutInHeader: Boolean,
+                      bannerConfig: BannerConfig
+                    )(contentBlock: Html)(
+                      implicit request: Request[_],
+                      messages: Messages
+                    ): HtmlFormat.Appendable = {
+
+    val keepAliveUrl = controllers.routes.KeepAliveController.keepAlive.url
+
     wrapperService.standardScaLayout(
       disableSessionExpired = !timeout,
       content = contentBlock,
       pageTitle = Some(pageTitle),
       showBackLinkJS = showBackLinkJS,
-      backLinkUrl =backLinkUrl,
+      backLinkUrl = backLinkUrl,
       scripts = Seq(additionalScript()),
       styleSheets = stylesheets.toSeq :+ headBlock(),
       fullWidth = fullWidth,
       showSignOutInHeader = showSignOutInHeader,
       hideMenuBar = true,
-      bannerConfig = newLayoutBannerConfig
+      bannerConfig = newLayoutBannerConfig,
+      keepAliveUrl = keepAliveUrl
     )(messages, HeaderCarrierConverter.fromRequest(request), request)
   }
 }
