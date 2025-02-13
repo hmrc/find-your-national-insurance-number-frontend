@@ -16,7 +16,6 @@
 
 package controllers
 
-import cacheables.OriginCacheable
 import controllers.actions._
 import forms.EnteredPostCodeNotFoundFormProvider
 import models.{EnteredPostCodeNotFound, Mode}
@@ -34,49 +33,50 @@ import views.html.EnteredPostCodeNotFoundView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class EnteredPostCodeNotFoundController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       sessionRepository: SessionRepository,
-                                       navigator: Navigator,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireValidData: ValidCustomerDataRequiredAction,
-                                       formProvider: EnteredPostCodeNotFoundFormProvider,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: EnteredPostCodeNotFoundView,
-                                       personalDetailsValidationService: PersonalDetailsValidationService,
-                                       auditService: AuditService
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+class EnteredPostCodeNotFoundController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireValidData: ValidCustomerDataRequiredAction,
+  formProvider: EnteredPostCodeNotFoundFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: EnteredPostCodeNotFoundView,
+  personalDetailsValidationService: PersonalDetailsValidationService,
+  auditService: AuditService
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
   val form: Form[EnteredPostCodeNotFound] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData) {
     implicit request =>
-
       val preparedForm = request.userAnswers.get(EnteredPostCodeNotFoundPage) match {
-        case None => form
+        case None        => form
         case Some(value) => form.fill(value)
       }
 
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData).async {
     implicit request =>
-
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
-
-        value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map(
-            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
-          )
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(EnteredPostCodeNotFoundPage, value))
-            _ <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(EnteredPostCodeNotFoundPage, mode, updatedAnswers))
-        }
-      )
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+          value => {
+            personalDetailsValidationService
+              .getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", ""))
+              .map(pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.origin))
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(EnteredPostCodeNotFoundPage, value))
+              _              <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
+            } yield Redirect(navigator.nextPage(EnteredPostCodeNotFoundPage, mode, updatedAnswers))
+          }
+        )
   }
 }

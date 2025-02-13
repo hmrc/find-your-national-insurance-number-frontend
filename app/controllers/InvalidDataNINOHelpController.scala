@@ -16,9 +16,8 @@
 
 package controllers
 
-import cacheables.OriginCacheable
 import config.FrontendAppConfig
-import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import forms.InvalidDataNINOHelpFormProvider
 import models.{InvalidDataNINOHelp, Mode}
 import navigation.Navigator
@@ -41,7 +40,6 @@ class InvalidDataNINOHelpController @Inject()(
                                                navigator: Navigator,
                                                identify: IdentifierAction,
                                                getData: DataRetrievalAction,
-                                               requireData: DataRequiredAction,
                                                view: InvalidDataNINOHelpView,
                                                formProvider: InvalidDataNINOHelpFormProvider,
                                                personalDetailsValidationService: PersonalDetailsValidationService,
@@ -51,7 +49,7 @@ class InvalidDataNINOHelpController @Inject()(
 
   val form: Form[InvalidDataNINOHelp] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData()) {
     implicit request =>
 
       val preparedForm = request.userAnswers.get(InvalidDataNINOHelpPage) match {
@@ -62,7 +60,7 @@ class InvalidDataNINOHelpController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData()).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>
@@ -70,11 +68,11 @@ class InvalidDataNINOHelpController @Inject()(
 
         value => {
           personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map(
-            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
+            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.origin)
           )
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(InvalidDataNINOHelpPage, value))
-            _ <- sessionRepository.set(updatedAnswers)
+            _ <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
           } yield Redirect(navigator.nextPage(InvalidDataNINOHelpPage, mode, updatedAnswers))
         }
       )

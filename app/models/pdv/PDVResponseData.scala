@@ -16,10 +16,11 @@
 
 package models.pdv
 
-import util.FMNConstants.EmptyString
+import org.apache.commons.lang3.StringUtils
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+
 import java.time._
 
 case class PersonalDetails(
@@ -48,28 +49,28 @@ object PDVResponseData {
 
   implicit class PDVResponseDataOps(private val pdvResponseData:PDVResponseData) extends AnyVal {
     def getPostCode: String = pdvResponseData.personalDetails match {
-      case Some(pd) => pd.postCode.getOrElse(EmptyString)
-      case _ => EmptyString
+      case Some(pd) => pd.postCode.getOrElse(StringUtils.EMPTY)
+      case _ => StringUtils.EMPTY
     }
 
     def getNino: String = pdvResponseData.personalDetails match {
       case Some(pd) => pd.nino.nino
-      case _        => EmptyString
+      case _        => StringUtils.EMPTY
     }
 
     def getFirstName: String = pdvResponseData.personalDetails match {
       case Some(pd) => pd.firstName
-      case _        => EmptyString
+      case _        => StringUtils.EMPTY
     }
 
     def getLastName: String = pdvResponseData.personalDetails match {
       case Some(pd) => pd.lastName
-      case _        => EmptyString
+      case _        => StringUtils.EMPTY
     }
 
     def getDateOfBirth: String = pdvResponseData.personalDetails match {
       case Some(pd) => pd.dateOfBirth.toString
-      case _        => EmptyString
+      case _        => StringUtils.EMPTY
     }
   }
 

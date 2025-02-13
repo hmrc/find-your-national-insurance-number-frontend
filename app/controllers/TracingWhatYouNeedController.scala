@@ -17,34 +17,33 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import controllers.actions.{DataRetrievalAction, IdentifierAction}
+import models.OriginType
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import util.FMNConstants.FMNOrigin
 import views.html.TracingWhatYouNeedView
 
 import java.net.URLEncoder
 import javax.inject.Inject
 
-class TracingWhatYouNeedController @Inject()(
-                                              override val messagesApi: MessagesApi,
-                                              identify: IdentifierAction,
-                                              getData: DataRetrievalAction,
-                                              requireData: DataRequiredAction,
-                                              val controllerComponents: MessagesControllerComponents,
-                                              config: FrontendAppConfig,
-                                              view: TracingWhatYouNeedView
-                                            ) extends FrontendBaseController with I18nSupport {
+class TracingWhatYouNeedController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  val controllerComponents: MessagesControllerComponents,
+  config: FrontendAppConfig,
+  view: TracingWhatYouNeedView
+) extends FrontendBaseController
+    with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData)  {
-    implicit request =>
-      val origin        = FMNOrigin
-      val redirectUrl   = config.fmnCheckDetailsUrl
+  def onPageLoad: Action[AnyContent] = (identify andThen getData()) { implicit request =>
+    val origin      = OriginType.FMN.toString
+    val redirectUrl = config.fmnCheckDetailsUrl
 
-      val pdvUrl = s"${config.personalDetailsValidationFrontEnd}/personal-details-validation/start?" +
-        s"completionUrl=${URLEncoder.encode(redirectUrl, "UTF-8")}&failureUrl=${URLEncoder.encode(redirectUrl, "UTF-8")}&origin=$origin"
+    val pdvUrl = s"${config.personalDetailsValidationFrontEnd}/personal-details-validation/start?" +
+      s"completionUrl=${URLEncoder.encode(redirectUrl, "UTF-8")}&failureUrl=${URLEncoder.encode(redirectUrl, "UTF-8")}&origin=$origin"
 
-      Ok(view(pdvUrl))
+    Ok(view(pdvUrl))
   }
 }

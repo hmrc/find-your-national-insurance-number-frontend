@@ -16,7 +16,6 @@
 
 package controllers
 
-import cacheables.OriginCacheable
 import config.FrontendAppConfig
 import controllers.actions._
 import forms.SelectAlternativeServiceFormProvider
@@ -52,7 +51,7 @@ class SendLetterErrorController @Inject()(
 
   val form: Form[SelectAlternativeService] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData) {
     implicit request =>
       val preparedForm = request.userAnswers.get(SelectAlternativeServicePage) match {
         case None => form
@@ -62,7 +61,7 @@ class SendLetterErrorController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>
@@ -70,11 +69,11 @@ class SendLetterErrorController @Inject()(
 
         value => {
           personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY)).map(
-            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
+            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.origin)
           )
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectAlternativeServicePage, value))
-            _ <- sessionRepository.set(updatedAnswers)
+            _ <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
           } yield Redirect(navigator.nextPage(SelectAlternativeServicePage, mode, updatedAnswers))
         }
       )

@@ -38,7 +38,7 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
   def onwardRoute = Call("GET", "/foo")
 
   val formProvider = new ConfirmIdentityFormProvider()
-  val form = formProvider()
+  val form         = formProvider()
 
   lazy val confirmIdentityRoute = routes.ConfirmIdentityController.onPageLoad(NormalMode).url
 
@@ -48,26 +48,7 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilderCl50OnWithConfig(
         Map("features.extendedIvJourney" -> false),
-        userAnswers = Some(emptyUserAnswers)
-      ).build()
-
-      running(application) {
-        val request = FakeRequest(GET, confirmIdentityRoute)
-
-        val result = route(application, request).value
-
-        val view = application.injector.instanceOf[ConfirmIdentityView]
-
-        status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode)(request, messages).toString
-      }
-    }
-
-    "must return OK and the correct view for a GET (no user answers object)" in {
-
-      val application = applicationBuilderCl50OnWithConfig(
-        Map("features.extendedIvJourney" -> false),
-        userAnswers = None
+        userAnswers = emptyUserAnswers
       ).build()
 
       running(application) {
@@ -84,11 +65,11 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(ConfirmIdentityPage, true).success.value
+      val userAnswers = UserAnswers().set(ConfirmIdentityPage, true).success.value
 
       val application = applicationBuilderCl50OnWithConfig(
         Map("features.extendedIvJourney" -> false),
-        userAnswers = Some(userAnswers)
+        userAnswers = userAnswers
       ).build()
 
       running(application) {
@@ -99,7 +80,8 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view(form.fill(true), NormalMode)(request, messages).toString
+        contentAsString(result)
+          .removeAllNonces() mustEqual view(form.fill(true), NormalMode)(request, messages).toString
       }
     }
 
@@ -107,10 +89,10 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository = mock[SessionRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder()
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
@@ -131,7 +113,7 @@ class ConfirmIdentityControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder().build()
 
       running(application) {
         val request =

@@ -18,13 +18,13 @@ package handlers
 
 import base.SpecBase
 import controllers.routes
-import models.NormalMode
+import models.{NormalMode, OriginType}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import views.html.ErrorTemplate
 import play.api.test.Helpers._
+import views.html.ErrorTemplate
 
 class ErrorHandlerSpec extends SpecBase {
 
@@ -45,8 +45,9 @@ class ErrorHandlerSpec extends SpecBase {
 
 object ErrorHandlerSpec {
 
-  val messagesApi: MessagesApi = mock[MessagesApi]
-  val errorTemplate: ErrorTemplate = mock[ErrorTemplate]
-  val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(GET, routes.CheckDetailsController.onPageLoad(Some("PDV"), NormalMode).url)
-  implicit val fakeMessages: Messages = messagesApi.preferred(fakeRequest)
+  val messagesApi: MessagesApi                         = mock[MessagesApi]
+  val errorTemplate: ErrorTemplate                     = mock[ErrorTemplate]
+  val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest(GET, routes.CheckDetailsController.onPageLoad(Some(OriginType.PDV), NormalMode).url)
+  implicit val fakeMessages: Messages                  = messagesApi.preferred(fakeRequest)
 }

@@ -20,17 +20,15 @@ import base.SpecBase
 import cacheables.TryAgainCountCacheable
 import forms.LetterTechnicalErrorFormProvider
 import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
-import models.requests.DataRequest
 import models.{LetterTechnicalError, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
-import org.mockito.Answers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.LetterTechnicalErrorPage
 import play.api.data.Form
 import play.api.inject.bind
-import play.api.mvc.{AnyContent, Call}
+import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
@@ -49,8 +47,8 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
   lazy val letterTechnicalErrorRoute: String = routes.LetterTechnicalErrorController.onPageLoad().url
 
-  val formProvider = new LetterTechnicalErrorFormProvider()
-  val form: Form[LetterTechnicalError] = formProvider()
+  val formProvider                                                           = new LetterTechnicalErrorFormProvider()
+  val form: Form[LetterTechnicalError]                                       = formProvider()
   val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
@@ -58,13 +56,15 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
   val fakePDVResponseDataWithPostcode: PDVResponseData = PDVResponseData(
     id = "fakeId",
     validationStatus = ValidationStatus.Success,
-    personalDetails = Some(PersonalDetails(
-      firstName = "John",
-      lastName = "Doe",
-      nino = Nino("AB123456C"),
-      postCode = Some("AA1 1AA"),
-      dateOfBirth = LocalDate.of(1990, 1, 1)
-    )),
+    personalDetails = Some(
+      PersonalDetails(
+        firstName = "John",
+        lastName = "Doe",
+        nino = Nino("AB123456C"),
+        postCode = Some("AA1 1AA"),
+        dateOfBirth = LocalDate.of(1990, 1, 1)
+      )
+    ),
     validCustomer = Some(true),
     CRN = Some("fakeCRN"),
     npsPostCode = Some("AA1 1AA"),
@@ -74,13 +74,15 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
   val fakePDVResponseDataWithoutPostcode: PDVResponseData = PDVResponseData(
     id = "fakeId",
     validationStatus = ValidationStatus.Success,
-    personalDetails = Some(PersonalDetails(
-      firstName = "John",
-      lastName = "Doe",
-      nino = Nino("AB123456C"),
-      postCode = None,
-      dateOfBirth = LocalDate.of(1990, 1, 1)
-    )),
+    personalDetails = Some(
+      PersonalDetails(
+        firstName = "John",
+        lastName = "Doe",
+        nino = Nino("AB123456C"),
+        postCode = None,
+        dateOfBirth = LocalDate.of(1990, 1, 1)
+      )
+    ),
     validCustomer = Some(true),
     CRN = Some("fakeCRN"),
     npsPostCode = Some("AA1 1AA"),
@@ -98,11 +100,12 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataWithPostcode)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value))
-        .overrides(
-          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-        )
-        .build()
+      val application =
+        applicationBuilder(userAnswers = emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value)
+          .overrides(
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          )
+          .build()
 
       running(application) {
         val request = FakeRequest(GET, letterTechnicalErrorRoute)
@@ -112,7 +115,8 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[LetterTechnicalErrorView]
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode, retryAllowed = true)(request, messages).toString
+        contentAsString(result)
+          .removeAllNonces() mustEqual view(form, NormalMode, retryAllowed = true)(request, messages).toString
       }
     }
 
@@ -123,11 +127,12 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataWithPostcode)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers.set(TryAgainCountCacheable, tryAgainCount).success.value))
-        .overrides(
-          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-        )
-        .build()
+      val application =
+        applicationBuilder(userAnswers = emptyUserAnswers.set(TryAgainCountCacheable, tryAgainCount).success.value)
+          .overrides(
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          )
+          .build()
 
       running(application) {
         val request = FakeRequest(GET, letterTechnicalErrorRoute)
@@ -137,21 +142,24 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[LetterTechnicalErrorView]
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode, retryAllowed = false)(request, messages).toString
+        contentAsString(result)
+          .removeAllNonces() mustEqual view(form, NormalMode, retryAllowed = false)(request, messages).toString
       }
     }
 
     "must not populate any value in the view on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(LetterTechnicalErrorPage, LetterTechnicalError.values.head)
-        .success.value
+      val userAnswers = UserAnswers()
+        .set(LetterTechnicalErrorPage, LetterTechnicalError.values.head)
+        .success
+        .value
         .set(TryAgainCountCacheable, 0)
-        .success.value
-
+        .success
+        .value
 
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataWithPostcode)))
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
+      val application = applicationBuilder(userAnswers = userAnswers)
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -165,7 +173,8 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode, retryAllowed = true)(request, messages).toString
+        contentAsString(result)
+          .removeAllNonces() mustEqual view(form, NormalMode, retryAllowed = true)(request, messages).toString
       }
     }
 
@@ -173,12 +182,12 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository = mock[SessionRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataWithPostcode)))
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder()
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository),
@@ -200,12 +209,12 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted and retry count < 5" in {
 
-      val mockSessionRepository       = mock[SessionRepository]
+      val mockSessionRepository = mock[SessionRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value))
+        applicationBuilder(userAnswers = emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value)
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository),
@@ -225,15 +234,19 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "redirect to SelectNINOLetterAddress page for a POST if user selects Try again option with a postcode" in {
+      val mockSessionRepository = mock[SessionRepository]
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
 
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseDataWithPostcode)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value))
-        .overrides(
-          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-        )
-        .build()
+      val application =
+        applicationBuilder(userAnswers = emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value)
+          .overrides(
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
 
       running(application) {
         val request =
@@ -249,15 +262,18 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "redirect to ConfirmYourPostcode page for a POST if user selects Try again option without a postcode" in {
-
+      val mockSessionRepository = mock[SessionRepository]
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseDataWithoutPostcode)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value))
-        .overrides(
-          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
-        )
-        .build()
+      val application =
+        applicationBuilder(userAnswers = emptyUserAnswers.set(TryAgainCountCacheable, 0).success.value)
+          .overrides(
+            bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
 
       running(application) {
         val request =
@@ -273,12 +289,15 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "redirect to PhoneHMRCDetails page for a POST if user selects Phone HMRC option" in {
+      val mockSessionRepository = mock[SessionRepository]
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseDataWithPostcode)))
 
-      val application = applicationBuilder(userAnswers = None)
+      val application = applicationBuilder()
         .overrides(
-          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+          bind[SessionRepository].toInstance(mockSessionRepository)
         )
         .build()
 
@@ -296,12 +315,15 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "redirect to Print and Post page for a POST if user selects P&P Service option" in {
+      val mockSessionRepository = mock[SessionRepository]
+      when(mockSessionRepository.setUserAnswers(any(), any())) thenReturn Future.successful(true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any()))
         .thenReturn(Future(Some(fakePDVResponseDataWithPostcode)))
 
-      val application = applicationBuilder(userAnswers = None)
+      val application = applicationBuilder()
         .overrides(
-          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
+          bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
+          bind[SessionRepository].toInstance(mockSessionRepository)
         )
         .build()
 
@@ -322,7 +344,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseDataInvalidCustomer)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -330,7 +352,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request = FakeRequest(GET, letterTechnicalErrorRoute)
-        val result = route(application, request).value
+        val result  = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
@@ -338,10 +360,11 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must redirect to journey recovery controller when there is no PDV data" in {
+     // val userAnswers = UserAnswers().setOrException(ValidDataNINOMatchedNINOHelpPage, true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder(nonEmptyUserAnswers)
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -349,7 +372,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request = FakeRequest(GET, letterTechnicalErrorRoute)
-        val result = route(application, request).value
+        val result  = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
@@ -360,7 +383,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 
-      val application = applicationBuilder(userAnswers = None)
+      val application = applicationBuilder()
         .overrides(
           bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService)
         )
@@ -368,7 +391,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request = FakeRequest(GET, letterTechnicalErrorRoute)
-        val result = route(application, request).value
+        val result  = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual auth.routes.SignedOutController.onPageLoad.url

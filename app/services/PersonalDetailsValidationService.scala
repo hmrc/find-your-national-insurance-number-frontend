@@ -18,13 +18,13 @@ package services
 
 import connectors.PersonalDetailsValidationConnector
 import models.pdv._
+import org.apache.commons.lang3.StringUtils
 import org.mongodb.scala.MongoException
 import play.api.Logging
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.libs.json.Json
 import repositories.PersonalDetailsValidationRepoTrait
 import uk.gov.hmrc.http.HeaderCarrier
-import util.FMNConstants.EmptyString
 import util.FMNHelper
 
 import javax.inject.Inject
@@ -71,7 +71,7 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
       case _@PDVSuccessResponse(pdvResponseData) =>
         (pdvResponseData.validationStatus, pdvResponseData.personalDetails) match {
           case (ValidationStatus.Success, Some(personalDetails)) =>
-            val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(EmptyString))
+            val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(StringUtils.EMPTY))
             if (reformattedPostCode.strip().nonEmpty) {
               val newPersonalDetails = personalDetails.copy(postCode = Some(reformattedPostCode))
               val newPDVResponseData = pdvResponseData.copy(personalDetails = Some(newPersonalDetails))

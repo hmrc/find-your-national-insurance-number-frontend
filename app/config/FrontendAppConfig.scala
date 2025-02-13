@@ -17,7 +17,7 @@
 package config
 
 import com.google.inject.{Inject, Singleton}
-import controllers.bindable.Origin
+import models.OriginType
 import play.api.Configuration
 import play.api.i18n.Lang
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -27,7 +27,7 @@ import java.net.URLEncoder
 @Singleton
 class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig: ServicesConfig) {
 
-  val appName: String = configuration.get[String]("appName")
+  val appName: String       = configuration.get[String]("appName")
   val exitSurveyURL: String = configuration.get[String]("sca-wrapper.signout.url")
 
   val enc = URLEncoder.encode(_: String, "UTF-8")
@@ -38,12 +38,12 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   val fmnCheckDetailsUrl: String = configuration.get[String]("urls.fmnCheckDetailsUrl")
 
   val feedbackSurveyFrontendHost = getExternalUrl(s"feedback-survey-frontend.host").getOrElse("")
-  val basGatewayFrontendHost = getExternalUrl(s"bas-gateway-frontend.host").getOrElse("")
+  val basGatewayFrontendHost     = getExternalUrl(s"bas-gateway-frontend.host").getOrElse("")
 
   private def getExternalUrl(key: String): Option[String] =
     configuration.getOptional[String](s"external-url.$key")
-  def getFeedbackSurveyUrl(origin: Origin): String =
-    feedbackSurveyFrontendHost + "/feedback/" + enc(origin.origin)
+  def getFeedbackSurveyUrl(origin: OriginType): String    =
+    feedbackSurveyFrontendHost + "/feedback/" + enc(origin.toString)
 
   def getBasGatewayFrontendSignOutUrl(continueUrl: String): String =
     basGatewayFrontendHost + s"/bas-gateway/sign-out-without-state?continue=$continueUrl"
@@ -53,43 +53,46 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
     "cy" -> Lang("cy")
   )
 
-  val cacheTtl: Int = configuration.get[Int]("mongodb.timeToLiveInSeconds")
+  val cacheTtl: Int                  = configuration.get[Int]("mongodb.timeToLiveInSeconds")
   val individualDetailsCacheTtl: Int = configuration.get[Int]("mongodb.individualDetailsTtlInSeconds")
 
-  val pdvBaseUrl: String = configuration.get[Service]("microservice.services.personal-details-validation").baseUrl
-  val personalDetailsValidationFrontEnd: String = configuration.get[Service]("microservice.services.personal-details-validation-frontend").baseUrl
+  val pdvBaseUrl: String                        = configuration.get[Service]("microservice.services.personal-details-validation").baseUrl
+  val personalDetailsValidationFrontEnd: String =
+    configuration.get[Service]("microservice.services.personal-details-validation-frontend").baseUrl
 
-  val printAndPostServiceUrl: String = configuration.get[String]("external-url.national-insurance-number-letter-frontend.host")
+  val printAndPostServiceUrl: String =
+    configuration.get[String]("external-url.national-insurance-number-letter-frontend.host")
 
   val fmnGuidancePageUrl: String = configuration.get[String]("urls.fmnGuidancePage")
 
   val hmrcExtraSupportUrl: String = configuration.get[String]("urls.hmrcExtraSupport")
-  val callChargesUrl: String = configuration.get[String]("urls.callCharges")
+  val callChargesUrl: String      = configuration.get[String]("urls.callCharges")
 
   def individualDetails: DesApiServiceConfig =
     DesApiServiceConfig(configuration.get[Configuration]("microservice.services.individual-details"))
 
   val individualDetailsProtocol: String = configuration.get[String]("external-url.individual-details.protocol")
-  val individualDetailsHost: String = configuration.get[String]("external-url.individual-details.host")
-  val individualDetailsBaseUrl: String = configuration.get[String]("external-url.individual-details.base-url")
-  val individualDetailsPort: String = configuration.get[String]("external-url.individual-details.port")
+  val individualDetailsHost: String     = configuration.get[String]("external-url.individual-details.host")
+  val individualDetailsBaseUrl: String  = configuration.get[String]("external-url.individual-details.base-url")
+  val individualDetailsPort: String     = configuration.get[String]("external-url.individual-details.port")
 
-  val individualDetailsServiceUrl: String = s"$individualDetailsProtocol://$individualDetailsHost:$individualDetailsPort$individualDetailsBaseUrl"
+  val individualDetailsServiceUrl: String =
+    s"$individualDetailsProtocol://$individualDetailsHost:$individualDetailsPort$individualDetailsBaseUrl"
 
-  val npsFMNAPIProtocol: String = configuration.get[String]("external-url.nps-fmn-api.protocol")
-  val npsFMNAPIHost: String = configuration.get[String]("external-url.nps-fmn-api.host")
-  val npsFMNAPIBaseUrl: String = configuration.get[String]("external-url.nps-fmn-api.base-url")
-  val npsFMNAPIPort: String = configuration.get[String]("external-url.nps-fmn-api.port")
+  val npsFMNAPIProtocol: String     = configuration.get[String]("external-url.nps-fmn-api.protocol")
+  val npsFMNAPIHost: String         = configuration.get[String]("external-url.nps-fmn-api.host")
+  val npsFMNAPIBaseUrl: String      = configuration.get[String]("external-url.nps-fmn-api.base-url")
+  val npsFMNAPIPort: String         = configuration.get[String]("external-url.nps-fmn-api.port")
   val npsFMNAPIOriginatorId: String = configuration.get[String]("external-url.nps-fmn-api.gov-uk-originator-id")
 
   val npsFMNAPIUrl: String = s"$npsFMNAPIProtocol://$npsFMNAPIHost:$npsFMNAPIPort$npsFMNAPIBaseUrl"
 
   // banners
-  val showAlphaBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-alpha")
-  val showBetaBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-beta")
+  val showAlphaBanner: Boolean       = configuration.get[Boolean]("sca-wrapper.banners.show-alpha")
+  val showBetaBanner: Boolean        = configuration.get[Boolean]("sca-wrapper.banners.show-beta")
   val showHelpImproveBanner: Boolean = configuration.get[Boolean]("sca-wrapper.banners.show-help-improve")
 
-  val npsFMNAppStatusMessageList:String = configuration.get[String]("npsfmn.app-status-message-list")
-  val encryptionKey: String = configuration.get[String]("mongodb.encryption.key")
-  val trustedDomains: Set[String] = configuration.get[Seq[String]]("mdtp.trustedDomains").toSet
+  val npsFMNAppStatusMessageList: String = configuration.get[String]("npsfmn.app-status-message-list")
+  val encryptionKey: String              = configuration.get[String]("mongodb.encryption.key")
+  val trustedDomains: Set[String]        = configuration.get[Seq[String]]("mdtp.trustedDomains").toSet
 }

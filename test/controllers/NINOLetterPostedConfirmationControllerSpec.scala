@@ -72,7 +72,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
 
       when(mockSessionCacheService.invalidateCache(any(), any())).thenReturn(Future.successful(true))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
           inject.bind[SessionCacheService].toInstance(mockSessionCacheService),
@@ -100,7 +100,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
 
       when(mockSessionCacheService.invalidateCache(any(), any())).thenReturn(Future.successful(false))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder()
         .overrides(
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
           inject.bind[SessionCacheService].toInstance(mockSessionCacheService),

@@ -16,23 +16,83 @@
 
 package controllers.actions
 
-import javax.inject.Inject
-import models.requests.{IdentifierRequest, OptionalDataRequest}
+import com.google.inject.ImplementedBy
+import models.requests.{DataRequest, IdentifierRequest}
+import models.{OriginType, SessionData, UserAnswers}
+import play.api.Logging
 import play.api.mvc.ActionTransformer
 import repositories.SessionRepository
 
+import java.time.Instant
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class DataRetrievalActionImpl @Inject()(
-                                         val sessionRepository: SessionRepository
-                                       )(implicit val executionContext: ExecutionContext) extends DataRetrievalAction {
+class DataRetrievalImpl(
+  sessionRepository: SessionRepository,
+  originType: Option[OriginType]
+)(implicit
+  val executionContext: ExecutionContext
+) extends DataRetrieval
+    with Logging {
 
-  override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] = {
-
-    sessionRepository.get(request.userId).map { userAnswers =>
-      OptionalDataRequest(request.request, request.userId, userAnswers, request.credId)
+  private def updateSessionData[A](
+    optSessionDataFromRepository: Option[SessionData],
+    request: IdentifierRequest[A]
+  ): (SessionData, Boolean) = {
+    (originType, optSessionDataFromRepository) match {
+      case (_, None) =>
+        (
+          SessionData(
+            userAnswers = UserAnswers(),
+            origin = originType,
+            lastUpdated = Instant.now(java.time.Clock.systemUTC()),
+            id = request.userId
+          ),
+          true
+        )
+      case (Some(ot), Some(sd)) if !sd.origin.contains(ot) => (sd copy (origin = originType), true)
+      case (_, Some(sd)) => (sd, false)
     }
   }
+
+  private def saveSessionData(
+    updatedSessionData: SessionData,
+    isChanged: Boolean
+  ): Future[Unit] =
+    if (isChanged || updatedSessionData.isOldFormat) {
+      sessionRepository.set(updatedSessionData).map(_ => (): Unit)
+    } else {
+      Future.successful((): Unit)
+    }
+
+  override protected def transform[A](request: IdentifierRequest[A]): Future[DataRequest[A]] =
+    for {
+      optSessionDataFromRepository   <- sessionRepository.get(request.userId)
+      (updatedSessionData, isChanged) = updateSessionData(optSessionDataFromRepository, request)
+      _                              <- saveSessionData(updatedSessionData, isChanged)
+    } yield DataRequest(
+      request.request,
+      request.userId,
+      updatedSessionData.userAnswers,
+      request.credId,
+      updatedSessionData.origin
+    )
+
 }
 
-trait DataRetrievalAction extends ActionTransformer[IdentifierRequest, OptionalDataRequest]
+@ImplementedBy(classOf[DataRetrievalImpl])
+trait DataRetrieval extends ActionTransformer[IdentifierRequest, DataRequest]
+
+@Singleton
+class DataRetrievalActionImpl @Inject() (
+  val sessionRepository: SessionRepository
+)(implicit val executionContext: ExecutionContext)
+    extends DataRetrievalAction {
+  override def apply(originType: Option[OriginType]): DataRetrieval =
+    new DataRetrievalImpl(sessionRepository, originType)
+}
+
+@ImplementedBy(classOf[DataRetrievalActionImpl])
+trait DataRetrievalAction {
+  def apply(originType: Option[OriginType] = None): DataRetrieval
+}

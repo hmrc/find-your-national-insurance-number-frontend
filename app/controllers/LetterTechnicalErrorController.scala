@@ -16,7 +16,7 @@
 
 package controllers
 
-import cacheables.{OriginCacheable, TryAgainCountCacheable}
+import cacheables.TryAgainCountCacheable
 import controllers.actions._
 import forms.LetterTechnicalErrorFormProvider
 import models.requests.DataRequest
@@ -53,7 +53,7 @@ class LetterTechnicalErrorController @Inject()(
 
   val form: Form[LetterTechnicalError] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData) {
     implicit request =>
       val count = request.userAnswers.get(TryAgainCountCacheable)
       val retryAllowed = count match {
@@ -67,7 +67,7 @@ class LetterTechnicalErrorController @Inject()(
       Ok(view(form, mode, retryAllowed))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData).async {
     implicit request =>
       val retryAllowed = request.userAnswers.get(TryAgainCountCacheable) match {
         case Some(i) => if (i >= 5) {false} else {true}
@@ -80,12 +80,12 @@ class LetterTechnicalErrorController @Inject()(
         value => {
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(LetterTechnicalErrorPage, value))
-            _ <- sessionRepository.set(updatedAnswers)
+            _ <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
             pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY))
           } yield {
             val personalDetails = pdvData.flatMap(_.personalDetails)
             val postcode: String = personalDetails.flatMap(_.postCode).getOrElse(StringUtils.EMPTY)
-            auditService.findYourNinoOptionChosen(pdvData, value.toString, request.userAnswers.get(OriginCacheable))
+            auditService.findYourNinoOptionChosen(pdvData, value.toString, request.origin)
             if (value.toString == "tryAgain") {
               incrementTryAgainCount()
               if (postcode.nonEmpty) {
@@ -105,7 +105,7 @@ class LetterTechnicalErrorController @Inject()(
     val count: Int = request.userAnswers.get(TryAgainCountCacheable).getOrElse(0)
     for {
       updatedAnswers <- Future.fromTry(request.userAnswers.set(TryAgainCountCacheable, count + 1))
-      _ <- sessionRepository.set(updatedAnswers)
+      _ <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
     } yield updatedAnswers
   }
 }

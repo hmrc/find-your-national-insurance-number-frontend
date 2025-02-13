@@ -17,13 +17,11 @@
 package connectors
 
 import base.WireMockHelper
-import cacheables.OriginCacheable
 import config.FrontendAppConfig
 import models.pdv.{PDVRequest, PDVResponseData, PersonalDetails, ValidationStatus}
 import models.requests.DataRequest
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, when}
-import org.mockito.{Answers, ArgumentMatchers}
+import org.mockito.Answers
+import org.mockito.Mockito.reset
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.libs.json.Json
@@ -156,9 +154,6 @@ class PDVResponseDataConnectorSpec
       val pdvRequest: PDVRequest = mock[PDVRequest]
       stubPost(url, NOT_FOUND, None, Some(body))
 
-      when(mockDataRequest.userAnswers.get(ArgumentMatchers.eq(OriginCacheable))(any()))
-        .thenReturn(Some("origin"))
-
       val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue.leftSideValue
       result.status mustBe NOT_FOUND
     }
@@ -198,9 +193,6 @@ class PDVResponseDataConnectorSpec
       val pdvRequest: PDVRequest = PDVRequest("invalid", "dummy")
       stubPost(url, BAD_REQUEST, Some(Json.toJson(pdvRequest).toString()), None)
 
-      when(mockDataRequest.userAnswers.get(ArgumentMatchers.eq(OriginCacheable))(any()))
-        .thenReturn(Some("origin"))
-
       val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue.leftSideValue
       result.status mustBe BAD_REQUEST
     }
@@ -209,9 +201,6 @@ class PDVResponseDataConnectorSpec
 
       val pdvRequest: PDVRequest = PDVRequest("pdv-success-not-crn", "dummy")
       stubPost(url, INTERNAL_SERVER_ERROR, Some(Json.toJson(pdvRequest).toString()), None)
-
-      when(mockDataRequest.userAnswers.get(ArgumentMatchers.eq(OriginCacheable))(any()))
-        .thenReturn(Some("origin"))
 
       val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue.leftSideValue
       result.status mustBe INTERNAL_SERVER_ERROR

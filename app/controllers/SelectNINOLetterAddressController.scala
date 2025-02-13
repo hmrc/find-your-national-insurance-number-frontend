@@ -16,14 +16,13 @@
 
 package controllers
 
-import cacheables.OriginCacheable
 import controllers.actions._
 import forms.SelectNINOLetterAddressFormProvider
 import models.errors._
 import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.PDVResponseData
 import models.requests.DataRequest
-import models.{IndividualDetailsNino, Mode, UserAnswers}
+import models.{IndividualDetailsNino, Mode, OriginType, UserAnswers}
 import navigation.Navigator
 import org.apache.commons.lang3.StringUtils
 import pages.{ConfirmYourPostcodePage, SelectNINOLetterAddressPage}
@@ -35,7 +34,6 @@ import repositories.SessionRepository
 import services.{AuditService, IndividualDetailsService, NPSFMNService, PersonalDetailsValidationService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import util.FMNConstants.EmptyString
 import util.FMNHelper
 import util.FMNHelper.comparePostCode
 import views.html.SelectNINOLetterAddressView
@@ -44,113 +42,121 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-class SelectNINOLetterAddressController @Inject()(
-                                                   override val messagesApi: MessagesApi,
-                                                   sessionRepository: SessionRepository,
-                                                   navigator: Navigator,
-                                                   identify: IdentifierAction,
-                                                   getData: DataRetrievalAction,
-                                                   requireValidData: ValidCustomerDataRequiredAction,
-                                                   individualDetailsService: IndividualDetailsService,
-                                                   formProvider: SelectNINOLetterAddressFormProvider,
-                                                   val controllerComponents: MessagesControllerComponents,
-                                                   view: SelectNINOLetterAddressView,
-                                                   personalDetailsValidationService: PersonalDetailsValidationService,
-                                                   auditService: AuditService,
-                                                   npsFMNService: NPSFMNService
-                                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+class SelectNINOLetterAddressController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireValidData: ValidCustomerDataRequiredAction,
+  individualDetailsService: IndividualDetailsService,
+  formProvider: SelectNINOLetterAddressFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: SelectNINOLetterAddressView,
+  personalDetailsValidationService: PersonalDetailsValidationService,
+  auditService: AuditService,
+  npsFMNService: NPSFMNService
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData).async {
     implicit request =>
       val preparedForm = request.userAnswers.get(SelectNINOLetterAddressPage) match {
-        case None => form
+        case None        => form
         case Some(value) => form.fill(value)
       }
       for {
-        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", EmptyString))
+        pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(
+                     request.session.data.getOrElse("nino", StringUtils.EMPTY)
+                   )
       } yield {
         val pdvPostcode = getPostCode(pdvData)
         if (pdvPostcode.isEmpty) {
-          //allow users through who have entered a matching postcode in confirm-your-postcode
+          // allow users through who have entered a matching postcode in confirm-your-postcode
           val confirmPostcodeValue = confirmYourPostcodeValue(request)
           if (postcodeMatch(pdvData, confirmPostcodeValue)) {
             Ok(view(preparedForm, mode, confirmPostcodeValue))
           } else {
             throw new IllegalArgumentException("Postcode does not match")
           }
-        }
-        else {
+        } else {
           Ok(view(preparedForm, mode, pdvPostcode))
         }
       }
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData).async {
     implicit request =>
-      val nino = request.session.data.getOrElse("nino", EmptyString)
+      val nino = request.session.data.getOrElse("nino", StringUtils.EMPTY)
 
-      personalDetailsValidationService.getPersonalDetailsValidationByNino(nino).flatMap(pdvData =>
-        form.bindFromRequest().fold(
-          formWithErrors =>
-            Future.successful(BadRequest(view(formWithErrors, mode, getPostCode(pdvData)))),
-          value => {
-            request.userAnswers.set(SelectNINOLetterAddressPage, value) match {
-              case Failure(_) => Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-              case Success(uA) =>
-                sessionRepository.set(uA)
-                val auditValue = if (value.toString.equals("true")) "postCode" else "notThisAddress"
-                uA.get(SelectNINOLetterAddressPage) match {
-                  case Some(false) =>
-                    auditAddress(pdvData, nino, auditValue, uA)
-                    Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA)))
-                  case Some(true) =>
-                    sendLetter(nino, pdvData, auditValue, uA, mode)
-                  case _ => throw new IllegalArgumentException("Failed to get SelectNINOLetterAddressPage")
+      personalDetailsValidationService
+        .getPersonalDetailsValidationByNino(nino)
+        .flatMap(pdvData =>
+          form
+            .bindFromRequest()
+            .fold(
+              formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, getPostCode(pdvData)))),
+              value =>
+                request.userAnswers.set(SelectNINOLetterAddressPage, value) match {
+                  case Failure(_)  => Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                  case Success(uA) =>
+                    sessionRepository.setUserAnswers(request.userId, uA)
+                    val auditValue = if (value.toString.equals("true")) "postCode" else "notThisAddress"
+                    uA.get(SelectNINOLetterAddressPage) match {
+                      case Some(false) =>
+                        auditAddress(pdvData, nino, auditValue, uA, request.origin)
+                        Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA)))
+                      case Some(true)  =>
+                        sendLetter(nino, pdvData, auditValue, uA, mode, request.origin)
+                      case _           => throw new IllegalArgumentException("Failed to get SelectNINOLetterAddressPage")
+                    }
                 }
-            }
-          }
+            )
         )
-      )
   }
 
-  private def confirmYourPostcodeValue(request: DataRequest[AnyContent]): String = {
+  private def confirmYourPostcodeValue(request: DataRequest[AnyContent]): String =
     request.userAnswers.get(ConfirmYourPostcodePage) match {
       case Some(value) => value
-      case _ => ""
+      case _           => ""
     }
-  }
 
-  private def postcodeMatch(PDVResponseData: Option[PDVResponseData], confirmPostcodeValue: String): Boolean = {
+  private def postcodeMatch(PDVResponseData: Option[PDVResponseData], confirmPostcodeValue: String): Boolean =
     PDVResponseData match {
       case Some(pdvValidData) =>
         pdvValidData.npsPostCode match {
           case Some(npsPostCode) => comparePostCode(npsPostCode, confirmPostcodeValue)
-          case _ => throw new IllegalArgumentException("NPS postcode not found")
+          case _                 => throw new IllegalArgumentException("NPS postcode not found")
         }
-      case _ => throw new IllegalArgumentException("PDV data not found")
+      case _                  => throw new IllegalArgumentException("PDV data not found")
     }
-  }
 
-  private def sendLetter(nino: String, pdvData: Option[PDVResponseData], value: String, uA: UserAnswers, mode: Mode)
-                        (implicit headerCarrier: HeaderCarrier): Future[Result] = {
-    auditAddress(pdvData, nino, value, uA)
-    individualDetailsService.getIndividualDetailsData(nino) flatMap {
-      idData => {
-        npsFMNService.sendLetter(nino, FMNHelper.createNPSFMNRequest(idData)) map {
-          case LetterIssuedResponse() =>
-            Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA))
-          case RLSDLONFAResponse(responseStatus, responseMessage) =>
-            auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage, uA.get(OriginCacheable))
-            Redirect(routes.SendLetterErrorController.onPageLoad(mode))
-          case TechnicalIssueResponse(responseStatus, responseMessage) =>
-            auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage, uA.get(OriginCacheable))
-            Redirect(routes.LetterTechnicalErrorController.onPageLoad())
-          case _ =>
-            logger.warn("Unknown NPS FMN API response")
-            Redirect(routes.LetterTechnicalErrorController.onPageLoad())
-        }
+  private def sendLetter(
+    nino: String,
+    pdvData: Option[PDVResponseData],
+    value: String,
+    uA: UserAnswers,
+    mode: Mode,
+    origin: Option[OriginType]
+  )(implicit headerCarrier: HeaderCarrier): Future[Result] = {
+    auditAddress(pdvData, nino, value, uA, origin)
+    individualDetailsService.getIndividualDetailsData(nino) flatMap { idData =>
+      npsFMNService.sendLetter(nino, FMNHelper.createNPSFMNRequest(idData)) map {
+        case LetterIssuedResponse()                                  =>
+          Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA))
+        case RLSDLONFAResponse(responseStatus, responseMessage)      =>
+          auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage, origin)
+          Redirect(routes.SendLetterErrorController.onPageLoad(mode))
+        case TechnicalIssueResponse(responseStatus, responseMessage) =>
+          auditService.findYourNinoError(pdvData, Some(responseStatus.toString), responseMessage, origin)
+          Redirect(routes.LetterTechnicalErrorController.onPageLoad())
+        case _                                                       =>
+          logger.warn("Unknown NPS FMN API response")
+          Redirect(routes.LetterTechnicalErrorController.onPageLoad())
       }
     }
   }
@@ -158,21 +164,25 @@ class SelectNINOLetterAddressController @Inject()(
   private def getPostCode(pdvResponseData: Option[PDVResponseData]): String =
     pdvResponseData match {
       case Some(pd) => pd.getPostCode
-      case _ => StringUtils.EMPTY
+      case _        => StringUtils.EMPTY
     }
 
-  private def auditAddress(pdvData: Option[PDVResponseData], nino: String, value: String, userAnswers: UserAnswers)(
-    implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Unit] = {
+  private def auditAddress(
+    pdvData: Option[PDVResponseData],
+    nino: String,
+    value: String,
+    userAnswers: UserAnswers,
+    origin: Option[OriginType]
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Unit] =
     individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino)) map {
-      case Right(idAddress) => auditService.findYourNinoOnlineLetterOption(pdvData, idAddress, value, userAnswers.get(OriginCacheable))
+      case Right(idAddress)             => auditService.findYourNinoOnlineLetterOption(pdvData, idAddress, value, origin)
       case Left(individualDetailsError) =>
-        val statusCode = individualDetailsError match {
+        val statusCode      = individualDetailsError match {
           case conError: ConnectorError => Some(conError.statusCode.toString)
-          case _ => None
+          case _                        => None
         }
         val responseMessage = "Could not get individuals address"
-        auditService.findYourNinoError(pdvData, statusCode, responseMessage, userAnswers.get(OriginCacheable))
+        auditService.findYourNinoError(pdvData, statusCode, responseMessage, origin)
         throw new IllegalArgumentException(responseMessage)
     }
-  }
 }

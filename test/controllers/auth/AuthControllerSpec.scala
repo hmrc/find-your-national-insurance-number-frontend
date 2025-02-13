@@ -17,7 +17,7 @@
 package controllers.auth
 
 import base.SpecBase
-import controllers.bindable.Origin
+import models.OriginType
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -46,17 +46,17 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
 
         val application =
-          applicationBuilder(None)
+          applicationBuilder()
             .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
             .build()
 
         running(application) {
 
           val sentLocation = "http://example.com&origin=FIND_MY_NINO"
-          val request = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), Some(Origin("FIND_MY_NINO"))).url)
+          val request      =
+            FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), Some(OriginType.FMN)).url)
 
           val result = route(application, request).value
-
           status(result) mustEqual SEE_OTHER
 
         }
@@ -68,17 +68,16 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
 
         val application =
-          applicationBuilder(None)
+          applicationBuilder()
             .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
             .build()
 
         running(application) {
 
           val sentLocation = "http://example.com&origin=FIND_MY_NINO"
-          val request = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), None).url)
+          val request      = FakeRequest(GET, routes.AuthController.signout(Some(RedirectUrl(sentLocation)), None).url)
 
           val result = route(application, request).value
-
           status(result) mustEqual SEE_OTHER
         }
       }
@@ -98,7 +97,9 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
 
         val result: Future[Result] = controller.timeOut()(FakeRequest("GET", ""))
 
-        redirectLocation(result).getOrElse("Unable to complete") mustBe controllers.auth.routes.SignedOutController.onPageLoad.url
+        redirectLocation(result).getOrElse(
+          "Unable to complete"
+        ) mustBe controllers.auth.routes.SignedOutController.onPageLoad.url
       }
 
       "clear the session upon redirect" in new LocalSetup {
@@ -112,13 +113,15 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
     "redirectToRegister" - {
 
       "must redirect to the register page" in new LocalSetup {
-        
-        val redirectUrl: Option[RedirectUrl] = Some(RedirectUrl("http://localhost:9553/feedback-survey?origin=FIND_MY_NINO"))
+
+        val redirectUrl: Option[RedirectUrl] =
+          Some(RedirectUrl("http://localhost:9553/feedback-survey?origin=FIND_MY_NINO"))
 
         val result: Future[Result] = controller.redirectToRegister(redirectUrl)(FakeRequest("GET", ""))
 
         status(result) mustBe SEE_OTHER
-        val expectedResult = "http://localhost:9553/bas-gateway/register?origin=find-your-national-insurance-number-frontend&continueUrl=http%3A%2F%2Flocalhost%3A9553%2Ffeedback-survey%3Forigin%3DFIND_MY_NINO&accountType=Individual"
+        val expectedResult =
+          "http://localhost:9553/bas-gateway/register?origin=find-your-national-insurance-number-frontend&continueUrl=http%3A%2F%2Flocalhost%3A9553%2Ffeedback-survey%3Forigin%3DFIND_MY_NINO&accountType=Individual"
         redirectLocation(result).value mustBe expectedResult
       }
 
@@ -131,7 +134,9 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         val result: Future[Result] = controller.redirectToSMN()(FakeRequest("GET", ""))
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe "http://localhost:9949/auth-login-stub/gg-sign-in?continue=http%3A%2F%2Flocalhost"
+        redirectLocation(
+          result
+        ).value mustBe "http://localhost:9949/auth-login-stub/gg-sign-in?continue=http%3A%2F%2Flocalhost"
       }
     }
 

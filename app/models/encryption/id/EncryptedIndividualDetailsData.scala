@@ -18,11 +18,11 @@ package models.encryption.id
 
 import models.encryption.EncryptedValueFormat._
 import models.individualdetails.{IndividualDetailsData, IndividualDetailsDataCache}
+import org.apache.commons.lang3.StringUtils
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{OFormat, __}
 import uk.gov.hmrc.crypto.{EncryptedValue, SymmetricCryptoFactory}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
-import util.FMNConstants.EmptyString
 
 import java.time.Instant
 
@@ -108,27 +108,27 @@ object EncryptedIndividualDetailsDataCache {
 
     def getNino: String = individualDetailsData.individualDetails match {
       case Some(id) => id.nino
-      case _        => EmptyString
+      case _        => StringUtils.EMPTY
     }
 
     def getPostCode: String = individualDetailsData.individualDetails match {
       case Some(id) => id.postCode.value
-      case _        => EmptyString
+      case _        => StringUtils.EMPTY
     }
 
     def getFirstForename: String = individualDetailsData.individualDetails match {
       case Some(id) => id.firstForename.value
-      case _        => EmptyString
+      case _        => StringUtils.EMPTY
     }
 
     def getLastName: String = individualDetailsData.individualDetails match {
       case Some(id) => id.surname.value
-      case _        => EmptyString
+      case _        => StringUtils.EMPTY
     }
 
     def dateOfBirth: String = individualDetailsData.individualDetails match {
       case Some(id) => id.dateOfBirth.value
-      case _        => EmptyString
+      case _        => StringUtils.EMPTY
     }
   }
 }

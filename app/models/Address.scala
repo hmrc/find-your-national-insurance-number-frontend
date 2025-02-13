@@ -16,10 +16,11 @@
 
 package models
 
+import org.apache.commons.lang3.StringUtils
 import play.api.Logging
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import org.apache.commons.lang3.StringUtils
+
 import java.time.LocalDate
 
 case class Address(

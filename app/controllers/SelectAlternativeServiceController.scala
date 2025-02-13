@@ -16,7 +16,6 @@
 
 package controllers
 
-import cacheables.OriginCacheable
 import controllers.actions._
 import forms.SelectAlternativeServiceFormProvider
 import models.{Mode, SelectAlternativeService}
@@ -34,45 +33,46 @@ import views.html.SelectAlternativeServiceView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SelectAlternativeServiceController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       sessionRepository: SessionRepository,
-                                       navigator: Navigator,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireValidData: DataRequiredAction,
-                                       formProvider: SelectAlternativeServiceFormProvider,
-                                       personalDetailsValidationService: PersonalDetailsValidationService,
-                                       auditService: AuditService,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: SelectAlternativeServiceView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging{
+class SelectAlternativeServiceController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  formProvider: SelectAlternativeServiceFormProvider,
+  personalDetailsValidationService: PersonalDetailsValidationService,
+  auditService: AuditService,
+  val controllerComponents: MessagesControllerComponents,
+  view: SelectAlternativeServiceView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
   val form: Form[SelectAlternativeService] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
-    implicit request =>
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData()) { implicit request =>
 
-      val preparedForm = request.userAnswers.get(SelectAlternativeServicePage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
+    val preparedForm = request.userAnswers.get(SelectAlternativeServicePage) match {
+      case None        => form
+      case Some(value) => form.fill(value)
+    }
 
-      Ok(view(preparedForm, mode))
+    Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
-    implicit request =>
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData()).async { implicit request =>
+    form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
         value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map(
-            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
-          )
+          personalDetailsValidationService
+            .getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", ""))
+            .map(pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.origin))
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectAlternativeServicePage, value))
-            _ <- sessionRepository.set(updatedAnswers)
+            _              <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
           } yield Redirect(navigator.nextPage(SelectAlternativeServicePage, mode, updatedAnswers))
         }
       )

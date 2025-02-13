@@ -16,7 +16,6 @@
 
 package controllers
 
-import cacheables.OriginCacheable
 import config.FrontendAppConfig
 import controllers.actions.{DataRetrievalAction, IdentifierAction, ValidCustomerDataRequiredAction}
 import forms.ValidDataNINOHelpFormProvider
@@ -52,7 +51,7 @@ class ValidDataNINOHelpController @Inject()(
 
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData andThen requireValidData) {
+  def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData() andThen requireValidData) {
     implicit request =>
         val preparedForm = request.userAnswers.get(ValidDataNINOHelpPage) match {
           case None => form
@@ -61,7 +60,7 @@ class ValidDataNINOHelpController @Inject()(
         Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireValidData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>
@@ -69,11 +68,11 @@ class ValidDataNINOHelpController @Inject()(
 
         value => {
           personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map(
-            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.userAnswers.get(OriginCacheable))
+            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.origin)
           )
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(ValidDataNINOHelpPage, value))
-            _ <- sessionRepository.set(updatedAnswers)
+            _ <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
           } yield Redirect(navigator.nextPage(ValidDataNINOHelpPage, mode, updatedAnswers))
         }
       )
