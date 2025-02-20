@@ -21,18 +21,6 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
 
-// TODO: DDCNL-10012 After the changes for DDCNL-9796 have been live for at least a day or so the following should be done:-
-/*
- Remove isOldFormat from the SessionData case class and
- all code relating to the true value. This will be from
- this file and the DataRetrievalAction class. This is because
- this field and program code is purely to cater for
- any Mongo documents which remain in the session cache (i.e. in
- the existing/ old format) when these changes go live: they will
- be gone from this short-lived cache within at most a few hours
- (TTL is just 15 mins).
- */
-
 case class SessionData(
   userAnswers: UserAnswers,
   origin: Option[OriginType],
