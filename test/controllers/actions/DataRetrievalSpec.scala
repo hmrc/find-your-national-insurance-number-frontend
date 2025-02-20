@@ -67,24 +67,6 @@ class DataRetrievalSpec extends SpecBase with MockitoSugar {
         result.origin mustBe None
         verify(sessionRepository, never).set(any)
       }
-
-      "if no origin in cache but session data old format must update cache" in {
-        val sessionRepository = mock[SessionRepository]
-        when(sessionRepository.get(any)) thenReturn Future(
-          Some(SessionData(userAnswers = userAnswers, origin = None, id = "id", isOldFormat = true))
-        )
-        when(sessionRepository.set(any())) thenReturn Future(true)
-        val action            = new Harness(sessionRepository, None)
-        val result            = action.callTransform(IdentifierRequest(FakeRequest(), "id", Some("credid-01234"))).futureValue
-
-        result.userAnswers.get(ConfirmYourPostcodePage) mustBe Some(dummyValue)
-        result.origin mustBe None
-        val sessionDataCaptor: ArgumentCaptor[SessionData] = ArgumentCaptor.forClass(classOf[SessionData])
-        verify(sessionRepository, times(1)).set(sessionDataCaptor.capture())
-        val actualSessionDataUpdated                       = sessionDataCaptor.getValue
-        actualSessionDataUpdated.userAnswers mustBe userAnswers
-        actualSessionDataUpdated.origin mustBe None
-      }
     }
 
     "when there is data in the cache and an origin passed in" - {

@@ -16,15 +16,12 @@
 
 package models
 
-import models.SelectAlternativeService.PhoneHmrc
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import pages.{ConfirmIdentityPage, SelectAlternativeServicePage, SelectNINOLetterAddressPage, ValidDataNINOHelpPage}
-import play.api.libs.json.{JsValue, Json}
-
-import java.time.Instant
+import pages.ConfirmIdentityPage
+import play.api.libs.json.{JsResultException, JsValue, Json}
 
 class SessionDataSpec extends AnyWordSpec with GuiceOneAppPerSuite with Matchers with BeforeAndAfterEach {
 
@@ -37,7 +34,6 @@ class SessionDataSpec extends AnyWordSpec with GuiceOneAppPerSuite with Matchers
       readInSessionData.origin mustBe sessionData.origin
       readInSessionData.userAnswers mustBe sessionData.userAnswers
       readInSessionData.id mustBe sessionData.id
-      readInSessionData.isOldFormat mustBe false
     }
 
     "read correctly in old format" in {
@@ -47,16 +43,7 @@ class SessionDataSpec extends AnyWordSpec with GuiceOneAppPerSuite with Matchers
           |"data":{"origin":"PDV","validDataNINOHelp":true,"selectNINOLetterAddress":false,"selectAlternativeService":"phoneHMRC"},
           |"lastUpdated":{"$date":{"$numberLong":"1738582855820"}}}""".stripMargin
       )
-
-      val readInSessionData = sessionJson.as[SessionData]
-      readInSessionData.origin mustBe Some(OriginType.PDV)
-      readInSessionData.userAnswers.get(ValidDataNINOHelpPage) mustBe Some(true)
-      readInSessionData.userAnswers.get(SelectNINOLetterAddressPage) mustBe Some(false)
-      readInSessionData.userAnswers.get(SelectAlternativeServicePage) mustBe Some(PhoneHmrc)
-      readInSessionData.id mustBe "session-803bec74-435d-42a4-8b3f-204baca7e009"
-      readInSessionData.lastUpdated mustBe Instant.ofEpochMilli(1738582855820L)
-      readInSessionData.isOldFormat mustBe true
-
+      a[JsResultException] mustBe thrownBy(sessionJson.as[SessionData])
     }
   }
 
