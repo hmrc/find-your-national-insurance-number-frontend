@@ -36,7 +36,7 @@ class SessionDataSpec extends AnyWordSpec with GuiceOneAppPerSuite with Matchers
       readInSessionData.id mustBe sessionData.id
     }
 
-    "read correctly in old format" in {
+    "throw jsresult exception for invalid format" in {
       val sessionJson: JsValue = Json.parse(
         """{
           |"_id":"session-803bec74-435d-42a4-8b3f-204baca7e009",
