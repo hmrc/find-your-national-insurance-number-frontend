@@ -38,9 +38,9 @@ class DataRetrievalImpl(
   private def updateSessionData[A](
     optSessionDataFromRepository: Option[SessionData],
     request: IdentifierRequest[A]
-  ): (SessionData, Boolean) = {
+  ): (SessionData, Boolean) =
     (originType, optSessionDataFromRepository) match {
-      case (_, None) =>
+      case (_, None)                                       =>
         (
           SessionData(
             userAnswers = UserAnswers(),
@@ -51,15 +51,14 @@ class DataRetrievalImpl(
           true
         )
       case (Some(ot), Some(sd)) if !sd.origin.contains(ot) => (sd copy (origin = originType), true)
-      case (_, Some(sd)) => (sd, false)
+      case (_, Some(sd))                                   => (sd, false)
     }
-  }
 
   private def saveSessionData(
     updatedSessionData: SessionData,
     isChanged: Boolean
   ): Future[Unit] =
-    if (isChanged || updatedSessionData.isOldFormat) {
+    if (isChanged) {
       sessionRepository.set(updatedSessionData).map(_ => (): Unit)
     } else {
       Future.successful((): Unit)
