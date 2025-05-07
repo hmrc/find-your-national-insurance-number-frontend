@@ -22,7 +22,7 @@ import play.api.data.FormError
 class ConfirmIdentityFormProviderSpec extends BooleanFieldBehaviours {
 
   val requiredKey = "confirmIdentity.error.required"
-  val invalidKey = "error.boolean"
+  val invalidKey  = "error.boolean"
 
   val form = new ConfirmIdentityFormProvider()()
 

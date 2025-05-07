@@ -32,12 +32,12 @@ object ValidationStatus {
   def fromString(value: String): ValidationStatus = value.toLowerCase match {
     case "success" => Success
     case "failure" => Failure
-    case _ => Unknown
+    case _         => Unknown
   }
 
   def withName(name: String): ValidationStatus = name.toLowerCase match {
     case "success" => Success
     case "failure" => Failure
-    case _ => throw new IllegalArgumentException(s"Invalid name for ValidationStatus: $name")
+    case _         => throw new IllegalArgumentException(s"Invalid name for ValidationStatus: $name")
   }
 }

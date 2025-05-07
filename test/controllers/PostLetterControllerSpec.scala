@@ -38,7 +38,7 @@ class PostLetterControllerSpec extends SpecBase with MockitoSugar {
   def onwardRoute = Call("GET", "/foo")
 
   val formProvider = new PostLetterFormProvider()
-  val form = formProvider()
+  val form         = formProvider()
 
   lazy val postLetterRoute = routes.PostLetterController.onPageLoad(NormalMode).url
 
@@ -74,7 +74,8 @@ class PostLetterControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view(form.fill(true), NormalMode)(request, messages).toString
+        contentAsString(result)
+          .removeAllNonces() mustEqual view(form.fill(true), NormalMode)(request, messages).toString
       }
     }
 

@@ -25,9 +25,9 @@ class SelectNINOLetterAddressFormProviderSpec extends BooleanFieldBehaviours {
 
   ".value" - {
 
-    val fieldName = "value"
+    val fieldName   = "value"
     val requiredKey = "selectNINOLetterAddress.error.required"
-    val invalidKey = "error.boolean"
+    val invalidKey  = "error.boolean"
 
     behave like booleanField(
       form,

@@ -30,14 +30,13 @@ class CrnIndicatorSpec extends AnyFlatSpec with Matchers {
     json1.as[CrnIndicator] shouldBe True
   }
 
-  for{
+  for {
     (status, expected) <- Seq(
-      (False, 0),
-      (True, 1)
-    )
-  } {
+                            (False, 0),
+                            (True, 1)
+                          )
+  }
     it should s"write $status to JSON" in {
       Json.toJson(status) shouldBe Json.toJson(expected)
     }
-  }
 }

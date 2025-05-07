@@ -21,13 +21,11 @@ import models.nps.NPSFMNRequest
 
 object FMNHelper {
 
-  private def removeSpaces(input: String): String = {
+  private def removeSpaces(input: String): String =
     input.replaceAll("\\s+", "")
-  }
 
-  def comparePostCode(pdvPostCode: String, npsPostCode: String): Boolean = {
+  def comparePostCode(pdvPostCode: String, npsPostCode: String): Boolean =
     removeSpaces(pdvPostCode).equalsIgnoreCase(removeSpaces(npsPostCode))
-  }
 
   def splitPostCode(postCode: String): String = {
     val withoutSpaces = removeSpaces(postCode)
@@ -43,7 +41,7 @@ object FMNHelper {
           id.dateOfBirth,
           id.getPostCode
         )
-      case _ => NPSFMNRequest.empty
+      case _                                          => NPSFMNRequest.empty
     }
 
 }

@@ -31,8 +31,8 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 /*
-  Collection is named user-answers. It was originally just this but now 
-  it holds all session-data, not just users answers. Ideally we'd rename 
+  Collection is named user-answers. It was originally just this but now
+  it holds all session-data, not just users answers. Ideally we'd rename
   it but it would cause issues for people mid-journey so it's been left.
  */
 @Singleton

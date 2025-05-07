@@ -44,8 +44,14 @@ class SelectAlternativeServiceViewSpec extends ViewBehaviours with Generators {
   behave like pageWithContent("legend", "What would you like to do?")
 
   behave like pageWithContent("label", "Print and post a form")
-  behave like pageWithContent("div", "Once we have received the completed form, we can send you a letter confirming your National Insurance number.")
+  behave like pageWithContent(
+    "div",
+    "Once we have received the completed form, we can send you a letter confirming your National Insurance number."
+  )
 
   behave like pageWithContent("label", "Phone HMRC")
-  behave like pageWithContent("div", "You’ll need to answer some questions, then we’ll post you a letter with your number on it.")
+  behave like pageWithContent(
+    "div",
+    "You’ll need to answer some questions, then we’ll post you a letter with your number on it."
+  )
 }

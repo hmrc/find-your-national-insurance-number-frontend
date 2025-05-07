@@ -46,19 +46,18 @@ class TitleTypeSpec extends AnyFlatSpec with Matchers {
     json6.as[TitleType] shouldBe Rev
   }
 
-  for{
+  for {
     (titleType, json) <- Seq(
-      (NotKnown, """0"""),
-      (Mr, """1"""),
-      (Mrs, """2"""),
-      (Miss, """3"""),
-      (Ms, """4"""),
-      (Dr, """5"""),
-      (Rev, """6""")
-    )
-  } {
+                           (NotKnown, """0"""),
+                           (Mr, """1"""),
+                           (Mrs, """2"""),
+                           (Miss, """3"""),
+                           (Ms, """4"""),
+                           (Dr, """5"""),
+                           (Rev, """6""")
+                         )
+  }
     it should s"write $titleType to JSON" in {
       Json.toJson(titleType) shouldBe Json.parse(json)
     }
-  }
 }

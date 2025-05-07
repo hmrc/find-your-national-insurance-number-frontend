@@ -32,27 +32,33 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[DefaultNPSFMNConnector])
 trait NPSFMNConnector {
 
-  def sendLetter(nino: String, npsFMNRequest: NPSFMNRequest
-                   )(implicit hc: HeaderCarrier,correlationId: CorrelationId, ec: ExecutionContext): Future[HttpResponse]
+  def sendLetter(nino: String, npsFMNRequest: NPSFMNRequest)(implicit
+    hc: HeaderCarrier,
+    correlationId: CorrelationId,
+    ec: ExecutionContext
+  ): Future[HttpResponse]
 }
 
 @Singleton
-class DefaultNPSFMNConnector@Inject() (httpClientV2: HttpClientV2, appConfig: FrontendAppConfig)
-  extends  NPSFMNConnector
-  with Logging {
+class DefaultNPSFMNConnector @Inject() (httpClientV2: HttpClientV2, appConfig: FrontendAppConfig)
+    extends NPSFMNConnector
+    with Logging {
 
-  def sendLetter(nino: String, body: NPSFMNRequest
-                   )(implicit hc: HeaderCarrier,correlationId: CorrelationId, ec: ExecutionContext): Future[HttpResponse] = {
-    val url = s"${appConfig.npsFMNAPIUrl}/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/$nino"
-    val headers = Seq("correlationId" -> correlationId.value.toString,
-      "gov-uk-originator-id" -> appConfig.npsFMNAPIOriginatorId)
+  def sendLetter(nino: String, body: NPSFMNRequest)(implicit
+    hc: HeaderCarrier,
+    correlationId: CorrelationId,
+    ec: ExecutionContext
+  ): Future[HttpResponse] = {
+    val url     = s"${appConfig.npsFMNAPIUrl}/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/$nino"
+    val headers =
+      Seq("correlationId" -> correlationId.value.toString, "gov-uk-originator-id" -> appConfig.npsFMNAPIOriginatorId)
 
     httpClientV2
       .post(new URL(url))
       .withBody(body)
-      .setHeader(headers:_*)
+      .setHeader(headers: _*)
       .execute[HttpResponse]
-      .flatMap{ response =>
+      .flatMap { response =>
         Future.successful(response)
       }
   }

@@ -24,10 +24,10 @@ import javax.inject.{Inject, Singleton};
 
 // $COVERAGE-OFF$
 @Singleton
-class Filters @Inject()(
-                         defaultFilters: EnabledFilters,
-                         wrapperDataFilter: WrapperDataFilter
-                       ) extends HttpFilters {
+class Filters @Inject() (
+  defaultFilters: EnabledFilters,
+  wrapperDataFilter: WrapperDataFilter
+) extends HttpFilters {
 
   override val filters: Seq[EssentialFilter] =
     defaultFilters.filters ++ Option(wrapperDataFilter)

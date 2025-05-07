@@ -33,31 +33,32 @@ import scala.concurrent.Future
 
 class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
 
-  lazy val ninoLetterPostedConfirmationRoute: String = routes.NINOLetterPostedConfirmationController.onPageLoad().url
+  lazy val ninoLetterPostedConfirmationRoute: String                         = routes.NINOLetterPostedConfirmationController.onPageLoad().url
   val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
-  val mockSessionCacheService: SessionCacheService = mock[SessionCacheService]
+  val mockSessionCacheService: SessionCacheService                           = mock[SessionCacheService]
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
     validationStatus = ValidationStatus.Success,
-    personalDetails = Some(PersonalDetails(
-      firstName = "John",
-      lastName = "Doe",
-      nino = Nino("AA000003B"),
-      postCode = Some("AA1 1AA"),
-      dateOfBirth = LocalDate.of(1990, 1, 1)
-    )),
+    personalDetails = Some(
+      PersonalDetails(
+        firstName = "John",
+        lastName = "Doe",
+        nino = Nino("AA000003B"),
+        postCode = Some("AA1 1AA"),
+        dateOfBirth = LocalDate.of(1990, 1, 1)
+      )
+    ),
     validCustomer = Some(true),
     CRN = Some("fakeCRN"),
     npsPostCode = Some("AA1 1AA"),
     reason = None
   )
 
-  override def beforeEach(): Unit = {
+  override def beforeEach(): Unit =
     reset(
       mockSessionCacheService
     )
-  }
 
   val fakePDVResponseDataInvalidCustomer: PDVResponseData = fakePDVResponseData.copy(
     validCustomer = Some(false)
@@ -75,7 +76,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
       val application = applicationBuilder()
         .overrides(
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
-          inject.bind[SessionCacheService].toInstance(mockSessionCacheService),
+          inject.bind[SessionCacheService].toInstance(mockSessionCacheService)
         )
         .build()
 
@@ -87,7 +88,9 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[NINOLetterPostedConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view(LocalDate.now.format(DateTimeFormatter.ofPattern("d MMMM uuuu")))(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(
+          LocalDate.now.format(DateTimeFormatter.ofPattern("d MMMM uuuu"))
+        )(request, messages).toString
 
         verify(mockSessionCacheService, times(1)).invalidateCache(any(), any())
       }
@@ -103,7 +106,7 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
       val application = applicationBuilder()
         .overrides(
           inject.bind[PersonalDetailsValidationService].toInstance(mockPersonalDetailsValidationService),
-          inject.bind[SessionCacheService].toInstance(mockSessionCacheService),
+          inject.bind[SessionCacheService].toInstance(mockSessionCacheService)
         )
         .build()
 
@@ -115,7 +118,9 @@ class NINOLetterPostedConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[NINOLetterPostedConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view(LocalDate.now.format(DateTimeFormatter.ofPattern("d MMMM uuuu")))(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(
+          LocalDate.now.format(DateTimeFormatter.ofPattern("d MMMM uuuu"))
+        )(request, messages).toString
 
         verify(mockSessionCacheService, times(1)).invalidateCache(any(), any())
       }

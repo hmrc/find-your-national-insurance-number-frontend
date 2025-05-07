@@ -39,19 +39,19 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
   lazy val invalidDataNINOHelpRoute = routes.InvalidDataNINOHelpController.onPageLoad(mode = NormalMode).url
 
   val formProvider = new InvalidDataNINOHelpFormProvider()
-  val form = formProvider()
+  val form         = formProvider()
 
   "InvalidDataNINOHelp Controller" - {
 
     "must return OK and the correct view for a GET" in {
-      val application = applicationBuilder(userAnswers =  emptyUserAnswers).build()
+      val application = applicationBuilder(userAnswers = emptyUserAnswers).build()
 
       running(application) {
         val request = FakeRequest(GET, invalidDataNINOHelpRoute)
 
         val result = route(application, request).value
         status(result) mustEqual OK
-        val view = application.injector.instanceOf[InvalidDataNINOHelpView]
+        val view   = application.injector.instanceOf[InvalidDataNINOHelpView]
         contentAsString(result).removeAllNonces() mustEqual view(form, NormalMode)(request, messages, config).toString
       }
     }
@@ -70,7 +70,10 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view(form.fill(InvalidDataNINOHelp.values.head), NormalMode)(request, messages, config).toString
+        contentAsString(result).removeAllNonces() mustEqual view(
+          form.fill(InvalidDataNINOHelp.values.head),
+          NormalMode
+        )(request, messages, config).toString
       }
     }
 
@@ -116,7 +119,8 @@ class InvalidDataNINOHelpControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result).removeAllNonces() mustEqual view(boundForm, NormalMode)(request, messages, config).toString
+        contentAsString(result)
+          .removeAllNonces() mustEqual view(boundForm, NormalMode)(request, messages, config).toString
       }
     }
   }

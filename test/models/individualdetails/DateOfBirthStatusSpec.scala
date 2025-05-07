@@ -22,13 +22,16 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Json, Writes}
 
-
 class DateOfBirthStatusSpec extends AnyFlatSpec with Matchers {
 
-  implicit val writesUnverified: Writes[DateOfBirthStatus.Unverified.type] = WritesNumber[DateOfBirthStatus.Unverified.type](_ => 0)
-  implicit val writesVerified: Writes[DateOfBirthStatus.Verified.type] = WritesNumber[DateOfBirthStatus.Verified.type](_ => 1)
-  implicit val writesNotKnown: Writes[DateOfBirthStatus.NotKnown.type] = WritesNumber[DateOfBirthStatus.NotKnown.type](_ => 2)
-  implicit val writesCoegConfirmed: Writes[DateOfBirthStatus.CoegConfirmed.type] = WritesNumber[DateOfBirthStatus.CoegConfirmed.type](_ => 3)
+  implicit val writesUnverified: Writes[DateOfBirthStatus.Unverified.type]       =
+    WritesNumber[DateOfBirthStatus.Unverified.type](_ => 0)
+  implicit val writesVerified: Writes[DateOfBirthStatus.Verified.type]           =
+    WritesNumber[DateOfBirthStatus.Verified.type](_ => 1)
+  implicit val writesNotKnown: Writes[DateOfBirthStatus.NotKnown.type]           =
+    WritesNumber[DateOfBirthStatus.NotKnown.type](_ => 2)
+  implicit val writesCoegConfirmed: Writes[DateOfBirthStatus.CoegConfirmed.type] =
+    WritesNumber[DateOfBirthStatus.CoegConfirmed.type](_ => 3)
 
   "DateOfBirthStatus" should "be read correctly from JSON" in {
     val json = Json.parse("""0""")
@@ -44,19 +47,17 @@ class DateOfBirthStatusSpec extends AnyFlatSpec with Matchers {
     json3.as[DateOfBirthStatus] shouldBe CoegConfirmed
   }
 
-  for{
-(input, expectedOutput) <- Seq(
-      (Unverified, 0),
-      (Verified, 1),
-      (NotKnown, 2),
-      (CoegConfirmed, 3)
-    )
-  } {
+  for {
+    (input, expectedOutput) <- Seq(
+                                 (Unverified, 0),
+                                 (Verified, 1),
+                                 (NotKnown, 2),
+                                 (CoegConfirmed, 3)
+                               )
+  }
     s"DateOfBirthStatus $input" should s"be written correctly to JSON" in {
       val json = Json.toJson(input)
       json shouldBe Json.toJson(expectedOutput)
     }
-
-  }
 
 }

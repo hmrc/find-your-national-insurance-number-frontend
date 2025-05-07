@@ -25,7 +25,7 @@ import java.util.UUID
 
 object AnyValueTypeMatcher {
 
-  implicit val defaultResolveMerge: Default[ResolveMerge] = new Default[ResolveMerge] {
+  implicit val defaultResolveMerge: Default[ResolveMerge]   = new Default[ResolveMerge] {
     val getDefault: ResolveMerge = ResolveMerge('X')
   }
   implicit val defaultCorrelationId: Default[CorrelationId] = new Default[CorrelationId] {

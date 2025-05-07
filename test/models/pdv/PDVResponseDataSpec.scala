@@ -44,16 +44,16 @@ class PDVResponseDataSpec extends AnyFlatSpec with Matchers {
       None
     )
     import uk.gov.hmrc.domain.Nino.isValid
-    pdvResponseData.validationStatus should be (ValidationStatus.Success)
-    pdvResponseData.validCustomer should be (Some(true))
-    isValid(personalDetails.nino.nino) should be (true)
-    pdvResponseData.getFirstName should be ("firstName")
-    pdvResponseData.getLastName should be ("lastName")
-    pdvResponseData.getPostCode should be ("NE12 1ZZ")
-    pdvResponseData.getNino should be ("AA123456B")
-    pdvResponseData.getDateOfBirth should be ("2024-01-01")
-    pdvResponseData.CRN should be (Some("CRN"))
-    pdvResponseData.npsPostCode should be (None)
+    pdvResponseData.validationStatus   should be(ValidationStatus.Success)
+    pdvResponseData.validCustomer      should be(Some(true))
+    isValid(personalDetails.nino.nino) should be(true)
+    pdvResponseData.getFirstName       should be("firstName")
+    pdvResponseData.getLastName        should be("lastName")
+    pdvResponseData.getPostCode        should be("NE12 1ZZ")
+    pdvResponseData.getNino            should be("AA123456B")
+    pdvResponseData.getDateOfBirth     should be("2024-01-01")
+    pdvResponseData.CRN                should be(Some("CRN"))
+    pdvResponseData.npsPostCode        should be(None)
   }
 
   "An PDV ResponseData and PersonalDetails" should "have empty data" in {
@@ -64,7 +64,7 @@ class PDVResponseDataSpec extends AnyFlatSpec with Matchers {
       None,
       LocalDate.of(2024, 1, 1)
     )
-    val pdvResponseData2: PDVResponseData = PDVResponseData(
+    val pdvResponseData2: PDVResponseData     = PDVResponseData(
       "id",
       ValidationStatus.Success,
       Some(emptyPersonalDetails),
@@ -74,9 +74,9 @@ class PDVResponseDataSpec extends AnyFlatSpec with Matchers {
       Some("CRN"),
       None
     )
-    pdvResponseData2.getFirstName should be ("")
-    pdvResponseData2.getLastName should be ("")
-    pdvResponseData2.getPostCode should be ("")
+    pdvResponseData2.getFirstName should be("")
+    pdvResponseData2.getLastName  should be("")
+    pdvResponseData2.getPostCode  should be("")
 
   }
 

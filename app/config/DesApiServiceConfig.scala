@@ -19,9 +19,9 @@ package config
 import play.api.Configuration
 
 final case class DesApiServiceConfig(
-    token:        String,
-    environment:  String,
-    originatorId: String
+  token: String,
+  environment: String,
+  originatorId: String
 )
 
 object DesApiServiceConfig {

@@ -37,7 +37,7 @@ trait ViewSpecAssertions extends ViewSpecGetters {
   def assertContainsLabel(doc: Document, forElement: String, expectedText: String): Assertion = {
     val labels = doc.getElementsByAttributeValue("for", forElement)
     assert(labels.size == 1, s"\n\nLabel for $forElement was not rendered on the page.")
-    val label = labels.first
+    val label  = labels.first
     assert(label.text().contains(expectedText), s"\n\nLabel for $forElement was not $expectedText")
   }
 
@@ -63,8 +63,14 @@ trait ViewSpecAssertions extends ViewSpecGetters {
     assert(doc.getElementsByClass(className).isEmpty)
 
   def assertRenderedByClass(doc: Document, className: String): Assertion =
-    assert(!doc.getElementsByClass(className).isEmpty, "\n\nElement with class " + className + " was not rendered on the page.\n")
+    assert(
+      !doc.getElementsByClass(className).isEmpty,
+      "\n\nElement with class " + className + " was not rendered on the page.\n"
+    )
 
   def assertNotRenderedByClass(doc: Document, className: String): Assertion =
-    assert(doc.getElementsByClass(className).isEmpty, "\n\nElement with class " + className + " was rendered on the page.\n")
+    assert(
+      doc.getElementsByClass(className).isEmpty,
+      "\n\nElement with class " + className + " was rendered on the page.\n"
+    )
 }

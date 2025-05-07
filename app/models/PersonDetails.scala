@@ -20,10 +20,10 @@ import org.apache.commons.lang3.StringUtils
 import play.api.libs.json.{Json, OFormat}
 
 case class PersonDetails(
-                          person: Person,
-                          address: Option[Address],
-                          correspondenceAddress: Option[Address]
-                        )
+  person: Person,
+  address: Option[Address],
+  correspondenceAddress: Option[Address]
+)
 
 object PersonDetails {
   implicit class PersonDetailsOps(private val pd: PersonDetails) extends AnyVal {

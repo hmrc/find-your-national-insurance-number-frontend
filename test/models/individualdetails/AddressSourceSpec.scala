@@ -55,22 +55,21 @@ class AddressSourceSpec extends AnyFlatSpec with Matchers {
     json9.as[AddressSource] shouldBe PersonalAccountUser
   }
 
-  for{
+  for {
     (addressSource, expectedJson) <- Seq(
-      (NotKnown, Json.parse("""0""")),
-      (Customer, Json.parse("""1""")),
-      (Relative, Json.parse("""2""")),
-      (Employer, Json.parse("""3""")),
-      (InlandRevenue, Json.parse("""4""")),
-      (OtherGovernmentDepartment, Json.parse("""5""")),
-      (OtherThirdParty, Json.parse("""6""")),
-      (Cutover, Json.parse("""7""")),
-      (RealTimeInformation, Json.parse("""8""")),
-      (PersonalAccountUser, Json.parse("""9"""))
-    )
-  } {
+                                       (NotKnown, Json.parse("""0""")),
+                                       (Customer, Json.parse("""1""")),
+                                       (Relative, Json.parse("""2""")),
+                                       (Employer, Json.parse("""3""")),
+                                       (InlandRevenue, Json.parse("""4""")),
+                                       (OtherGovernmentDepartment, Json.parse("""5""")),
+                                       (OtherThirdParty, Json.parse("""6""")),
+                                       (Cutover, Json.parse("""7""")),
+                                       (RealTimeInformation, Json.parse("""8""")),
+                                       (PersonalAccountUser, Json.parse("""9"""))
+                                     )
+  }
     s"AddressSource $addressSource" should s"be written correctly to JSON" in {
       Json.toJson(addressSource.asInstanceOf[models.individualdetails.AddressSource]) shouldBe expectedJson
     }
-  }
 }

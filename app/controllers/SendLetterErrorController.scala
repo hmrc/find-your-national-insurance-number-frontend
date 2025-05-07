@@ -35,26 +35,29 @@ import views.html.SendLetterErrorView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SendLetterErrorController @Inject()(
-                                           override val messagesApi: MessagesApi,
-                                           sessionRepository: SessionRepository,
-                                           navigator: Navigator,
-                                           identify: IdentifierAction,
-                                           getData: DataRetrievalAction,
-                                           requireValidData: ValidCustomerDataRequiredAction,
-                                           view: SendLetterErrorView,
-                                           formProvider: SelectAlternativeServiceFormProvider,
-                                           personalDetailsValidationService: PersonalDetailsValidationService,
-                                           auditService: AuditService,
-                                           val controllerComponents: MessagesControllerComponents
-                                         )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
+class SendLetterErrorController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireValidData: ValidCustomerDataRequiredAction,
+  view: SendLetterErrorView,
+  formProvider: SelectAlternativeServiceFormProvider,
+  personalDetailsValidationService: PersonalDetailsValidationService,
+  auditService: AuditService,
+  val controllerComponents: MessagesControllerComponents
+)(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
   val form: Form[SelectAlternativeService] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData) {
     implicit request =>
       val preparedForm = request.userAnswers.get(SelectAlternativeServicePage) match {
-        case None => form
+        case None        => form
         case Some(value) => form.fill(value)
       }
 
@@ -63,19 +66,19 @@ class SendLetterErrorController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData).async {
     implicit request =>
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
-
-        value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY)).map(
-            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.origin)
-          )
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectAlternativeServicePage, value))
-            _ <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
-          } yield Redirect(navigator.nextPage(SelectAlternativeServicePage, mode, updatedAnswers))
-        }
-      )
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+          value => {
+            personalDetailsValidationService
+              .getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY))
+              .map(pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.origin))
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(SelectAlternativeServicePage, value))
+              _              <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
+            } yield Redirect(navigator.nextPage(SelectAlternativeServicePage, mode, updatedAnswers))
+          }
+        )
   }
 }

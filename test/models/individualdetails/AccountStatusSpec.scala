@@ -43,7 +43,7 @@ class AccountStatusSpec extends AnyFlatSpec with Matchers {
     )
 
     for ((input, expectedOutput) <- testData) {
-      val json = Json.toJson(input)
+      val json   = Json.toJson(input)
       val result = json.as[AccountStatusType]
       result shouldBe expectedOutput
     }

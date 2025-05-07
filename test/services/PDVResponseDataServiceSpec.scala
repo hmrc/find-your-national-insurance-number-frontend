@@ -37,47 +37,53 @@ import java.time.{Instant, LocalDate}
 import scala.concurrent.Future
 import scala.util.Random
 
-class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach{
+class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
 
   import PDVResponseDataServiceSpec._
-  implicit val mockDataRequest: DataRequest[AnyContent]  = mock[DataRequest[AnyContent]]
+  implicit val mockDataRequest: DataRequest[AnyContent] = mock[DataRequest[AnyContent]]
 
-  override def beforeEach(): Unit = {
+  override def beforeEach(): Unit =
     reset(mockConnector, mockEncryptedPersonalDetailsValidationRepository, mockPersonalDetailsValidationRepository)
-  }
 
   "PDVResponseDataService with EncryptedPersonalDetailsValidationRepository" must {
 
-    val personalDetailsValidationService = new PersonalDetailsValidationService(
-      mockConnector,
-      mockEncryptedPersonalDetailsValidationRepository)(ec)
+    val personalDetailsValidationService =
+      new PersonalDetailsValidationService(mockConnector, mockEncryptedPersonalDetailsValidationRepository)(ec)
 
     "getPersonalDetailsValidationByNino" must {
       "return the details when nino exists" in {
         when(mockEncryptedPersonalDetailsValidationRepository.findByNino(eqTo(fakeNino.nino))(any()))
           .thenReturn(Future.successful(Option(personalDetailsValidation)))
-        personalDetailsValidationService.getPersonalDetailsValidationByNino(fakeNino.nino).map { result =>
-          result mustBe Some(personalDetailsValidation)
-        }(ec)
+        personalDetailsValidationService
+          .getPersonalDetailsValidationByNino(fakeNino.nino)
+          .map { result =>
+            result mustBe Some(personalDetailsValidation)
+          }(ec)
       }
       "return None when nino does NOT exist" in {
         when(mockEncryptedPersonalDetailsValidationRepository.findByNino(eqTo("test2"))(any()))
           .thenReturn(Future.successful(None))
 
-        personalDetailsValidationService.getPersonalDetailsValidationByNino("test2").map { result =>
-          result mustBe None
-        }(ec)
+        personalDetailsValidationService
+          .getPersonalDetailsValidationByNino("test2")
+          .map { result =>
+            result mustBe None
+          }(ec)
       }
     }
 
     "updatePDVDataRowWithValidationStatus" must {
       "update the row with valid validation status" in {
-        when(mockEncryptedPersonalDetailsValidationRepository.updateCustomerValidityWithReason(any(), any(), any())(any()))
+        when(
+          mockEncryptedPersonalDetailsValidationRepository.updateCustomerValidityWithReason(any(), any(), any())(any())
+        )
           .thenReturn(Future.successful(validationId))
 
-        personalDetailsValidationService.updatePDVDataRowWithValidCustomer(validationId, isValidCustomer = true, "success").map { result =>
-          result mustBe true
-        }(ec)
+        personalDetailsValidationService
+          .updatePDVDataRowWithValidCustomer(validationId, isValidCustomer = true, "success")
+          .map { result =>
+            result mustBe true
+          }(ec)
       }
     }
 
@@ -86,9 +92,11 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockEncryptedPersonalDetailsValidationRepository.updatePDVDataWithNPSPostCode(any(), any())(any()))
           .thenReturn(Future.successful(validationId))
 
-        personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(validationId, "AA1 1AA").map { result =>
-          result mustBe true
-        }(ec)
+        personalDetailsValidationService
+          .updatePDVDataRowWithNPSPostCode(validationId, "AA1 1AA")
+          .map { result =>
+            result mustBe true
+          }(ec)
       }
     }
 
@@ -97,17 +105,21 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockEncryptedPersonalDetailsValidationRepository.findByNino(any())(any()))
           .thenReturn(Future.successful(Option(personalDetailsValidation2)))
 
-        personalDetailsValidationService.getValidCustomerStatus(validationId).map { result =>
-          result mustBe true
-        }(ec)
+        personalDetailsValidationService
+          .getValidCustomerStatus(validationId)
+          .map { result =>
+            result mustBe true
+          }(ec)
       }
       "return None when valid customer status does NOT exist" in {
         when(mockEncryptedPersonalDetailsValidationRepository.findByNino(any())(any()))
           .thenReturn(Future.successful(None))
 
-        personalDetailsValidationService.getValidCustomerStatus(validationId).map { result =>
-          result mustBe false
-        }(ec)
+        personalDetailsValidationService
+          .getValidCustomerStatus(validationId)
+          .map { result =>
+            result mustBe false
+          }(ec)
       }
     }
 
@@ -116,17 +128,21 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockEncryptedPersonalDetailsValidationRepository.insertOrReplacePDVResultData(any())(any()))
           .thenReturn(Future.successful(validationId))
 
-        personalDetailsValidationService.createPDVDataRow(pdvSuccessResponse).map { result =>
-          result mustBe pdvSuccessResponse
-        }(ec)
+        personalDetailsValidationService
+          .createPDVDataRow(pdvSuccessResponse)
+          .map { result =>
+            result mustBe pdvSuccessResponse
+          }(ec)
       }
 
       "not create a row with PdvNotFoundResponse status" in {
         val pdvNotFoundResponse = PDVNotFoundResponse(HttpResponse(NOT_FOUND, "PDV data not found"))
 
-        personalDetailsValidationService.createPDVDataRow(pdvNotFoundResponse).map { result =>
-          result mustBe pdvNotFoundResponse
-        }(ec)
+        personalDetailsValidationService
+          .createPDVDataRow(pdvNotFoundResponse)
+          .map { result =>
+            result mustBe pdvNotFoundResponse
+          }(ec)
       }
     }
 
@@ -138,10 +154,20 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, Json.toJson(personalDetailsValidation2).toString())))
 
-        personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
-          result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.npsPostCode mustBe personalDetailsValidation2.npsPostCode
-          result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.validationStatus mustBe personalDetailsValidation2.validationStatus
-        }(ec)
+        personalDetailsValidationService
+          .getPDVMatchResult(pdvRequest)
+          .map { result =>
+            result
+              .asInstanceOf[PDVSuccessResponse]
+              .leftSideValue
+              .pdvResponseData
+              .npsPostCode mustBe personalDetailsValidation2.npsPostCode
+            result
+              .asInstanceOf[PDVSuccessResponse]
+              .leftSideValue
+              .pdvResponseData
+              .validationStatus mustBe personalDetailsValidation2.validationStatus
+          }(ec)
       }
 
       "return PDVSuccessResponse when the PDV data row does NOT have a valid customer status" in {
@@ -151,10 +177,20 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, Json.toJson(personalDetailsValidation).toString())))
 
-        personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
-          result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.npsPostCode mustBe personalDetailsValidation.npsPostCode
-          result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.validationStatus mustBe personalDetailsValidation.validationStatus
-        }(ec)
+        personalDetailsValidationService
+          .getPDVMatchResult(pdvRequest)
+          .map { result =>
+            result
+              .asInstanceOf[PDVSuccessResponse]
+              .leftSideValue
+              .pdvResponseData
+              .npsPostCode mustBe personalDetailsValidation.npsPostCode
+            result
+              .asInstanceOf[PDVSuccessResponse]
+              .leftSideValue
+              .pdvResponseData
+              .validationStatus mustBe personalDetailsValidation.validationStatus
+          }(ec)
       }
 
       "return PDVBadRequestResponse when the connector returns a BAD_REQUEST" in {
@@ -164,9 +200,11 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "BAD REQUEST")))
 
-        personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
-          result.isInstanceOf[PDVBadRequestResponse] mustBe true
-        }(ec)
+        personalDetailsValidationService
+          .getPDVMatchResult(pdvRequest)
+          .map { result =>
+            result.isInstanceOf[PDVBadRequestResponse] mustBe true
+          }(ec)
       }
 
       "return PDVNotFoundResponse when the connector returns a NOT_FOUND" in {
@@ -176,9 +214,11 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(NOT_FOUND, "NOT_FOUND")))
 
-        personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
-          result.isInstanceOf[PDVNotFoundResponse] mustBe true
-        }(ec)
+        personalDetailsValidationService
+          .getPDVMatchResult(pdvRequest)
+          .map { result =>
+            result.isInstanceOf[PDVNotFoundResponse] mustBe true
+          }(ec)
       }
 
       "return PDVErrorResponse when the connector returns a INTERNAL_SERVER_ERROR" in {
@@ -188,9 +228,11 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "Something went wrong")))
 
-        personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
-          result.isInstanceOf[PDVErrorResponse] mustBe true
-        }(ec)
+        personalDetailsValidationService
+          .getPDVMatchResult(pdvRequest)
+          .map { result =>
+            result.isInstanceOf[PDVErrorResponse] mustBe true
+          }(ec)
       }
 
       "return PDVUnexpectedResponse when the connector returns a BAD_GATEWAY" in {
@@ -200,15 +242,17 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(BAD_GATEWAY, "Something went wrong")))
 
-        personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
-          result.isInstanceOf[PDVUnexpectedResponse] mustBe true
-        }(ec)
+        personalDetailsValidationService
+          .getPDVMatchResult(pdvRequest)
+          .map { result =>
+            result.isInstanceOf[PDVUnexpectedResponse] mustBe true
+          }(ec)
       }
 
       "createPDVDataRow should reformat the postCode in PersonalDetails" in {
         val mockEncryptedRepository = mock[EncryptedPersonalDetailsValidationRepository]
-        val mockRepository = mock[PersonalDetailsValidationRepository]
-        val service = new PersonalDetailsValidationService(null, mockEncryptedRepository)(ec)
+        val mockRepository          = mock[PersonalDetailsValidationRepository]
+        val service                 = new PersonalDetailsValidationService(null, mockEncryptedRepository)(ec)
 
         val originalPostCode = "Ab 12C d"
         val expectedPostCode = "AB1 2CD" // assuming this is the expected format after splitPostCode
@@ -238,7 +282,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
           case PDVSuccessResponse(pdvResponseData) =>
             pdvResponseData.personalDetails mustBe defined
             pdvResponseData.personalDetails.get.postCode mustBe Some(expectedPostCode)
-          case _ => fail("Expected PDVSuccessResponse")
+          case _                                   => fail("Expected PDVSuccessResponse")
         }
       }
     }
@@ -287,25 +331,28 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
 
   "PDVResponseDataService with PersonalDetailsValidationRepository" must {
 
-    val personalDetailsValidationService = new PersonalDetailsValidationService(
-      mockConnector,
-      mockPersonalDetailsValidationRepository)(ec)
+    val personalDetailsValidationService =
+      new PersonalDetailsValidationService(mockConnector, mockPersonalDetailsValidationRepository)(ec)
 
     "getPersonalDetailsValidationByNino" must {
       "return the details when nino exists" in {
         when(mockPersonalDetailsValidationRepository.findByNino(eqTo(fakeNino.nino))(any()))
           .thenReturn(Future.successful(Option(personalDetailsValidation)))
-        personalDetailsValidationService.getPersonalDetailsValidationByNino(fakeNino.nino).map { result =>
-          result mustBe Some(personalDetailsValidation)
-        }(ec)
+        personalDetailsValidationService
+          .getPersonalDetailsValidationByNino(fakeNino.nino)
+          .map { result =>
+            result mustBe Some(personalDetailsValidation)
+          }(ec)
       }
       "return None when nino does NOT exist" in {
         when(mockPersonalDetailsValidationRepository.findByNino(eqTo("test2"))(any()))
           .thenReturn(Future.successful(None))
 
-        personalDetailsValidationService.getPersonalDetailsValidationByNino("test2").map { result =>
-          result mustBe None
-        }(ec)
+        personalDetailsValidationService
+          .getPersonalDetailsValidationByNino("test2")
+          .map { result =>
+            result mustBe None
+          }(ec)
       }
     }
 
@@ -314,9 +361,11 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockPersonalDetailsValidationRepository.updateCustomerValidityWithReason(any(), any(), any())(any()))
           .thenReturn(Future.successful(validationId))
 
-        personalDetailsValidationService.updatePDVDataRowWithValidCustomer(validationId, isValidCustomer = true, "success").map { result =>
-          result mustBe true
-        }(ec)
+        personalDetailsValidationService
+          .updatePDVDataRowWithValidCustomer(validationId, isValidCustomer = true, "success")
+          .map { result =>
+            result mustBe true
+          }(ec)
       }
     }
 
@@ -325,9 +374,11 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockPersonalDetailsValidationRepository.updatePDVDataWithNPSPostCode(any(), any())(any()))
           .thenReturn(Future.successful(validationId))
 
-        personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(validationId, "AA1 1AA").map { result =>
-          result mustBe true
-        }(ec)
+        personalDetailsValidationService
+          .updatePDVDataRowWithNPSPostCode(validationId, "AA1 1AA")
+          .map { result =>
+            result mustBe true
+          }(ec)
       }
     }
 
@@ -336,17 +387,21 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockPersonalDetailsValidationRepository.findByNino(any())(any()))
           .thenReturn(Future.successful(Option(personalDetailsValidation2)))
 
-        personalDetailsValidationService.getValidCustomerStatus(validationId).map { result =>
-          result mustBe true
-        }(ec)
+        personalDetailsValidationService
+          .getValidCustomerStatus(validationId)
+          .map { result =>
+            result mustBe true
+          }(ec)
       }
       "return None when valid customer status does NOT exist" in {
         when(mockPersonalDetailsValidationRepository.findByNino(any())(any()))
           .thenReturn(Future.successful(None))
 
-        personalDetailsValidationService.getValidCustomerStatus(validationId).map { result =>
-          result mustBe false
-        }(ec)
+        personalDetailsValidationService
+          .getValidCustomerStatus(validationId)
+          .map { result =>
+            result mustBe false
+          }(ec)
       }
     }
 
@@ -355,50 +410,62 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockPersonalDetailsValidationRepository.insertOrReplacePDVResultData(any())(any()))
           .thenReturn(Future.successful(validationId))
 
-        personalDetailsValidationService.createPDVDataRow(pdvSuccessResponse).map { result =>
-          result mustBe pdvSuccessResponse
-        }(ec)
+        personalDetailsValidationService
+          .createPDVDataRow(pdvSuccessResponse)
+          .map { result =>
+            result mustBe pdvSuccessResponse
+          }(ec)
       }
 
       "create a row with validation fail" in {
         when(mockPersonalDetailsValidationRepository.insertOrReplacePDVResultData(any())(any()))
           .thenReturn(Future.successful(validationId))
 
-        personalDetailsValidationService.createPDVDataRow(pdvFailureResponse).map { result =>
-          result mustBe pdvFailureResponse
-        }(ec)
+        personalDetailsValidationService
+          .createPDVDataRow(pdvFailureResponse)
+          .map { result =>
+            result mustBe pdvFailureResponse
+          }(ec)
       }
 
       "not create a row with PdvNotFoundResponse status" in {
         val pdvNotFoundResponse = PDVNotFoundResponse(HttpResponse(NOT_FOUND, "PDV data not found"))
 
-        personalDetailsValidationService.createPDVDataRow(pdvNotFoundResponse).map { result =>
-          result mustBe pdvNotFoundResponse
-        }(ec)
+        personalDetailsValidationService
+          .createPDVDataRow(pdvNotFoundResponse)
+          .map { result =>
+            result mustBe pdvNotFoundResponse
+          }(ec)
       }
 
       "not create a row with pdvBadRequestResponse status" in {
         val response = PDVBadRequestResponse(HttpResponse(BAD_REQUEST, "PDV data not found"))
 
-        personalDetailsValidationService.createPDVDataRow(response).map { result =>
-          result mustBe response
-        }(ec)
+        personalDetailsValidationService
+          .createPDVDataRow(response)
+          .map { result =>
+            result mustBe response
+          }(ec)
       }
 
       "not create a row with pdvUnexpectedResponse status" in {
         val response = PDVUnexpectedResponse(HttpResponse(BAD_GATEWAY, "PDV data not found"))
 
-        personalDetailsValidationService.createPDVDataRow(response).map { result =>
-          result mustBe response
-        }(ec)
+        personalDetailsValidationService
+          .createPDVDataRow(response)
+          .map { result =>
+            result mustBe response
+          }(ec)
       }
 
       "not create a row with pdvErrorResponse status" in {
         val response = PDVErrorResponse(HttpResponse(INTERNAL_SERVER_ERROR, "PDV data not found"))
 
-        personalDetailsValidationService.createPDVDataRow(response).map { result =>
-          result mustBe response
-        }(ec)
+        personalDetailsValidationService
+          .createPDVDataRow(response)
+          .map { result =>
+            result mustBe response
+          }(ec)
       }
 
     }
@@ -411,10 +478,20 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, Json.toJson(personalDetailsValidation2).toString())))
 
-        personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
-          result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.npsPostCode mustBe personalDetailsValidation2.npsPostCode
-          result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.validationStatus mustBe personalDetailsValidation2.validationStatus
-        }(ec)
+        personalDetailsValidationService
+          .getPDVMatchResult(pdvRequest)
+          .map { result =>
+            result
+              .asInstanceOf[PDVSuccessResponse]
+              .leftSideValue
+              .pdvResponseData
+              .npsPostCode mustBe personalDetailsValidation2.npsPostCode
+            result
+              .asInstanceOf[PDVSuccessResponse]
+              .leftSideValue
+              .pdvResponseData
+              .validationStatus mustBe personalDetailsValidation2.validationStatus
+          }(ec)
       }
 
       "return false when the PDV data row does NOT have a valid customer status" in {
@@ -424,16 +501,26 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, Json.toJson(personalDetailsValidation).toString())))
 
-        personalDetailsValidationService.getPDVMatchResult(pdvRequest).map { result =>
-          result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.npsPostCode mustBe personalDetailsValidation.npsPostCode
-          result.asInstanceOf[PDVSuccessResponse].leftSideValue.pdvResponseData.validationStatus mustBe personalDetailsValidation.validationStatus
-        }(ec)
+        personalDetailsValidationService
+          .getPDVMatchResult(pdvRequest)
+          .map { result =>
+            result
+              .asInstanceOf[PDVSuccessResponse]
+              .leftSideValue
+              .pdvResponseData
+              .npsPostCode mustBe personalDetailsValidation.npsPostCode
+            result
+              .asInstanceOf[PDVSuccessResponse]
+              .leftSideValue
+              .pdvResponseData
+              .validationStatus mustBe personalDetailsValidation.validationStatus
+          }(ec)
       }
 
       "createPDVDataRow should reformat the postCode in PersonalDetails" in {
         val mockPersonalDetailsValidationRepository = mock[PersonalDetailsValidationRepository]
-        val mockRepository = mock[PersonalDetailsValidationRepository]
-        val service = new PersonalDetailsValidationService(null, mockPersonalDetailsValidationRepository)(ec)
+        val mockRepository                          = mock[PersonalDetailsValidationRepository]
+        val service                                 = new PersonalDetailsValidationService(null, mockPersonalDetailsValidationRepository)(ec)
 
         val originalPostCode = "Ab 12C d"
         val expectedPostCode = "AB1 2CD" // assuming this is the expected format after splitPostCode
@@ -463,7 +550,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
           case PDVSuccessResponse(pdvResponseData) =>
             pdvResponseData.personalDetails mustBe defined
             pdvResponseData.personalDetails.get.postCode mustBe Some(expectedPostCode)
-          case _ => fail("Expected PDVSuccessResponse")
+          case _                                   => fail("Expected PDVSuccessResponse")
         }
       }
     }
@@ -473,14 +560,14 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
 }
 
 object PDVResponseDataServiceSpec {
-  private val mockConnector = mock[PersonalDetailsValidationConnector]
+  private val mockConnector                                    = mock[PersonalDetailsValidationConnector]
   private val mockEncryptedPersonalDetailsValidationRepository = mock[EncryptedPersonalDetailsValidationRepository]
-  private val mockPersonalDetailsValidationRepository = mock[PersonalDetailsValidationRepository]
+  private val mockPersonalDetailsValidationRepository          = mock[PersonalDetailsValidationRepository]
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit val hc: HeaderCarrier                     = HeaderCarrier()
 
-  val validationId = "abcd01234"
+  val validationId   = "abcd01234"
   val fakeNino: Nino = Nino(new Generator(new Random()).nextNino.nino)
 
   val pdvRequest: PDVRequest = PDVRequest("credid=12345", "session-67890")
@@ -494,37 +581,8 @@ object PDVResponseDataServiceSpec {
       LocalDate.parse("1945-03-18")
     )
 
-  val pdvSuccessResponse: PDVSuccessResponse = PDVSuccessResponse(PDVResponseData(
-      validationId,
-      ValidationStatus.Success,
-      Some(personalDetails),
-      reason = None,
-      validCustomer = None,
-      CRN = None,
-      npsPostCode = None
-    ))
-
-  val pdvFailureResponse: PDVSuccessResponse = PDVSuccessResponse(PDVResponseData(
-    validationId,
-    ValidationStatus.Failure,
-    None,
-    reason = None,
-    validCustomer = None,
-    CRN = None,
-    npsPostCode = None
-  ))
-
-  val pdvInvalidResponse: PDVSuccessResponse = PDVSuccessResponse(PDVResponseData(
-    validationId,
-    ValidationStatus.Failure,
-    Some(personalDetails),
-    reason = None,
-    validCustomer = None,
-    CRN = None,
-    npsPostCode = None
-  ))
-
-  val personalDetailsValidation: PDVResponseData = PDVResponseData(
+  val pdvSuccessResponse: PDVSuccessResponse = PDVSuccessResponse(
+    PDVResponseData(
       validationId,
       ValidationStatus.Success,
       Some(personalDetails),
@@ -533,6 +591,41 @@ object PDVResponseDataServiceSpec {
       CRN = None,
       npsPostCode = None
     )
+  )
+
+  val pdvFailureResponse: PDVSuccessResponse = PDVSuccessResponse(
+    PDVResponseData(
+      validationId,
+      ValidationStatus.Failure,
+      None,
+      reason = None,
+      validCustomer = None,
+      CRN = None,
+      npsPostCode = None
+    )
+  )
+
+  val pdvInvalidResponse: PDVSuccessResponse = PDVSuccessResponse(
+    PDVResponseData(
+      validationId,
+      ValidationStatus.Failure,
+      Some(personalDetails),
+      reason = None,
+      validCustomer = None,
+      CRN = None,
+      npsPostCode = None
+    )
+  )
+
+  val personalDetailsValidation: PDVResponseData = PDVResponseData(
+    validationId,
+    ValidationStatus.Success,
+    Some(personalDetails),
+    reason = None,
+    validCustomer = None,
+    CRN = None,
+    npsPostCode = None
+  )
 
   val personalDetailsValidation2: PDVResponseData =
     PDVResponseData(

@@ -64,7 +64,9 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
 
   "must append service to feedback link" in {
     val link = getElementBySelector(doc, ".govuk-phase-banner__text > .govuk-link")
-    getElementHref(link) must include("http://localhost:9250/contact/beta-feedback?service=find-your-national-insurance-number-frontend&backUrl=http%3A%2F%2Flocalhost%3A14033")
+    getElementHref(link) must include(
+      "http://localhost:9250/contact/beta-feedback?service=find-your-national-insurance-number-frontend&backUrl=http%3A%2F%2Flocalhost%3A14033"
+    )
   }
 
   "must render accessibility statement link" in {
@@ -74,7 +76,9 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
       .find(_.text() == "Accessibility statement")
       .get
 
-    getElementHref(link) must include("http://localhost:12346/accessibility-statement/personal-account?referrerUrl=http%3A%2F%2Flocalhost%3A12346%2Ffind-your-national-insurance-number" )
+    getElementHref(link) must include(
+      "http://localhost:12346/accessibility-statement/personal-account?referrerUrl=http%3A%2F%2Flocalhost%3A12346%2Ffind-your-national-insurance-number"
+    )
   }
 
   "must render 'page not working properly' link" in {
@@ -142,8 +146,8 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
     }
 
   def pageWithSubmitButton(expectedText: String): Unit =
-    pageWithButton(expectedText) {
-      button => assertElementContainsId(button, "submit")
+    pageWithButton(expectedText) { button =>
+      assertElementContainsId(button, "submit")
     }
 
   def pageWithoutSubmitButton(): Unit =
@@ -188,7 +192,12 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
   def pageWithPartialContent(tag: String, expectedText: String): Unit =
     pageWithContent(doc, tag, expectedText, _ contains _)
 
-  private def pageWithContent(doc: Document, tag: String, expectedText: String, condition: (String, String) => Boolean): Unit =
+  private def pageWithContent(
+    doc: Document,
+    tag: String,
+    expectedText: String,
+    condition: (String, String) => Boolean
+  ): Unit =
     s"must render $tag with text $expectedText" in {
       val elements = getElementsByTag(doc, tag)
       assertElementExists(elements, element => condition(element.text, expectedText))

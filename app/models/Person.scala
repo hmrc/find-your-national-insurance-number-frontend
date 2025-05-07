@@ -23,36 +23,35 @@ import uk.gov.hmrc.domain.Nino
 import java.time.LocalDate
 
 case class Person(
-                   firstName: Option[String],
-                   middleName: Option[String],
-                   lastName: Option[String],
-                   initials: Option[String],
-                   title: Option[String],
-                   honours: Option[String],
-                   sex: Option[String],
-                   dateOfBirth: Option[LocalDate],
-                   nino: Option[Nino]
-                 ) {
+  firstName: Option[String],
+  middleName: Option[String],
+  lastName: Option[String],
+  initials: Option[String],
+  title: Option[String],
+  honours: Option[String],
+  sex: Option[String],
+  dateOfBirth: Option[LocalDate],
+  nino: Option[Nino]
+) {
   lazy val initialsName =
     initials.getOrElse(List(title, firstName.map(_.take(1)), middleName.map(_.take(1)), lastName).flatten.mkString(" "))
 
-  lazy val shortName    = for {
+  lazy val shortName = for {
     f <- firstName
     l <- lastName
   } yield List(f, l).mkString(" ")
 
-  lazy val fullName     = List(title, firstName, middleName, lastName, honours).flatten.mkString(" ")
+  lazy val fullName = List(title, firstName, middleName, lastName, honours).flatten.mkString(" ")
 }
 
 object Person {
 
   implicit class PersonOps(private val person: Person) extends AnyVal {
-    def getFirstName: String = person.firstName.getOrElse(StringUtils.EMPTY)
-    def getLastName: String = person.lastName.getOrElse(StringUtils.EMPTY)
+    def getFirstName: String   = person.firstName.getOrElse(StringUtils.EMPTY)
+    def getLastName: String    = person.lastName.getOrElse(StringUtils.EMPTY)
     def getDateOfBirth: String = person.dateOfBirth.map(_.toString).getOrElse(StringUtils.EMPTY)
   }
 
   implicit val formats: OFormat[Person] = Json.format[Person]
 
 }
-

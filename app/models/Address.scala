@@ -24,18 +24,18 @@ import play.api.libs.json._
 import java.time.LocalDate
 
 case class Address(
-                    line1: Option[String],
-                    line2: Option[String],
-                    line3: Option[String],
-                    line4: Option[String],
-                    line5: Option[String],
-                    postcode: Option[String],
-                    country: Option[String],
-                    startDate: Option[LocalDate],
-                    endDate: Option[LocalDate],
-                    `type`: Option[String],
-                    isRls: Boolean
-                  ) {
+  line1: Option[String],
+  line2: Option[String],
+  line3: Option[String],
+  line4: Option[String],
+  line5: Option[String],
+  postcode: Option[String],
+  country: Option[String],
+  startDate: Option[LocalDate],
+  endDate: Option[LocalDate],
+  `type`: Option[String],
+  isRls: Boolean
+) {
   lazy val lines       = List(line1, line2, line3, line4, line5).flatten
   lazy val fullAddress =
     List(line1, line2, line3, line4, line5, postcode.map(_.toUpperCase), internationalAddressCountry(country)).flatten
@@ -56,8 +56,9 @@ case class Address(
 
   def isWelshLanguageUnit: Boolean = {
     val welshLanguageUnitPostcodes = Set("CF145SH", "CF145TS", "LL499BF", "BX55AB", "LL499AB")
-    welshLanguageUnitPostcodes.contains(postcode.getOrElse(StringUtils.EMPTY)
-      .toUpperCase.trim.replace(" ", StringUtils.EMPTY))
+    welshLanguageUnitPostcodes.contains(
+      postcode.getOrElse(StringUtils.EMPTY).toUpperCase.trim.replace(" ", StringUtils.EMPTY)
+    )
   }
 
 }
@@ -98,7 +99,7 @@ object Address extends Logging {
       (JsPath \ "endDate").readNullable[LocalDate] and
       (JsPath \ "type").readNullable[String] and
       (JsPath \ "status").readNullable[Int].map(isRls)
-    )(Address.apply _)
+  )(Address.apply _)
 
   private def removeNulls(jsObject: JsObject): JsValue =
     JsObject(jsObject.fields.collect {

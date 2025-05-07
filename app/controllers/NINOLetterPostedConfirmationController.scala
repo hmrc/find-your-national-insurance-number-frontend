@@ -28,39 +28,46 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-class NINOLetterPostedConfirmationController @Inject()(
-                                                        override val messagesApi: MessagesApi,
-                                                        identify: IdentifierAction,
-                                                        val controllerComponents: MessagesControllerComponents,
-                                                        view: NINOLetterPostedConfirmationView,
-                                                        sessionCacheService: SessionCacheService
-                                                      ) extends FrontendBaseController with I18nSupport {
+class NINOLetterPostedConfirmationController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  val controllerComponents: MessagesControllerComponents,
+  view: NINOLetterPostedConfirmationView,
+  sessionCacheService: SessionCacheService
+) extends FrontendBaseController
+    with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = identify {
-    implicit request =>
-      val nino = request.session.data.getOrElse("nino", StringUtils.EMPTY)
-      sessionCacheService.invalidateCache(nino, request.userId)
-      val lang = request.lang(messagesApi)
-      if (lang.language.equals("cy")) {
-        Ok(view(getWelshDate(lang)))
-      } else {
-        Ok(view(LocalDate.now.format(DateTimeFormatter.ofPattern("d MMMM uuuu"))))
-      }
+  def onPageLoad: Action[AnyContent] = identify { implicit request =>
+    val nino = request.session.data.getOrElse("nino", StringUtils.EMPTY)
+    sessionCacheService.invalidateCache(nino, request.userId)
+    val lang = request.lang(messagesApi)
+    if (lang.language.equals("cy")) {
+      Ok(view(getWelshDate(lang)))
+    } else {
+      Ok(view(LocalDate.now.format(DateTimeFormatter.ofPattern("d MMMM uuuu"))))
+    }
   }
 
-
   private def getWelshDate(lang: Lang): String = {
-    val month = LocalDate.now().getMonth.toString.toLowerCase.capitalize
+    val month                          = LocalDate.now().getMonth.toString.toLowerCase.capitalize
     val monthKeys: Map[String, String] = Map(
-      "January" -> "month.january", "February" -> "month.february", "March" -> "month.march", "April" -> "month.april",
-      "May" -> "month.may", "June" -> "month.june", "July" -> "month.july", "August" -> "month.august",
-      "September" -> "month.september", "October" -> "month.october", "November" -> "month.november",
-      "December" -> "month.december"
+      "January"   -> "month.january",
+      "February"  -> "month.february",
+      "March"     -> "month.march",
+      "April"     -> "month.april",
+      "May"       -> "month.may",
+      "June"      -> "month.june",
+      "July"      -> "month.july",
+      "August"    -> "month.august",
+      "September" -> "month.september",
+      "October"   -> "month.october",
+      "November"  -> "month.november",
+      "December"  -> "month.december"
     )
 
     val welshMonth = monthKeys.get(month) match {
       case Some(monthKey) => messagesApi(monthKey)(lang)
-      case None => throw new IllegalArgumentException("Invalid month name")
+      case None           => throw new IllegalArgumentException("Invalid month name")
     }
 
     LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM uuuu")).replace(month, welshMonth)

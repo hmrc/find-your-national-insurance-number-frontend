@@ -36,7 +36,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class IndividualDetailsConnectorSpec
-  extends AnyWordSpec
+    extends AnyWordSpec
     with Matchers
     with ScalaFutures
     with IndividualDetailsConnectorFixture {
@@ -45,11 +45,13 @@ class IndividualDetailsConnectorSpec
     "make an http call to query master API to retrieve the correct response" in {
       val connector = new DefaultIndividualDetailsConnector(httpClient, appConfig, metrics)
 
-      (httpClient.GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(
-            _: HttpReads[Either[IndividualDetailsError, IndividualDetails]],
-            _: HeaderCarrier, _: ExecutionContext)).expects(
-          s"$individualDetailsUrl${nino.value}/${resolveMerge.value}",
-          *, *, *, *, *)
+      (httpClient
+        .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(
+          _: HttpReads[Either[IndividualDetailsError, IndividualDetails]],
+          _: HeaderCarrier,
+          _: ExecutionContext
+        ))
+        .expects(s"$individualDetailsUrl${nino.value}/${resolveMerge.value}", *, *, *, *, *)
         .returning(Future successful Right(individualDetailsResponse))
         .once()
 
@@ -60,11 +62,13 @@ class IndividualDetailsConnectorSpec
     "return a ConnectorError " in {
       val connector = new DefaultIndividualDetailsConnector(httpClient, appConfig, metrics)
 
-      (httpClient.GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])
-          (_: HttpReads[Either[IndividualDetailsError, IndividualDetails]],
-            _: HeaderCarrier, _: ExecutionContext)).expects(
-          s"$individualDetailsUrl${nino.value}/${resolveMerge.value}",
-          *, *, *, *, *)
+      (httpClient
+        .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(
+          _: HttpReads[Either[IndividualDetailsError, IndividualDetails]],
+          _: HeaderCarrier,
+          _: ExecutionContext
+        ))
+        .expects(s"$individualDetailsUrl${nino.value}/${resolveMerge.value}", *, *, *, *, *)
         .returning(Future successful Left(ConnectorError(NOT_FOUND, "something not found")))
         .once()
 
@@ -76,7 +80,7 @@ class IndividualDetailsConnectorSpec
     "return a Invalid identifier error " in {
       val connector = new DefaultIndividualDetailsConnector(httpClient, appConfig, metrics)
 
-      val emptyNino:IndividualDetailsIdentifier = IndividualDetailsNino("")
+      val emptyNino: IndividualDetailsIdentifier = IndividualDetailsNino("")
 
       whenReady(connector.getIndividualDetails(emptyNino, resolveMerge).value) { r =>
         r mustBe Left(InvalidIdentifier(emptyNino))
@@ -87,24 +91,24 @@ class IndividualDetailsConnectorSpec
 }
 
 trait IndividualDetailsConnectorFixture {
-  implicit val hc:            HeaderCarrier = HeaderCarrier()
+  implicit val hc: HeaderCarrier            = HeaderCarrier()
   implicit val correlationId: CorrelationId = CorrelationId.random
 
   val metrics: Metrics = new Metrics {
     override def defaultRegistry: MetricRegistry = new MetricRegistry()
   }
 
-  private val config = ConfigFactory.load(); // read Config here
-  private val myconfig = Configuration(config)
+  private val config           = ConfigFactory.load(); // read Config here
+  private val myconfig         = Configuration(config)
   private val myServicesConfig = new ServicesConfig(myconfig)
 
-  val nino                 = IndividualDetailsNino("12345")
-  val resolveMerge         = ResolveMerge('Y')
-  val individualDetailsUrl = "http://localhost:14022/find-your-national-insurance-number/individuals/details/NINO/"
-  val individualDetailsConfig = DesApiServiceConfig("token", "env", "corr-id")
+  val nino                         = IndividualDetailsNino("12345")
+  val resolveMerge                 = ResolveMerge('Y')
+  val individualDetailsUrl         = "http://localhost:14022/find-your-national-insurance-number/individuals/details/NINO/"
+  val individualDetailsConfig      = DesApiServiceConfig("token", "env", "corr-id")
   val httpClient: HttpClient       = mock[HttpClient]
-  val appConfig:  FrontendAppConfig  = new FrontendAppConfig(myconfig, myServicesConfig)
-  val ec:         ExecutionContext = implicitly[ExecutionContext]
+  val appConfig: FrontendAppConfig = new FrontendAppConfig(myconfig, myServicesConfig)
+  val ec: ExecutionContext         = implicitly[ExecutionContext]
 
   val name = Name(
     NameSequenceNumber(1),

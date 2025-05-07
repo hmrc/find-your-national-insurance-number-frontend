@@ -27,7 +27,7 @@ import java.time.{Clock, ZoneOffset}
 // $COVERAGE-OFF$
 class Module(environment: Environment, config: Configuration) extends AbstractModule {
 
-  private val encryptionEnabled   = config.get[Boolean]("mongodb.encryption.enabled")
+  private val encryptionEnabled = config.get[Boolean]("mongodb.encryption.enabled")
 
   override def configure(): Unit = {
 
@@ -41,14 +41,18 @@ class Module(environment: Environment, config: Configuration) extends AbstractMo
 
     if (encryptionEnabled) {
       bind(classOf[IndividualDetailsRepoTrait])
-        .to(classOf[EncryptedIndividualDetailsRepository]).asEagerSingleton()
+        .to(classOf[EncryptedIndividualDetailsRepository])
+        .asEagerSingleton()
       bind(classOf[PersonalDetailsValidationRepoTrait])
-        .to(classOf[EncryptedPersonalDetailsValidationRepository]).asEagerSingleton()
+        .to(classOf[EncryptedPersonalDetailsValidationRepository])
+        .asEagerSingleton()
     } else {
       bind(classOf[IndividualDetailsRepoTrait])
-        .to(classOf[IndividualDetailsRepository]).asEagerSingleton()
+        .to(classOf[IndividualDetailsRepository])
+        .asEagerSingleton()
       bind(classOf[PersonalDetailsValidationRepoTrait])
-        .to(classOf[PersonalDetailsValidationRepository]).asEagerSingleton()
+        .to(classOf[PersonalDetailsValidationRepository])
+        .asEagerSingleton()
     }
 
   }

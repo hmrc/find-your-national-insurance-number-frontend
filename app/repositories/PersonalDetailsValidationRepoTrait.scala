@@ -22,7 +22,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait PersonalDetailsValidationRepoTrait {
   def insertOrReplacePDVResultData(pdvResponseData: PDVResponseData)(implicit ec: ExecutionContext): Future[String]
-  def updateCustomerValidityWithReason(nino: String, validCustomer: Boolean, reason: String)(implicit ec: ExecutionContext): Future[String]
+  def updateCustomerValidityWithReason(nino: String, validCustomer: Boolean, reason: String)(implicit
+    ec: ExecutionContext
+  ): Future[String]
   def updatePDVDataWithNPSPostCode(nino: String, npsPostCode: String)(implicit ec: ExecutionContext): Future[String]
   def findByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]]
   def clear(nino: String): Future[Boolean]

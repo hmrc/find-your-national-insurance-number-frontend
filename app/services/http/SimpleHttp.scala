@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, HttpResponse}
 import scala.concurrent.{ExecutionContext, Future}
 // $COVERAGE-OFF$
 @Singleton
-class SimpleHttp @Inject()(http: HttpClient)(implicit executionContext: ExecutionContext) {
+class SimpleHttp @Inject() (http: HttpClient)(implicit executionContext: ExecutionContext) {
 
   implicit val r: HttpReads[HttpResponse] = new HttpReads[HttpResponse] {
     override def read(method: String, url: String, response: HttpResponse): HttpResponse = response

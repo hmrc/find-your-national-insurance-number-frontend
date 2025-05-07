@@ -32,24 +32,30 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[NPSFMNServiceImpl])
 trait NPSFMNService {
-  def sendLetter(nino: String, npsFMNRequest: NPSFMNRequest
-                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNServiceResponse]
+  def sendLetter(nino: String, npsFMNRequest: NPSFMNRequest)(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[NPSFMNServiceResponse]
 }
 
-class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
-  config: FrontendAppConfig)(implicit val ec: ExecutionContext)
-  extends NPSFMNService with Logging {
+class NPSFMNServiceImpl @Inject() (connector: NPSFMNConnector, config: FrontendAppConfig)(implicit
+  val ec: ExecutionContext
+) extends NPSFMNService
+    with Logging {
 
-  def sendLetter(nino: String, npsFMNRequest: NPSFMNRequest
-                   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[NPSFMNServiceResponse] = {
+  def sendLetter(nino: String, npsFMNRequest: NPSFMNRequest)(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[NPSFMNServiceResponse] = {
     implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
 
-    connector.sendLetter(nino.take(8), npsFMNRequest)
-      .map{ response =>
+    connector
+      .sendLetter(nino.take(8), npsFMNRequest)
+      .map { response =>
         response.status match {
-          case ACCEPTED => LetterIssuedResponse()
+          case ACCEPTED    => LetterIssuedResponse()
           case BAD_REQUEST =>
-            if(checkFailure(response.body)) {
+            if (checkFailure(response.body)) {
               val npsFMNResponse = Json.parse(response.body).as[NPSFMNResponseWithFailures]
               FailureResponse(npsFMNResponse.response.failures)
             } else {
@@ -58,28 +64,27 @@ class NPSFMNServiceImpl @Inject()(connector: NPSFMNConnector,
               } else
                 TechnicalIssueResponse(response.status, getMessage(response.body))
             }
-          case _ =>
+          case _           =>
             TechnicalIssueResponse(response.status, getMessage(response.body))
         }
-    }
+      }
   }
 
   private def getMessage(responseBody: String): String =
     (Json.parse(responseBody) \ "origin").asOpt[String] match {
       case Some(_) => (Json.parse(responseBody) \ "response" \ "jsonServiceError" \ "message").as[String]
-      case _ => (Json.parse(responseBody) \ "jsonServiceError" \ "message").as[String]
+      case _       => (Json.parse(responseBody) \ "jsonServiceError" \ "message").as[String]
     }
 
-  private def check(responseBody: String):Boolean = {
-      val appStatusMessageList = config.npsFMNAppStatusMessageList.split(",").toList
-      val npsFMNResponse = Json.parse(responseBody).as[NPSFMNResponse]
-      npsFMNResponse.response.jsonServiceError.appStatusMessageList.appStatusMessage match {
-        case message :: Nil => appStatusMessageList.contains(message)
-        case _ => false
-      }
+  private def check(responseBody: String): Boolean        = {
+    val appStatusMessageList = config.npsFMNAppStatusMessageList.split(",").toList
+    val npsFMNResponse       = Json.parse(responseBody).as[NPSFMNResponse]
+    npsFMNResponse.response.jsonServiceError.appStatusMessageList.appStatusMessage match {
+      case message :: Nil => appStatusMessageList.contains(message)
+      case _              => false
     }
-  private def checkFailure(responseBody: String):Boolean = {
-    if(responseBody.contains("failures")) true else false
   }
+  private def checkFailure(responseBody: String): Boolean =
+    if (responseBody.contains("failures")) true else false
 
 }

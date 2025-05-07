@@ -37,32 +37,36 @@ import views.html.LetterTechnicalErrorView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class LetterTechnicalErrorController @Inject()(
-                                                override val messagesApi: MessagesApi,
-                                                sessionRepository: SessionRepository,
-                                                navigator: Navigator,
-                                                identify: IdentifierAction,
-                                                getData: DataRetrievalAction,
-                                                requireValidData: ValidCustomerDataRequiredAction,
-                                                formProvider: LetterTechnicalErrorFormProvider,
-                                                personalDetailsValidationService: PersonalDetailsValidationService,
-                                                auditService: AuditService,
-                                                val controllerComponents: MessagesControllerComponents,
-                                                view: LetterTechnicalErrorView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+class LetterTechnicalErrorController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireValidData: ValidCustomerDataRequiredAction,
+  formProvider: LetterTechnicalErrorFormProvider,
+  personalDetailsValidationService: PersonalDetailsValidationService,
+  auditService: AuditService,
+  val controllerComponents: MessagesControllerComponents,
+  view: LetterTechnicalErrorView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
   val form: Form[LetterTechnicalError] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData) {
     implicit request =>
-      val count = request.userAnswers.get(TryAgainCountCacheable)
+      val count        = request.userAnswers.get(TryAgainCountCacheable)
       val retryAllowed = count match {
-        case Some(i) => if (i >= 5) {
-          false
-        } else {
-          true
-        }
-        case _ => true
+        case Some(i) =>
+          if (i >= 5) {
+            false
+          } else {
+            true
+          }
+        case _       => true
       }
       Ok(view(form, mode, retryAllowed))
   }
@@ -70,42 +74,45 @@ class LetterTechnicalErrorController @Inject()(
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData).async {
     implicit request =>
       val retryAllowed = request.userAnswers.get(TryAgainCountCacheable) match {
-        case Some(i) => if (i >= 5) {false} else {true}
-        case _ => true
+        case Some(i) =>
+          if (i >= 5) { false }
+          else { true }
+        case _       => true
       }
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, retryAllowed))),
-
-        value => {
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(LetterTechnicalErrorPage, value))
-            _ <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
-            pdvData <- personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", StringUtils.EMPTY))
-          } yield {
-            val personalDetails = pdvData.flatMap(_.personalDetails)
-            val postcode: String = personalDetails.flatMap(_.postCode).getOrElse(StringUtils.EMPTY)
-            auditService.findYourNinoOptionChosen(pdvData, value.toString, request.origin)
-            if (value.toString == "tryAgain") {
-              incrementTryAgainCount()
-              if (postcode.nonEmpty) {
-                Redirect(routes.SelectNINOLetterAddressController.onPageLoad())
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, retryAllowed))),
+          value =>
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(LetterTechnicalErrorPage, value))
+              _              <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
+              pdvData        <- personalDetailsValidationService.getPersonalDetailsValidationByNino(
+                                  request.session.data.getOrElse("nino", StringUtils.EMPTY)
+                                )
+            } yield {
+              val personalDetails  = pdvData.flatMap(_.personalDetails)
+              val postcode: String = personalDetails.flatMap(_.postCode).getOrElse(StringUtils.EMPTY)
+              auditService.findYourNinoOptionChosen(pdvData, value.toString, request.origin)
+              if (value.toString == "tryAgain") {
+                incrementTryAgainCount()
+                if (postcode.nonEmpty) {
+                  Redirect(routes.SelectNINOLetterAddressController.onPageLoad())
+                } else {
+                  Redirect(routes.ConfirmYourPostcodeController.onPageLoad())
+                }
               } else {
-                Redirect(routes.ConfirmYourPostcodeController.onPageLoad())
+                Redirect(navigator.nextPage(LetterTechnicalErrorPage, mode, updatedAnswers))
               }
-            } else {
-              Redirect(navigator.nextPage(LetterTechnicalErrorPage, mode, updatedAnswers))
             }
-          }
-        }
-      )
+        )
   }
 
   private def incrementTryAgainCount()(implicit request: DataRequest[AnyContent]): Future[UserAnswers] = {
     val count: Int = request.userAnswers.get(TryAgainCountCacheable).getOrElse(0)
     for {
       updatedAnswers <- Future.fromTry(request.userAnswers.set(TryAgainCountCacheable, count + 1))
-      _ <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
+      _              <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
     } yield updatedAnswers
   }
 }

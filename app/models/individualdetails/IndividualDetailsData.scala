@@ -24,37 +24,35 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
 import java.time.Instant
 
 case class IndividualDetailsData(
-                              firstForename: String,
-                              surname: String,
-                              dateOfBirth: String,
-                              postCode: String,
-                              nino: String
-                              )
+  firstForename: String,
+  surname: String,
+  dateOfBirth: String,
+  postCode: String,
+  nino: String
+)
 
 case class IndividualDetailsDataCache(
-   id: String,
-   individualDetails: Option[IndividualDetailsData],
-   lastUpdated: Instant = Instant.now(java.time.Clock.systemUTC())
- )
+  id: String,
+  individualDetails: Option[IndividualDetailsData],
+  lastUpdated: Instant = Instant.now(java.time.Clock.systemUTC())
+)
 
 object IndividualDetailsDataCache {
-  private val individualDetailsDataFormat: OFormat[IndividualDetailsData] = {
+  private val individualDetailsDataFormat: OFormat[IndividualDetailsData] =
     ((__ \ "firstForename").format[String]
       ~ (__ \ "surname").format[String]
       ~ (__ \ "dateOfBirth").format[String]
       ~ (__ \ "postCode").format[String]
-      ~ (__ \ "nino").format[String]
-      )(IndividualDetailsData.apply, unlift(IndividualDetailsData.unapply))
-  }
+      ~ (__ \ "nino").format[String])(IndividualDetailsData.apply, unlift(IndividualDetailsData.unapply))
 
-  val individualDetailsDataCacheFormat: OFormat[IndividualDetailsDataCache] = {
+  val individualDetailsDataCacheFormat: OFormat[IndividualDetailsDataCache] =
     ((__ \ "id").format[String]
       ~ (__ \ "individualDetails").formatNullable[IndividualDetailsData](individualDetailsDataFormat)
-      ~ (__ \ "lastUpdated").format[Instant](instantFormat)
-      )(IndividualDetailsDataCache.apply, unlift(IndividualDetailsDataCache.unapply))
-  }
-  
-  implicit class IndividualDetailsDataOps(private val individualDetailsData:IndividualDetailsDataCache) extends AnyVal {
+      ~ (__ \ "lastUpdated")
+        .format[Instant](instantFormat))(IndividualDetailsDataCache.apply, unlift(IndividualDetailsDataCache.unapply))
+
+  implicit class IndividualDetailsDataOps(private val individualDetailsData: IndividualDetailsDataCache)
+      extends AnyVal {
 
     def getNino: String = individualDetailsData.individualDetails match {
       case Some(id) => id.nino

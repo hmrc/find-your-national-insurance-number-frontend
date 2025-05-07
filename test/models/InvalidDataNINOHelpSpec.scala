@@ -32,10 +32,8 @@ class InvalidDataNINOHelpSpec extends AnyFreeSpec with Matchers with ScalaCheckP
 
       val gen = Gen.oneOf(InvalidDataNINOHelp.values.toSeq)
 
-      forAll(gen) {
-        invalidDataNINOHelp =>
-
-          JsString(invalidDataNINOHelp.toString).validate[InvalidDataNINOHelp].asOpt.value mustEqual invalidDataNINOHelp
+      forAll(gen) { invalidDataNINOHelp =>
+        JsString(invalidDataNINOHelp.toString).validate[InvalidDataNINOHelp].asOpt.value mustEqual invalidDataNINOHelp
       }
     }
 
@@ -43,10 +41,8 @@ class InvalidDataNINOHelpSpec extends AnyFreeSpec with Matchers with ScalaCheckP
 
       val gen = arbitrary[String] suchThat (!InvalidDataNINOHelp.values.map(_.toString).contains(_))
 
-      forAll(gen) {
-        invalidValue =>
-
-          JsString(invalidValue).validate[InvalidDataNINOHelp] mustEqual JsError("error.invalid")
+      forAll(gen) { invalidValue =>
+        JsString(invalidValue).validate[InvalidDataNINOHelp] mustEqual JsError("error.invalid")
       }
     }
 
@@ -54,10 +50,8 @@ class InvalidDataNINOHelpSpec extends AnyFreeSpec with Matchers with ScalaCheckP
 
       val gen = Gen.oneOf(InvalidDataNINOHelp.values.toSeq)
 
-      forAll(gen) {
-        invalidDataNINOHelp =>
-
-          Json.toJson(invalidDataNINOHelp) mustEqual JsString(invalidDataNINOHelp.toString)
+      forAll(gen) { invalidDataNINOHelp =>
+        Json.toJson(invalidDataNINOHelp) mustEqual JsString(invalidDataNINOHelp.toString)
       }
     }
   }

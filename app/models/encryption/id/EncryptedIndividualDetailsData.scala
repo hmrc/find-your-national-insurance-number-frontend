@@ -27,12 +27,12 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
 import java.time.Instant
 
 case class EncryptedIndividualDetailsData(
-                                  firstForename: EncryptedValue,
-                                  surname: EncryptedValue,
-                                  dateOfBirth: EncryptedValue,
-                                  postCode: EncryptedValue,
-                                  nino: String
-                                )
+  firstForename: EncryptedValue,
+  surname: EncryptedValue,
+  dateOfBirth: EncryptedValue,
+  postCode: EncryptedValue,
+  nino: String
+)
 
 case class EncryptedIndividualDetailsDataCache(
   id: String,
@@ -42,69 +42,69 @@ case class EncryptedIndividualDetailsDataCache(
 
 object EncryptedIndividualDetailsDataCache {
 
-  private val encryptedIndividualDetailsDataFormat: OFormat[EncryptedIndividualDetailsData] = {
+  private val encryptedIndividualDetailsDataFormat: OFormat[EncryptedIndividualDetailsData] =
     ((__ \ "firstForename").format[EncryptedValue]
       ~ (__ \ "surname").format[EncryptedValue]
       ~ (__ \ "dateOfBirth").format[EncryptedValue]
       ~ (__ \ "postCode").format[EncryptedValue]
-      ~ (__ \ "nino").format[String]
-      )(EncryptedIndividualDetailsData.apply, unlift(EncryptedIndividualDetailsData.unapply))
-  }
+      ~ (__ \ "nino")
+        .format[String])(EncryptedIndividualDetailsData.apply, unlift(EncryptedIndividualDetailsData.unapply))
 
-
-  val encryptedIndividualDetailsDataCacheFormat: OFormat[EncryptedIndividualDetailsDataCache] = {
+  val encryptedIndividualDetailsDataCacheFormat: OFormat[EncryptedIndividualDetailsDataCache] =
     ((__ \ "id").format[String]
       ~ (__ \ "individualDetails").formatNullable[EncryptedIndividualDetailsData](encryptedIndividualDetailsDataFormat)
-      ~ (__ \ "lastUpdated").format[Instant](instantFormat)
-      )(EncryptedIndividualDetailsDataCache.apply, unlift(EncryptedIndividualDetailsDataCache.unapply))
-  }
+      ~ (__ \ "lastUpdated").format[Instant](instantFormat))(
+      EncryptedIndividualDetailsDataCache.apply,
+      unlift(EncryptedIndividualDetailsDataCache.unapply)
+    )
 
-  
-  def encryptField(fieldValue: String, key: String): EncryptedValue = {
+  def encryptField(fieldValue: String, key: String): EncryptedValue =
     SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(fieldValue, key)
-  }
 
-  def encrypt(individualDetailsDataCache: IndividualDetailsDataCache, key: String): EncryptedIndividualDetailsDataCache = {
-    def e(fieldValue: String): EncryptedValue = {
+  def encrypt(
+    individualDetailsDataCache: IndividualDetailsDataCache,
+    key: String
+  ): EncryptedIndividualDetailsDataCache = {
+    def e(fieldValue: String): EncryptedValue =
       SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(fieldValue, key)
-    }
 
     EncryptedIndividualDetailsDataCache(
       id = individualDetailsDataCache.id,
-      individualDetails = individualDetailsDataCache.individualDetails.map {
-        id =>
-          EncryptedIndividualDetailsData(
-            firstForename = e(id.firstForename),
-            surname = e(id.surname),
-            dateOfBirth = e(id.dateOfBirth),
-            postCode = e(id.postCode),
-            nino = id.nino
-          )
+      individualDetails = individualDetailsDataCache.individualDetails.map { id =>
+        EncryptedIndividualDetailsData(
+          firstForename = e(id.firstForename),
+          surname = e(id.surname),
+          dateOfBirth = e(id.dateOfBirth),
+          postCode = e(id.postCode),
+          nino = id.nino
+        )
       }
     )
   }
 
-  def decrypt(encryptedIndividualDetailsDataCache: EncryptedIndividualDetailsDataCache, key: String): IndividualDetailsDataCache = {
-    def d(field: EncryptedValue): String = {
+  def decrypt(
+    encryptedIndividualDetailsDataCache: EncryptedIndividualDetailsDataCache,
+    key: String
+  ): IndividualDetailsDataCache = {
+    def d(field: EncryptedValue): String =
       SymmetricCryptoFactory.aesGcmAdCrypto(key).decrypt(field, key)
-    }
 
     IndividualDetailsDataCache(
       id = encryptedIndividualDetailsDataCache.id,
-      individualDetails = encryptedIndividualDetailsDataCache.individualDetails.map {
-        id =>
-          IndividualDetailsData(
-            firstForename = d(id.firstForename),
-            surname = d(id.surname),
-            dateOfBirth = d(id.dateOfBirth),
-            postCode = d(id.postCode),
-            nino = id.nino
-          )
+      individualDetails = encryptedIndividualDetailsDataCache.individualDetails.map { id =>
+        IndividualDetailsData(
+          firstForename = d(id.firstForename),
+          surname = d(id.surname),
+          dateOfBirth = d(id.dateOfBirth),
+          postCode = d(id.postCode),
+          nino = id.nino
+        )
       }
     )
   }
 
-  implicit class IndividualDetailsDataOps(private val individualDetailsData:EncryptedIndividualDetailsDataCache) extends AnyVal {
+  implicit class IndividualDetailsDataOps(private val individualDetailsData: EncryptedIndividualDetailsDataCache)
+      extends AnyVal {
 
     def getNino: String = individualDetailsData.individualDetails match {
       case Some(id) => id.nino

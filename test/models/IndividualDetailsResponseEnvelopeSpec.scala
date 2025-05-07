@@ -26,56 +26,56 @@ import models.errors.{ConnectorError, IndividualDetailsError}
 class IndividualDetailsResponseEnvelopeSpec extends AnyFlatSpec with Matchers {
 
   "IndividualDetailsResponseEnvelope apply" should "correctly wrap a value into a right EitherT" in {
-    val value = "test"
-    val result = IndividualDetailsResponseEnvelope(value)
+    val value        = "test"
+    val result       = IndividualDetailsResponseEnvelope(value)
     val futureEither = result.value
 
     futureEither.map { either =>
-      either.isRight shouldBe true
+      either.isRight       shouldBe true
       either.getOrElse("") shouldBe value
     }
   }
 
   "IndividualDetailsResponseEnvelope apply" should "correctly wrap a Right value into an EitherT" in {
-    val value = "test".asRight[IndividualDetailsError]
-    val result = IndividualDetailsResponseEnvelope(value)
+    val value        = "test".asRight[IndividualDetailsError]
+    val result       = IndividualDetailsResponseEnvelope(value)
     val futureEither = result.value
 
     futureEither.map { either =>
-      either.isRight shouldBe true
+      either.isRight       shouldBe true
       either.getOrElse("") shouldBe value.getOrElse("")
     }
   }
 
   it should "correctly wrap a Left value into an EitherT" in {
-    val error = ConnectorError(500, "test error").asLeft[String]
-    val result = IndividualDetailsResponseEnvelope(error)
+    val error        = ConnectorError(500, "test error").asLeft[String]
+    val result       = IndividualDetailsResponseEnvelope(error)
     val futureEither = result.value
 
     futureEither.map { either =>
-      either.isLeft shouldBe true
+      either.isLeft             shouldBe true
       either.swap.getOrElse("") shouldBe error.swap.getOrElse("")
     }
   }
 
   "IndividualDetailsResponseEnvelope fromError" should "correctly wrap an error into a left EitherT" in {
-    val error = ConnectorError(500, "test error")
-    val result = IndividualDetailsResponseEnvelope.fromError(error)
+    val error        = ConnectorError(500, "test error")
+    val result       = IndividualDetailsResponseEnvelope.fromError(error)
     val futureEither = result.value
 
     futureEither.map { either =>
-      either.isLeft shouldBe true
+      either.isLeft               shouldBe true
       either.swap.getOrElse(null) shouldBe error
     }
   }
 
   "IndividualDetailsResponseEnvelope fromF" should "correctly wrap a Future into a right EitherT" in {
-    val futureValue = Future.successful("test value")
-    val result = IndividualDetailsResponseEnvelope.fromF(futureValue)
+    val futureValue  = Future.successful("test value")
+    val result       = IndividualDetailsResponseEnvelope.fromF(futureValue)
     val futureEither = result.value
 
     futureEither.map { either =>
-      either.isRight shouldBe true
+      either.isRight         shouldBe true
       either.getOrElse(null) shouldBe "test value"
     }
   }

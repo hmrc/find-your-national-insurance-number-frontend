@@ -32,7 +32,7 @@ import java.time.{Instant, LocalDate}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class EncryptedPersonalDetailsValidationRepositorySpec
-  extends AnyFreeSpec
+    extends AnyFreeSpec
     with Matchers
     with DefaultPlayMongoRepositorySupport[EncryptedPDVResponseData]
     with ScalaFutures
@@ -48,7 +48,7 @@ class EncryptedPersonalDetailsValidationRepositorySpec
 
   protected override val repository = new EncryptedPersonalDetailsValidationRepository(
     mongoComponent = mongoComponent,
-    appConfig      = mockAppConfig
+    appConfig = mockAppConfig
   )
 
   "PersonalDetailsValidationRepository" - {
@@ -59,15 +59,20 @@ class EncryptedPersonalDetailsValidationRepositorySpec
         val pdvResultData = PDVResponseData(
           id = "id",
           validationStatus = ValidationStatus.Success,
-          personalDetails = Some(PersonalDetails(
-            firstName = "firstName",
-            lastName = "lastName",
-            nino = Nino("AB123456C"),
-            postCode = Some("postcode"),
-            dateOfBirth = LocalDate.now()
-          )),
+          personalDetails = Some(
+            PersonalDetails(
+              firstName = "firstName",
+              lastName = "lastName",
+              nino = Nino("AB123456C"),
+              postCode = Some("postcode"),
+              dateOfBirth = LocalDate.now()
+            )
+          ),
           lastUpdated = instant,
-          None, None, None, None
+          None,
+          None,
+          None,
+          None
         )
 
         val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
@@ -78,15 +83,20 @@ class EncryptedPersonalDetailsValidationRepositorySpec
         val pdvResultData = PDVResponseData(
           id = "id",
           validationStatus = ValidationStatus.Success,
-          personalDetails = Some(PersonalDetails(
-            firstName = "firstName",
-            lastName = "lastName",
-            nino = Nino("AB123456C"),
-            postCode = Some("postcode"),
-            dateOfBirth = LocalDate.now()
-          )),
+          personalDetails = Some(
+            PersonalDetails(
+              firstName = "firstName",
+              lastName = "lastName",
+              nino = Nino("AB123456C"),
+              postCode = Some("postcode"),
+              dateOfBirth = LocalDate.now()
+            )
+          ),
           lastUpdated = instant,
-          None, None, None, None
+          None,
+          None,
+          None,
+          None
         )
 
         val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
@@ -95,15 +105,20 @@ class EncryptedPersonalDetailsValidationRepositorySpec
         val pdvResultData2 = PDVResponseData(
           id = "id",
           validationStatus = ValidationStatus.Success,
-          personalDetails = Some(PersonalDetails(
-            firstName = "firstName",
-            lastName = "lastName",
-            nino = Nino("AB123456C"),
-            postCode = Some("postcode2"),
-            dateOfBirth = LocalDate.now()
-          )),
+          personalDetails = Some(
+            PersonalDetails(
+              firstName = "firstName",
+              lastName = "lastName",
+              nino = Nino("AB123456C"),
+              postCode = Some("postcode2"),
+              dateOfBirth = LocalDate.now()
+            )
+          ),
           lastUpdated = instant,
-          None, None, None, None
+          None,
+          None,
+          None,
+          None
         )
 
         val result2 = repository.insertOrReplacePDVResultData(pdvResultData2).futureValue
@@ -119,21 +134,27 @@ class EncryptedPersonalDetailsValidationRepositorySpec
         val pdvResultData = PDVResponseData(
           id = "id",
           validationStatus = ValidationStatus.Success,
-          personalDetails = Some(PersonalDetails(
-            firstName = "firstName",
-            lastName = "lastName",
-            nino = Nino("AB123456C"),
-            postCode = Some("postcode"),
-            dateOfBirth = LocalDate.now()
-          )),
+          personalDetails = Some(
+            PersonalDetails(
+              firstName = "firstName",
+              lastName = "lastName",
+              nino = Nino("AB123456C"),
+              postCode = Some("postcode"),
+              dateOfBirth = LocalDate.now()
+            )
+          ),
           lastUpdated = instant,
-          None, None, None, None
+          None,
+          None,
+          None,
+          None
         )
 
         val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
         result mustBe "AB123456C"
 
-        val result2 = repository.updateCustomerValidityWithReason("AB123456C", validCustomer = true, "reason").futureValue
+        val result2 =
+          repository.updateCustomerValidityWithReason("AB123456C", validCustomer = true, "reason").futureValue
         result2 mustBe "AB123456C"
       }
     }
@@ -144,15 +165,20 @@ class EncryptedPersonalDetailsValidationRepositorySpec
         val pdvResultData = PDVResponseData(
           id = "id",
           validationStatus = ValidationStatus.Success,
-          personalDetails = Some(PersonalDetails(
-            firstName = "firstName",
-            lastName = "lastName",
-            nino = Nino("AB123456C"),
-            postCode = Some("postcode"),
-            dateOfBirth = LocalDate.now()
-          )),
+          personalDetails = Some(
+            PersonalDetails(
+              firstName = "firstName",
+              lastName = "lastName",
+              nino = Nino("AB123456C"),
+              postCode = Some("postcode"),
+              dateOfBirth = LocalDate.now()
+            )
+          ),
           lastUpdated = instant,
-          None, None, None, None
+          None,
+          None,
+          None,
+          None
         )
 
         val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
@@ -169,15 +195,20 @@ class EncryptedPersonalDetailsValidationRepositorySpec
         val pdvResultData = PDVResponseData(
           id = "id",
           validationStatus = ValidationStatus.Success,
-          personalDetails = Some(PersonalDetails(
-            firstName = "firstName",
-            lastName = "lastName",
-            nino = Nino("AB123456C"),
-            postCode = Some("postcode"),
-            dateOfBirth = LocalDate.of(2010, 1, 1)
-          )),
+          personalDetails = Some(
+            PersonalDetails(
+              firstName = "firstName",
+              lastName = "lastName",
+              nino = Nino("AB123456C"),
+              postCode = Some("postcode"),
+              dateOfBirth = LocalDate.of(2010, 1, 1)
+            )
+          ),
           lastUpdated = instant,
-          None, None, None, None
+          None,
+          None,
+          None,
+          None
         )
 
         val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
@@ -201,15 +232,20 @@ class EncryptedPersonalDetailsValidationRepositorySpec
         val pdvResultData = PDVResponseData(
           id = "id",
           validationStatus = ValidationStatus.Success,
-          personalDetails = Some(PersonalDetails(
-            firstName = "firstName",
-            lastName = "lastName",
-            nino = Nino("AB123456C"),
-            postCode = Some("postcode"),
-            dateOfBirth = LocalDate.now()
-          )),
+          personalDetails = Some(
+            PersonalDetails(
+              firstName = "firstName",
+              lastName = "lastName",
+              nino = Nino("AB123456C"),
+              postCode = Some("postcode"),
+              dateOfBirth = LocalDate.now()
+            )
+          ),
           lastUpdated = instant,
-          None, None, None, None
+          None,
+          None,
+          None,
+          None
         )
 
         val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue

@@ -29,10 +29,12 @@ import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PersonalDetailsValidationConnector @Inject()(val httpClientV2: HttpClientV2, config: FrontendAppConfig) extends Logging {
+class PersonalDetailsValidationConnector @Inject() (val httpClientV2: HttpClientV2, config: FrontendAppConfig)
+    extends Logging {
 
-  def retrieveMatchingDetails(pdvRequest: PDVRequest)
-                             (implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse] = {
+  def retrieveMatchingDetails(
+    pdvRequest: PDVRequest
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse] = {
     val url = s"${config.pdvBaseUrl}/personal-details-validation/retrieve-by-session"
 
     httpClientV2

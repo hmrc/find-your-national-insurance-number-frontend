@@ -21,14 +21,14 @@ import uk.gov.hmrc.http.HeaderCarrier
 // $COVERAGE-OFF$
 package object connectors {
   def desApiHeaders(
-                     config: DesApiServiceConfig
-                   )(implicit hc: HeaderCarrier, correlationId: CorrelationId): HeaderCarrier = {
+    config: DesApiServiceConfig
+  )(implicit hc: HeaderCarrier, correlationId: CorrelationId): HeaderCarrier = {
     val headers = Seq(
       "Authorization" -> s"Bearer ${config.token}",
       "CorrelationId" -> correlationId.value.toString,
-      "Content-Type" -> "application/json",
-      "Environment" -> config.environment,
-      "OriginatorId" -> config.originatorId
+      "Content-Type"  -> "application/json",
+      "Environment"   -> config.environment,
+      "OriginatorId"  -> config.originatorId
     )
 
     hc.withExtraHeaders(headers: _*)

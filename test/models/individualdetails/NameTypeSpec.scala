@@ -31,14 +31,13 @@ class NameTypeSpec extends AnyFlatSpec with Matchers {
     json1.as[NameType] shouldBe KnownAsName
   }
 
-  for{
+  for {
     (nameType, json) <- Seq(
-      (RealName, """1"""),
-      (KnownAsName, """2""")
-    )
-  } {
+                          (RealName, """1"""),
+                          (KnownAsName, """2""")
+                        )
+  }
     it should s"write $nameType to JSON" in {
       Json.toJson(nameType) shouldBe Json.parse(json)
     }
-  }
 }

@@ -31,7 +31,7 @@ import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class EncryptedIndividualDetailsRepositorySpec
-  extends AnyFreeSpec
+    extends AnyFreeSpec
     with Matchers
     with DefaultPlayMongoRepositorySupport[EncryptedIndividualDetailsDataCache]
     with ScalaFutures
@@ -44,12 +44,10 @@ class EncryptedIndividualDetailsRepositorySpec
   when(mockAppConfig.cacheTtl) thenReturn 1
   when(mockAppConfig.encryptionKey) thenReturn "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
 
-
   protected val repository = new EncryptedIndividualDetailsRepository(
     mongoComponent = mongoComponent,
-    appConfig      = mockAppConfig
+    appConfig = mockAppConfig
   )
-
 
   "EncryptedIndividualDetailsRepository" - {
 
@@ -61,7 +59,7 @@ class EncryptedIndividualDetailsRepositorySpec
           id = "id",
           individualDetails = Some(IndividualDetailsData("John", "Doe", "1980-01-01", "AB12CD", "AB123456C"))
         )
-        val result = repository.insertOrReplaceIndividualDetailsData(individualDetailsDataCache).futureValue
+        val result                                                 = repository.insertOrReplaceIndividualDetailsData(individualDetailsDataCache).futureValue
         result mustBe "AB123456C"
       }
     }
@@ -82,11 +80,13 @@ class EncryptedIndividualDetailsRepositorySpec
         result1 mustBe "AB123456"
 
         val result = repository.findIndividualDetailsDataByNino(nino).futureValue
-        result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsDataCache.copy(lastUpdated = Instant.EPOCH)
+        result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsDataCache.copy(lastUpdated =
+          Instant.EPOCH
+        )
       }
 
       "must return None when the IndividualDetailsData does not exist" in {
-        val nino = "ZZ999999Z"
+        val nino   = "ZZ999999Z"
         val result = repository.findIndividualDetailsDataByNino(nino).futureValue
         result mustBe None
       }

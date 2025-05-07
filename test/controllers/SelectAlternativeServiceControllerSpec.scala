@@ -44,20 +44,22 @@ class SelectAlternativeServiceControllerSpec extends SpecBase with MockitoSugar 
   lazy val selectAlternativeServiceRoute = routes.SelectAlternativeServiceController.onPageLoad(NormalMode).url
 
   val formProvider = new SelectAlternativeServiceFormProvider()
-  val form = formProvider()
+  val form         = formProvider()
 
   val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
     validationStatus = ValidationStatus.Success,
-    personalDetails = Some(PersonalDetails(
-      firstName = "John",
-      lastName = "Doe",
-      nino = Nino("AA000003B"),
-      postCode = Some("AA1 1AA"),
-      dateOfBirth = LocalDate.of(1990, 1, 1)
-    )),
+    personalDetails = Some(
+      PersonalDetails(
+        firstName = "John",
+        lastName = "Doe",
+        nino = Nino("AA000003B"),
+        postCode = Some("AA1 1AA"),
+        dateOfBirth = LocalDate.of(1990, 1, 1)
+      )
+    ),
     validCustomer = Some(true),
     CRN = Some("fakeCRN"),
     npsPostCode = Some("AA1 1AA"),
@@ -94,7 +96,8 @@ class SelectAlternativeServiceControllerSpec extends SpecBase with MockitoSugar 
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers().set(SelectAlternativeServicePage, SelectAlternativeService.values.head).success.value
+      val userAnswers =
+        UserAnswers().set(SelectAlternativeServicePage, SelectAlternativeService.values.head).success.value
 
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
@@ -113,7 +116,10 @@ class SelectAlternativeServiceControllerSpec extends SpecBase with MockitoSugar 
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view(form.fill(SelectAlternativeService.values.head), NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(
+          form.fill(SelectAlternativeService.values.head),
+          NormalMode
+        )(request, messages).toString
       }
     }
 

@@ -35,34 +35,36 @@ trait LayoutProvider {
     showBetaBanner = false,
     showHelpImproveBanner = true
   )
-  //noinspection ScalaStyle
+  // noinspection ScalaStyle
   def apply(
-             pageTitle: String,
-             showBackLinkJS: Boolean = true,
-             timeout: Boolean = true,
-             showSignOut: Boolean = false,
-             stylesheets: Option[Html] = None,
-             fullWidth: Boolean = false,
-             accountHome: Boolean = false,
-             yourProfileActive: Boolean = false,
-             hideAccountMenu: Boolean = false,
-             backLinkUrl: Option[String] = None,
-             disableSessionExpired: Boolean = false,
-             sidebarContent: Option[Html] = None,
-             messagesActive: Boolean = false,
-             showSignOutInHeader: Boolean = true,
-             bannerConfig: BannerConfig = defaultBannerConfig
-           )(contentBlock: Html)(
-             implicit request: Request[_]
-             , messages: Messages
-           ): HtmlFormat.Appendable
+    pageTitle: String,
+    showBackLinkJS: Boolean = true,
+    timeout: Boolean = true,
+    showSignOut: Boolean = false,
+    stylesheets: Option[Html] = None,
+    fullWidth: Boolean = false,
+    accountHome: Boolean = false,
+    yourProfileActive: Boolean = false,
+    hideAccountMenu: Boolean = false,
+    backLinkUrl: Option[String] = None,
+    disableSessionExpired: Boolean = false,
+    sidebarContent: Option[Html] = None,
+    messagesActive: Boolean = false,
+    showSignOutInHeader: Boolean = true,
+    bannerConfig: BannerConfig = defaultBannerConfig
+  )(contentBlock: Html)(implicit
+    request: Request[_],
+    messages: Messages
+  ): HtmlFormat.Appendable
 }
 
-class NewLayoutProvider @Inject()(wrapperService: WrapperService,
-                                  additionalScript: AdditionalScript,
-                                  headBlock: HeadBlock,
-                                  appConfig: FrontendAppConfig
-                                 ) extends LayoutProvider with Logging {
+class NewLayoutProvider @Inject() (
+  wrapperService: WrapperService,
+  additionalScript: AdditionalScript,
+  headBlock: HeadBlock,
+  appConfig: FrontendAppConfig
+) extends LayoutProvider
+    with Logging {
 
   private lazy val newLayoutBannerConfig: BannerConfig = BannerConfig(
     showAlphaBanner = appConfig.showAlphaBanner,
@@ -70,27 +72,27 @@ class NewLayoutProvider @Inject()(wrapperService: WrapperService,
     showHelpImproveBanner = appConfig.showHelpImproveBanner
   )
 
-  //noinspection ScalaStyle
+  // noinspection ScalaStyle
   override def apply(
-                      pageTitle: String,
-                      showBackLinkJS: Boolean,
-                      timeout: Boolean,
-                      showSignOut: Boolean,
-                      stylesheets: Option[Html],
-                      fullWidth: Boolean,
-                      accountHome: Boolean,
-                      yourProfileActive: Boolean,
-                      hideAccountMenu: Boolean,
-                      backLinkUrl: Option[String],
-                      disableSessionExpired: Boolean,
-                      sidebarContent: Option[Html],
-                      messagesActive: Boolean,
-                      showSignOutInHeader: Boolean,
-                      bannerConfig: BannerConfig
-                    )(contentBlock: Html)(
-                      implicit request: Request[_],
-                      messages: Messages
-                    ): HtmlFormat.Appendable = {
+    pageTitle: String,
+    showBackLinkJS: Boolean,
+    timeout: Boolean,
+    showSignOut: Boolean,
+    stylesheets: Option[Html],
+    fullWidth: Boolean,
+    accountHome: Boolean,
+    yourProfileActive: Boolean,
+    hideAccountMenu: Boolean,
+    backLinkUrl: Option[String],
+    disableSessionExpired: Boolean,
+    sidebarContent: Option[Html],
+    messagesActive: Boolean,
+    showSignOutInHeader: Boolean,
+    bannerConfig: BannerConfig
+  )(contentBlock: Html)(implicit
+    request: Request[_],
+    messages: Messages
+  ): HtmlFormat.Appendable = {
 
     val keepAliveUrl = controllers.routes.KeepAliveController.keepAlive.url
 

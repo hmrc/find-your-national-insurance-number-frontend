@@ -32,9 +32,8 @@ import java.time.LocalDate
 class CheckDetailsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
 
   import CheckDetailsServiceSpec._
-  override def beforeEach(): Unit = {
+  override def beforeEach(): Unit =
     reset(personalDetailsValidationService, mockFrontendAppConfig, individualDetailsConnector)
-  }
 
   "CheckDetailsService" must {
 
@@ -44,23 +43,18 @@ class CheckDetailsServiceSpec extends AsyncWordSpec with Matchers with MockitoSu
         val fakeIndividualDetailsWithConditionsMet = fakeIndividualDetails.copy(
           accountStatusType = Some(AccountStatusType.FullLive),
           crnIndicator = CrnIndicator.False,
-          addressList = AddressList(Some(List(
-            fakeAddress.copy(addressStatus = None))
-          ))
+          addressList = AddressList(Some(List(fakeAddress.copy(addressStatus = None))))
         )
 
         val result = npsFMNService.checkConditions(fakeIndividualDetailsWithConditionsMet)
         result mustBe (true, "")
       }
 
-
       "return true and empty string when all conditions are met" in {
         val fakeIndividualDetailsWithConditionsMet = fakeIndividualDetails.copy(
           accountStatusType = Some(AccountStatusType.FullLive),
           crnIndicator = CrnIndicator.False,
-          addressList = AddressList(Some(List(
-            fakeAddress.copy(addressStatus = Some(AddressStatus.NotDlo)))
-          ))
+          addressList = AddressList(Some(List(fakeAddress.copy(addressStatus = Some(AddressStatus.NotDlo)))))
         )
 
         val result = npsFMNService.checkConditions(fakeIndividualDetailsWithConditionsMet)
@@ -71,12 +65,16 @@ class CheckDetailsServiceSpec extends AsyncWordSpec with Matchers with MockitoSu
         val fakeIndividualDetailsWithFewConditionsNotMet = fakeIndividualDetails.copy(
           accountStatusType = Some(AccountStatusType.FullCancelled),
           crnIndicator = CrnIndicator.False,
-          addressList = AddressList(Some(List(
-            fakeAddress.copy(
-              addressType = AddressType.ResidentialAddress,
-              addressStatus = Some(AddressStatus.NotDlo)
-            ))
-          ))
+          addressList = AddressList(
+            Some(
+              List(
+                fakeAddress.copy(
+                  addressType = AddressType.ResidentialAddress,
+                  addressStatus = Some(AddressStatus.NotDlo)
+                )
+              )
+            )
+          )
         )
 
         val result = npsFMNService.checkConditions(fakeIndividualDetailsWithFewConditionsNotMet)
@@ -89,19 +87,23 @@ class CheckDetailsServiceSpec extends AsyncWordSpec with Matchers with MockitoSu
         )
 
         val result = npsFMNService.checkConditions(fakeIndividualDetailsWithFewConditionsNotMet)
-        result mustBe(false, "No residential address;")
+        result mustBe (false, "No residential address;")
       }
 
       "return false and reason when crnIndicator is True" in {
         val fakeIndividualDetailsWithFewConditionsNotMet = fakeIndividualDetails.copy(
           accountStatusType = Some(AccountStatusType.FullLive),
           crnIndicator = CrnIndicator.True,
-          addressList = AddressList(Some(List(
-            fakeAddress.copy(
-              addressType = AddressType.ResidentialAddress,
-              addressStatus = Some(AddressStatus.NotDlo)
-            ))
-          ))
+          addressList = AddressList(
+            Some(
+              List(
+                fakeAddress.copy(
+                  addressType = AddressType.ResidentialAddress,
+                  addressStatus = Some(AddressStatus.NotDlo)
+                )
+              )
+            )
+          )
         )
 
         val result = npsFMNService.checkConditions(fakeIndividualDetailsWithFewConditionsNotMet)
@@ -112,14 +114,18 @@ class CheckDetailsServiceSpec extends AsyncWordSpec with Matchers with MockitoSu
         val fakeIndividualDetailsWithFewConditionsNotMet = fakeIndividualDetails.copy(
           accountStatusType = Some(AccountStatusType.FullLive),
           crnIndicator = CrnIndicator.False,
-          addressList = AddressList(Some(List(
-            fakeAddress.copy(
-              addressType = AddressType.ResidentialAddress,
-              addressStatus = Some(AddressStatus.Dlo)
-            ))
-          ))
+          addressList = AddressList(
+            Some(
+              List(
+                fakeAddress.copy(
+                  addressType = AddressType.ResidentialAddress,
+                  addressStatus = Some(AddressStatus.Dlo)
+                )
+              )
+            )
+          )
         )
-        val result = npsFMNService.checkConditions(fakeIndividualDetailsWithFewConditionsNotMet)
+        val result                                       = npsFMNService.checkConditions(fakeIndividualDetailsWithFewConditionsNotMet)
         result mustBe (false, "AddressStatus is Dlo or NFa;")
       }
 
@@ -130,11 +136,12 @@ class CheckDetailsServiceSpec extends AsyncWordSpec with Matchers with MockitoSu
 }
 
 object CheckDetailsServiceSpec {
-  implicit val hc: HeaderCarrier         = HeaderCarrier()
-  private val mockFrontendAppConfig = mock[FrontendAppConfig]
-  private val personalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
-  private val individualDetailsConnector: IndividualDetailsConnector = mock[IndividualDetailsConnector]
-  private val npsFMNService = new CheckDetailsServiceImpl()
+  implicit val hc: HeaderCarrier                                                 = HeaderCarrier()
+  private val mockFrontendAppConfig                                              = mock[FrontendAppConfig]
+  private val personalDetailsValidationService: PersonalDetailsValidationService =
+    mock[PersonalDetailsValidationService]
+  private val individualDetailsConnector: IndividualDetailsConnector             = mock[IndividualDetailsConnector]
+  private val npsFMNService                                                      = new CheckDetailsServiceImpl()
 
   val fakeName: individualdetails.Name = models.individualdetails.Name(
     nameSequenceNumber = NameSequenceNumber(1),

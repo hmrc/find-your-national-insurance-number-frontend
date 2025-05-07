@@ -34,24 +34,30 @@ import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[DefaultIndividualDetailsConnector])
 trait IndividualDetailsConnector {
-  def getIndividualDetails(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge
-                          )(implicit ec: ExecutionContext,
-                            hc: HeaderCarrier,
-                            correlationId: CorrelationId): IndividualDetailsResponseEnvelope[IndividualDetails]
+  def getIndividualDetails(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge)(implicit
+    ec: ExecutionContext,
+    hc: HeaderCarrier,
+    correlationId: CorrelationId
+  ): IndividualDetailsResponseEnvelope[IndividualDetails]
 }
 
 @Singleton
-class DefaultIndividualDetailsConnector @Inject() (httpClient: HttpClient,
-    appConfig:  FrontendAppConfig, metrics: Metrics) extends IndividualDetailsConnector
+class DefaultIndividualDetailsConnector @Inject() (
+  httpClient: HttpClient,
+  appConfig: FrontendAppConfig,
+  metrics: Metrics
+) extends IndividualDetailsConnector
     with HttpReadsWrapper[UpstreamFailures, Failure] {
-  def getIndividualDetails(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge
-                          )(implicit ec: ExecutionContext,hc: HeaderCarrier, correlationId: CorrelationId
-  ): IndividualDetailsResponseEnvelope[IndividualDetails] = {
-
+  def getIndividualDetails(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge)(implicit
+    ec: ExecutionContext,
+    hc: HeaderCarrier,
+    correlationId: CorrelationId
+  ): IndividualDetailsResponseEnvelope[IndividualDetails] =
     if (identifier.value.isEmpty) {
       IndividualDetailsResponseEnvelope(Left(InvalidIdentifier(identifier)))
     } else {
-      val url = s"${appConfig.individualDetailsServiceUrl}/individuals/details/NINO/${identifier.value}/${resolveMerge.value}"
+      val url               =
+        s"${appConfig.individualDetailsServiceUrl}/individuals/details/NINO/${identifier.value}/${resolveMerge.value}"
       val connectorName     = "individual-details-connector"
       val additionalLogInfo = Some(AdditionalLogInfo(Map("correlation-id" -> correlationId.value.toString)))
       withHttpReads(
@@ -66,19 +72,18 @@ class DefaultIndividualDetailsConnector @Inject() (httpClient: HttpClient,
         )
       }
     }
-  }
 
   // $COVERAGE-OFF$
   override def fromUpstreamErrorToIndividualDetailsError(
-      connectorName:     String,
-      status:            Int,
-      upstreamError:     UpstreamFailures,
-      additionalLogInfo: Option[AdditionalLogInfo]
+    connectorName: String,
+    status: Int,
+    upstreamError: UpstreamFailures,
+    additionalLogInfo: Option[AdditionalLogInfo]
   ): ConnectorError = {
     val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse("")
     logger.debug(s"$additionalLogInformation$connectorName with status: $status, ${upstreamError.failures
-      .map(f => s"code: ${f.code}. reason: ${f.reason}")
-      .mkString(";")}")
+        .map(f => s"code: ${f.code}. reason: ${f.reason}")
+        .mkString(";")}")
 
     ConnectorError(
       status,
@@ -87,10 +92,10 @@ class DefaultIndividualDetailsConnector @Inject() (httpClient: HttpClient,
   }
 
   override def fromSingleUpstreamErrorToIndividualDetailsError(
-      connectorName:     String,
-      status:            Int,
-      upstreamError:     Failure,
-      additionalLogInfo: Option[AdditionalLogInfo]
+    connectorName: String,
+    status: Int,
+    upstreamError: Failure,
+    additionalLogInfo: Option[AdditionalLogInfo]
   ): Option[IndividualDetailsError] = {
     val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse("")
 

@@ -27,7 +27,8 @@ object NPSFMNRequest {
   def empty = NPSFMNRequest(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY)
 
   implicit val writes: Writes[NPSFMNRequest] = Json.writes[NPSFMNRequest]
-  implicit def jsonBodyWritable[T](implicit writes: Writes[T],
-       jsValueBodyWritable: BodyWritable[JsValue]
-      ): BodyWritable[T] = jsValueBodyWritable.map(writes.writes)
+  implicit def jsonBodyWritable[T](implicit
+    writes: Writes[T],
+    jsValueBodyWritable: BodyWritable[JsValue]
+  ): BodyWritable[T] = jsValueBodyWritable.map(writes.writes)
 }

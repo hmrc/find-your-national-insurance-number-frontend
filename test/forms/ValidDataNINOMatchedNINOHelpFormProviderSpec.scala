@@ -22,7 +22,7 @@ import play.api.data.FormError
 class ValidDataNINOMatchedNINOHelpFormProviderSpec extends BooleanFieldBehaviours {
 
   val requiredKey = "validDataNINOMatchedNINOHelp.error.required"
-  val invalidKey = "error.boolean"
+  val invalidKey  = "error.boolean"
 
   val form = new ValidDataNINOMatchedNINOHelpFormProvider()()
 

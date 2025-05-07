@@ -32,13 +32,18 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait IdentifierAction extends ActionBuilder[IdentifierRequest, AnyContent] with ActionFunction[Request, IdentifierRequest]
+trait IdentifierAction
+    extends ActionBuilder[IdentifierRequest, AnyContent]
+    with ActionFunction[Request, IdentifierRequest]
 
-class SessionIdentifierAction @Inject()(
-     override val authConnector: AuthConnector,
-     config: FrontendAppConfig,
-     val parser: BodyParsers.Default
- )(implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions with Logging{
+class SessionIdentifierAction @Inject() (
+  override val authConnector: AuthConnector,
+  config: FrontendAppConfig,
+  val parser: BodyParsers.Default
+)(implicit val executionContext: ExecutionContext)
+    extends IdentifierAction
+    with AuthorisedFunctions
+    with Logging {
 
   private val AuthPredicate = AuthProviders(GovernmentGateway)
   private val FMNRetrievals = Retrievals.credentials and Retrievals.confidenceLevel
@@ -56,20 +61,20 @@ class SessionIdentifierAction @Inject()(
             } else {
               block(IdentifierRequest(request, session.value, Some(credentials.providerId)))
             }
-          case None =>
+          case None          =>
             Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
         }
-      case _ =>
+      case _                                   =>
         throw new UnauthorizedException("Unable to retrieve internal Id and credentials Id.")
     } recover {
-      case _: NoActiveSession =>
+      case _: NoActiveSession        =>
         logger.warn(s"[SessionIdentifierAction][invokeBlock] No active session, redirecting...")
         Redirect(config.loginUrl, Map("continue" -> Seq(resolveCorrectUrl(request))))
       case _: AuthorisationException =>
         logger.warn(s"[SessionIdentifierAction][invokeBlock] Authorisation exception, redirecting....}")
         Redirect(routes.UnauthorisedController.onPageLoad)
     }
-   }
+  }
 
   private def resolveCorrectUrl[A](request: Request[A]): String = {
     val root =

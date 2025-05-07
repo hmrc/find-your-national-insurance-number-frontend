@@ -26,7 +26,6 @@ case class PDVNotFoundResponse(r: HttpResponse) extends PDVResponse
 case class PDVUnexpectedResponse(r: HttpResponse) extends PDVResponse
 case class PDVErrorResponse(r: HttpResponse) extends PDVResponse
 
-object PDVResponse{
+object PDVResponse {
   implicit val format: OFormat[PDVSuccessResponse] = Json.format[PDVSuccessResponse]
 }
-

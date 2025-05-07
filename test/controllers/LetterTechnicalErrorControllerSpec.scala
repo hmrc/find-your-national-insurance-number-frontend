@@ -360,7 +360,7 @@ class LetterTechnicalErrorControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must redirect to journey recovery controller when there is no PDV data" in {
-     // val userAnswers = UserAnswers().setOrException(ValidDataNINOMatchedNINOHelpPage, true)
+      // val userAnswers = UserAnswers().setOrException(ValidDataNINOMatchedNINOHelpPage, true)
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(None))
 

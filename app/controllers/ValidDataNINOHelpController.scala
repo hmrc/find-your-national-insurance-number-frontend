@@ -35,46 +35,49 @@ import views.html.ValidDataNINOHelpView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ValidDataNINOHelpController @Inject()(
-                                             override val messagesApi: MessagesApi,
-                                             sessionRepository: SessionRepository,
-                                             navigator: Navigator,
-                                             identify: IdentifierAction,
-                                             getData: DataRetrievalAction,
-                                             requireValidData: ValidCustomerDataRequiredAction,
-                                             formProvider: ValidDataNINOHelpFormProvider,
-                                             view: ValidDataNINOHelpView,
-                                             auditService: AuditService,
-                                             personalDetailsValidationService: PersonalDetailsValidationService,
-                                             val controllerComponents: MessagesControllerComponents
-                                  )(implicit ec: ExecutionContext, appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport with Logging {
+class ValidDataNINOHelpController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireValidData: ValidCustomerDataRequiredAction,
+  formProvider: ValidDataNINOHelpFormProvider,
+  view: ValidDataNINOHelpView,
+  auditService: AuditService,
+  personalDetailsValidationService: PersonalDetailsValidationService,
+  val controllerComponents: MessagesControllerComponents
+)(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
   val form: Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode = NormalMode): Action[AnyContent] = (identify andThen getData() andThen requireValidData) {
     implicit request =>
-        val preparedForm = request.userAnswers.get(ValidDataNINOHelpPage) match {
-          case None => form
-          case Some(value) => form.fill(value)
-        }
-        Ok(view(preparedForm, mode))
+      val preparedForm = request.userAnswers.get(ValidDataNINOHelpPage) match {
+        case None        => form
+        case Some(value) => form.fill(value)
+      }
+      Ok(view(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData() andThen requireValidData).async {
     implicit request =>
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
-
-        value => {
-          personalDetailsValidationService.getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", "")).map(
-            pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.origin)
-          )
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(ValidDataNINOHelpPage, value))
-            _ <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
-          } yield Redirect(navigator.nextPage(ValidDataNINOHelpPage, mode, updatedAnswers))
-        }
-      )
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+          value => {
+            personalDetailsValidationService
+              .getPersonalDetailsValidationByNino(request.session.data.getOrElse("nino", ""))
+              .map(pdv => auditService.findYourNinoOptionChosen(pdv, value.toString, request.origin))
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(ValidDataNINOHelpPage, value))
+              _              <- sessionRepository.setUserAnswers(request.userId, updatedAnswers)
+            } yield Redirect(navigator.nextPage(ValidDataNINOHelpPage, mode, updatedAnswers))
+          }
+        )
   }
 }

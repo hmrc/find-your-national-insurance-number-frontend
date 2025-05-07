@@ -33,12 +33,11 @@ class AddressTypeSpec extends AnyFlatSpec with Matchers {
 
   for {
     (addressType, json) <- Seq(
-      ResidentialAddress -> """1""",
-      CorrespondenceAddress -> """2"""
-    )
-  } {
+                             ResidentialAddress    -> """1""",
+                             CorrespondenceAddress -> """2"""
+                           )
+  }
     it should s"write $addressType to JSON" in {
       Json.toJson(addressType.asInstanceOf[AddressType]) shouldBe Json.parse(json)
     }
-  }
 }
