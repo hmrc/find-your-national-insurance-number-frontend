@@ -86,7 +86,7 @@ class IndividualDetailsConnectorSpec
   }
 }
 
-trait IndividualDetailsConnectorFixture extends MockFactory {
+trait IndividualDetailsConnectorFixture {
   implicit val hc:            HeaderCarrier = HeaderCarrier()
   implicit val correlationId: CorrelationId = CorrelationId.random
 

@@ -5,8 +5,8 @@ import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 lazy val appName: String = "find-your-national-insurance-number-frontend"
 
-ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.13"
+ThisBuild / majorVersion := 1
+ThisBuild / scalaVersion := "3.3.5"
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
@@ -45,12 +45,22 @@ lazy val root = (project in file("."))
       "controllers.routes._",
       "viewmodels.govuk.all._"
     ),
+    PlayKeys.playDefaultPort := 14033,
     scalacOptions ++= Seq(
-      "-Wconf:cat=deprecation:ws,cat=feature:ws,cat=optimizer:ws,src=target/.*:s",
       "-unchecked",
-      "-deprecation",
-      "-feature"
+      "-feature",
+      "-language:noAutoTupling",
+      "-Werror",
+      "-Wconf:msg=unused import&src=.*views/.*:s",
+      "-Wconf:msg=unused import&src=<empty>:s",
+      "-Wconf:msg=unused&src=.*RoutesPrefix\\.scala:s",
+      "-Wconf:msg=unused&src=.*Routes\\.scala:s",
+      "-Wconf:msg=unused&src=.*ReverseRoutes\\.scala:s",
+      "-Wconf:msg=unused&src=.*JavaScriptReverseRoutes\\.scala:s",
+      "-Wconf:msg=Flag.*repeatedly:s",
+      "-Wconf:src=routes/.*:s"
     ),
+    scoverageSettings,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     retrieveManaged := true,
     Global / excludeLintKeys += update / evictionWarningOptions,
@@ -58,16 +68,9 @@ lazy val root = (project in file("."))
       EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     resolvers ++= Seq(Resolver.jcenterRepo),
     // concatenate js
-    Concat.groups := Seq(
-      "javascripts/application.js" ->
-        group(Seq(
-          "javascripts/app.js"
-        ))
-    ),
+    Concat.groups := Seq("javascripts/application.js" -> group(Seq("javascripts/app.js"))),
     pipelineStages := Seq(digest),
   )
-.settings(PlayKeys.playDefaultPort := 14033)
-.settings(scoverageSettings: _*)
 
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(
   fork := true,
