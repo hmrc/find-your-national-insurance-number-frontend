@@ -53,8 +53,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
     "cy" -> Lang("cy")
   )
 
-  val cacheTtl: Int                  = configuration.get[Int]("mongodb.timeToLiveInSeconds")
-  val individualDetailsCacheTtl: Int = configuration.get[Int]("mongodb.individualDetailsTtlInSeconds")
+  val cacheTtl: Long                  = configuration.get[Int]("mongodb.timeToLiveInSeconds")
+  val individualDetailsCacheTtl: Long = configuration.get[Int]("mongodb.individualDetailsTtlInSeconds")
 
   val pdvBaseUrl: String                        = configuration.get[Service]("microservice.services.personal-details-validation").baseUrl
   val personalDetailsValidationFrontEnd: String =

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,7 +195,24 @@ object IndividualDetails {
       (__ \ "details" \ "dateOfRegistration").formatNullable[LocalDate] ~
       (__ \ "details" \ "crnIndicator").format[CrnIndicator] ~
       (__ \ "nameList").format[NameList] ~
-      (__ \ "addressList").format[AddressList])(IndividualDetails.apply, unlift(IndividualDetails.unapply))
+      (__ \ "addressList").format[AddressList])(
+      IndividualDetails.apply,
+      id =>
+        Tuple12(
+          id.ninoWithoutSuffix,
+          id.ninoSuffix,
+          id.accountStatusType,
+          id.dateOfEntry,
+          id.dateOfBirth,
+          id.dateOfBirthStatus,
+          id.dateOfDeath,
+          id.dateOfDeathStatus,
+          id.dateOfRegistration,
+          id.crnIndicator,
+          id.nameList,
+          id.addressList
+        )
+    )
 
   implicit class IndividualDetailsOps(idData: IndividualDetails) {
     def getAddressTypeResidential: Option[Address] =

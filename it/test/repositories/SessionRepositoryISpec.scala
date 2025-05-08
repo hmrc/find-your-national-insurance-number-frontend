@@ -51,7 +51,7 @@ class SessionRepositoryISpec
   private val request     = DataRequest(FakeRequest(), "id", userAnswers, Some("credid-01234"), Some(OriginType.FMN))
 
   private val mockAppConfig = mock[FrontendAppConfig]
-  when(mockAppConfig.cacheTtl) thenReturn 1
+  when(mockAppConfig.cacheTtl) thenReturn 1L
 
   protected override val repository = new SessionRepository(
     mongoComponent = mongoComponent,

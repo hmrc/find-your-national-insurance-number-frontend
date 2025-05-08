@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,13 +43,19 @@ object IndividualDetailsDataCache {
       ~ (__ \ "surname").format[String]
       ~ (__ \ "dateOfBirth").format[String]
       ~ (__ \ "postCode").format[String]
-      ~ (__ \ "nino").format[String])(IndividualDetailsData.apply, unlift(IndividualDetailsData.unapply))
+      ~ (__ \ "nino").format[String])(
+      IndividualDetailsData.apply,
+      idd => Tuple5(idd.firstForename, idd.surname, idd.dateOfBirth, idd.postCode, idd.nino)
+    )
 
   val individualDetailsDataCacheFormat: OFormat[IndividualDetailsDataCache] =
     ((__ \ "id").format[String]
       ~ (__ \ "individualDetails").formatNullable[IndividualDetailsData](individualDetailsDataFormat)
       ~ (__ \ "lastUpdated")
-        .format[Instant](instantFormat))(IndividualDetailsDataCache.apply, unlift(IndividualDetailsDataCache.unapply))
+        .format[Instant](instantFormat))(
+      IndividualDetailsDataCache.apply,
+      iddCache => Tuple3(iddCache.id, iddCache.individualDetails, iddCache.lastUpdated)
+    )
 
   implicit class IndividualDetailsDataOps(private val individualDetailsData: IndividualDetailsDataCache)
       extends AnyVal {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ package object models {
           Reads
             .optionNoError(Reads.at[JsValue](JsPath(first :: Nil)))
             .reads(oldValue)
-            .flatMap { opt: Option[JsValue] =>
+            .flatMap { (opt: Option[JsValue]) =>
               opt
                 .map(JsSuccess(_))
                 .getOrElse {

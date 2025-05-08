@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,14 +48,18 @@ object EncryptedIndividualDetailsDataCache {
       ~ (__ \ "dateOfBirth").format[EncryptedValue]
       ~ (__ \ "postCode").format[EncryptedValue]
       ~ (__ \ "nino")
-        .format[String])(EncryptedIndividualDetailsData.apply, unlift(EncryptedIndividualDetailsData.unapply))
+        .format[String])(
+      EncryptedIndividualDetailsData.apply,
+      eiDetails =>
+        Tuple5(eiDetails.firstForename, eiDetails.surname, eiDetails.dateOfBirth, eiDetails.postCode, eiDetails.nino)
+    )
 
   val encryptedIndividualDetailsDataCacheFormat: OFormat[EncryptedIndividualDetailsDataCache] =
     ((__ \ "id").format[String]
       ~ (__ \ "individualDetails").formatNullable[EncryptedIndividualDetailsData](encryptedIndividualDetailsDataFormat)
       ~ (__ \ "lastUpdated").format[Instant](instantFormat))(
       EncryptedIndividualDetailsDataCache.apply,
-      unlift(EncryptedIndividualDetailsDataCache.unapply)
+      eiDetailsCache => Tuple3(eiDetailsCache.id, eiDetailsCache.individualDetails, eiDetailsCache.lastUpdated)
     )
 
   def encryptField(fieldValue: String, key: String): EncryptedValue =

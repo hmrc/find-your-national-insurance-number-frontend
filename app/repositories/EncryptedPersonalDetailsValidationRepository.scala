@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import config.FrontendAppConfig
 import models.encryption.pdv.EncryptedPDVResponseData
 import models.encryption.pdv.EncryptedPDVResponseData.{decrypt, encrypt, encryptField}
 import models.pdv.PDVResponseData
+import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.model._
 import play.api.Logging

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,10 @@ object EncryptedPDVResponseData {
       ~ (__ \ "nino").format[String]
       ~ (__ \ "postCode").formatNullable[EncryptedValue]
       ~ (__ \ "dateOfBirth")
-        .format[EncryptedValue])(EncryptedPersonalDetails.apply, unlift(EncryptedPersonalDetails.unapply))
+        .format[EncryptedValue])(
+      EncryptedPersonalDetails.apply,
+      epd => Tuple5(epd.firstName, epd.lastName, epd.nino, epd.postCode, epd.dateOfBirth)
+    )
 
   val encryptedPDVResponseDataFormat: OFormat[EncryptedPDVResponseData] =
     ((__ \ "id").format[String]
@@ -64,7 +67,20 @@ object EncryptedPDVResponseData {
       ~ (__ \ "validCustomer").formatNullable[EncryptedValue]
       ~ (__ \ "CRN").formatNullable[EncryptedValue]
       ~ (__ \ "npsPostCode")
-        .formatNullable[EncryptedValue])(EncryptedPDVResponseData.apply, unlift(EncryptedPDVResponseData.unapply))
+        .formatNullable[EncryptedValue])(
+      EncryptedPDVResponseData.apply,
+      ePDVResp =>
+        Tuple8(
+          ePDVResp.id,
+          ePDVResp.validationStatus,
+          ePDVResp.personalDetails,
+          ePDVResp.lastUpdated,
+          ePDVResp.reason,
+          ePDVResp.validCustomer,
+          ePDVResp.CRN,
+          ePDVResp.npsPostCode
+        )
+    )
 
   def encryptField(fieldValue: String, key: String): EncryptedValue =
     SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(fieldValue, key)

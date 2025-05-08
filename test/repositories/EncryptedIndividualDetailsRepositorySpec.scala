@@ -41,7 +41,7 @@ class EncryptedIndividualDetailsRepositorySpec
 
   private val mockAppConfig = mock[FrontendAppConfig]
 
-  when(mockAppConfig.cacheTtl) thenReturn 1
+  when(mockAppConfig.cacheTtl) thenReturn 1L
   when(mockAppConfig.encryptionKey) thenReturn "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
 
   protected val repository = new EncryptedIndividualDetailsRepository(

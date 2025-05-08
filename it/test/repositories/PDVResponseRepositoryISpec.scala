@@ -63,7 +63,7 @@ class PDVResponseRepositoryISpec
     "id", ValidationStatus.Success, Some(personalDetails), Instant.ofEpochSecond(1), Some("Invalid Reason"), Some(false), Some("false"),Some("somePostcode"))
 
   private val mockAppConfig = mock[FrontendAppConfig]
-  when(mockAppConfig.cacheTtl) thenReturn 1
+  when(mockAppConfig.cacheTtl) thenReturn 1L
   when(mockAppConfig.encryptionKey) thenReturn "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
 
   protected override val repository = new PersonalDetailsValidationRepository(

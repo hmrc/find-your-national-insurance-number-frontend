@@ -41,7 +41,7 @@ class IndividualDetailsRepositoryISpec
     with MockitoSugar with Logging {
 
   val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
-  when(mockAppConfig.cacheTtl) thenReturn 1
+  when(mockAppConfig.cacheTtl) thenReturn 1L
 
   protected override val repository = new IndividualDetailsRepository(
     mongoComponent = mongoComponent,

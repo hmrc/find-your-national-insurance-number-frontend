@@ -43,7 +43,7 @@ class EncryptedIndividualDetailsRepositoryISpec
 
   val encKey:String = "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
   val mockAppConfig = mock[FrontendAppConfig]
-  when(mockAppConfig.cacheTtl) thenReturn 1
+  when(mockAppConfig.cacheTtl) thenReturn 1L
   when(mockAppConfig.encryptionKey) thenReturn encKey.toString
 
   protected override val repository = new EncryptedIndividualDetailsRepository(
