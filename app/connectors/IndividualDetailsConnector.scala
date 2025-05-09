@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,17 @@
 package connectors
 
 import cats.data.EitherT
-import cats.syntax.all._
+import cats.syntax.all.*
 import com.google.inject.ImplementedBy
-import config.FrontendAppConfig
+import config.{DesApiServiceConfig, FrontendAppConfig}
 import connectors.HttpReadsWrapper.Recovered
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
 import models.errors.{ConnectorError, IndividualDetailsError, InvalidIdentifier}
 import models.individualdetails.{IndividualDetails, ResolveMerge}
 import models.upstreamfailure.{Failure, UpstreamFailures}
 import models.{CorrelationId, IndividualDetailsIdentifier, IndividualDetailsResponseEnvelope}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import javax.inject.{Inject, Singleton}
@@ -43,8 +44,9 @@ trait IndividualDetailsConnector {
 
 @Singleton
 class DefaultIndividualDetailsConnector @Inject() (
-  httpClient: HttpClient,
+  httpClientV2: HttpClientV2,
   appConfig: FrontendAppConfig,
+  desConfig: DesApiServiceConfig,
   metrics: Metrics
 ) extends IndividualDetailsConnector
     with HttpReadsWrapper[UpstreamFailures, Failure] {
@@ -52,26 +54,39 @@ class DefaultIndividualDetailsConnector @Inject() (
     ec: ExecutionContext,
     hc: HeaderCarrier,
     correlationId: CorrelationId
-  ): IndividualDetailsResponseEnvelope[IndividualDetails] =
+  ): IndividualDetailsResponseEnvelope[IndividualDetails] = {
+
+    val headers: Seq[(String, String)] = Seq(
+      "Authorization" -> s"Bearer ${desConfig.token}",
+      "CorrelationId" -> correlationId.value.toString,
+      "Content-Type"  -> "application/json",
+      "Environment"   -> desConfig.environment,
+      "OriginatorId"  -> desConfig.originatorId
+    )
+
     if (identifier.value.isEmpty) {
       IndividualDetailsResponseEnvelope(Left(InvalidIdentifier(identifier)))
     } else {
-      val url               =
+      val url                        =
         s"${appConfig.individualDetailsServiceUrl}/individuals/details/NINO/${identifier.value}/${resolveMerge.value}"
-      val connectorName     = "individual-details-connector"
-      val additionalLogInfo = Some(AdditionalLogInfo(Map("correlation-id" -> correlationId.value.toString)))
+      val connectorName              = "individual-details-connector"
+      val additionalLogInfo          = Some(AdditionalLogInfo(Map("correlation-id" -> correlationId.value.toString)))
+      implicit val hc: HeaderCarrier = hc.withExtraHeaders(headers: _*)
+
       withHttpReads(
         connectorName,
         metrics.defaultRegistry,
         additionalLogInfo
       ) { implicit httpReads =>
         EitherT(
-          httpClient
-            .GET(url)(httpReads, desApiHeaders(appConfig.individualDetails), ec)
+          httpClientV2
+            .get(url"$url")
+            .execute[Either[IndividualDetailsError, IndividualDetails]](httpReads, ec)
             .recovered(logger, connectorName, metrics.defaultRegistry, additionalLogInfo)
         )
       }
     }
+  }
 
   // $COVERAGE-OFF$
   override def fromUpstreamErrorToIndividualDetailsError(
