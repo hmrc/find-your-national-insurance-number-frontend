@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,14 @@
 package views.html.templates
 
 import config.FrontendAppConfig
+import models.OriginType
+import models.OriginType.FMN
 import play.api.Logging
 import play.api.i18n.Messages
-import play.api.mvc.Request
+import play.api.mvc.{Request, RequestHeader}
 import play.twirl.api.{Html, HtmlFormat}
+import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage.ServiceURLs
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import uk.gov.hmrc.sca.models.BannerConfig
 import uk.gov.hmrc.sca.services.WrapperService
@@ -53,7 +57,7 @@ trait LayoutProvider {
     showSignOutInHeader: Boolean = true,
     bannerConfig: BannerConfig = defaultBannerConfig
   )(contentBlock: Html)(implicit
-    request: Request[_],
+    request: RequestHeader,
     messages: Messages
   ): HtmlFormat.Appendable
 }
@@ -90,25 +94,32 @@ class NewLayoutProvider @Inject() (
     showSignOutInHeader: Boolean,
     bannerConfig: BannerConfig
   )(contentBlock: Html)(implicit
-    request: Request[_],
+    request: RequestHeader,
     messages: Messages
   ): HtmlFormat.Appendable = {
 
     val keepAliveUrl = controllers.routes.KeepAliveController.keepAlive.url
+    val continueUrl  = Some(RedirectUrl(appConfig.getFeedbackSurveyUrl(OriginType.FMN)))
+    val origin       = Some(OriginType.FMN)
+    val signOutUrl   = if (showSignOutInHeader) {
+      Some(controllers.auth.routes.AuthController.signout(continueUrl, origin).url)
+    } else None
 
     wrapperService.standardScaLayout(
       disableSessionExpired = !timeout,
       content = contentBlock,
       pageTitle = Some(pageTitle),
+      serviceURLs = ServiceURLs(
+        signOutUrl = signOutUrl
+      ),
       showBackLinkJS = showBackLinkJS,
       backLinkUrl = backLinkUrl,
       scripts = Seq(additionalScript()),
       styleSheets = stylesheets.toSeq :+ headBlock(),
       fullWidth = fullWidth,
-      showSignOutInHeader = showSignOutInHeader,
       hideMenuBar = true,
       bannerConfig = newLayoutBannerConfig,
       keepAliveUrl = keepAliveUrl
-    )(messages, HeaderCarrierConverter.fromRequest(request), request)
+    )
   }
 }
