@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package viewmodels.govuk
 
 import play.api.data.Field
 import play.api.i18n.Messages
+import uk.gov.hmrc.govukfrontend.views.viewmodels.FormGroup
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.fieldset.{Fieldset, Legend}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
@@ -143,7 +144,7 @@ trait RadiosFluency {
       radios copy (hint = Some(hint))
 
     def withFormGroupClasses(classes: String): Radios =
-      radios copy (formGroupClasses = classes)
+      radios copy (formGroup = FormGroup(classes = Some(classes)))
 
     def withIdPrefix(prefix: String): Radios =
       radios copy (idPrefix = Some(prefix))
