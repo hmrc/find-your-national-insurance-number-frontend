@@ -19,7 +19,7 @@ package models.encryption.id
 import models.encryption.EncryptedValueFormat._
 import models.individualdetails.{IndividualDetailsData, IndividualDetailsDataCache}
 import org.apache.commons.lang3.StringUtils
-import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{OFormat, __}
 import uk.gov.hmrc.crypto.{EncryptedValue, SymmetricCryptoFactory}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat

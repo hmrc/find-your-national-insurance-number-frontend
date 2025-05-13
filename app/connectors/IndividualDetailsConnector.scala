@@ -26,7 +26,7 @@ import models.errors.{ConnectorError, IndividualDetailsError, InvalidIdentifier}
 import models.individualdetails.{IndividualDetails, ResolveMerge}
 import models.upstreamfailure.{Failure, UpstreamFailures}
 import models.{CorrelationId, IndividualDetailsIdentifier, IndividualDetailsResponseEnvelope}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
@@ -52,7 +52,7 @@ class DefaultIndividualDetailsConnector @Inject() (
     with HttpReadsWrapper[UpstreamFailures, Failure] {
   def getIndividualDetails(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge)(implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier,
+    headerCarrier: HeaderCarrier,
     correlationId: CorrelationId
   ): IndividualDetailsResponseEnvelope[IndividualDetails] = {
 
@@ -71,7 +71,7 @@ class DefaultIndividualDetailsConnector @Inject() (
         s"${appConfig.individualDetailsServiceUrl}/individuals/details/NINO/${identifier.value}/${resolveMerge.value}"
       val connectorName              = "individual-details-connector"
       val additionalLogInfo          = Some(AdditionalLogInfo(Map("correlation-id" -> correlationId.value.toString)))
-      implicit val hc: HeaderCarrier = hc.withExtraHeaders(headers: _*)
+      implicit val hc: HeaderCarrier = headerCarrier.withExtraHeaders(headers: _*)
 
       withHttpReads(
         connectorName,

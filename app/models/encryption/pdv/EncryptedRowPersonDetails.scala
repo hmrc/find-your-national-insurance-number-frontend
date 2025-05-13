@@ -18,7 +18,7 @@ package models.encryption.pdv
 
 import models.encryption.EncryptedValueFormat._
 import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
-import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{OFormat, __}
 import uk.gov.hmrc.crypto.{EncryptedValue, SymmetricCryptoFactory}
 import uk.gov.hmrc.domain.Nino
