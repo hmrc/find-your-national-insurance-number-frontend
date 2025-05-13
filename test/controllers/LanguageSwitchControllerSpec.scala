@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.Lang
 import play.api.mvc.Results
 import config.FrontendAppConfig
-import org.mockito.MockitoSugar.when
+import org.mockito.Mockito.reset
 import uk.gov.hmrc.play.language.LanguageUtils
 
 class LanguageSwitchControllerSpec extends SpecBase with Results with MockitoSugar {

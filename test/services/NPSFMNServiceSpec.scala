@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import connectors.DefaultNPSFMNConnector
 import models.CorrelationId
 import models.nps._
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar
-import org.mockito.MockitoSugar.mock
+import org.mockito.Mockito.{reset, when}
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AsyncWordSpec

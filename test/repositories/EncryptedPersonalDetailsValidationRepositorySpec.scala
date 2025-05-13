@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,10 +46,11 @@ class EncryptedPersonalDetailsValidationRepositorySpec
 
   private val instant = Instant.ofEpochSecond(1234567890)
 
-  protected override val repository = new EncryptedPersonalDetailsValidationRepository(
-    mongoComponent = mongoComponent,
-    appConfig = mockAppConfig
-  )
+  protected override val repository: EncryptedPersonalDetailsValidationRepository =
+    new EncryptedPersonalDetailsValidationRepository(
+      mongoComponent = mongoComponent,
+      appConfig = mockAppConfig
+    )
 
   "PersonalDetailsValidationRepository" - {
 
