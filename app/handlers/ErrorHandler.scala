@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,29 @@ package handlers
 
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.mvc.Request
+import play.api.mvc.{AnyContentAsEmpty, Request, RequestHeader}
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
 import views.html.ErrorTemplate
+
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ErrorHandler @Inject() (
   val messagesApi: MessagesApi,
   view: ErrorTemplate
-) extends FrontendErrorHandler
+)(implicit val ec: ExecutionContext)
+    extends FrontendErrorHandler
     with I18nSupport {
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit
-    rh: Request[_]
-  ): Html =
-    view(pageTitle, heading, message)
+    rh: RequestHeader
+  ): Future[Html] = {
+    implicit val request = Request(rh, AnyContentAsEmpty)
+    Future.successful(view(pageTitle, heading, message))
+  }
 
-  def standardErrorTemplate()(implicit rh: Request[_]): Html =
+  def standardErrorTemplate()(implicit rh: RequestHeader): Future[Html] =
     standardErrorTemplate(
       Messages("global.error.InternalServerError500.heading"),
       Messages("global.error.InternalServerError500.heading"),
