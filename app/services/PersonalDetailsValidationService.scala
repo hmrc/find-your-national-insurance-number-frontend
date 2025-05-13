@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,16 +99,12 @@ class PersonalDetailsValidationService @Inject() (
       case pdvErrorResponse @ PDVErrorResponse(_)           =>
         logger.warn(s"Failed creating PDV data row. PDV Internal server error.")
         Future.successful(pdvErrorResponse)
-      case _                                                =>
-        logger.warn(s"Failed creating PDV data row.")
-        throw new RuntimeException(s"Failed creating PDV data row.")
     }
 
   // Update the PDV data row with the a validCustomer which is boolean value
   def updatePDVDataRowWithValidCustomer(nino: String, isValidCustomer: Boolean, reason: String): Future[Boolean] =
-    pdvRepository.updateCustomerValidityWithReason(nino, isValidCustomer, reason) map {
-      case str: String => if (str.length > 8) true else false
-      case _           => false
+    pdvRepository.updateCustomerValidityWithReason(nino, isValidCustomer, reason) map { str =>
+      if (str.length > 8) true else false
     } recover { case _: MongoException =>
       false
     }

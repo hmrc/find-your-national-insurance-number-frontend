@@ -59,6 +59,7 @@ lazy val root = (project in file("."))
       "-Wconf:msg=unused&src=.*ReverseRoutes\\.scala:s",
       "-Wconf:msg=unused&src=.*JavaScriptReverseRoutes\\.scala:s",
       "-Wconf:msg=Flag.*repeatedly:s",
+      "-Wconf:msg=method safeSignoutUrl in class WrapperService is deprecated:s",
       "-Wconf:src=routes/.*:s"
     ),
     scoverageSettings,
