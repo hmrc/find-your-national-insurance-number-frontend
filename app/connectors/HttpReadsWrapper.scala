@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package connectors
 import scala.collection.Seq
 import cats.Show
 import cats.syntax.all._
-import com.codahale.metrics.MetricRegistry
 import connectors.HttpReadsWrapper.showPath
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
 import models.errors.{ConnectorError, IndividualDetailsError}
@@ -44,7 +43,7 @@ final case class AdditionalLogInfo(infoKeyValue: Map[String, String]) {
 
 trait HttpReadsWrapper[E, EE] {
   val logger: Logger = Logger(this.getClass)
-  def withHttpReads[T](name: String, registry: MetricRegistry, additionalLogInfo: Option[AdditionalLogInfo] = None)(
+  def withHttpReads[T](name: String, additionalLogInfo: Option[AdditionalLogInfo] = None)(
     block: HttpReads[Either[IndividualDetailsError, T]] => IndividualDetailsResponseEnvelope[T]
   )(implicit
     readsSuccess: Reads[T],
@@ -52,15 +51,14 @@ trait HttpReadsWrapper[E, EE] {
     readsErrorT: Reads[EE]
   ): IndividualDetailsResponseEnvelope[T] =
     block(
-      getHttpReads(name: String, registry: MetricRegistry, additionalLogInfo: Option[AdditionalLogInfo])(
+      getHttpReads(name: String, additionalLogInfo: Option[AdditionalLogInfo])(
         readsSuccess,
         readsError,
         readsErrorT
       )
     )
 
-  private def getHttpReads[T](name: String, registry: MetricRegistry, additionalLogInfo: Option[AdditionalLogInfo])(
-    implicit
+  private def getHttpReads[T](name: String, additionalLogInfo: Option[AdditionalLogInfo])(implicit
     readsSuccess: Reads[T],
     readsError: Reads[E],
     readsErrorT: Reads[EE]
@@ -170,7 +168,6 @@ object HttpReadsWrapper {
     def recovered(
       logger: Logger,
       connectorName: String,
-      registry: MetricRegistry,
       additionalLogInfo: Option[AdditionalLogInfo]
     )(implicit
       ec: ExecutionContext

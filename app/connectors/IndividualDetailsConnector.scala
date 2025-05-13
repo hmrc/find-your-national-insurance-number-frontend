@@ -28,7 +28,6 @@ import models.upstreamfailure.{Failure, UpstreamFailures}
 import models.{CorrelationId, IndividualDetailsIdentifier, IndividualDetailsResponseEnvelope}
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
@@ -46,8 +45,7 @@ trait IndividualDetailsConnector {
 class DefaultIndividualDetailsConnector @Inject() (
   httpClientV2: HttpClientV2,
   appConfig: FrontendAppConfig,
-  desConfig: DesApiServiceConfig,
-  metrics: Metrics
+  desConfig: DesApiServiceConfig
 ) extends IndividualDetailsConnector
     with HttpReadsWrapper[UpstreamFailures, Failure] {
   def getIndividualDetails(identifier: IndividualDetailsIdentifier, resolveMerge: ResolveMerge)(implicit
@@ -73,16 +71,12 @@ class DefaultIndividualDetailsConnector @Inject() (
       val additionalLogInfo          = Some(AdditionalLogInfo(Map("correlation-id" -> correlationId.value.toString)))
       implicit val hc: HeaderCarrier = headerCarrier.withExtraHeaders(headers: _*)
 
-      withHttpReads(
-        connectorName,
-        metrics.defaultRegistry,
-        additionalLogInfo
-      ) { implicit httpReads =>
+      withHttpReads(connectorName, additionalLogInfo) { implicit httpReads =>
         EitherT(
           httpClientV2
             .get(url"$url")
             .execute[Either[IndividualDetailsError, IndividualDetails]](httpReads, ec)
-            .recovered(logger, connectorName, metrics.defaultRegistry, additionalLogInfo)
+            .recovered(logger, connectorName, additionalLogInfo)
         )
       }
     }
