@@ -85,9 +85,8 @@ class NewLayoutProviderSpec extends AnyWordSpec with Matchers with MockitoSugar 
           any(),
           any(),
           any(),
-          any(),
           any()
-        )(any(), any(), any())
+        )(any(), any())
       ).thenReturn(Html("<html></html>"))
 
       val result = layoutProvider(

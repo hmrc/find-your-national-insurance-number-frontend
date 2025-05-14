@@ -156,18 +156,12 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
 
         personalDetailsValidationService
           .getPDVMatchResult(pdvRequest)
-          .map { result =>
-            result
-              .asInstanceOf[PDVSuccessResponse]
-              .leftSideValue
-              .pdvResponseData
-              .npsPostCode mustBe personalDetailsValidation2.npsPostCode
-            result
-              .asInstanceOf[PDVSuccessResponse]
-              .leftSideValue
-              .pdvResponseData
-              .validationStatus mustBe personalDetailsValidation2.validationStatus
-          }(ec)
+          .map {
+            case successResponse: PDVSuccessResponse =>
+              successResponse.pdvResponseData.npsPostCode mustBe personalDetailsValidation2.npsPostCode
+              successResponse.pdvResponseData.validationStatus mustBe personalDetailsValidation2.validationStatus
+            case _                                   => fail("Expected PDVSuccessResponse")
+          }
       }
 
       "return PDVSuccessResponse when the PDV data row does NOT have a valid customer status" in {
@@ -179,18 +173,12 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
 
         personalDetailsValidationService
           .getPDVMatchResult(pdvRequest)
-          .map { result =>
-            result
-              .asInstanceOf[PDVSuccessResponse]
-              .leftSideValue
-              .pdvResponseData
-              .npsPostCode mustBe personalDetailsValidation.npsPostCode
-            result
-              .asInstanceOf[PDVSuccessResponse]
-              .leftSideValue
-              .pdvResponseData
-              .validationStatus mustBe personalDetailsValidation.validationStatus
-          }(ec)
+          .map {
+            case successResponse: PDVSuccessResponse =>
+              successResponse.pdvResponseData.npsPostCode mustBe personalDetailsValidation.npsPostCode
+              successResponse.pdvResponseData.validationStatus mustBe personalDetailsValidation.validationStatus
+            case _                                   => fail("Expected PDVSuccessResponse")
+          }
       }
 
       "return PDVBadRequestResponse when the connector returns a BAD_REQUEST" in {
@@ -480,18 +468,12 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
 
         personalDetailsValidationService
           .getPDVMatchResult(pdvRequest)
-          .map { result =>
-            result
-              .asInstanceOf[PDVSuccessResponse]
-              .leftSideValue
-              .pdvResponseData
-              .npsPostCode mustBe personalDetailsValidation2.npsPostCode
-            result
-              .asInstanceOf[PDVSuccessResponse]
-              .leftSideValue
-              .pdvResponseData
-              .validationStatus mustBe personalDetailsValidation2.validationStatus
-          }(ec)
+          .map {
+            case successResponse: PDVSuccessResponse =>
+              successResponse.pdvResponseData.npsPostCode mustBe personalDetailsValidation2.npsPostCode
+              successResponse.pdvResponseData.validationStatus mustBe personalDetailsValidation2.validationStatus
+            case _                                   => fail("Expected PDVSuccessResponse")
+          }
       }
 
       "return false when the PDV data row does NOT have a valid customer status" in {
@@ -503,18 +485,12 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
 
         personalDetailsValidationService
           .getPDVMatchResult(pdvRequest)
-          .map { result =>
-            result
-              .asInstanceOf[PDVSuccessResponse]
-              .leftSideValue
-              .pdvResponseData
-              .npsPostCode mustBe personalDetailsValidation.npsPostCode
-            result
-              .asInstanceOf[PDVSuccessResponse]
-              .leftSideValue
-              .pdvResponseData
-              .validationStatus mustBe personalDetailsValidation.validationStatus
-          }(ec)
+          .map {
+            case successResponse: PDVSuccessResponse =>
+              successResponse.pdvResponseData.npsPostCode mustBe personalDetailsValidation.npsPostCode
+              successResponse.pdvResponseData.validationStatus mustBe personalDetailsValidation.validationStatus
+            case _                                   => fail("Expected PDVSuccessResponse")
+          }
       }
 
       "createPDVDataRow should reformat the postCode in PersonalDetails" in {

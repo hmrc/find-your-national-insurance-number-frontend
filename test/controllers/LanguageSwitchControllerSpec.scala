@@ -21,7 +21,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.Lang
 import play.api.mvc.Results
 import config.FrontendAppConfig
-import org.mockito.Mockito.reset
+import org.mockito.Mockito.when
 import uk.gov.hmrc.play.language.LanguageUtils
 
 class LanguageSwitchControllerSpec extends SpecBase with Results with MockitoSugar {
