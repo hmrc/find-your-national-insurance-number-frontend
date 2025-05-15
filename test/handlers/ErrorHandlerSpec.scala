@@ -20,12 +20,16 @@ import base.SpecBase
 import controllers.routes
 import models.{NormalMode, OriginType}
 import org.scalatestplus.mockito.MockitoSugar.mock
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import play.twirl.api.Html
 import views.html.ErrorTemplate
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class ErrorHandlerSpec extends SpecBase {
 
@@ -34,11 +38,15 @@ class ErrorHandlerSpec extends SpecBase {
   "ErrorHandler" - {
     "must return the correct error page for a bad request" in {
 
+      when(errorTemplate.apply(any[String], any[String], any[String])(any(), any()))
+        .thenReturn(Html("<h1>test template</h1>"))
+
       val errorHandler = new ErrorHandler(messagesApi, errorTemplate)
 
-      val result = errorHandler.standardErrorTemplate("fakeRequest", "bad request", "pageTitle")(fakeRequest)
+      val result: Future[Html] =
+        errorHandler.standardErrorTemplate("pageTitle", "bad request", "some message")(fakeRequest)
 
-      result mustEqual errorTemplate("fakeRequest", "bad request", "pageTitle")(fakeRequest, fakeMessages)
+      result.futureValue mustEqual Html("<h1>test template</h1>")
     }
   }
 
