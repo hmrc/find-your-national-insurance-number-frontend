@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ trait FormSpec extends AnyFreeSpec with Matchers with OptionValues {
             formWithErrors.errors must contain(FormError(error.key, error.message, error.args))
           formWithErrors.errors.size mustBe expectedErrors.size
         },
-        form => fail("Expected a validation error when binding the form, but it was bound successfully.")
+        _ => fail("Expected a validation error when binding the form, but it was bound successfully.")
       )
 
   def error(key: String, value: String, args: Any*) = Seq(FormError(key, value, args))

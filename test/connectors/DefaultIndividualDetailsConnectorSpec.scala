@@ -15,102 +15,66 @@
  */
 
 package connectors
-import com.codahale.metrics.MetricRegistry
-import com.typesafe.config.ConfigFactory
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get}
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import config.{DesApiServiceConfig, FrontendAppConfig}
-import models.errors.{ConnectorError, IndividualDetailsError, InvalidIdentifier}
-import models.individualdetails._
+import models.errors.{ConnectorError, InvalidIdentifier}
+import models.individualdetails.*
 import models.{AddressLine, CorrelationId, IndividualDetailsIdentifier, IndividualDetailsNino}
-import org.scalamock.scalatest.MockFactory
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.matchers.must.Matchers
-import org.scalatest.wordspec.AnyWordSpec
-import play.api.Configuration
-import play.api.http.Status.NOT_FOUND
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.metrics.Metrics
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers.mustBe
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
+import play.api.http.Status.*
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
+import play.api.test.Helpers.{CONTENT_TYPE, JSON}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.HeaderCarrier
+import util.WireMockSupport
 
 import java.time.LocalDate
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class IndividualDetailsConnectorSpec
-    extends AnyWordSpec
-    with Matchers
-    with ScalaFutures
-    with IndividualDetailsConnectorFixture {
+    extends AnyFreeSpec
+    with GuiceOneAppPerSuite
+    with WireMockSupport
+    with MockitoSugar {
 
-  "IndividualDetailsConnector" should {
-    "make an http call to query master API to retrieve the correct response" in {
-      val connector = new DefaultIndividualDetailsConnector(httpClient, appConfig, metrics)
-
-      (httpClient
-        .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(
-          _: HttpReads[Either[IndividualDetailsError, IndividualDetails]],
-          _: HeaderCarrier,
-          _: ExecutionContext
-        ))
-        .expects(s"$individualDetailsUrl${nino.value}/${resolveMerge.value}", *, *, *, *, *)
-        .returning(Future successful Right(individualDetailsResponse))
-        .once()
-
-      whenReady(connector.getIndividualDetails(IndividualDetailsNino(nino.value), resolveMerge).value) { r =>
-        r mustBe Right(individualDetailsResponse)
-      }
-    }
-    "return a ConnectorError " in {
-      val connector = new DefaultIndividualDetailsConnector(httpClient, appConfig, metrics)
-
-      (httpClient
-        .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(
-          _: HttpReads[Either[IndividualDetailsError, IndividualDetails]],
-          _: HeaderCarrier,
-          _: ExecutionContext
-        ))
-        .expects(s"$individualDetailsUrl${nino.value}/${resolveMerge.value}", *, *, *, *, *)
-        .returning(Future successful Left(ConnectorError(NOT_FOUND, "something not found")))
-        .once()
-
-      whenReady(connector.getIndividualDetails(IndividualDetailsNino(nino.value), resolveMerge).value) { r =>
-        r mustBe Left(ConnectorError(NOT_FOUND, "something not found"))
-      }
-    }
-
-    "return a Invalid identifier error " in {
-      val connector = new DefaultIndividualDetailsConnector(httpClient, appConfig, metrics)
-
-      val emptyNino: IndividualDetailsIdentifier = IndividualDetailsNino("")
-
-      whenReady(connector.getIndividualDetails(emptyNino, resolveMerge).value) { r =>
-        r mustBe Left(InvalidIdentifier(emptyNino))
-      }
-    }
-
+  override def fakeApplication(): Application = {
+    wireMockServer.start()
+    new GuiceApplicationBuilder()
+      .configure(
+        "external-url.individual-details.port"     -> wiremockPort,
+        "external-url.individual-details.host"     -> "127.0.0.1",
+        "external-url.individual-details.protocol" -> "http",
+        "external-url.individual-details.base-url" -> "/find-your-national-insurance-number"
+      )
+      .build()
   }
-}
 
-trait IndividualDetailsConnectorFixture {
   implicit val hc: HeaderCarrier            = HeaderCarrier()
   implicit val correlationId: CorrelationId = CorrelationId.random
+  implicit val ec: ExecutionContext         = app.injector.instanceOf[ExecutionContext]
+  val appConfig: FrontendAppConfig          = app.injector.instanceOf[FrontendAppConfig]
+  val desConfig: DesApiServiceConfig        = app.injector.instanceOf[DesApiServiceConfig]
+  val httpClientV2: HttpClientV2            = app.injector.instanceOf[HttpClientV2]
+  val nino: IndividualDetailsIdentifier     = IndividualDetailsNino("12345")
+  val resolveMerge: ResolveMerge            = ResolveMerge('Y')
+  val individualDetailsUrl                  = s"/individuals/details/NINO/${nino.value}/${resolveMerge.value}"
 
-  val metrics: Metrics = new Metrics {
-    override def defaultRegistry: MetricRegistry = new MetricRegistry()
-  }
+  val connector: IndividualDetailsConnector = new DefaultIndividualDetailsConnector(httpClientV2, appConfig, desConfig)
 
-  private val config           = ConfigFactory.load(); // read Config here
-  private val myconfig         = Configuration(config)
-  private val myServicesConfig = new ServicesConfig(myconfig)
+  def stubGet(url: String, responseStatus: Int, responseBody: Option[String] = None): StubMapping =
+    wireMockServer.stubFor {
+      val baseResponse = aResponse().withStatus(responseStatus).withHeader(CONTENT_TYPE, JSON)
+      val response     = responseBody.fold(baseResponse)(body => baseResponse.withBody(body))
+      get(url).willReturn(response)
+    }
 
-  val nino                         = IndividualDetailsNino("12345")
-  val resolveMerge                 = ResolveMerge('Y')
-  val individualDetailsUrl         = "http://localhost:14022/find-your-national-insurance-number/individuals/details/NINO/"
-  val individualDetailsConfig      = DesApiServiceConfig("token", "env", "corr-id")
-  val httpClient: HttpClient       = mock[HttpClient]
-  val appConfig: FrontendAppConfig = new FrontendAppConfig(myconfig, myServicesConfig)
-  val ec: ExecutionContext         = implicitly[ExecutionContext]
-
-  val name = Name(
+  val name: Name = Name(
     NameSequenceNumber(1),
     NameType.RealName,
     Some(TitleType.Mr),
@@ -124,7 +88,7 @@ trait IndividualDetailsConnectorFixture {
     Surname("TESTSURNAME")
   )
 
-  val address = Address(
+  val address: Address = Address(
     AddressSequenceNumber(2),
     Some(AddressSource.InlandRevenue),
     CountryCode(1),
@@ -144,7 +108,7 @@ trait IndividualDetailsConnectorFixture {
     Some(AddressPostcode("XX77 6YY"))
   )
 
-  val individualDetailsResponse = IndividualDetails(
+  val individualDetailsResponse: IndividualDetails = IndividualDetails(
     "AB049513",
     Some(NinoSuffix("B")),
     None,
@@ -158,4 +122,28 @@ trait IndividualDetailsConnectorFixture {
     NameList(Some(List(name))),
     AddressList(Some(List(address)))
   )
+
+  "IndividualDetailsConnector" - {
+    "make an http call to query master API to retrieve the correct response" in {
+      val individualDetailsJsonResp = Json.toJson(individualDetailsResponse).toString()
+      stubGet(individualDetailsUrl, OK, Some(individualDetailsJsonResp))
+      val result                    = connector.getIndividualDetails(nino, resolveMerge).value.futureValue
+
+      result mustBe a[Right[_, IndividualDetails]]
+    }
+
+    "return a ConnectorError when the API returns a non-OK status" in {
+      stubGet(individualDetailsUrl, NOT_FOUND, Some("something not found"))
+      val result = connector.getIndividualDetails(nino, resolveMerge).value.futureValue
+
+      result mustBe a[Left[ConnectorError, _]]
+    }
+
+    "return a Invalid identifier error when an empty identifier is provided" in {
+      val emptyNino: IndividualDetailsIdentifier = IndividualDetailsNino("")
+      val result                                 = connector.getIndividualDetails(emptyNino, resolveMerge).value.futureValue
+
+      result mustBe a[Left[InvalidIdentifier, _]]
+    }
+  }
 }

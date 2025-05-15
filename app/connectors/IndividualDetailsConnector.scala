@@ -75,7 +75,7 @@ class DefaultIndividualDetailsConnector @Inject() (
         EitherT(
           httpClientV2
             .get(url"$url")
-            .execute[Either[IndividualDetailsError, IndividualDetails]](httpReads, ec)
+            .execute[Either[IndividualDetailsError, IndividualDetails]](httpReads, implicitly)
             .recovered(logger, connectorName, additionalLogInfo)
         )
       }
