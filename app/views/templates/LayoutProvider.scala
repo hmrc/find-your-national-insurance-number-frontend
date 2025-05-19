@@ -17,8 +17,6 @@
 package views.html.templates
 
 import config.FrontendAppConfig
-import models.OriginType
-import models.OriginType.FMN
 import play.api.Logging
 import play.api.i18n.Messages
 import play.api.mvc.{Request, RequestHeader}
@@ -99,18 +97,14 @@ class NewLayoutProvider @Inject() (
   ): HtmlFormat.Appendable = {
 
     val keepAliveUrl = controllers.routes.KeepAliveController.keepAlive.url
-    val continueUrl  = Some(RedirectUrl(appConfig.getFeedbackSurveyUrl(OriginType.FMN)))
-    val origin       = Some(OriginType.FMN)
-    val signOutUrl   = if (showSignOutInHeader) {
-      Some(controllers.auth.routes.AuthController.signout(continueUrl, origin).url)
-    } else None
-
+    val signOutUrl   = if (showSignOutInHeader) Some(appConfig.exitSurveyURL) else None
     wrapperService.standardScaLayout(
       disableSessionExpired = !timeout,
       content = contentBlock,
       pageTitle = Some(pageTitle),
       serviceURLs = ServiceURLs(
-        signOutUrl = signOutUrl
+        signOutUrl = signOutUrl,
+        accessibilityStatementUrl = Some(appConfig.accessibilityStatementUrl(request.uri))
       ),
       showBackLinkJS = showBackLinkJS,
       backLinkUrl = backLinkUrl,

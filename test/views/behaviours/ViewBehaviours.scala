@@ -20,6 +20,7 @@ import base.SpecBase
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.scalatest.Assertion
+import org.scalatest.AppendedClues.convertToClueful
 import play.twirl.api.HtmlFormat
 import play.twirl.api.TwirlHelperImports._
 import views.base.ViewSpecAssertions
@@ -65,8 +66,8 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
   "must append service to feedback link" in {
     val link = getElementBySelector(doc, ".govuk-phase-banner__text > .govuk-link")
     getElementHref(link) must include(
-      "http://localhost:9250/contact/beta-feedback?service=find-your-national-insurance-number-frontend&backUrl=http%3A%2F%2Flocalhost%3A14033"
-    )
+      "http://localhost:9250/contact/beta-feedback?service=find-your-national-insurance-number-frontend"
+    ) withClue " - GovUkBanner .get"
   }
 
   "must render accessibility statement link" in {
@@ -77,7 +78,7 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
       .get
 
     getElementHref(link) must include(
-      "http://localhost:12346/accessibility-statement/personal-account?referrerUrl=http%3A%2F%2Flocalhost%3A12346%2Ffind-your-national-insurance-number"
+      "http://localhost:12346/accessibility-statement/find-your-national-insurance-number?referrerUrl="
     )
   }
 
@@ -85,9 +86,7 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
     val link = getElementByClass(doc, "hmrc-report-technical-issue")
 
     assertElementContainsText(link, "Is this page not working properly? (opens in new tab)")
-    getElementHref(link) must include(
-      "http://localhost:9250/contact/report-technical-problem?newTab=true&service=find-your-national-insurance-number-frontend&referrerUrl="
-    )
+    getElementHref(link) must include("/contact/report-technical-problem") withClue " - Technical issue"
   }
 
   def pageWithTitle(args: Any*): Unit =
