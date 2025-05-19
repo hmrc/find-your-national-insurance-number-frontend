@@ -39,8 +39,11 @@ class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar wi
 
   import NPSFMNServiceSpec._
 
-  override def beforeEach(): Unit =
+  override def beforeEach(): Unit = {
     reset(mockConnector, mockFrontendAppConfig)
+    when(mockFrontendAppConfig.npsFMNAppStatusMessageList).thenReturn("63471,63472,63473")
+    ()
+  }
 
   "NPSFMNServiceImpl.sendLetter" must {
 
@@ -95,7 +98,7 @@ class NPSFMNServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar wi
         .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, RLSDLONFAResponseBody)))
 
       npsFMNService.sendLetter(fakeNino.nino, fakeNPSRequest).map { result =>
-        result mustBe TechnicalIssueResponse(BAD_REQUEST, "BAD_REQUEST")
+        result mustBe RLSDLONFAResponse(BAD_REQUEST, "BAD_REQUEST")
       }
     }
 

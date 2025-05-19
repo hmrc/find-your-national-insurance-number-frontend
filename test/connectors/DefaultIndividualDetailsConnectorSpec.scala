@@ -49,8 +49,7 @@ class IndividualDetailsConnectorSpec
       .configure(
         "external-url.individual-details.port"     -> wiremockPort,
         "external-url.individual-details.host"     -> "127.0.0.1",
-        "external-url.individual-details.protocol" -> "http",
-        "external-url.individual-details.base-url" -> "/find-your-national-insurance-number"
+        "external-url.individual-details.protocol" -> "http"
       )
       .build()
   }
@@ -63,7 +62,8 @@ class IndividualDetailsConnectorSpec
   val httpClientV2: HttpClientV2            = app.injector.instanceOf[HttpClientV2]
   val nino: IndividualDetailsIdentifier     = IndividualDetailsNino("12345")
   val resolveMerge: ResolveMerge            = ResolveMerge('Y')
-  val individualDetailsUrl                  = s"/individuals/details/NINO/${nino.value}/${resolveMerge.value}"
+  val individualDetailsUrl                  =
+    s"/find-your-national-insurance-number/individuals/details/NINO/${nino.value}/${resolveMerge.value}"
 
   val connector: IndividualDetailsConnector = new DefaultIndividualDetailsConnector(httpClientV2, appConfig, desConfig)
 
