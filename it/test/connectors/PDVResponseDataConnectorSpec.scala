@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ class PDVResponseDataConnectorSpec
         Some(Json.toJson(pdvRequest).toString()),
         Some(Json.toJson(personalDetailsValidation).toString())
       )
-      val result: HttpResponse   = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue.leftSideValue
+      val result: HttpResponse   = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue
       result.status mustBe OK
       Json.parse(result.body).as[PDVResponseData].personalDetails mustBe personalDetailsValidation.personalDetails
     }
@@ -158,7 +158,7 @@ class PDVResponseDataConnectorSpec
       val pdvRequest: PDVRequest = mock[PDVRequest]
       stubPost(url, NOT_FOUND, None, Some(body))
 
-      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue.leftSideValue
+      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue
       result.status mustBe NOT_FOUND
     }
 
@@ -173,7 +173,7 @@ class PDVResponseDataConnectorSpec
       val pdvRequest: PDVRequest = mock[PDVRequest]
       stubPost(url, NOT_FOUND, None, Some(body))
 
-      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue.leftSideValue
+      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue
       result.status mustBe NOT_FOUND
     }
 
@@ -188,7 +188,7 @@ class PDVResponseDataConnectorSpec
       val pdvRequest: PDVRequest = mock[PDVRequest]
       stubPost(url, NOT_FOUND, None, Some(body))
 
-      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue.leftSideValue
+      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue
       result.status mustBe NOT_FOUND
     }
 
@@ -197,7 +197,7 @@ class PDVResponseDataConnectorSpec
       val pdvRequest: PDVRequest = PDVRequest("invalid", "dummy")
       stubPost(url, BAD_REQUEST, Some(Json.toJson(pdvRequest).toString()), None)
 
-      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue.leftSideValue
+      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue
       result.status mustBe BAD_REQUEST
     }
 
@@ -206,7 +206,7 @@ class PDVResponseDataConnectorSpec
       val pdvRequest: PDVRequest = PDVRequest("pdv-success-not-crn", "dummy")
       stubPost(url, INTERNAL_SERVER_ERROR, Some(Json.toJson(pdvRequest).toString()), None)
 
-      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue.leftSideValue
+      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue
       result.status mustBe INTERNAL_SERVER_ERROR
     }
   }

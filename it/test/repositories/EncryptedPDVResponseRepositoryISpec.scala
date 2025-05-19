@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,10 +92,11 @@ class EncryptedPDVResponseRepositoryISpec
   when(mockAppConfig.cacheTtl) thenReturn 1L
   when(mockAppConfig.encryptionKey) thenReturn "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
 
-  protected override val repository = new EncryptedPersonalDetailsValidationRepository(
-    mongoComponent = mongoComponent,
-    appConfig = mockAppConfig
-  )
+  protected override val repository: EncryptedPersonalDetailsValidationRepository =
+    new EncryptedPersonalDetailsValidationRepository(
+      mongoComponent = mongoComponent,
+      appConfig = mockAppConfig
+    )
 
   ".updateCustomerValidityWithReason" - {
 

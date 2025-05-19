@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ class IndividualDetailsRepositoryISpec
   val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1L
 
-  protected override val repository = new IndividualDetailsRepository(
+  protected override val repository: IndividualDetailsRepository = new IndividualDetailsRepository(
     mongoComponent = mongoComponent,
     appConfig = mockAppConfig
   )

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ class NPSFMNConnectorSpec
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
       val body: NPSFMNRequest                   = mock[NPSFMNRequest]
       stubPost(url(nino.nino), ACCEPTED, Some(Json.toJson(body).toString()), Some(""))
-      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
+      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue
       result.status mustBe ACCEPTED
       result.body mustBe ""
     }
@@ -120,7 +120,7 @@ class NPSFMNConnectorSpec
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
       val body: NPSFMNRequest                   = mock[NPSFMNRequest]
       stubPost(url(nino.nino), NOT_FOUND, Some(Json.toJson(body).toString()), Some(jsonNotFound))
-      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
+      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue
       result.status mustBe NOT_FOUND
       result.body mustBe jsonNotFound
     }
@@ -129,7 +129,7 @@ class NPSFMNConnectorSpec
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
       val body: NPSFMNRequest                   = mock[NPSFMNRequest]
       stubPost(url(nino.nino), NOT_FOUND, Some(Json.toJson(body).toString()), Some(jsonResourceNotFound))
-      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
+      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue
       result.status mustBe NOT_FOUND
       result.body mustBe jsonResourceNotFound
     }
@@ -138,7 +138,7 @@ class NPSFMNConnectorSpec
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
       val body: NPSFMNRequest                   = mock[NPSFMNRequest]
       stubPost(url(nino.nino), INTERNAL_SERVER_ERROR, Some(Json.toJson(body).toString()), Some(jsonInternalServerError))
-      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
+      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue
       result.status mustBe INTERNAL_SERVER_ERROR
       result.body mustBe jsonInternalServerError
     }
@@ -147,7 +147,7 @@ class NPSFMNConnectorSpec
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
       val body: NPSFMNRequest                   = mock[NPSFMNRequest]
       stubPost(url(nino.nino), BAD_REQUEST, Some(Json.toJson(body).toString()), Some(""))
-      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
+      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue
       result.status mustBe BAD_REQUEST
       result.body mustBe ""
     }
@@ -156,7 +156,7 @@ class NPSFMNConnectorSpec
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
       val body: NPSFMNRequest                   = mock[NPSFMNRequest]
       stubPost(url(nino.nino), UNAUTHORIZED, Some(Json.toJson(body).toString()), Some(""))
-      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
+      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue
       result.status mustBe UNAUTHORIZED
       result.body mustBe ""
     }
@@ -165,7 +165,7 @@ class NPSFMNConnectorSpec
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
       val body: NPSFMNRequest                   = mock[NPSFMNRequest]
       stubPost(url(nino.nino), NOT_IMPLEMENTED, Some(Json.toJson(body).toString()), Some(""))
-      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
+      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue
       result.status mustBe NOT_IMPLEMENTED
       result.body mustBe ""
     }
