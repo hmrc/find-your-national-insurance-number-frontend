@@ -36,7 +36,7 @@ import java.time.{Instant, LocalDate}
 import scala.util.Random
 
 class PDVResponseDataConnectorSpec
-  extends ConnectorSpec
+    extends ConnectorSpec
     with WireMockHelper
     with MockitoSugar
     with DefaultAwaitTimeout
@@ -53,18 +53,17 @@ class PDVResponseDataConnectorSpec
 
   val headers: Seq[(String, String)] = Seq(
     "CorrelationId" -> "1118057e-fbbc-47a8-a8b4-78d9f015c253",
-    "Content-Type" -> "application/json"
+    "Content-Type"  -> "application/json"
   )
 
-  val headers2: Map[String,Seq[String]] = Map(
+  val headers2: Map[String, Seq[String]] = Map(
     "CorrelationId" -> Seq("1118057e-fbbc-47a8-a8b4-78d9f015c253"),
-    "Content-Type" -> Seq("application/json")
+    "Content-Type"  -> Seq("application/json")
   )
 
-  val id =  "10123456789"
+  val id = "10123456789"
 
-  def PDV200SuccessResponseforCRNFailure: Result = Ok(
-    s"""
+  def PDV200SuccessResponseforCRNFailure: Result = Ok(s"""
        |{
        |  "id": $id,
        |  "validationStatus": "success",
@@ -97,13 +96,13 @@ class PDVResponseDataConnectorSpec
 
   val httpResponse: HttpResponse = HttpResponse(200, body, headers2)
 
-  private val mockDataRequest: DataRequest[AnyContent]  = mock[DataRequest[AnyContent]](Answers.RETURNS_DEEP_STUBS)
+  private val mockDataRequest: DataRequest[AnyContent] = mock[DataRequest[AnyContent]](Answers.RETURNS_DEEP_STUBS)
 
   trait SpecSetup {
     def url: String
     val fakeNino: Nino = Nino(new Generator(new Random()).nextNino.nino)
 
-    val personalDetails: PersonalDetails =
+    val personalDetails: PersonalDetails           =
       PersonalDetails(
         "Jim",
         "Ferguson",
@@ -125,7 +124,7 @@ class PDVResponseDataConnectorSpec
 
     lazy val connector: PersonalDetailsValidationConnector = {
       val httpClient2 = app.injector.instanceOf[HttpClientV2]
-      val config = app.injector.instanceOf[FrontendAppConfig]
+      val config      = app.injector.instanceOf[FrontendAppConfig]
       new PersonalDetailsValidationConnector(httpClient2, config)
     }
   }
@@ -137,8 +136,13 @@ class PDVResponseDataConnectorSpec
 
     "return OK when called with an existing validationId" in new LocalSetup {
       val pdvRequest: PDVRequest = PDVRequest("pdv-success-not-crn", "dummy")
-      stubPost(url, OK, Some(Json.toJson(pdvRequest).toString()), Some(Json.toJson(personalDetailsValidation).toString()))
-      val result: HttpResponse = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue.leftSideValue
+      stubPost(
+        url,
+        OK,
+        Some(Json.toJson(pdvRequest).toString()),
+        Some(Json.toJson(personalDetailsValidation).toString())
+      )
+      val result: HttpResponse   = connector.retrieveMatchingDetails(pdvRequest)(hc, ec).futureValue.leftSideValue
       result.status mustBe OK
       Json.parse(result.body).as[PDVResponseData].personalDetails mustBe personalDetailsValidation.personalDetails
     }

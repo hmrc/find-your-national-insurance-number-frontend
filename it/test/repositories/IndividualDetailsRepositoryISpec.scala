@@ -32,20 +32,21 @@ import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class IndividualDetailsRepositoryISpec
-  extends AnyFreeSpec
+    extends AnyFreeSpec
     with Matchers
     with DefaultPlayMongoRepositorySupport[IndividualDetailsDataCache]
     with ScalaFutures
     with IntegrationPatience
     with OptionValues
-    with MockitoSugar with Logging {
+    with MockitoSugar
+    with Logging {
 
   val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1L
 
   protected override val repository = new IndividualDetailsRepository(
     mongoComponent = mongoComponent,
-    appConfig = mockAppConfig,
+    appConfig = mockAppConfig
   )
 
   private val individualDetailsData = IndividualDetailsDataCache(
@@ -63,7 +64,9 @@ class IndividualDetailsRepositoryISpec
 
           repository.insertOrReplaceIndividualDetailsData(individualDetailsData).futureValue
           val result = repository.findIndividualDetailsDataByNino(individualDetailsData.getNino).futureValue
-          result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsData.copy(lastUpdated = Instant.EPOCH)
+          result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsData.copy(lastUpdated =
+            Instant.EPOCH
+          )
         }
       }
     }
@@ -76,7 +79,9 @@ class IndividualDetailsRepositoryISpec
 
           repository.insertOrReplaceIndividualDetailsData(individualDetailsData).futureValue
           val result = repository.findIndividualDetailsDataByNino(individualDetailsData.getNino).futureValue
-          result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsData.copy(lastUpdated = Instant.EPOCH)
+          result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsData.copy(lastUpdated =
+            Instant.EPOCH
+          )
         }
       }
     }
