@@ -17,7 +17,6 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.requests.DataRequest
 import models.{OriginType, SessionData, UserAnswers}
 import org.mockito.Mockito.when
 import org.mongodb.scala.model.Filters
@@ -27,7 +26,6 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
-import play.api.test.FakeRequest
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.temporal.ChronoUnit
@@ -46,10 +44,8 @@ class SessionRepositoryISpec
   private val instant          = Instant.now.truncatedTo(ChronoUnit.MILLIS)
   private val stubClock: Clock = Clock.fixed(instant, ZoneId.systemDefault)
 
-  private val userAnswers = UserAnswers(Json.obj("foo" -> "bar"))
-  private val sessionData = SessionData(userAnswers, Some(OriginType.PDV), Instant.ofEpochSecond(1), "id")
-  private val request     = DataRequest(FakeRequest(), "id", userAnswers, Some("credid-01234"), Some(OriginType.FMN))
-
+  private val userAnswers   = UserAnswers(Json.obj("foo" -> "bar"))
+  private val sessionData   = SessionData(userAnswers, Some(OriginType.PDV), Instant.ofEpochSecond(1), "id")
   private val mockAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1L
 
