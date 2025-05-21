@@ -91,5 +91,26 @@ class EncryptedIndividualDetailsRepositorySpec
         result mustBe None
       }
     }
+
+    "clear" - {
+
+      "must delete the IndividualDetailsData for the given NINO" in {
+        val nino = "AB123456"
+
+        val individualDetailsDataCache = IndividualDetailsDataCache(
+          id = "id",
+          individualDetails = Some(IndividualDetailsData("John", "Doe", "1980-01-01", "AB12CD", nino)),
+          lastUpdated = Instant.EPOCH
+        )
+
+        repository.insertOrReplaceIndividualDetailsData(individualDetailsDataCache).futureValue
+
+        val result1 = repository.clear(nino).futureValue
+        result1 mustBe true
+
+        val result2 = repository.findIndividualDetailsDataByNino(nino).futureValue
+        result2 mustBe None
+      }
+    }
   }
 }

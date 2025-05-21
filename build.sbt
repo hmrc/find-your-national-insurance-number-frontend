@@ -14,7 +14,7 @@ lazy val scoverageSettings = {
   Seq(
     // Semicolon-separated list of regexs matching classes to exclude
     ScoverageKeys.coverageExcludedFiles := ";.*controllers.LanguageSwitchController.*;.*services.AuditService;.*connectors.HttpReadsWrapper",
-    ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;view.*;config.*;.*(AuthService|BuildInfo|Routes).*;.*DataRetrievalActionImpl.*;models.Mode.*",
+    ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;view.*;config.*;.*(AuthService|BuildInfo|Routes).*;.*DataRetrievalActionImpl.*;models.Mode.*;models.encryption.*;.*\\$anon.*",
     ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,

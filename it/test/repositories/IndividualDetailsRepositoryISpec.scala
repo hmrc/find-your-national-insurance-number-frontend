@@ -100,6 +100,22 @@ class IndividualDetailsRepositoryISpec
       }
     }
 
+    ".clear" - {
+
+      "when there is a record for this nino" - {
+        "must delete the record" in {
+
+          repository.insertOrReplaceIndividualDetailsData(individualDetailsData).futureValue
+
+          val result1 = repository.clear(individualDetailsData.getNino).futureValue
+          result1 mustBe true
+
+          val result2 = repository.findIndividualDetailsDataByNino(individualDetailsData.getNino).futureValue
+          result2 mustBe None
+        }
+      }
+    }
+
   }
 
 }

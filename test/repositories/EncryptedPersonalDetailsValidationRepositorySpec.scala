@@ -264,6 +264,38 @@ class EncryptedPersonalDetailsValidationRepositorySpec
       }
     }
 
+    "clear" - {
+
+      "must delete PDVResultData for the given NINO" in {
+        val nino          = "AB123456C"
+        val pdvResultData = PDVResponseData(
+          id = "id",
+          validationStatus = ValidationStatus.Success,
+          personalDetails = Some(
+            PersonalDetails(
+              firstName = "firstName",
+              lastName = "lastName",
+              nino = Nino(nino),
+              postCode = Some("ABC DEF"),
+              dateOfBirth = LocalDate.now()
+            )
+          ),
+          lastUpdated = instant,
+          None,
+          None,
+          None,
+          None
+        )
+
+        repository.insertOrReplacePDVResultData(pdvResultData).futureValue
+
+        val result1 = repository.clear(nino).futureValue
+        result1 mustBe true
+
+        val result2 = repository.findByNino(nino).futureValue
+        result2 mustBe None
+      }
+    }
   }
 
 }
