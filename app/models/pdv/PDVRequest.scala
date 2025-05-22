@@ -20,10 +20,11 @@ import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.libs.ws.BodyWritable
 
 case class PDVRequest(credentialId: String, sessionId: String)
-object PDVRequest{
+object PDVRequest {
   implicit val writes: Writes[PDVRequest] = Json.writes[PDVRequest]
 
-  implicit def jsonBodyWritable[T](implicit writes: Writes[T],
-                                   jsValueBodyWritable: BodyWritable[JsValue]
-                                  ): BodyWritable[T] = jsValueBodyWritable.map(writes.writes)
+  implicit def jsonBodyWritable[T](implicit
+    writes: Writes[T],
+    jsValueBodyWritable: BodyWritable[JsValue]
+  ): BodyWritable[T] = jsValueBodyWritable.map(writes.writes)
 }

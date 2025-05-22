@@ -42,19 +42,21 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute: Call = Call("GET", "/foo")
 
-  lazy val enteredPostCodeNotFoundRoute: String = routes.EnteredPostCodeNotFoundController.onPageLoad(NormalMode).url
+  lazy val enteredPostCodeNotFoundRoute: String                              = routes.EnteredPostCodeNotFoundController.onPageLoad(NormalMode).url
   val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
     validationStatus = ValidationStatus.Success,
-    personalDetails = Some(PersonalDetails(
-      firstName = "John",
-      lastName = "Doe",
-      nino = Nino("AA000003B"),
-      postCode = Some("AA1 1AA"),
-      dateOfBirth = LocalDate.of(1990, 1, 1)
-    )),
+    personalDetails = Some(
+      PersonalDetails(
+        firstName = "John",
+        lastName = "Doe",
+        nino = Nino("AA000003B"),
+        postCode = Some("AA1 1AA"),
+        dateOfBirth = LocalDate.of(1990, 1, 1)
+      )
+    ),
     validCustomer = Some(true),
     CRN = Some("fakeCRN"),
     npsPostCode = Some("AA1 1AA"),
@@ -65,7 +67,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
     validCustomer = Some(false)
   )
 
-  val formProvider = new EnteredPostCodeNotFoundFormProvider()
+  val formProvider                        = new EnteredPostCodeNotFoundFormProvider()
   val form: Form[EnteredPostCodeNotFound] = formProvider()
 
   "EnteredPostCodeNotFound Controller" - {
@@ -95,7 +97,8 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
     "must populate the view correctly on a GET when the question has previously been answered" in {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
-      val userAnswers = UserAnswers().set(EnteredPostCodeNotFoundPage, EnteredPostCodeNotFound.values.head).success.value
+      val userAnswers =
+        UserAnswers().set(EnteredPostCodeNotFoundPage, EnteredPostCodeNotFound.values.head).success.value
 
       val application = applicationBuilder(userAnswers = userAnswers)
         .overrides(
@@ -111,7 +114,10 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view(form.fill(EnteredPostCodeNotFound.values.head), NormalMode)(request, messages).toString
+        contentAsString(result).removeAllNonces() mustEqual view(
+          form.fill(EnteredPostCodeNotFound.values.head),
+          NormalMode
+        )(request, messages).toString
       }
     }
 
@@ -182,7 +188,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request = FakeRequest(GET, enteredPostCodeNotFoundRoute)
-        val result = route(application, request).value
+        val result  = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
@@ -201,7 +207,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request = FakeRequest(GET, enteredPostCodeNotFoundRoute)
-        val result = route(application, request).value
+        val result  = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
@@ -220,7 +226,7 @@ class EnteredPostCodeNotFoundControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request = FakeRequest(GET, enteredPostCodeNotFoundRoute)
-        val result = route(application, request).value
+        val result  = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual auth.routes.SignedOutController.onPageLoad.url

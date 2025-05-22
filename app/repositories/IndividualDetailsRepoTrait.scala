@@ -20,13 +20,14 @@ import models.individualdetails.IndividualDetailsDataCache
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
 trait IndividualDetailsRepoTrait {
-  def insertOrReplaceIndividualDetailsData(individualDetailsData: IndividualDetailsDataCache
-                                          )(implicit ec: ExecutionContext): Future[String]
+  def insertOrReplaceIndividualDetailsData(individualDetailsData: IndividualDetailsDataCache)(implicit
+    ec: ExecutionContext
+  ): Future[String]
 
-  def findIndividualDetailsDataByNino(nino: String
-                                     )(implicit ec: ExecutionContext): Future[Option[IndividualDetailsDataCache]]
+  def findIndividualDetailsDataByNino(nino: String)(implicit
+    ec: ExecutionContext
+  ): Future[Option[IndividualDetailsDataCache]]
   def clear(nino: String): Future[Boolean]
 
 }

@@ -23,12 +23,12 @@ import uk.gov.hmrc.auth.core.retrieve.Name
 class UserNameSpec extends AnyFlatSpec with Matchers {
 
   "An UserName" should "have name and lastname" in {
-    val name = Name(Some("first"), Some("last"))
+    val name     = Name(Some("first"), Some("last"))
     val userName = UserName(name)
-    userName.name.name should be (Some("first"))
-    userName.name.lastName should be (Some("last"))
-    userName.toString should be ("first last")
-    userName.getOrElse("default") should be ("first last")
+    userName.name.name            should be(Some("first"))
+    userName.name.lastName        should be(Some("last"))
+    userName.toString             should be("first last")
+    userName.getOrElse("default") should be("first last")
   }
 
 }

@@ -32,10 +32,11 @@ class EnteredPostCodeNotFoundSpec extends AnyFreeSpec with Matchers with ScalaCh
 
       val gen = Gen.oneOf(EnteredPostCodeNotFound.values.toSeq)
 
-      forAll(gen) {
-        enteredPostCodeNotFound =>
-
-          JsString(enteredPostCodeNotFound.toString).validate[EnteredPostCodeNotFound].asOpt.value mustEqual enteredPostCodeNotFound
+      forAll(gen) { enteredPostCodeNotFound =>
+        JsString(enteredPostCodeNotFound.toString)
+          .validate[EnteredPostCodeNotFound]
+          .asOpt
+          .value mustEqual enteredPostCodeNotFound
       }
     }
 
@@ -43,10 +44,8 @@ class EnteredPostCodeNotFoundSpec extends AnyFreeSpec with Matchers with ScalaCh
 
       val gen = arbitrary[String] suchThat (!EnteredPostCodeNotFound.values.map(_.toString).contains(_))
 
-      forAll(gen) {
-        invalidValue =>
-
-          JsString(invalidValue).validate[EnteredPostCodeNotFound] mustEqual JsError("error.invalid")
+      forAll(gen) { invalidValue =>
+        JsString(invalidValue).validate[EnteredPostCodeNotFound] mustEqual JsError("error.invalid")
       }
     }
 
@@ -54,10 +53,8 @@ class EnteredPostCodeNotFoundSpec extends AnyFreeSpec with Matchers with ScalaCh
 
       val gen = Gen.oneOf(EnteredPostCodeNotFound.values.toSeq)
 
-      forAll(gen) {
-        enteredPostCodeNotFound =>
-
-          Json.toJson(enteredPostCodeNotFound) mustEqual JsString(enteredPostCodeNotFound.toString)
+      forAll(gen) { enteredPostCodeNotFound =>
+        Json.toJson(enteredPostCodeNotFound) mustEqual JsString(enteredPostCodeNotFound.toString)
       }
     }
   }

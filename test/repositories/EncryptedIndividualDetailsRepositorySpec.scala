@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class EncryptedIndividualDetailsRepositorySpec
-  extends AnyFreeSpec
+    extends AnyFreeSpec
     with Matchers
     with DefaultPlayMongoRepositorySupport[EncryptedIndividualDetailsDataCache]
     with ScalaFutures
@@ -41,15 +41,13 @@ class EncryptedIndividualDetailsRepositorySpec
 
   private val mockAppConfig = mock[FrontendAppConfig]
 
-  when(mockAppConfig.cacheTtl) thenReturn 1
+  when(mockAppConfig.cacheTtl) thenReturn 1L
   when(mockAppConfig.encryptionKey) thenReturn "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
 
-
-  protected val repository = new EncryptedIndividualDetailsRepository(
+  protected val repository: EncryptedIndividualDetailsRepository = new EncryptedIndividualDetailsRepository(
     mongoComponent = mongoComponent,
-    appConfig      = mockAppConfig
+    appConfig = mockAppConfig
   )
-
 
   "EncryptedIndividualDetailsRepository" - {
 
@@ -61,7 +59,7 @@ class EncryptedIndividualDetailsRepositorySpec
           id = "id",
           individualDetails = Some(IndividualDetailsData("John", "Doe", "1980-01-01", "AB12CD", "AB123456C"))
         )
-        val result = repository.insertOrReplaceIndividualDetailsData(individualDetailsDataCache).futureValue
+        val result                                                 = repository.insertOrReplaceIndividualDetailsData(individualDetailsDataCache).futureValue
         result mustBe "AB123456C"
       }
     }
@@ -82,13 +80,36 @@ class EncryptedIndividualDetailsRepositorySpec
         result1 mustBe "AB123456"
 
         val result = repository.findIndividualDetailsDataByNino(nino).futureValue
-        result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsDataCache.copy(lastUpdated = Instant.EPOCH)
+        result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsDataCache.copy(lastUpdated =
+          Instant.EPOCH
+        )
       }
 
       "must return None when the IndividualDetailsData does not exist" in {
-        val nino = "ZZ999999Z"
+        val nino   = "ZZ999999Z"
         val result = repository.findIndividualDetailsDataByNino(nino).futureValue
         result mustBe None
+      }
+    }
+
+    "clear" - {
+
+      "must delete the IndividualDetailsData for the given NINO" in {
+        val nino = "AB123456"
+
+        val individualDetailsDataCache = IndividualDetailsDataCache(
+          id = "id",
+          individualDetails = Some(IndividualDetailsData("John", "Doe", "1980-01-01", "AB12CD", nino)),
+          lastUpdated = Instant.EPOCH
+        )
+
+        repository.insertOrReplaceIndividualDetailsData(individualDetailsDataCache).futureValue
+
+        val result1 = repository.clear(nino).futureValue
+        result1 mustBe true
+
+        val result2 = repository.findIndividualDetailsDataByNino(nino).futureValue
+        result2 mustBe None
       }
     }
   }

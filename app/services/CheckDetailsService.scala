@@ -35,27 +35,26 @@ trait CheckDetailsService {
 
 class CheckDetailsServiceImpl @Inject() extends CheckDetailsService with Logging {
 
-   def checkConditions(idData: IndividualDetails): (Boolean, String) = {
-     var reason: String                 = StringUtils.EMPTY
-     val isValidNino:Boolean            = idData.crnIndicator.equals(False)
-     val isValidAccountStatus:Boolean   = idData.accountStatusType.exists(_.equals(FullLive))
-     val hasResidentialAddress: Boolean = idData.getAddressTypeResidential.isDefined
-     val validStatus: Boolean           = isValidAddressStatus(idData)
+  def checkConditions(idData: IndividualDetails): (Boolean, String) = {
+    var reason: String                 = StringUtils.EMPTY
+    val isValidNino: Boolean           = idData.crnIndicator.equals(False)
+    val isValidAccountStatus: Boolean  = idData.accountStatusType.exists(_.equals(FullLive))
+    val hasResidentialAddress: Boolean = idData.getAddressTypeResidential.isDefined
+    val validStatus: Boolean           = isValidAddressStatus(idData)
 
-     if (!isValidAccountStatus) reason += "AccountStatus is not FullLive;"
-     if (!isValidNino) reason += "CRN;"
-     if (!hasResidentialAddress) reason += "No residential address;"
-     if (!validStatus && hasResidentialAddress) reason += "AddressStatus is Dlo or NFa;"
+    if (!isValidAccountStatus) reason += "AccountStatus is not FullLive;"
+    if (!isValidNino) reason += "CRN;"
+    if (!hasResidentialAddress) reason += "No residential address;"
+    if (!validStatus && hasResidentialAddress) reason += "AddressStatus is Dlo or NFa;"
 
     val isValidCustomer = isValidAccountStatus && isValidNino && validStatus && hasResidentialAddress
     (isValidCustomer, reason)
   }
 
-  private def isValidAddressStatus(idData: IndividualDetails): Boolean = {
-    getAddressTypeResidential(idData.addressList).exists(
-      status => status.addressStatus.isEmpty || status.addressStatus.get.equals(NotDlo)
+  private def isValidAddressStatus(idData: IndividualDetails): Boolean =
+    getAddressTypeResidential(idData.addressList).exists(status =>
+      status.addressStatus.isEmpty || status.addressStatus.get.equals(NotDlo)
     )
-  }
 
   private def getAddressTypeResidential(addressList: AddressList): Option[Address] = {
     val residentialAddress = addressList.getAddress.filter(_.addressType.equals(ResidentialAddress))

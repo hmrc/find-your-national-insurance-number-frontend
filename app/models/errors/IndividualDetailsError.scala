@@ -18,13 +18,11 @@ package models.errors
 
 import models.IndividualDetailsIdentifier
 
-sealed abstract class IndividualDetailsError(message: String)
-  extends Throwable {
+sealed abstract class IndividualDetailsError(message: String) extends Throwable {
   val errorMessage: String = message
 }
 
-final case class ConnectorError(statusCode: Int, message: String)
-  extends IndividualDetailsError(message)
+final case class ConnectorError(statusCode: Int, message: String) extends IndividualDetailsError(message)
 
 final case class InvalidIdentifier(identifier: IndividualDetailsIdentifier)
-  extends IndividualDetailsError(s"Invalid identifier: $identifier")
+    extends IndividualDetailsError(s"Invalid identifier: $identifier")

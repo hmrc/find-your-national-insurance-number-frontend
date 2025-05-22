@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package viewmodels.govuk
 
 import play.api.data.Field
 import play.api.i18n.Messages
+import uk.gov.hmrc.govukfrontend.views.viewmodels.FormGroup
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.fieldset.{Fieldset, Legend}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
@@ -31,10 +32,10 @@ trait RadiosFluency {
   object RadiosViewModel extends ErrorMessageAwareness with FieldsetFluency {
 
     def apply(
-               field: Field,
-               items: Seq[RadioItem],
-               legend: Legend
-             )(implicit messages: Messages): Radios =
+      field: Field,
+      items: Seq[RadioItem],
+      legend: Legend
+    )(implicit messages: Messages): Radios =
       apply(
         field = field,
         items = items,
@@ -42,10 +43,10 @@ trait RadiosFluency {
       )
 
     def apply(
-               field: Field,
-               items: Seq[RadioItem],
-               fieldset: Fieldset
-             )(implicit messages: Messages): Radios =
+      field: Field,
+      items: Seq[RadioItem],
+      fieldset: Fieldset
+    )(implicit messages: Messages): Radios =
       Radios(
         fieldset = Some(fieldset),
         name = field.name,
@@ -54,20 +55,20 @@ trait RadiosFluency {
       )
 
     def yesNo(
-               field: Field,
-               legend: Legend
-             )(implicit messages: Messages): Radios =
+      field: Field,
+      legend: Legend
+    )(implicit messages: Messages): Radios =
       yesNo(
         field = field,
         fieldset = FieldsetViewModel(legend)
       )
 
     def yesNoWithHint(
-               field: Field,
-               legend: Legend,
-               yesHint: Option[String] = None,
-               noHint: Option[String] = None
-             )(implicit messages: Messages): Radios =
+      field: Field,
+      legend: Legend,
+      yesHint: Option[String] = None,
+      noHint: Option[String] = None
+    )(implicit messages: Messages): Radios =
       yesNoWithHint(
         field = field,
         fieldset = FieldsetViewModel(legend),
@@ -76,9 +77,9 @@ trait RadiosFluency {
       )
 
     def yesNo(
-               field: Field,
-               fieldset: Fieldset
-             )(implicit messages: Messages): Radios = {
+      field: Field,
+      fieldset: Fieldset
+    )(implicit messages: Messages): Radios = {
 
       val items = Seq(
         RadioItem(
@@ -101,11 +102,11 @@ trait RadiosFluency {
     }
 
     def yesNoWithHint(
-                       field: Field,
-                       fieldset: Fieldset,
-                       yesHint: Option[String],
-                       noHint: Option[String]
-                     )(implicit messages: Messages): Radios = {
+      field: Field,
+      fieldset: Fieldset,
+      yesHint: Option[String],
+      noHint: Option[String]
+    )(implicit messages: Messages): Radios = {
 
       val items = Seq(
         RadioItem(
@@ -143,7 +144,7 @@ trait RadiosFluency {
       radios copy (hint = Some(hint))
 
     def withFormGroupClasses(classes: String): Radios =
-      radios copy (formGroupClasses = classes)
+      radios copy (formGroup = FormGroup(classes = Some(classes)))
 
     def withIdPrefix(prefix: String): Radios =
       radios copy (idPrefix = Some(prefix))

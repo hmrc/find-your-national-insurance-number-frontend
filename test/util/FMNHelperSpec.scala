@@ -26,34 +26,39 @@ class FMNHelperSpec extends AnyFlatSpec with Matchers {
   "splitPostCode" should "remove spaces and insert a space before the last three characters" in {
     val postCode = "AB12CD"
     val expected = "AB1 2CD"
-    val result = FMNHelper.splitPostCode(postCode)
+    val result   = FMNHelper.splitPostCode(postCode)
     result shouldEqual expected
   }
 
   it should "handle postcodes without spaces" in {
     val postCode = "E11AA"
     val expected = "E1 1AA"
-    val result = FMNHelper.splitPostCode(postCode)
+    val result   = FMNHelper.splitPostCode(postCode)
     result shouldEqual expected
   }
 
   it should "handle postcodes with spaces" in {
     val postCode = " SW1A 2AA "
     val expected = "SW1A 2AA"
-    val result = FMNHelper.splitPostCode(postCode)
+    val result   = FMNHelper.splitPostCode(postCode)
     result shouldEqual expected
   }
 
   "createNPSFMNRequest" should "return NPSFMNRequest with data when idData is defined" in {
-    val idData = Some(IndividualDetailsDataCache(
-      id="id",
-      individualDetails = Some(IndividualDetailsData(
-        firstForename = "John",
-        surname = "Doe",
-        dateOfBirth = "1990-01-01",
-        postCode = "AB12CD",
-        nino = "AB123456C"
-      ))))
+    val idData = Some(
+      IndividualDetailsDataCache(
+        id = "id",
+        individualDetails = Some(
+          IndividualDetailsData(
+            firstForename = "John",
+            surname = "Doe",
+            dateOfBirth = "1990-01-01",
+            postCode = "AB12CD",
+            nino = "AB123456C"
+          )
+        )
+      )
+    )
 
     val expected = NPSFMNRequest(
       firstForename = "John",
@@ -61,25 +66,22 @@ class FMNHelperSpec extends AnyFlatSpec with Matchers {
       dateOfBirth = "1990-01-01",
       postCode = "AB12CD"
     )
-    val result = FMNHelper.createNPSFMNRequest(idData)
+    val result   = FMNHelper.createNPSFMNRequest(idData)
     result shouldEqual expected
   }
 
   it should "return empty NPSFMNRequest when idData is None" in {
-    val idData = None
+    val idData   = None
     val expected = NPSFMNRequest.empty
-    val result = FMNHelper.createNPSFMNRequest(idData)
+    val result   = FMNHelper.createNPSFMNRequest(idData)
     result shouldEqual expected
   }
 
   it should "return empty NPSFMNRequest when individualDetails is None" in {
-    val idData = Some(IndividualDetailsDataCache(id="id",
-      individualDetails = None
-    ))
+    val idData   = Some(IndividualDetailsDataCache(id = "id", individualDetails = None))
     val expected = NPSFMNRequest.empty
-    val result = FMNHelper.createNPSFMNRequest(idData)
+    val result   = FMNHelper.createNPSFMNRequest(idData)
     result shouldEqual expected
   }
-
 
 }

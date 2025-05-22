@@ -26,13 +26,13 @@ class SelectAlternativeServiceFormProviderSpec extends OptionFieldBehaviours {
 
   ".value" - {
 
-    val fieldName = "value"
+    val fieldName   = "value"
     val requiredKey = "selectAlternativeService.error.required"
 
     behave like optionsField[SelectAlternativeService](
       form,
       fieldName,
-      validValues  = SelectAlternativeService.values,
+      validValues = SelectAlternativeService.values,
       invalidError = FormError(fieldName, "error.invalid")
     )
 

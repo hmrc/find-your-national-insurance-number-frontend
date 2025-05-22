@@ -23,19 +23,19 @@ import play.api.libs.json.Json
 class IndividualDetailsIdentifierSpec extends AnyFlatSpec with Matchers {
 
   "IndividualDetailsIdentifier reads" should "correctly parse IndividualDetailsNino" in {
-    val json = Json.parse("\"AB123456B\"")
+    val json   = Json.parse("\"AB123456B\"")
     val result = json.as[IndividualDetailsNino]
     result shouldBe IndividualDetailsNino("AB123456B")
   }
 
   it should "correctly parse ChildReferenceNumber" in {
-    val json = Json.parse("\"AA123456\"")
+    val json   = Json.parse("\"AA123456\"")
     val result = json.as[ChildReferenceNumber]
     result shouldBe ChildReferenceNumber("AA123456")
   }
 
   it should "correctly parse TemporaryReferenceNumber" in {
-    val json = Json.parse("\"12345678\"")
+    val json   = Json.parse("\"12345678\"")
     val result = json.as[TemporaryReferenceNumber]
     result shouldBe TemporaryReferenceNumber("12345678")
   }
@@ -54,28 +54,27 @@ class IndividualDetailsIdentifierSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "correctly write ChildReferenceNumber" in {
-    val crn = ChildReferenceNumber("AA123456")
+    val crn  = ChildReferenceNumber("AA123456")
     val json = Json.toJson(crn)
     json.toString() shouldBe """"AA123456""""
   }
 
   it should "correctly write TemporaryReferenceNumber" in {
-    val trn = TemporaryReferenceNumber("12345678")
+    val trn  = TemporaryReferenceNumber("12345678")
     val json = Json.toJson(trn)
     json.toString() shouldBe """"12345678""""
   }
 
   "IndividualDetailsNino" should "correctly remove suffix from NINO" in {
-    val nino = IndividualDetailsNino("AB123456C")
+    val nino   = IndividualDetailsNino("AB123456C")
     val result = nino.withoutSuffix
     result shouldBe "AB123456"
   }
 
   it should "return the same NINO if it has no suffix" in {
-    val nino = IndividualDetailsNino("AB123456")
+    val nino   = IndividualDetailsNino("AB123456")
     val result = nino.withoutSuffix
     result shouldBe "AB123456"
   }
 
 }
-

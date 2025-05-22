@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,45 +30,43 @@ import util.FMNHelper
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValidationConnector,
-                                                 pdvRepository: PersonalDetailsValidationRepoTrait
-                                                )(implicit val ec: ExecutionContext) extends Logging{
+class PersonalDetailsValidationService @Inject() (
+  connector: PersonalDetailsValidationConnector,
+  pdvRepository: PersonalDetailsValidationRepoTrait
+)(implicit val ec: ExecutionContext)
+    extends Logging {
 
-  def createPDVDataFromPDVMatch(pdvRequest: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponse] = {
+  def createPDVDataFromPDVMatch(pdvRequest: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponse] =
     for {
       pdvResponse <- getPDVMatchResult(pdvRequest)
       pdvResponse <- createPDVDataRow(pdvResponse)
-    } yield {
-      pdvResponse
-    }
-  }
+    } yield pdvResponse
 
   // Get a PDV match result
-  def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponse] = {
+  def getPDVMatchResult(pdvRequest: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponse] =
     connector.retrieveMatchingDetails(pdvRequest) map { response =>
       response.status match {
-        case OK =>
+        case OK                    =>
           PDVSuccessResponse(Json.parse(response.body).as[PDVResponseData])
-        case BAD_REQUEST =>
+        case BAD_REQUEST           =>
           logger.warn("Bad request in personal-details-validation")
           PDVBadRequestResponse(response)
-        case NOT_FOUND =>
+        case NOT_FOUND             =>
           logger.warn("Unable to find personal details record in personal-details-validation")
           PDVNotFoundResponse(response)
         case INTERNAL_SERVER_ERROR =>
           logger.error("Internal server error personal-details-validation")
           PDVErrorResponse(response)
-        case _ =>
+        case _                     =>
           logger.error("Unexpected response from personal-details-validation")
           PDVUnexpectedResponse(response)
       }
     }
-  }
 
   // Create a PDV data row
-  def createPDVDataRow(personalDetailsValidation: PDVResponse): Future[PDVResponse] = {
+  def createPDVDataRow(personalDetailsValidation: PDVResponse): Future[PDVResponse] =
     personalDetailsValidation match {
-      case _@PDVSuccessResponse(pdvResponseData) =>
+      case _ @PDVSuccessResponse(pdvResponseData)           =>
         (pdvResponseData.validationStatus, pdvResponseData.personalDetails) match {
           case (ValidationStatus.Success, Some(personalDetails)) =>
             val reformattedPostCode = FMNHelper.splitPostCode(personalDetails.postCode.getOrElse(StringUtils.EMPTY))
@@ -77,77 +75,67 @@ class PersonalDetailsValidationService @Inject()(connector: PersonalDetailsValid
               val newPDVResponseData = pdvResponseData.copy(personalDetails = Some(newPersonalDetails))
               pdvRepository.insertOrReplacePDVResultData(newPDVResponseData)
               Future.successful(PDVSuccessResponse(newPDVResponseData))
-            }
-            else {
+            } else {
               pdvRepository.insertOrReplacePDVResultData(pdvResponseData)
               Future.successful(PDVSuccessResponse(pdvResponseData))
             }
-          case (ValidationStatus.Failure, None) =>
+          case (ValidationStatus.Failure, None)                  =>
             pdvRepository.insertOrReplacePDVResultData(pdvResponseData)
             Future.successful(PDVSuccessResponse(pdvResponseData))
-          case (_, None) =>
+          case (_, None)                                         =>
             Future.failed(new RuntimeException("PersonalDetails is None in PDVResponseData"))
-          case _ =>
+          case _                                                 =>
             Future.failed(new RuntimeException("PersonalDetails could not be parsed"))
         }
-      case pdvNotFoundResponse@PDVNotFoundResponse(_) =>
+      case pdvNotFoundResponse @ PDVNotFoundResponse(_)     =>
         logger.warn(s"Failed creating PDV data row. PDV data not found.")
         Future.successful(pdvNotFoundResponse)
-      case pdvBadRequestResponse@PDVBadRequestResponse(_) =>
+      case pdvBadRequestResponse @ PDVBadRequestResponse(_) =>
         logger.warn(s"Failed creating PDV data row. Bad PDV request.")
         Future.successful(pdvBadRequestResponse)
-      case pdvUnexpectedResponse@PDVUnexpectedResponse(_) =>
+      case pdvUnexpectedResponse @ PDVUnexpectedResponse(_) =>
         logger.warn(s"Failed creating PDV data row. PDV unexpected response.")
         Future.successful(pdvUnexpectedResponse)
-      case pdvErrorResponse@PDVErrorResponse(_) =>
+      case pdvErrorResponse @ PDVErrorResponse(_)           =>
         logger.warn(s"Failed creating PDV data row. PDV Internal server error.")
         Future.successful(pdvErrorResponse)
-      case _ =>
-        logger.warn(s"Failed creating PDV data row.")
-        throw new RuntimeException(s"Failed creating PDV data row.")
     }
-  }
 
   // Update the PDV data row with the a validCustomer which is boolean value
-  def updatePDVDataRowWithValidCustomer(nino: String, isValidCustomer: Boolean, reason:String): Future[Boolean] =
-    pdvRepository.updateCustomerValidityWithReason(nino, isValidCustomer, reason) map {
-      case str:String => if(str.length > 8) true else false
-      case _ => false
-    } recover {
-      case _: MongoException => false
+  def updatePDVDataRowWithValidCustomer(nino: String, isValidCustomer: Boolean, reason: String): Future[Boolean] =
+    pdvRepository.updateCustomerValidityWithReason(nino, isValidCustomer, reason) map { str =>
+      if (str.length > 8) true else false
+    } recover { case _: MongoException =>
+      false
     }
 
   def updatePDVDataRowWithNPSPostCode(nino: String, npsPostCode: String): Future[Boolean] =
     pdvRepository.updatePDVDataWithNPSPostCode(nino, npsPostCode) map {
       case nino: String if nino.nonEmpty => true
-      case _ => false
-    } recover {
-      case e: MongoException =>
-        logger.warn(s"Failed updating PDV data row with NPS Postcode, ${e.getMessage}")
-        false
+      case _                             => false
+    } recover { case e: MongoException =>
+      logger.warn(s"Failed updating PDV data row with NPS Postcode, ${e.getMessage}")
+      false
     }
 
   def getPersonalDetailsValidationByNino(nino: String): Future[Option[PDVResponseData]] =
     pdvRepository.findByNino(nino) map {
       case Some(pdvResponseData) => Some(pdvResponseData)
-      case _ => None
-    } recover {
-      case e: MongoException =>
-        logger.warn(s"Failed finding PDV data by NINO: $nino, ${e.getMessage}")
-        None
+      case _                     => None
+    } recover { case e: MongoException =>
+      logger.warn(s"Failed finding PDV data by NINO: $nino, ${e.getMessage}")
+      None
     }
 
-  def getValidCustomerStatus(nino: String): Future[Boolean] = {
+  def getValidCustomerStatus(nino: String): Future[Boolean] =
     getPersonalDetailsValidationByNino(nino) map {
       case Some(pdvData) => pdvData.validCustomer.getOrElse(false)
-      case None => false
-    } recover {
-      case _: Exception => false
+      case None          => false
+    } recover { case _: Exception =>
+      false
     }
-  }
 
-  def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponse] = {
+  def getPDVData(body: PDVRequest)(implicit hc: HeaderCarrier): Future[PDVResponse] =
     createPDVDataFromPDVMatch(body)
-  }
 
 }

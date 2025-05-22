@@ -26,13 +26,13 @@ class InvalidDataNINOHelpFormProviderSpec extends OptionFieldBehaviours {
 
   ".value" - {
 
-    val fieldName = "value"
+    val fieldName   = "value"
     val requiredKey = "selectAlternativeService.error.required"
 
     behave like optionsField[InvalidDataNINOHelp](
       form,
       fieldName,
-      validValues  = InvalidDataNINOHelp.values,
+      validValues = InvalidDataNINOHelp.values,
       invalidError = FormError(fieldName, "error.invalid")
     )
 

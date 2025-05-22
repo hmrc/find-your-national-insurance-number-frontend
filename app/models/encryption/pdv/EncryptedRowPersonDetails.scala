@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package models.encryption.pdv
 
 import models.encryption.EncryptedValueFormat._
 import models.pdv.{PDVResponseData, PersonalDetails, ValidationStatus}
-import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{OFormat, __}
 import uk.gov.hmrc.crypto.{EncryptedValue, SymmetricCryptoFactory}
 import uk.gov.hmrc.domain.Nino
@@ -27,36 +27,38 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
 import java.time._
 
 case class EncryptedPDVResponseData(
-                                     id: String,
-                                     validationStatus: EncryptedValue,
-                                     personalDetails: Option[EncryptedPersonalDetails],
-                                     lastUpdated: Instant = Instant.now(java.time.Clock.systemUTC()),
-                                     reason: Option[EncryptedValue],
-                                     validCustomer: Option[EncryptedValue],
-                                     CRN: Option[EncryptedValue],
-                                     npsPostCode: Option[EncryptedValue]
-                                   )
+  id: String,
+  validationStatus: EncryptedValue,
+  personalDetails: Option[EncryptedPersonalDetails],
+  lastUpdated: Instant = Instant.now(java.time.Clock.systemUTC()),
+  reason: Option[EncryptedValue],
+  validCustomer: Option[EncryptedValue],
+  CRN: Option[EncryptedValue],
+  npsPostCode: Option[EncryptedValue]
+)
 
 case class EncryptedPersonalDetails(
-                            firstName: EncryptedValue,
-                            lastName: EncryptedValue,
-                            nino: String,
-                            postCode: Option[EncryptedValue],
-                            dateOfBirth: EncryptedValue
-                          )
+  firstName: EncryptedValue,
+  lastName: EncryptedValue,
+  nino: String,
+  postCode: Option[EncryptedValue],
+  dateOfBirth: EncryptedValue
+)
 
 object EncryptedPDVResponseData {
 
-  private val encryptedPersonalDetailsFormat: OFormat[EncryptedPersonalDetails] = {
+  private val encryptedPersonalDetailsFormat: OFormat[EncryptedPersonalDetails] =
     ((__ \ "firstName").format[EncryptedValue]
       ~ (__ \ "lastName").format[EncryptedValue]
       ~ (__ \ "nino").format[String]
       ~ (__ \ "postCode").formatNullable[EncryptedValue]
-      ~ (__ \ "dateOfBirth").format[EncryptedValue]
-      )(EncryptedPersonalDetails.apply, unlift(EncryptedPersonalDetails.unapply))
-  }
+      ~ (__ \ "dateOfBirth")
+        .format[EncryptedValue])(
+      EncryptedPersonalDetails.apply,
+      epd => Tuple5(epd.firstName, epd.lastName, epd.nino, epd.postCode, epd.dateOfBirth)
+    )
 
-  val encryptedPDVResponseDataFormat: OFormat[EncryptedPDVResponseData] = {
+  val encryptedPDVResponseDataFormat: OFormat[EncryptedPDVResponseData] =
     ((__ \ "id").format[String]
       ~ (__ \ "validationStatus").format[EncryptedValue]
       ~ (__ \ "personalDetails").formatNullable[EncryptedPersonalDetails](encryptedPersonalDetailsFormat)
@@ -64,22 +66,31 @@ object EncryptedPDVResponseData {
       ~ (__ \ "reason").formatNullable[EncryptedValue]
       ~ (__ \ "validCustomer").formatNullable[EncryptedValue]
       ~ (__ \ "CRN").formatNullable[EncryptedValue]
-      ~ (__ \ "npsPostCode").formatNullable[EncryptedValue]
-      )(EncryptedPDVResponseData.apply, unlift(EncryptedPDVResponseData.unapply))
-  }
+      ~ (__ \ "npsPostCode")
+        .formatNullable[EncryptedValue])(
+      EncryptedPDVResponseData.apply,
+      ePDVResp =>
+        Tuple8(
+          ePDVResp.id,
+          ePDVResp.validationStatus,
+          ePDVResp.personalDetails,
+          ePDVResp.lastUpdated,
+          ePDVResp.reason,
+          ePDVResp.validCustomer,
+          ePDVResp.CRN,
+          ePDVResp.npsPostCode
+        )
+    )
 
-  def encryptField(fieldValue: String, key: String): EncryptedValue = {
+  def encryptField(fieldValue: String, key: String): EncryptedValue =
     SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(fieldValue, key)
-  }
 
   def encrypt(pDVResponseData: PDVResponseData, key: String): EncryptedPDVResponseData = {
-    def encryptStringField(fieldValue: String): EncryptedValue = {
+    def encryptStringField(fieldValue: String): EncryptedValue =
       SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(fieldValue, key)
-    }
 
-    def encryptBooleanField(fieldValue: Boolean): EncryptedValue = {
+    def encryptBooleanField(fieldValue: Boolean): EncryptedValue =
       SymmetricCryptoFactory.aesGcmAdCrypto(key).encrypt(fieldValue.toString, key)
-    }
 
     EncryptedPDVResponseData(
       id = pDVResponseData.id,
@@ -90,7 +101,8 @@ object EncryptedPDVResponseData {
           encryptStringField(pd.lastName),
           pd.nino.nino,
           pd.postCode map encryptStringField,
-          encryptStringField(pd.dateOfBirth.toString))
+          encryptStringField(pd.dateOfBirth.toString)
+        )
       ),
       lastUpdated = pDVResponseData.lastUpdated,
       reason = pDVResponseData.reason map encryptStringField,
@@ -101,23 +113,24 @@ object EncryptedPDVResponseData {
   }
 
   def decrypt(encryptedRowPersonDetails: EncryptedPDVResponseData, key: String): PDVResponseData = {
-    def decryptStringField(field: EncryptedValue): String = {
+    def decryptStringField(field: EncryptedValue): String =
       SymmetricCryptoFactory.aesGcmAdCrypto(key).decrypt(field, key)
-    }
 
-    def decryptBooleanField(field: EncryptedValue): Boolean = {
+    def decryptBooleanField(field: EncryptedValue): Boolean =
       SymmetricCryptoFactory.aesGcmAdCrypto(key).decrypt(field, key).toBoolean
-    }
 
     PDVResponseData(
       id = encryptedRowPersonDetails.id,
       validationStatus = ValidationStatus.withName(decryptStringField(encryptedRowPersonDetails.validationStatus)),
       personalDetails = encryptedRowPersonDetails.personalDetails.map(pd =>
-        PersonalDetails(decryptStringField(pd.firstName),
+        PersonalDetails(
+          decryptStringField(pd.firstName),
           decryptStringField(pd.lastName),
           Nino(pd.nino),
           pd.postCode map decryptStringField,
-          LocalDate.parse(decryptStringField(pd.dateOfBirth)))),
+          LocalDate.parse(decryptStringField(pd.dateOfBirth))
+        )
+      ),
       lastUpdated = encryptedRowPersonDetails.lastUpdated,
       reason = encryptedRowPersonDetails.reason map decryptStringField,
       validCustomer = encryptedRowPersonDetails.validCustomer map decryptBooleanField,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 
 class EncryptedPDVResponseRepositoryISpec
-  extends AnyFreeSpec
+    extends AnyFreeSpec
     with Matchers
     with DefaultPlayMongoRepositorySupport[EncryptedPDVResponseData]
     with ScalaFutures
@@ -43,7 +43,7 @@ class EncryptedPDVResponseRepositoryISpec
     with OptionValues
     with MockitoSugar {
 
-  private val instant = Instant.now.truncatedTo(ChronoUnit.MILLIS)
+  private val instant  = Instant.now.truncatedTo(ChronoUnit.MILLIS)
   private val fakeNino = Nino(new Generator(new Random()).nextNino.nino)
 
   val personalDetails: PersonalDetails =
@@ -56,23 +56,47 @@ class EncryptedPDVResponseRepositoryISpec
     )
 
   private val pdvResponseData = PDVResponseData(
-    "id", ValidationStatus.Success, Some(personalDetails), Instant.ofEpochSecond(1), None, Some(false), Some("false"),Some("somePostcode"))
-
-  private val validCustomerPDVResponseData = PDVResponseData(
-    "id", ValidationStatus.Success, Some(personalDetails), Instant.ofEpochSecond(1), Some("Valid Reason"), Some(true), Some("false"),Some("somePostcode"))
-
-  private val invalidCustomerPDVResponseData = PDVResponseData(
-    "id", ValidationStatus.Success, Some(personalDetails), Instant.ofEpochSecond(1), Some("Invalid Reason"), Some(false), Some("false"),Some("somePostcode"))
-
-  private val mockAppConfig = mock[FrontendAppConfig]
-  when(mockAppConfig.cacheTtl) thenReturn 1
-  when(mockAppConfig.encryptionKey) thenReturn "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
-
-  protected override val repository = new EncryptedPersonalDetailsValidationRepository(
-    mongoComponent = mongoComponent,
-    appConfig = mockAppConfig,
+    "id",
+    ValidationStatus.Success,
+    Some(personalDetails),
+    Instant.ofEpochSecond(1),
+    None,
+    Some(false),
+    Some("false"),
+    Some("somePostcode")
   )
 
+  private val validCustomerPDVResponseData = PDVResponseData(
+    "id",
+    ValidationStatus.Success,
+    Some(personalDetails),
+    Instant.ofEpochSecond(1),
+    Some("Valid Reason"),
+    Some(true),
+    Some("false"),
+    Some("somePostcode")
+  )
+
+  private val invalidCustomerPDVResponseData = PDVResponseData(
+    "id",
+    ValidationStatus.Success,
+    Some(personalDetails),
+    Instant.ofEpochSecond(1),
+    Some("Invalid Reason"),
+    Some(false),
+    Some("false"),
+    Some("somePostcode")
+  )
+
+  private val mockAppConfig = mock[FrontendAppConfig]
+  when(mockAppConfig.cacheTtl) thenReturn 1L
+  when(mockAppConfig.encryptionKey) thenReturn "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
+
+  protected override val repository: EncryptedPersonalDetailsValidationRepository =
+    new EncryptedPersonalDetailsValidationRepository(
+      mongoComponent = mongoComponent,
+      appConfig = mockAppConfig
+    )
 
   ".updateCustomerValidityWithReason" - {
 
@@ -84,13 +108,15 @@ class EncryptedPDVResponseRepositoryISpec
 
         insert(encrypt(pdvResponseData, mockAppConfig.encryptionKey)).futureValue
 
-        repository.updateCustomerValidityWithReason(pdvResponseData.getNino, validCustomer = true, "Valid Reason").futureValue
+        repository
+          .updateCustomerValidityWithReason(pdvResponseData.getNino, validCustomer = true, "Valid Reason")
+          .futureValue
 
         val result = repository.findByValidationId(pdvResponseData.id).futureValue
 
         result.value.validationStatus mustEqual expectedResult.validationStatus
-        result.value.personalDetails  mustEqual expectedResult.personalDetails
-        result.value.reason           mustEqual expectedResult.reason
+        result.value.personalDetails mustEqual expectedResult.personalDetails
+        result.value.reason mustEqual expectedResult.reason
       }
 
       "must update record to be an invalid customer" in {
@@ -99,13 +125,15 @@ class EncryptedPDVResponseRepositoryISpec
 
         insert(encrypt(pdvResponseData, mockAppConfig.encryptionKey)).futureValue
 
-        repository.updateCustomerValidityWithReason(pdvResponseData.getNino, validCustomer = false, "Invalid Reason").futureValue
+        repository
+          .updateCustomerValidityWithReason(pdvResponseData.getNino, validCustomer = false, "Invalid Reason")
+          .futureValue
 
         val result = repository.findByValidationId(pdvResponseData.id).futureValue
 
         result.value.validationStatus mustEqual expectedResult.validationStatus
-        result.value.personalDetails  mustEqual expectedResult.personalDetails
-        result.value.reason           mustEqual expectedResult.reason
+        result.value.personalDetails mustEqual expectedResult.personalDetails
+        result.value.reason mustEqual expectedResult.reason
       }
     }
   }
@@ -118,11 +146,11 @@ class EncryptedPDVResponseRepositoryISpec
 
         insert(encrypt(pdvResponseData, mockAppConfig.encryptionKey)).futureValue
 
-        val result = repository.findByValidationId(pdvResponseData.id).futureValue
+        val result         = repository.findByValidationId(pdvResponseData.id).futureValue
         val expectedResult = pdvResponseData
 
-        result.value.id               mustEqual expectedResult.id
-        result.value.personalDetails  mustEqual expectedResult.personalDetails
+        result.value.id mustEqual expectedResult.id
+        result.value.personalDetails mustEqual expectedResult.personalDetails
         result.value.validationStatus mustEqual expectedResult.validationStatus
       }
     }
@@ -143,7 +171,7 @@ class EncryptedPDVResponseRepositoryISpec
 
         insert(encrypt(pdvResponseData, mockAppConfig.encryptionKey)).futureValue
 
-        val result = repository.findByNino(pdvResponseData.personalDetails.get.nino.value).futureValue
+        val result         = repository.findByNino(pdvResponseData.personalDetails.get.nino.value).futureValue
         val expectedResult = pdvResponseData
 
         result.value.id mustEqual expectedResult.id

@@ -18,6 +18,9 @@ package models
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import play.api.libs.json.Json
+import uk.gov.hmrc.domain.Nino
+
 import java.time.LocalDate
 
 class PersonSpec extends AnyFlatSpec with Matchers {
@@ -51,4 +54,64 @@ class PersonSpec extends AnyFlatSpec with Matchers {
     val person = Person(None, None, None, None, None, None, None, None, None)
     person.getDateOfBirth shouldBe ""
   }
+
+  "Person" should "serialize and deserialize correctly" in {
+    val person = Person(
+      firstName = Some("John"),
+      middleName = Some("H."),
+      lastName = Some("Doe"),
+      initials = Some("J.H.D."),
+      title = Some("Mr"),
+      honours = Some("OBE"),
+      sex = Some("M"),
+      dateOfBirth = Some(LocalDate.of(1985, 5, 15)),
+      nino = Some(Nino("AA000003B"))
+    )
+
+    val json   = Json.toJson(person)
+    val parsed = json.as[Person]
+
+    parsed shouldBe person
+  }
+
+  "PersonDetails" should "serialize and deserialize correctly" in {
+    val address = Address(
+      Some("Line 1"),
+      Some("Line 2"),
+      Some("Line 3"),
+      Some("Line 4"),
+      Some("Line 5"),
+      Some("AA1 1AA"),
+      Some("Country"),
+      Some(LocalDate.now()),
+      Some(LocalDate.now().plusDays(1)),
+      Some("Type"),
+      isRls = false
+    )
+
+    val person = Person(
+      firstName = Some("Alice"),
+      middleName = None,
+      lastName = Some("Smith"),
+      initials = None,
+      title = Some("Ms"),
+      honours = None,
+      sex = Some("F"),
+      dateOfBirth = Some(LocalDate.of(1990, 1, 1)),
+      nino = Some(Nino("AA000004C"))
+    )
+
+    val personDetails = PersonDetails(
+      person = person,
+      address = Some(address),
+      correspondenceAddress = None
+    )
+
+    val json   = Json.toJson(personDetails)
+    val parsed = json.as[PersonDetails]
+
+    parsed                    shouldBe personDetails
+    personDetails.getPostCode shouldBe "AA1 1AA"
+  }
+
 }

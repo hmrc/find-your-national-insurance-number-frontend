@@ -30,19 +30,22 @@ object LetterTechnicalError extends Enumerable.Implicits {
   case object PhoneHmrc extends WithName("phoneHMRC") with LetterTechnicalError
 
   val values: Seq[LetterTechnicalError] = Seq(
-    TryAgain, PrintForm, PhoneHmrc
+    TryAgain,
+    PrintForm,
+    PhoneHmrc
   )
 
-  def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map {
-    case (value, index) =>
-      RadioItem(
-        content = Text(messages(s"technicalError.${value.toString}")),
-        value   = Some(value.toString),
-        id      = Some(s"value_$index"),
-        hint    = Some(Hint(
+  def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map { case (value, index) =>
+    RadioItem(
+      content = Text(messages(s"technicalError.${value.toString}")),
+      value = Some(value.toString),
+      id = Some(s"value_$index"),
+      hint = Some(
+        Hint(
           content = Text(messages(s"technicalError.${value.toString}.hint"))
-        ))
+        )
       )
+    )
   }
 
   implicit val enumerable: Enumerable[LetterTechnicalError] =

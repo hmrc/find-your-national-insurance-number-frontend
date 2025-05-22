@@ -26,21 +26,21 @@ import uk.gov.hmrc.http.HttpVerbs.GET
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class Navigator @Inject()(implicit config: FrontendAppConfig) {
+class Navigator @Inject() (implicit config: FrontendAppConfig) {
 
   private lazy val getNINOByPost = "/fill-online/get-your-national-insurance-number-by-post"
 
   private val normalRoutes: Page => UserAnswers => Call = {
-    case ConfirmIdentityPage                => userAnswers => navigateConformIdentity(userAnswers)
-    case PostLetterPage                     => userAnswers => navigatePostLetter(userAnswers)
-    case SelectNINOLetterAddressPage        => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
-    case SelectAlternativeServicePage       => userAnswers => navigateSelectAlternativeService(userAnswers)
-    case LetterTechnicalErrorPage           => userAnswers => navigateLetterTechnicalError(userAnswers)
-    case InvalidDataNINOHelpPage            => userAnswers => navigateInvalidDataNINOHelp(userAnswers)
-    case ValidDataNINOHelpPage              => userAnswers => navigateValidDataNINOHelp(userAnswers)
-    case EnteredPostCodeNotFoundPage        => userAnswers => navigateEnteredPostCodeNotFound(userAnswers)
-    case ValidDataNINOMatchedNINOHelpPage   => userAnswers => navigateValidDataNINOMatchedNINOHelp(userAnswers)
-    case _                                  => _           => routes.JourneyRecoveryController.onPageLoad()
+    case ConfirmIdentityPage              => userAnswers => navigateConformIdentity(userAnswers)
+    case PostLetterPage                   => userAnswers => navigatePostLetter(userAnswers)
+    case SelectNINOLetterAddressPage      => userAnswers => navigateSelectNINOLetterAddress(userAnswers)
+    case SelectAlternativeServicePage     => userAnswers => navigateSelectAlternativeService(userAnswers)
+    case LetterTechnicalErrorPage         => userAnswers => navigateLetterTechnicalError(userAnswers)
+    case InvalidDataNINOHelpPage          => userAnswers => navigateInvalidDataNINOHelp(userAnswers)
+    case ValidDataNINOHelpPage            => userAnswers => navigateValidDataNINOHelp(userAnswers)
+    case EnteredPostCodeNotFoundPage      => userAnswers => navigateEnteredPostCodeNotFound(userAnswers)
+    case ValidDataNINOMatchedNINOHelpPage => userAnswers => navigateValidDataNINOMatchedNINOHelp(userAnswers)
+    case _                                => _ => routes.JourneyRecoveryController.onPageLoad()
   }
 
   def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
@@ -53,7 +53,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
       case Some(true) => controllers.auth.routes.AuthController.redirectToSMN()
       case _          => controllers.routes.PostLetterController.onPageLoad()
     }
-  private def navigatePostLetter(userAnswers: UserAnswers): Call =
+  private def navigatePostLetter(userAnswers: UserAnswers): Call      =
     userAnswers.get(PostLetterPage) match {
       case Some(true) => controllers.routes.TracingWhatYouNeedController.onPageLoad()
       case _          => routes.SelectAlternativeServiceController.onPageLoad()
@@ -63,7 +63,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     userAnswers.get(SelectNINOLetterAddressPage) match {
       case Some(true)  => routes.NINOLetterPostedConfirmationController.onPageLoad()
       case Some(false) => routes.SelectAlternativeServiceController.onPageLoad(mode = NormalMode)
-      case _                                            => routes.JourneyRecoveryController.onPageLoad()
+      case _           => routes.JourneyRecoveryController.onPageLoad()
     }
 
   private def navigateSelectAlternativeService(userAnswers: UserAnswers): Call =
@@ -77,7 +77,7 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
     userAnswers.get(LetterTechnicalErrorPage) match {
       case Some(LetterTechnicalError.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
       case Some(LetterTechnicalError.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}$getNINOByPost")
-      case _                                     => routes.JourneyRecoveryController.onPageLoad()
+      case _                                    => routes.JourneyRecoveryController.onPageLoad()
     }
 
   private def navigateInvalidDataNINOHelp(userAnswers: UserAnswers): Call =
@@ -89,23 +89,23 @@ class Navigator @Inject()(implicit config: FrontendAppConfig) {
 
   private def navigateValidDataNINOHelp(userAnswers: UserAnswers): Call =
     userAnswers.get(ValidDataNINOHelpPage) match {
-      case Some(true) => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
+      case Some(true)  => routes.SelectNINOLetterAddressController.onPageLoad(mode = NormalMode)
       case Some(false) => routes.SelectAlternativeServiceController.onPageLoad(mode = NormalMode)
-      case _                                 => routes.JourneyRecoveryController.onPageLoad()
+      case _           => routes.JourneyRecoveryController.onPageLoad()
     }
 
   private def navigateEnteredPostCodeNotFound(userAnswers: UserAnswers): Call =
     userAnswers.get(EnteredPostCodeNotFoundPage) match {
       case Some(EnteredPostCodeNotFound.PhoneHmrc) => routes.PhoneHMRCDetailsController.onPageLoad()
       case Some(EnteredPostCodeNotFound.PrintForm) => Call(GET, s"${config.printAndPostServiceUrl}$getNINOByPost")
-      case _ => routes.JourneyRecoveryController.onPageLoad()
+      case _                                       => routes.JourneyRecoveryController.onPageLoad()
     }
-  
+
   private def navigateValidDataNINOMatchedNINOHelp(userAnswers: UserAnswers): Call =
     userAnswers.get(ValidDataNINOMatchedNINOHelpPage) match {
-      case Some(true) => routes.ConfirmYourPostcodeController.onPageLoad(mode = NormalMode)
+      case Some(true)  => routes.ConfirmYourPostcodeController.onPageLoad(mode = NormalMode)
       case Some(false) => routes.SelectAlternativeServiceController.onPageLoad(mode = NormalMode)
-      case _ => routes.JourneyRecoveryController.onPageLoad()
+      case _           => routes.JourneyRecoveryController.onPageLoad()
     }
 
 }

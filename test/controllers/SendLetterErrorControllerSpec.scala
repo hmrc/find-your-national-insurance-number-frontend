@@ -40,19 +40,21 @@ class SendLetterErrorControllerSpec extends SpecBase {
 
   def onwardRoute = Call("GET", "/foo")
 
-  lazy val sendLetterErrorRoute = routes.SendLetterErrorController.onPageLoad(mode = NormalMode).url
+  lazy val sendLetterErrorRoute                                              = routes.SendLetterErrorController.onPageLoad(mode = NormalMode).url
   val mockPersonalDetailsValidationService: PersonalDetailsValidationService = mock[PersonalDetailsValidationService]
 
   val fakePDVResponseData: PDVResponseData = PDVResponseData(
     id = "fakeId",
     validationStatus = ValidationStatus.Success,
-    personalDetails = Some(PersonalDetails(
-      firstName = "John",
-      lastName = "Doe",
-      nino = Nino("AA000003B"),
-      postCode = Some("AA1 1AA"),
-      dateOfBirth = LocalDate.of(1990, 1, 1)
-    )),
+    personalDetails = Some(
+      PersonalDetails(
+        firstName = "John",
+        lastName = "Doe",
+        nino = Nino("AA000003B"),
+        postCode = Some("AA1 1AA"),
+        dateOfBirth = LocalDate.of(1990, 1, 1)
+      )
+    ),
     validCustomer = Some(true),
     CRN = Some("fakeCRN"),
     npsPostCode = Some("AA1 1AA"),
@@ -64,7 +66,7 @@ class SendLetterErrorControllerSpec extends SpecBase {
   )
 
   val formProvider = new SelectAlternativeServiceFormProvider()
-  val form = formProvider()
+  val form         = formProvider()
 
   "SendLetterError Controller" - {
 
@@ -94,7 +96,8 @@ class SendLetterErrorControllerSpec extends SpecBase {
       when(mockPersonalDetailsValidationService.getPersonalDetailsValidationByNino(any[String]))
         .thenReturn(Future.successful(Some(fakePDVResponseData)))
 
-      val userAnswers = UserAnswers().set(SelectAlternativeServicePage, SelectAlternativeService.values.head).success.value
+      val userAnswers =
+        UserAnswers().set(SelectAlternativeServicePage, SelectAlternativeService.values.head).success.value
 
       val application = applicationBuilder(userAnswers = userAnswers)
         .overrides(
@@ -110,7 +113,10 @@ class SendLetterErrorControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result).removeAllNonces() mustEqual view(form.fill(SelectAlternativeService.values.head), NormalMode)(request, messages, config).toString
+        contentAsString(result).removeAllNonces() mustEqual view(
+          form.fill(SelectAlternativeService.values.head),
+          NormalMode
+        )(request, messages, config).toString
       }
     }
 
@@ -165,7 +171,8 @@ class SendLetterErrorControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result).removeAllNonces() mustEqual view(boundForm, NormalMode)(request, messages, config).toString
+        contentAsString(result)
+          .removeAllNonces() mustEqual view(boundForm, NormalMode)(request, messages, config).toString
       }
     }
 
@@ -181,7 +188,7 @@ class SendLetterErrorControllerSpec extends SpecBase {
 
       running(application) {
         val request = FakeRequest(GET, sendLetterErrorRoute)
-        val result = route(application, request).value
+        val result  = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad.url
@@ -200,7 +207,7 @@ class SendLetterErrorControllerSpec extends SpecBase {
 
       running(application) {
         val request = FakeRequest(GET, sendLetterErrorRoute)
-        val result = route(application, request).value
+        val result  = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
@@ -219,7 +226,7 @@ class SendLetterErrorControllerSpec extends SpecBase {
 
       running(application) {
         val request = FakeRequest(GET, sendLetterErrorRoute)
-        val result = route(application, request).value
+        val result  = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual auth.routes.SignedOutController.onPageLoad.url

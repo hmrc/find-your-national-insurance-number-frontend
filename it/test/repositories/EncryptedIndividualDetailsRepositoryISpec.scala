@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,22 +33,23 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.Logging
 
 class EncryptedIndividualDetailsRepositoryISpec
-  extends AnyFreeSpec
+    extends AnyFreeSpec
     with Matchers
     with DefaultPlayMongoRepositorySupport[EncryptedIndividualDetailsDataCache]
     with ScalaFutures
     with IntegrationPatience
     with OptionValues
-    with MockitoSugar with Logging {
+    with MockitoSugar
+    with Logging {
 
-  val encKey:String = "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
-  val mockAppConfig = mock[FrontendAppConfig]
-  when(mockAppConfig.cacheTtl) thenReturn 1
+  val encKey: String = "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
+  val mockAppConfig  = mock[FrontendAppConfig]
+  when(mockAppConfig.cacheTtl) thenReturn 1L
   when(mockAppConfig.encryptionKey) thenReturn encKey.toString
 
-  protected override val repository = new EncryptedIndividualDetailsRepository(
+  protected override val repository: EncryptedIndividualDetailsRepository = new EncryptedIndividualDetailsRepository(
     mongoComponent = mongoComponent,
-    appConfig = mockAppConfig,
+    appConfig = mockAppConfig
   )
 
   private val individualDetailsData = IndividualDetailsDataCache(
@@ -66,7 +67,9 @@ class EncryptedIndividualDetailsRepositoryISpec
 
           repository.insertOrReplaceIndividualDetailsData(individualDetailsData).futureValue
           val result = repository.findIndividualDetailsDataByNino(individualDetailsData.getNino).futureValue
-          result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsData.copy(lastUpdated = Instant.EPOCH)
+          result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsData.copy(lastUpdated =
+            Instant.EPOCH
+          )
         }
       }
     }
@@ -79,11 +82,12 @@ class EncryptedIndividualDetailsRepositoryISpec
 
           repository.insertOrReplaceIndividualDetailsData(individualDetailsData).futureValue
           val result = repository.findIndividualDetailsDataByNino(individualDetailsData.getNino).futureValue
-          result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsData.copy(lastUpdated = Instant.EPOCH)
+          result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsData.copy(lastUpdated =
+            Instant.EPOCH
+          )
         }
       }
     }
-
 
     "when an exception is thrown" - {
 
@@ -99,9 +103,6 @@ class EncryptedIndividualDetailsRepositoryISpec
       }
     }
 
-
   }
-
-
 
 }

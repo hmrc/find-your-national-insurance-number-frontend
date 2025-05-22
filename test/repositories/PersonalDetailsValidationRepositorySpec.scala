@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,23 +31,23 @@ import java.time.{Instant, LocalDate}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class PersonalDetailsValidationRepositorySpec
-  extends AnyFreeSpec
-  with Matchers
-  with DefaultPlayMongoRepositorySupport[PDVResponseData]
-  with ScalaFutures
-  with IntegrationPatience
-  with OptionValues
-  with MockitoSugar {
+    extends AnyFreeSpec
+    with Matchers
+    with DefaultPlayMongoRepositorySupport[PDVResponseData]
+    with ScalaFutures
+    with IntegrationPatience
+    with OptionValues
+    with MockitoSugar {
 
   private val mockAppConfig = mock[FrontendAppConfig]
-  when(mockAppConfig.cacheTtl) thenReturn 1
+  when(mockAppConfig.cacheTtl) thenReturn 1L
   when(mockAppConfig.encryptionKey) thenReturn "z4rWoRLf7a1OHTXLutSDJjhrUzZTBE3b"
 
   private val instant = Instant.ofEpochSecond(1234567890)
 
-  protected override val repository = new PersonalDetailsValidationRepository(
+  protected override val repository: PersonalDetailsValidationRepository = new PersonalDetailsValidationRepository(
     mongoComponent = mongoComponent,
-    appConfig      = mockAppConfig
+    appConfig = mockAppConfig
   )
 
   "PersonalDetailsValidationRepository" - {
@@ -58,15 +58,20 @@ class PersonalDetailsValidationRepositorySpec
         val pdvResultData = PDVResponseData(
           id = "id",
           validationStatus = ValidationStatus.Success,
-          personalDetails = Some(PersonalDetails(
-            firstName = "firstName",
-            lastName = "lastName",
-            nino = Nino("AB123456C"),
-            postCode = Some("postcode"),
-            dateOfBirth = LocalDate.now()
-          )),
+          personalDetails = Some(
+            PersonalDetails(
+              firstName = "firstName",
+              lastName = "lastName",
+              nino = Nino("AB123456C"),
+              postCode = Some("postcode"),
+              dateOfBirth = LocalDate.now()
+            )
+          ),
           lastUpdated = instant,
-          None, None, None, None
+          None,
+          None,
+          None,
+          None
         )
 
         val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
@@ -77,15 +82,20 @@ class PersonalDetailsValidationRepositorySpec
         val pdvResultData = PDVResponseData(
           id = "id",
           validationStatus = ValidationStatus.Success,
-          personalDetails = Some(PersonalDetails(
-            firstName = "firstName",
-            lastName = "lastName",
-            nino = Nino("AB123456C"),
-            postCode = Some("postcode"),
-            dateOfBirth = LocalDate.now()
-          )),
+          personalDetails = Some(
+            PersonalDetails(
+              firstName = "firstName",
+              lastName = "lastName",
+              nino = Nino("AB123456C"),
+              postCode = Some("postcode"),
+              dateOfBirth = LocalDate.now()
+            )
+          ),
           lastUpdated = instant,
-          None, None, None, None
+          None,
+          None,
+          None,
+          None
         )
 
         val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
@@ -94,15 +104,20 @@ class PersonalDetailsValidationRepositorySpec
         val pdvResultData2 = PDVResponseData(
           id = "id",
           validationStatus = ValidationStatus.Success,
-          personalDetails = Some(PersonalDetails(
-            firstName = "firstName",
-            lastName = "lastName",
-            nino = Nino("AB123456C"),
-            postCode = Some("postcode2"),
-            dateOfBirth = LocalDate.now()
-          )),
+          personalDetails = Some(
+            PersonalDetails(
+              firstName = "firstName",
+              lastName = "lastName",
+              nino = Nino("AB123456C"),
+              postCode = Some("postcode2"),
+              dateOfBirth = LocalDate.now()
+            )
+          ),
           lastUpdated = instant,
-          None, None, None, None
+          None,
+          None,
+          None,
+          None
         )
 
         val result2 = repository.insertOrReplacePDVResultData(pdvResultData2).futureValue
@@ -118,21 +133,27 @@ class PersonalDetailsValidationRepositorySpec
         val pdvResultData = PDVResponseData(
           id = "id",
           validationStatus = ValidationStatus.Success,
-          personalDetails = Some(PersonalDetails(
-            firstName = "firstName",
-            lastName = "lastName",
-            nino = Nino("AB123456C"),
-            postCode = Some("postcode"),
-            dateOfBirth = LocalDate.now()
-          )),
+          personalDetails = Some(
+            PersonalDetails(
+              firstName = "firstName",
+              lastName = "lastName",
+              nino = Nino("AB123456C"),
+              postCode = Some("postcode"),
+              dateOfBirth = LocalDate.now()
+            )
+          ),
           lastUpdated = instant,
-          None, None, None, None
+          None,
+          None,
+          None,
+          None
         )
 
         val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
         result mustBe "AB123456C"
 
-        val result2 = repository.updateCustomerValidityWithReason("AB123456C", validCustomer = true, "reason").futureValue
+        val result2 =
+          repository.updateCustomerValidityWithReason("AB123456C", validCustomer = true, "reason").futureValue
         result2 mustBe "AB123456C"
       }
     }
@@ -143,15 +164,20 @@ class PersonalDetailsValidationRepositorySpec
         val pdvResultData = PDVResponseData(
           id = "id",
           validationStatus = ValidationStatus.Success,
-          personalDetails = Some(PersonalDetails(
-            firstName = "firstName",
-            lastName = "lastName",
-            nino = Nino("AB123456C"),
-            postCode = Some("postcode"),
-            dateOfBirth = LocalDate.now()
-          )),
+          personalDetails = Some(
+            PersonalDetails(
+              firstName = "firstName",
+              lastName = "lastName",
+              nino = Nino("AB123456C"),
+              postCode = Some("postcode"),
+              dateOfBirth = LocalDate.now()
+            )
+          ),
           lastUpdated = instant,
-          None, None, None, None
+          None,
+          None,
+          None,
+          None
         )
 
         val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
@@ -164,68 +190,109 @@ class PersonalDetailsValidationRepositorySpec
 
     "findByValidationId" - {
 
-        "must return the PDVResultData when it exists" in {
-          val pdvResultData = PDVResponseData(
-            id = "id",
-            validationStatus = ValidationStatus.Success,
-            personalDetails = Some(PersonalDetails(
+      "must return the PDVResultData when it exists" in {
+        val pdvResultData = PDVResponseData(
+          id = "id",
+          validationStatus = ValidationStatus.Success,
+          personalDetails = Some(
+            PersonalDetails(
               firstName = "firstName",
               lastName = "lastName",
               nino = Nino("AB123456C"),
               postCode = Some("postcode"),
               dateOfBirth = LocalDate.of(2010, 1, 1)
-            )),
-            lastUpdated = instant,
-            None, None, None, None
-          )
+            )
+          ),
+          lastUpdated = instant,
+          None,
+          None,
+          None,
+          None
+        )
 
-          val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
-          result mustBe "AB123456C"
+        val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
+        result mustBe "AB123456C"
 
-          val result2 = repository.findByValidationId("id").futureValue
-          result2.value.personalDetails mustBe pdvResultData.personalDetails
-          result2.value.validationStatus mustBe pdvResultData.validationStatus
-          result2.value.npsPostCode mustBe pdvResultData.npsPostCode
-        }
+        val result2 = repository.findByValidationId("id").futureValue
+        result2.value.personalDetails mustBe pdvResultData.personalDetails
+        result2.value.validationStatus mustBe pdvResultData.validationStatus
+        result2.value.npsPostCode mustBe pdvResultData.npsPostCode
+      }
 
-        "must return None when the PDVResultData does not exist" in {
-          val result = repository.findByValidationId("id").futureValue
-          result mustBe None
-        }
+      "must return None when the PDVResultData does not exist" in {
+        val result = repository.findByValidationId("id").futureValue
+        result mustBe None
+      }
     }
 
     "findByNino" - {
 
-        "must return the PDVResultData when it exists" in {
-          val pdvResultData = PDVResponseData(
-            id = "id",
-            validationStatus = ValidationStatus.Success,
-            personalDetails = Some(PersonalDetails(
+      "must return the PDVResultData when it exists" in {
+        val pdvResultData = PDVResponseData(
+          id = "id",
+          validationStatus = ValidationStatus.Success,
+          personalDetails = Some(
+            PersonalDetails(
               firstName = "firstName",
               lastName = "lastName",
               nino = Nino("AB123456C"),
               postCode = Some("postcode"),
               dateOfBirth = LocalDate.now()
-            )),
-            lastUpdated = instant,
-            None, None, None, None
-          )
+            )
+          ),
+          lastUpdated = instant,
+          None,
+          None,
+          None,
+          None
+        )
 
-          val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
-          result mustBe "AB123456C"
+        val result = repository.insertOrReplacePDVResultData(pdvResultData).futureValue
+        result mustBe "AB123456C"
 
-          val result2 = repository.findByNino("AB123456C").futureValue
-          result2.value.personalDetails mustBe pdvResultData.personalDetails
-          result2.value.validationStatus mustBe pdvResultData.validationStatus
-          result2.value.npsPostCode mustBe pdvResultData.npsPostCode
-        }
+        val result2 = repository.findByNino("AB123456C").futureValue
+        result2.value.personalDetails mustBe pdvResultData.personalDetails
+        result2.value.validationStatus mustBe pdvResultData.validationStatus
+        result2.value.npsPostCode mustBe pdvResultData.npsPostCode
+      }
 
-        "must return None when the PDVResultData does not exist" in {
-          val result = repository.findByNino("AB123456C").futureValue
-          result mustBe None
-        }
+      "must return None when the PDVResultData does not exist" in {
+        val result = repository.findByNino("AB123456C").futureValue
+        result mustBe None
+      }
     }
 
-  }
+    "clear" - {
 
+      "must delete the pdvResultData for the given NINO" in {
+        val nino          = "AB123456C"
+        val pdvResultData = PDVResponseData(
+          id = "id",
+          validationStatus = ValidationStatus.Success,
+          personalDetails = Some(
+            PersonalDetails(
+              firstName = "firstName",
+              lastName = "lastName",
+              nino = Nino(nino),
+              postCode = Some("ABCDEF"),
+              dateOfBirth = LocalDate.now()
+            )
+          ),
+          lastUpdated = instant,
+          None,
+          None,
+          None,
+          None
+        )
+
+        repository.insertOrReplacePDVResultData(pdvResultData).futureValue
+
+        val result1 = repository.clear(nino).futureValue
+        result1 mustBe true
+
+        val result2 = repository.findByNino(nino).futureValue
+        result2 mustBe None
+      }
+    }
+  }
 }

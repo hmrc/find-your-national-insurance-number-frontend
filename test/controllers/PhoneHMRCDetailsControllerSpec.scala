@@ -29,7 +29,7 @@ class PhoneHMRCDetailsControllerSpec extends SpecBase {
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder().build()
-      val appConfig = application.injector.instanceOf[FrontendAppConfig]
+      val appConfig   = application.injector.instanceOf[FrontendAppConfig]
 
       running(application) {
         val request = FakeRequest(GET, routes.PhoneHMRCDetailsController.onPageLoad().url)

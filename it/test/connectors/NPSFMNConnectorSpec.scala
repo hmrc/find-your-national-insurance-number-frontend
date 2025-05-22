@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,15 +32,14 @@ import java.util.UUID
 import scala.util.Random
 
 class NPSFMNConnectorSpec
-  extends ConnectorSpec
+    extends ConnectorSpec
     with WireMockHelper
     with MockitoSugar
     with DefaultAwaitTimeout
     with Injecting {
 
   override implicit lazy val app: Application = app(
-    Map("external-url.nps-fmn-api.port" -> server.port(),
-    )
+    Map("external-url.nps-fmn-api.port" -> server.port())
   )
 
   val nino: Nino = Nino(new Generator(new Random()).nextNino.nino)
@@ -60,7 +59,7 @@ class NPSFMNConnectorSpec
                 |}
                 |""".stripMargin
 
-  val jsonResourceNotFound: String =  s"""
+  val jsonResourceNotFound: String = s"""
                 |{
                 |  "jsonServiceError": {
                 |    "requestURL": "/itmp/find-my-nino/api/v1/individual/${nino.nino}",
@@ -90,14 +89,13 @@ class NPSFMNConnectorSpec
                 |}
                 |""".stripMargin
 
-
   trait SpecSetup {
 
     def url(nino: String): String
 
     lazy val connector: DefaultNPSFMNConnector = {
       val httpClient2 = app.injector.instanceOf[HttpClientV2]
-      val config = app.injector.instanceOf[FrontendAppConfig]
+      val config      = app.injector.instanceOf[FrontendAppConfig]
       new DefaultNPSFMNConnector(httpClient2, config)
     }
   }
@@ -105,68 +103,69 @@ class NPSFMNConnectorSpec
   "NPS FMN Connector" must {
 
     trait LocalSetup extends SpecSetup {
-      def url(nino: String) = s"/find-your-national-insurance-number/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/$nino"
+      def url(nino: String) =
+        s"/find-your-national-insurance-number/nps-json-service/nps/itmp/find-my-nino/api/v1/individual/$nino"
     }
 
     "return ACCEPTED (202) when called with an invalid nino" in new LocalSetup {
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
-      val body: NPSFMNRequest = mock[NPSFMNRequest]
+      val body: NPSFMNRequest                   = mock[NPSFMNRequest]
       stubPost(url(nino.nino), ACCEPTED, Some(Json.toJson(body).toString()), Some(""))
-      val result: HttpResponse = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
+      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue
       result.status mustBe ACCEPTED
       result.body mustBe ""
     }
 
     "return NOT_FOUND (404) when called with an invalid nino" in new LocalSetup {
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
-      val body: NPSFMNRequest = mock[NPSFMNRequest]
+      val body: NPSFMNRequest                   = mock[NPSFMNRequest]
       stubPost(url(nino.nino), NOT_FOUND, Some(Json.toJson(body).toString()), Some(jsonNotFound))
-      val result: HttpResponse = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
+      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue
       result.status mustBe NOT_FOUND
       result.body mustBe jsonNotFound
     }
 
     "return RESOURCE_NOT_FOUND (404) when called with an invalid nino" in new LocalSetup {
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
-      val body: NPSFMNRequest = mock[NPSFMNRequest]
+      val body: NPSFMNRequest                   = mock[NPSFMNRequest]
       stubPost(url(nino.nino), NOT_FOUND, Some(Json.toJson(body).toString()), Some(jsonResourceNotFound))
-      val result: HttpResponse = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
+      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue
       result.status mustBe NOT_FOUND
       result.body mustBe jsonResourceNotFound
     }
 
     "return INTERNAL_SERVER_ERROR (500) when called with an invalid nino" in new LocalSetup {
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
-      val body: NPSFMNRequest = mock[NPSFMNRequest]
+      val body: NPSFMNRequest                   = mock[NPSFMNRequest]
       stubPost(url(nino.nino), INTERNAL_SERVER_ERROR, Some(Json.toJson(body).toString()), Some(jsonInternalServerError))
-      val result: HttpResponse = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
+      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue
       result.status mustBe INTERNAL_SERVER_ERROR
       result.body mustBe jsonInternalServerError
     }
 
     "return a failed future with BAD_REQUEST (400) when the call fails" in new LocalSetup {
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
-      val body: NPSFMNRequest = mock[NPSFMNRequest]
+      val body: NPSFMNRequest                   = mock[NPSFMNRequest]
       stubPost(url(nino.nino), BAD_REQUEST, Some(Json.toJson(body).toString()), Some(""))
-      val result: HttpResponse = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
+      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue
       result.status mustBe BAD_REQUEST
       result.body mustBe ""
     }
 
     "return UNAUTHORIZED (401) when called with an invalid nino" in new LocalSetup {
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
-      val body: NPSFMNRequest = mock[NPSFMNRequest]
+      val body: NPSFMNRequest                   = mock[NPSFMNRequest]
       stubPost(url(nino.nino), UNAUTHORIZED, Some(Json.toJson(body).toString()), Some(""))
-      val result: HttpResponse = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
+      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue
       result.status mustBe UNAUTHORIZED
       result.body mustBe ""
     }
 
     "return NOT_IMPLEMENTED (501) when called with an invalid nino" in new LocalSetup {
       implicit val correlationId: CorrelationId = CorrelationId(UUID.randomUUID())
-      val body: NPSFMNRequest = mock[NPSFMNRequest]
+      val body: NPSFMNRequest                   = mock[NPSFMNRequest]
       stubPost(url(nino.nino), NOT_IMPLEMENTED, Some(Json.toJson(body).toString()), Some(""))
-      val result: HttpResponse = connector.sendLetter(nino.nino, body).futureValue.leftSideValue
+      val result: HttpResponse                  = connector.sendLetter(nino.nino, body).futureValue
       result.status mustBe NOT_IMPLEMENTED
       result.body mustBe ""
     }

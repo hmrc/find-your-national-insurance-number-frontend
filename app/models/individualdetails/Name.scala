@@ -27,7 +27,7 @@ object NameSequenceNumber {
 }
 sealed trait NameType
 object NameType {
-  object RealName    extends NameType
+  object RealName extends NameType
   object KnownAsName extends NameType
 
   implicit val reads: Reads[NameType] = JsPath
@@ -37,10 +37,10 @@ object NameType {
       case 2 => KnownAsName
     }
 
-  implicit val writes: Writes[NameType] = WritesNumber[NameType]({
+  implicit val writes: Writes[NameType] = WritesNumber[NameType] {
     case RealName    => 1
     case KnownAsName => 2
-  })
+  }
 
   implicit val format: Format[NameType] = Format[NameType](reads, writes)
 }
@@ -49,13 +49,13 @@ sealed trait TitleType
 
 object TitleType {
   object NotKnown extends TitleType
-  object Mr       extends TitleType
-  object Mrs      extends TitleType
-  object Miss     extends TitleType
-  object Ms       extends TitleType
-  object Dr       extends TitleType
-  object Rev      extends TitleType
-  implicit val reads: Reads[TitleType] = JsPath
+  object Mr extends TitleType
+  object Mrs extends TitleType
+  object Miss extends TitleType
+  object Ms extends TitleType
+  object Dr extends TitleType
+  object Rev extends TitleType
+  implicit val reads: Reads[TitleType]   = JsPath
     .read[Int]
     .map {
       case 0 => NotKnown
@@ -113,17 +113,17 @@ object Surname {
 }
 
 final case class Name(
-    nameSequenceNumber: NameSequenceNumber,
-    nameType:           NameType,
-    titleType:          Option[TitleType],
-    requestedName:      Option[RequestedName],
-    nameStartDate:      NameStartDate,
-    nameEndDate:        Option[NameEndDate],
-    otherTitle:         Option[OtherTitle],
-    honours:            Option[Honours],
-    firstForename:      FirstForename,
-    secondForename:     Option[SecondForename],
-    surname:            Surname
+  nameSequenceNumber: NameSequenceNumber,
+  nameType: NameType,
+  titleType: Option[TitleType],
+  requestedName: Option[RequestedName],
+  nameStartDate: NameStartDate,
+  nameEndDate: Option[NameEndDate],
+  otherTitle: Option[OtherTitle],
+  honours: Option[Honours],
+  firstForename: FirstForename,
+  secondForename: Option[SecondForename],
+  surname: Surname
 )
 
 object Name {

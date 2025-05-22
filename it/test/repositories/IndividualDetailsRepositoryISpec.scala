@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,20 +32,21 @@ import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class IndividualDetailsRepositoryISpec
-  extends AnyFreeSpec
+    extends AnyFreeSpec
     with Matchers
     with DefaultPlayMongoRepositorySupport[IndividualDetailsDataCache]
     with ScalaFutures
     with IntegrationPatience
     with OptionValues
-    with MockitoSugar with Logging {
+    with MockitoSugar
+    with Logging {
 
   val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
-  when(mockAppConfig.cacheTtl) thenReturn 1
+  when(mockAppConfig.cacheTtl) thenReturn 1L
 
-  protected override val repository = new IndividualDetailsRepository(
+  protected override val repository: IndividualDetailsRepository = new IndividualDetailsRepository(
     mongoComponent = mongoComponent,
-    appConfig = mockAppConfig,
+    appConfig = mockAppConfig
   )
 
   private val individualDetailsData = IndividualDetailsDataCache(
@@ -63,7 +64,9 @@ class IndividualDetailsRepositoryISpec
 
           repository.insertOrReplaceIndividualDetailsData(individualDetailsData).futureValue
           val result = repository.findIndividualDetailsDataByNino(individualDetailsData.getNino).futureValue
-          result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsData.copy(lastUpdated = Instant.EPOCH)
+          result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsData.copy(lastUpdated =
+            Instant.EPOCH
+          )
         }
       }
     }
@@ -76,7 +79,9 @@ class IndividualDetailsRepositoryISpec
 
           repository.insertOrReplaceIndividualDetailsData(individualDetailsData).futureValue
           val result = repository.findIndividualDetailsDataByNino(individualDetailsData.getNino).futureValue
-          result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsData.copy(lastUpdated = Instant.EPOCH)
+          result.value.copy(lastUpdated = Instant.EPOCH) mustEqual individualDetailsData.copy(lastUpdated =
+            Instant.EPOCH
+          )
         }
       }
     }
@@ -91,6 +96,22 @@ class IndividualDetailsRepositoryISpec
           repository.findIndividualDetailsDataByNino(nonExistentNino)
         } map { ex =>
           ex.getMessage must include("Failed finding Individual Details Data by Nino")
+        }
+      }
+    }
+
+    ".clear" - {
+
+      "when there is a record for this nino" - {
+        "must delete the record" in {
+
+          repository.insertOrReplaceIndividualDetailsData(individualDetailsData).futureValue
+
+          val result1 = repository.clear(individualDetailsData.getNino).futureValue
+          result1 mustBe true
+
+          val result2 = repository.findIndividualDetailsDataByNino(individualDetailsData.getNino).futureValue
+          result2 mustBe None
         }
       }
     }

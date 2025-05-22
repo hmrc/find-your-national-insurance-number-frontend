@@ -21,9 +21,11 @@ import repositories.{IndividualDetailsRepoTrait, PersonalDetailsValidationRepoTr
 import javax.inject.Inject
 import scala.concurrent.Future
 
-class SessionCacheService @Inject()(sessionRepository: SessionRepository,
-                                  individualDetailsRepository: IndividualDetailsRepoTrait,
-                                  personalDetailsValidationRepository: PersonalDetailsValidationRepoTrait) {
+class SessionCacheService @Inject() (
+  sessionRepository: SessionRepository,
+  individualDetailsRepository: IndividualDetailsRepoTrait,
+  personalDetailsValidationRepository: PersonalDetailsValidationRepoTrait
+) {
 
   def invalidateCache(nino: String, userId: String): Future[Boolean] = {
     personalDetailsValidationRepository.clear(nino)

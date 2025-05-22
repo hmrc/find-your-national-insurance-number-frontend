@@ -38,10 +38,10 @@ class NewLayoutProviderSpec extends AnyWordSpec with Matchers with MockitoSugar 
   "NewLayoutProvider" should {
     "render the standard layout with the correct parameters" in {
 
-      val mockWrapperService = mock[WrapperService]
+      val mockWrapperService   = mock[WrapperService]
       val mockAdditionalScript = mock[AdditionalScript]
-      val mockHeadBlock = mock[HeadBlock]
-      val mockAppConfig = mock[FrontendAppConfig]
+      val mockHeadBlock        = mock[HeadBlock]
+      val mockAppConfig        = mock[FrontendAppConfig]
 
       when(mockHeadBlock()).thenReturn(Html("<head></head>"))
 
@@ -50,7 +50,7 @@ class NewLayoutProviderSpec extends AnyWordSpec with Matchers with MockitoSugar 
       when(mockAppConfig.showHelpImproveBanner).thenReturn(true)
 
       implicit val mockRequest: Request[_] = FakeRequest()
-      implicit val mockMessages: Messages = mock[Messages]
+      implicit val mockMessages: Messages  = mock[Messages]
 
       val layoutProvider = new NewLayoutProvider(
         mockWrapperService,
@@ -66,26 +66,28 @@ class NewLayoutProviderSpec extends AnyWordSpec with Matchers with MockitoSugar 
       )
 
       val contentBlock = Html("<p>Test Content</p>")
-      val pageTitle = "Test Page"
+      val pageTitle    = "Test Page"
 
-      when(mockWrapperService.standardScaLayout(
-        any(),
-        any(),
-        any(),
-        any(),
-        any(),
-        any(),
-        ArgumentMatchers.eq(routes.KeepAliveController.keepAlive.url),
-        any(),
-        any(),
-        any(),
-        any(),
-        any(),
-        any(),
-        any(),
-        any(),
-        any(),
-        any())(any(), any(), any())).thenReturn(Html("<html></html>"))
+      when(
+        mockWrapperService.standardScaLayout(
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          ArgumentMatchers.eq(routes.KeepAliveController.keepAlive.url),
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          any()
+        )(any(), any())
+      ).thenReturn(Html("<html></html>"))
 
       val result = layoutProvider(
         pageTitle = pageTitle,

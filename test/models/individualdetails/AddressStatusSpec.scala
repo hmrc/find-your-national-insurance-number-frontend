@@ -36,13 +36,12 @@ class AddressStatusSpec extends AnyFlatSpec with Matchers {
 
   for {
     (addressStatus, json) <- Seq(
-      NotDlo -> """0""",
-      Dlo -> """1""",
-      Nfa -> """2"""
-    )
-  } {
+                               NotDlo -> """0""",
+                               Dlo    -> """1""",
+                               Nfa    -> """2"""
+                             )
+  }
     it should s"write $addressStatus to JSON" in {
       Json.toJson(addressStatus.asInstanceOf[AddressStatus]) shouldBe Json.parse(json)
     }
-  }
 }

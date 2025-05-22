@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,8 +135,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           val result  = route(app, request).value
 
           status(result) mustEqual INTERNAL_SERVER_ERROR
-          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
-          contentAsString(result) must include("Please try again in a few minutes.")
+          contentAsString(result) must include("Sorry, there is a problem with the service")
+          contentAsString(result) must include("Try again later.")
 
           verify(auditService, times(1)).start()(any())
         }
@@ -211,8 +211,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           val result  = route(app, request).value
 
           status(result) mustEqual BAD_REQUEST
-          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
-          contentAsString(result) must include("Please try again in a few minutes.")
+          contentAsString(result) must include("Sorry, there is a problem with the service")
+          contentAsString(result) must include("Try again later.")
 
           verify(auditService, times(1)).start()(any())
           verify(auditService, times(1)).findYourNinoGetPdvDataHttpError(any(), any(), any())(any())
@@ -237,8 +237,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
           val result  = route(app, request).value
 
           status(result) mustEqual INTERNAL_SERVER_ERROR
-          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
-          contentAsString(result) must include("Please try again in a few minutes.")
+          contentAsString(result) must include("Sorry, there is a problem with the service")
+          contentAsString(result) must include("Try again later.")
 
           verify(auditService, times(1)).start()(any())
           verify(auditService, times(1)).findYourNinoGetPdvDataHttpError(any(), any(), any())(any())
@@ -583,8 +583,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual INTERNAL_SERVER_ERROR
 
-          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
-          contentAsString(result) must include("Please try again in a few minutes.")
+          contentAsString(result) must include("Sorry, there is a problem with the service")
+          contentAsString(result) must include("Try again later.")
 
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
           verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
@@ -627,8 +627,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual INTERNAL_SERVER_ERROR
 
-          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
-          contentAsString(result) must include("Please try again in a few minutes.")
+          contentAsString(result) must include("Sorry, there is a problem with the service")
+          contentAsString(result) must include("Try again later.")
 
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
           verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
@@ -671,8 +671,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual INTERNAL_SERVER_ERROR
 
-          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
-          contentAsString(result) must include("Please try again in a few minutes.")
+          contentAsString(result) must include("Sorry, there is a problem with the service")
+          contentAsString(result) must include("Try again later.")
 
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
           verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
@@ -706,8 +706,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual BAD_REQUEST
 
-          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
-          contentAsString(result) must include("Please try again in a few minutes.")
+          contentAsString(result) must include("Sorry, there is a problem with the service")
+          contentAsString(result) must include("Try again later.")
 
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
           verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
@@ -774,8 +774,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual INTERNAL_SERVER_ERROR
 
-          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
-          contentAsString(result) must include("Please try again in a few minutes.")
+          contentAsString(result) must include("Sorry, there is a problem with the service")
+          contentAsString(result) must include("Try again later.")
 
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
           verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())
@@ -810,8 +810,8 @@ class CheckDetailsControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual INTERNAL_SERVER_ERROR
 
-          contentAsString(result) must include("Sorry, we’re experiencing technical difficulties")
-          contentAsString(result) must include("Please try again in a few minutes.")
+          contentAsString(result) must include("Sorry, there is a problem with the service")
+          contentAsString(result) must include("Try again later.")
 
           verify(auditService, times(1)).findYourNinoPDVMatched(any(), any(), any())(any())
           verify(auditService, times(1)).findYourNinoIdDataError(any(), any(), any(), any())(any())

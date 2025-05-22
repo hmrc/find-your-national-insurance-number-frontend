@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,15 @@
 
 package models
 
-import play.api.libs.json.{Format, Json}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import play.api.libs.json.Json
 
-final case class NationalInsuranceNumber(nino: String) extends AnyVal
-
-object NationalInsuranceNumber {
-  implicit val format: Format[IndividualDetailsNino] = Json.valueFormat[IndividualDetailsNino]
+class CountrySpec extends AnyFlatSpec with Matchers {
+  "Country" should "serialize and deserialize correctly" in {
+    val country = Country("United Kingdom")
+    val json    = Json.toJson(country)
+    json             shouldBe Json.parse("""{ "countryName": "United Kingdom" }""")
+    json.as[Country] shouldBe country
+  }
 }

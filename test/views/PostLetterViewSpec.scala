@@ -38,8 +38,14 @@ class PostLetterViewSpec extends ViewBehaviours with Generators {
 
   behave like pageWithHeading()
 
-  behave like pageWithContent("p", "Because you are unable to prove your identity, you cannot access your National Insurance number online.")
-  behave like pageWithContent("p", "You can instead use this service to get your number posted to the address HMRC has on record for you.")
+  behave like pageWithContent(
+    "p",
+    "Because you are unable to prove your identity, you cannot access your National Insurance number online."
+  )
+  behave like pageWithContent(
+    "p",
+    "You can instead use this service to get your number posted to the address HMRC has on record for you."
+  )
   behave like pageWithContent("div", "We will not tell you your National Insurance number over the phone.")
 
   behave like pageWithContent("legend", "Would you like us to post your number to you?")

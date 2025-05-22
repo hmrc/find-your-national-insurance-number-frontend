@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package config
 import play.api.{ConfigLoader, Configuration}
 
 import scala.language.implicitConversions
-// $COVERAGE-OFF$
+
 final case class Service(host: String, port: String, protocol: String) {
 
   def baseUrl: String =
@@ -31,19 +31,16 @@ final case class Service(host: String, port: String, protocol: String) {
 
 object Service {
 
-  implicit lazy val configLoader: ConfigLoader[Service] = ConfigLoader {
-    config =>
-      prefix =>
+  implicit lazy val configLoader: ConfigLoader[Service] = ConfigLoader { config => prefix =>
 
-        val service  = Configuration(config).get[Configuration](prefix)
-        val host     = service.get[String]("host")
-        val port     = service.get[String]("port")
-        val protocol = service.get[String]("protocol")
+    val service  = Configuration(config).get[Configuration](prefix)
+    val host     = service.get[String]("host")
+    val port     = service.get[String]("port")
+    val protocol = service.get[String]("protocol")
 
-        Service(host, port, protocol)
+    Service(host, port, protocol)
   }
 
   implicit def convertToString(service: Service): String =
     service.baseUrl
 }
-// $COVERAGE-ON$

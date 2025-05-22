@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,21 +32,21 @@ object NinoSuffix {
 sealed trait AccountStatusType
 
 object AccountStatusType {
-  case object FullLive                 extends AccountStatusType
-  case object PseudoIomPre86           extends AccountStatusType
-  case object FullIomPost86            extends AccountStatusType
-  case object FullCancelled            extends AccountStatusType
-  case object FullAmalgamated          extends AccountStatusType
-  case object FullAdministrative       extends AccountStatusType
-  case object PseudoWeeded             extends AccountStatusType
-  case object PseudoAmalgamated        extends AccountStatusType
-  case object PseudoOther              extends AccountStatusType
-  case object Redundant                extends AccountStatusType
-  case object ConversionRejection      extends AccountStatusType
-  case object Redirected               extends AccountStatusType
-  case object PayeTemporary            extends AccountStatusType
+  case object FullLive extends AccountStatusType
+  case object PseudoIomPre86 extends AccountStatusType
+  case object FullIomPost86 extends AccountStatusType
+  case object FullCancelled extends AccountStatusType
+  case object FullAmalgamated extends AccountStatusType
+  case object FullAdministrative extends AccountStatusType
+  case object PseudoWeeded extends AccountStatusType
+  case object PseudoAmalgamated extends AccountStatusType
+  case object PseudoOther extends AccountStatusType
+  case object Redundant extends AccountStatusType
+  case object ConversionRejection extends AccountStatusType
+  case object Redirected extends AccountStatusType
+  case object PayeTemporary extends AccountStatusType
   case object AmalgamatedPayeTemporary extends AccountStatusType
-  case object NotKnown                 extends AccountStatusType
+  case object NotKnown extends AccountStatusType
 
   implicit val reads: Reads[AccountStatusType] = JsPath
     .read[Int]
@@ -90,12 +90,12 @@ object AccountStatusType {
 sealed trait DateOfBirthStatus
 
 object DateOfBirthStatus {
-  object Unverified    extends DateOfBirthStatus
-  object Verified      extends DateOfBirthStatus
-  object NotKnown      extends DateOfBirthStatus
+  object Unverified extends DateOfBirthStatus
+  object Verified extends DateOfBirthStatus
+  object NotKnown extends DateOfBirthStatus
   object CoegConfirmed extends DateOfBirthStatus
 
-  implicit val reads: Reads[DateOfBirthStatus] = JsPath
+  implicit val reads: Reads[DateOfBirthStatus]   = JsPath
     .read[Int]
     .map {
       case 0 => Unverified
@@ -116,12 +116,12 @@ sealed trait DateOfDeathStatus
 
 object DateOfDeathStatus {
 
-  object Unverified    extends DateOfDeathStatus
-  object Verified      extends DateOfDeathStatus
-  object NotKnown      extends DateOfDeathStatus
+  object Unverified extends DateOfDeathStatus
+  object Verified extends DateOfDeathStatus
+  object NotKnown extends DateOfDeathStatus
   object CoegConfirmed extends DateOfDeathStatus
 
-  implicit val reads: Reads[DateOfDeathStatus] = JsPath
+  implicit val reads: Reads[DateOfDeathStatus]   = JsPath
     .read[Int]
     .map {
       case 0 => Unverified
@@ -146,11 +146,11 @@ object CrnIndicator {
   object False extends CrnIndicator {
     override val asString: String = "false"
   }
-  object True  extends CrnIndicator {
+  object True extends CrnIndicator {
     override val asString: String = "true"
   }
 
-  implicit val reads: Reads[CrnIndicator] = JsPath
+  implicit val reads: Reads[CrnIndicator]   = JsPath
     .read[Int]
     .map {
       case 0 => False
@@ -163,48 +163,67 @@ object CrnIndicator {
 }
 
 final case class IndividualDetails(
-    ninoWithoutSuffix:  String,
-    ninoSuffix:         Option[NinoSuffix],
-    accountStatusType:  Option[AccountStatusType],
-    dateOfEntry:        Option[LocalDate],
-    dateOfBirth:        LocalDate,
-    dateOfBirthStatus:  Option[DateOfBirthStatus],
-    dateOfDeath:        Option[LocalDate],
-    dateOfDeathStatus:  Option[DateOfDeathStatus],
-    dateOfRegistration: Option[LocalDate],
-    crnIndicator:       CrnIndicator,
-    nameList:           NameList,
-    addressList:        AddressList
+  ninoWithoutSuffix: String,
+  ninoSuffix: Option[NinoSuffix],
+  accountStatusType: Option[AccountStatusType],
+  dateOfEntry: Option[LocalDate],
+  dateOfBirth: LocalDate,
+  dateOfBirthStatus: Option[DateOfBirthStatus],
+  dateOfDeath: Option[LocalDate],
+  dateOfDeathStatus: Option[DateOfDeathStatus],
+  dateOfRegistration: Option[LocalDate],
+  crnIndicator: CrnIndicator,
+  nameList: NameList,
+  addressList: AddressList
 ) {
-  def fullIdentifier: String = s"""${ninoWithoutSuffix}${ninoSuffix.map(_.value).getOrElse("")}"""
+  def fullIdentifier: String = s"""$ninoWithoutSuffix${ninoSuffix.map(_.value).getOrElse("")}"""
 }
 
 object IndividualDetails {
 
   implicit val reads: Format[IndividualDetails] =
     ((JsPath \ "details" \ "nino").format[String] ~
-    (__ \ "details" \ "ninoSuffix").formatNullable[NinoSuffix].inmap(_.filter(_ != NinoSuffix(" ")), identity[Option[NinoSuffix]]) ~
-    (__ \ "details" \ "accountStatusType").formatNullable[AccountStatusType] ~
-    (__ \ "details" \ "dateOfEntry").formatNullable[LocalDate] ~
-    (__ \ "details" \ "dateOfBirth").format[LocalDate] ~
-    (__ \ "details" \ "dateOfBirthStatus").formatNullable[DateOfBirthStatus] ~
-    (__ \ "details" \ "dateOfDeath").formatNullable[LocalDate] ~
-    (__ \ "details" \ "dateOfDeathStatus").formatNullable[DateOfDeathStatus] ~
-    (__ \ "details" \ "dateOfRegistration").formatNullable[LocalDate] ~
-    (__ \ "details" \ "crnIndicator").format[CrnIndicator] ~
-    (__ \ "nameList").format[NameList] ~
-    (__ \ "addressList").format[AddressList])(IndividualDetails.apply, unlift(IndividualDetails.unapply))
+      (__ \ "details" \ "ninoSuffix")
+        .formatNullable[NinoSuffix]
+        .inmap(_.filter(_ != NinoSuffix(" ")), identity[Option[NinoSuffix]]) ~
+      (__ \ "details" \ "accountStatusType").formatNullable[AccountStatusType] ~
+      (__ \ "details" \ "dateOfEntry").formatNullable[LocalDate] ~
+      (__ \ "details" \ "dateOfBirth").format[LocalDate] ~
+      (__ \ "details" \ "dateOfBirthStatus").formatNullable[DateOfBirthStatus] ~
+      (__ \ "details" \ "dateOfDeath").formatNullable[LocalDate] ~
+      (__ \ "details" \ "dateOfDeathStatus").formatNullable[DateOfDeathStatus] ~
+      (__ \ "details" \ "dateOfRegistration").formatNullable[LocalDate] ~
+      (__ \ "details" \ "crnIndicator").format[CrnIndicator] ~
+      (__ \ "nameList").format[NameList] ~
+      (__ \ "addressList").format[AddressList])(
+      IndividualDetails.apply,
+      id =>
+        Tuple12(
+          id.ninoWithoutSuffix,
+          id.ninoSuffix,
+          id.accountStatusType,
+          id.dateOfEntry,
+          id.dateOfBirth,
+          id.dateOfBirthStatus,
+          id.dateOfDeath,
+          id.dateOfDeathStatus,
+          id.dateOfRegistration,
+          id.crnIndicator,
+          id.nameList,
+          id.addressList
+        )
+    )
 
   implicit class IndividualDetailsOps(idData: IndividualDetails) {
-    def getAddressTypeResidential: Option[Address] = idData.addressList.getAddress.filter(_.addressType.equals(ResidentialAddress)).headOption
+    def getAddressTypeResidential: Option[Address] =
+      idData.addressList.getAddress.filter(_.addressType.equals(ResidentialAddress)).headOption
 
     def getPostCode: String = getAddressTypeResidential.map(_.addressPostcode.map(_.value).getOrElse("")).getOrElse("")
 
     def getNinoWithoutSuffix: String = idData.ninoWithoutSuffix
 
     def getFirstForename: String = idData.nameList.name.flatMap(_.headOption).map(_.firstForename.value).getOrElse("")
-    def getLastName: String = idData.nameList.name.flatMap(_.headOption).map(_.surname.value).getOrElse("")
+    def getLastName: String      = idData.nameList.name.flatMap(_.headOption).map(_.surname.value).getOrElse("")
   }
-
 
 }

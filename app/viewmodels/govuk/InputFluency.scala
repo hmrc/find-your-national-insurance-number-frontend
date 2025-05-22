@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package viewmodels.govuk
 
 import play.api.data.Field
 import play.api.i18n.Messages
+import uk.gov.hmrc.govukfrontend.views.viewmodels.FormGroup
 import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
 import uk.gov.hmrc.govukfrontend.views.viewmodels.input.{Input, PrefixOrSuffix}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.label.Label
@@ -30,14 +31,14 @@ trait InputFluency {
   object InputViewModel extends ErrorMessageAwareness {
 
     def apply(
-               field: Field,
-               label: Label
-             )(implicit messages: Messages): Input =
+      field: Field,
+      label: Label
+    )(implicit messages: Messages): Input =
       Input(
-        id           = field.id,
-        name         = field.name,
-        value        = field.value,
-        label        = label,
+        id = field.id,
+        name = field.name,
+        value = field.value,
+        label = label,
         errorMessage = errorMessage(field)
       )
   }
@@ -71,7 +72,7 @@ trait InputFluency {
       input copy (hint = Some(hint))
 
     def withFormGroupClasses(classes: String): Input =
-      input copy (formGroupClasses = classes)
+      input copy (formGroup = FormGroup(classes = Some(classes)))
 
     def withCssClass(newClass: String): Input =
       input copy (classes = s"${input.classes} $newClass")

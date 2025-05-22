@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,9 @@ package connectors
 import scala.collection.Seq
 import cats.Show
 import cats.syntax.all._
-import com.codahale.metrics.MetricRegistry
 import connectors.HttpReadsWrapper.showPath
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
-import models.errors.{IndividualDetailsError, ConnectorError}
+import models.errors.{ConnectorError, IndividualDetailsError}
 import play.api.Logger
 import play.api.http.Status
 import play.api.http.Status.INTERNAL_SERVER_ERROR
@@ -33,41 +32,36 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 final case class AdditionalLogInfo(infoKeyValue: Map[String, String]) {
-  override def toString: String = {
+  override def toString: String =
     infoKeyValue.toList
-      .map(kv => {
+      .map { kv =>
         val (key, value) = kv
         s"$key: $value"
-      })
+      }
       .mkString(", ")
-  }
 }
 
 trait HttpReadsWrapper[E, EE] {
   val logger: Logger = Logger(this.getClass)
-  def withHttpReads[T](name: String, registry: MetricRegistry, additionalLogInfo: Option[AdditionalLogInfo] = None)(
-      block:                 HttpReads[Either[IndividualDetailsError, T]] => IndividualDetailsResponseEnvelope[T]
+  def withHttpReads[T](name: String, additionalLogInfo: Option[AdditionalLogInfo] = None)(
+    block: HttpReads[Either[IndividualDetailsError, T]] => IndividualDetailsResponseEnvelope[T]
   )(implicit
-      readsSuccess: Reads[T],
-      readsError:   Reads[E],
-      readsErrorT:  Reads[EE]
-  ): IndividualDetailsResponseEnvelope[T] = {
-
-      block(
-        getHttpReads(name: String, registry: MetricRegistry, additionalLogInfo: Option[AdditionalLogInfo])(
-          readsSuccess,
-          readsError,
-          readsErrorT
-        )
+    readsSuccess: Reads[T],
+    readsError: Reads[E],
+    readsErrorT: Reads[EE]
+  ): IndividualDetailsResponseEnvelope[T] =
+    block(
+      getHttpReads(name: String, additionalLogInfo: Option[AdditionalLogInfo])(
+        readsSuccess,
+        readsError,
+        readsErrorT
       )
+    )
 
-  }
-
-  private def getHttpReads[T](name: String, registry: MetricRegistry, additionalLogInfo: Option[AdditionalLogInfo])(
-      implicit
-      readsSuccess: Reads[T],
-      readsError:   Reads[E],
-      readsErrorT:  Reads[EE]
+  private def getHttpReads[T](name: String, additionalLogInfo: Option[AdditionalLogInfo])(implicit
+    readsSuccess: Reads[T],
+    readsError: Reads[E],
+    readsErrorT: Reads[EE]
   ): HttpReads[Either[IndividualDetailsError, T]] =
     (_, _, response) => {
       val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse("")
@@ -80,7 +74,9 @@ trait HttpReadsWrapper[E, EE] {
                 .fold(
                   error => {
                     logger
-                      .debug(s"$additionalLogInformation$name could not parse response body from json response: error= ${error.show}")
+                      .debug(
+                        s"$additionalLogInformation$name could not parse response body from json response: error= ${error.show}"
+                      )
                     ConnectorError(
                       Status.UNPROCESSABLE_ENTITY,
                       s"$name could not parse response from json response."
@@ -88,15 +84,14 @@ trait HttpReadsWrapper[E, EE] {
                   },
                   Right(_)
                 )
-            case Failure(e) => {
+            case Failure(e)     =>
               logger.debug(s"$additionalLogInformation$name couldn't parse body from upstream", e)
               ConnectorError(
                 Status.INTERNAL_SERVER_ERROR,
                 s"$name couldn't parse error body from upstream"
               ).asLeft[T]
-            }
           }
-        case status =>
+        case status    =>
           Try(response.json) match {
             case Success(value) =>
               value
@@ -105,7 +100,7 @@ trait HttpReadsWrapper[E, EE] {
                   e => validateAdditionalError(name, status, value.validate[EE], e, additionalLogInfo),
                   error => fromUpstreamErrorToIndividualDetailsError(name, status, error, additionalLogInfo).asLeft[T]
                 )
-            case Failure(e) =>
+            case Failure(e)     =>
               logger.debug(s"$additionalLogInformation$name couldn't parse error body from upstream", e)
               ConnectorError(
                 Status.INTERNAL_SERVER_ERROR,
@@ -116,12 +111,12 @@ trait HttpReadsWrapper[E, EE] {
     }
 
   private def validateAdditionalError[T](
-      name:              String,
-      status:            Int,
-      value:             JsResult[EE],
-      validationErr:     Seq[(JsPath, Seq[JsonValidationError])],
-      additionalLogInfo: Option[AdditionalLogInfo]
-  ): Either[IndividualDetailsError, T] = {
+    name: String,
+    status: Int,
+    value: JsResult[EE],
+    validationErr: Seq[(JsPath, Seq[JsonValidationError])],
+    additionalLogInfo: Option[AdditionalLogInfo]
+  ): Either[IndividualDetailsError, T] =
     value
       .fold(
         e => validationErrorToIndividualDetailsError(name, e, additionalLogInfo),
@@ -130,12 +125,11 @@ trait HttpReadsWrapper[E, EE] {
             .getOrElse(validationErrorToIndividualDetailsError(name, validationErr, additionalLogInfo))
       )
       .asLeft[T]
-  }
 
   private def validationErrorToIndividualDetailsError(
-      name:              String,
-      e:                 Seq[(JsPath, Seq[JsonValidationError])],
-      additionalLogInfo: Option[AdditionalLogInfo]
+    name: String,
+    e: Seq[(JsPath, Seq[JsonValidationError])],
+    additionalLogInfo: Option[AdditionalLogInfo]
   ): IndividualDetailsError = {
     val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse("")
     logger.debug(s"$additionalLogInformation$name couldn't parse error body from upstream, error= ${e.show}")
@@ -146,16 +140,16 @@ trait HttpReadsWrapper[E, EE] {
   }
 
   def fromUpstreamErrorToIndividualDetailsError(
-      connectorName:     String,
-      status:            Int,
-      upstreamError:     E,
-      additionalLogInfo: Option[AdditionalLogInfo]
+    connectorName: String,
+    status: Int,
+    upstreamError: E,
+    additionalLogInfo: Option[AdditionalLogInfo]
   ): IndividualDetailsError
   def fromSingleUpstreamErrorToIndividualDetailsError(
-      connectorName:     String,
-      status:            Int,
-      upstreamError:     EE,
-      additionalLogInfo: Option[AdditionalLogInfo]
+    connectorName: String,
+    status: Int,
+    upstreamError: EE,
+    additionalLogInfo: Option[AdditionalLogInfo]
   ): Option[IndividualDetailsError]
 }
 
@@ -172,29 +166,26 @@ object HttpReadsWrapper {
 
   implicit class Recovered[T](httpResult: Future[Either[IndividualDetailsError, T]]) {
     def recovered(
-        logger:            Logger,
-        connectorName:     String,
-        registry:          MetricRegistry,
-        additionalLogInfo: Option[AdditionalLogInfo]
+      logger: Logger,
+      connectorName: String,
+      additionalLogInfo: Option[AdditionalLogInfo]
     )(implicit
-        ec: ExecutionContext
+      ec: ExecutionContext
     ): Future[Either[IndividualDetailsError, T]] = {
       val additionalLogInformation = additionalLogInfo.map(ali => s"${ali.toString}, ").getOrElse("")
 
       httpResult.recover {
-        case e: HttpException => {
+        case e: HttpException         =>
           logger.debug(
             s"$additionalLogInformation$connectorName http exception error with response code: ${e.responseCode}",
             e
           )
           ConnectorError(e.responseCode, s"$connectorName http exception error with response code: ${e.responseCode}")
             .asLeft[T]
-        }
-        case e: UpstreamErrorResponse => {
+        case e: UpstreamErrorResponse =>
           logger.debug(s"$additionalLogInformation$connectorName upstream error with status code: ${e.statusCode}", e)
           ConnectorError(e.statusCode, s"$connectorName upstream error with status code: ${e.statusCode}").asLeft[T]
-        }
-        case e: Throwable =>
+        case e: Throwable             =>
           logger.debug(
             s"$additionalLogInformation$connectorName downstream error with status code: $INTERNAL_SERVER_ERROR",
             e

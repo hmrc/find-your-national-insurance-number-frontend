@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import config.FrontendAppConfig
 import models.pdv.PDVRequest
 import models.pdv.PDVRequest._
 import play.api.Logging
+import play.api.libs.ws.WSBodyWritables.writeableOf_JsValue
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -29,10 +30,12 @@ import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PersonalDetailsValidationConnector @Inject()(val httpClientV2: HttpClientV2, config: FrontendAppConfig) extends Logging {
+class PersonalDetailsValidationConnector @Inject() (val httpClientV2: HttpClientV2, config: FrontendAppConfig)
+    extends Logging {
 
-  def retrieveMatchingDetails(pdvRequest: PDVRequest)
-                             (implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse] = {
+  def retrieveMatchingDetails(
+    pdvRequest: PDVRequest
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse] = {
     val url = s"${config.pdvBaseUrl}/personal-details-validation/retrieve-by-session"
 
     httpClientV2

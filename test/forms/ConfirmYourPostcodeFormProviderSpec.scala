@@ -22,9 +22,10 @@ import play.api.data.FormError
 
 class ConfirmYourPostcodeFormProviderSpec extends StringFieldBehaviours with FormBehaviours {
 
-  val requiredKey = "confirmYourPostcode.error.required"
-  val invalidKey = "confirmYourPostcode.error.invalid"
-  val postcodeRegex = """([A-Za-z]\s*[A-HJ-Ya-hj-y]?\s*[0-9]\s*[A-Za-z0-9]?|[A-Za-z]\s*[A-HJ-Ya-hj-y]\s*[A-Za-z])\s*[0-9]\s*([ABDEFGHJLNPQRSTUWXYZabdefghjlnpqrstuwxyz]\s*){2}"""
+  val requiredKey   = "confirmYourPostcode.error.required"
+  val invalidKey    = "confirmYourPostcode.error.invalid"
+  val postcodeRegex =
+    """([A-Za-z]\s*[A-HJ-Ya-hj-y]?\s*[0-9]\s*[A-Za-z0-9]?|[A-Za-z]\s*[A-HJ-Ya-hj-y]\s*[A-Za-z])\s*[0-9]\s*([ABDEFGHJLNPQRSTUWXYZabdefghjlnpqrstuwxyz]\s*){2}"""
 
   val validData: Map[String, String] = Map("value" -> "AA1 1ZZ")
 

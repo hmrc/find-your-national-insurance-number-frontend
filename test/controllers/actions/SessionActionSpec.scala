@@ -29,21 +29,21 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class SessionActionSpec extends SpecBase {
 
   class Harness(action: IdentifierAction) {
-    def onPageLoad(): Action[AnyContent] = action { _ => Results.Ok }
+    def onPageLoad(): Action[AnyContent] = action(_ => Results.Ok)
   }
 
   "Session Action" - {
 
     "when there is no active session" - {
 
-      "must redirect to the session expired page" ignore  {
+      "must redirect to the session expired page" ignore {
 
         val application = applicationBuilder().build()
 
-        running(application){
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
+        running(application) {
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
           val authConnector = mock[AuthConnector]
-          val config = mock[FrontendAppConfig]
+          val config        = mock[FrontendAppConfig]
 
           val sessionAction = new SessionIdentifierAction(authConnector, config, bodyParsers)
 
@@ -65,9 +65,9 @@ class SessionActionSpec extends SpecBase {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
           val authConnector = mock[AuthConnector]
-          val config = mock[FrontendAppConfig]
+          val config        = mock[FrontendAppConfig]
 
           val sessionAction = new SessionIdentifierAction(authConnector, config, bodyParsers)
 

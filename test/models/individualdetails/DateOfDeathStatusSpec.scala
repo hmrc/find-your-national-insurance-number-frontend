@@ -37,16 +37,15 @@ class DateOfDeathStatusSpec extends AnyFlatSpec with Matchers {
     json3.as[DateOfDeathStatus] shouldBe CoegConfirmed
   }
 
-  for{
+  for {
     (status, expected) <- Seq(
-      (Unverified, 0),
-      (Verified, 1),
-      (NotKnown, 2),
-      (CoegConfirmed, 3)
-    )
-  } {
+                            (Unverified, 0),
+                            (Verified, 1),
+                            (NotKnown, 2),
+                            (CoegConfirmed, 3)
+                          )
+  }
     it should s"write $status to JSON" in {
       Json.toJson(status) shouldBe Json.toJson(expected)
     }
-  }
 }

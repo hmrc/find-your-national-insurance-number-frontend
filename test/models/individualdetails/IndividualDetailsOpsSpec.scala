@@ -38,38 +38,50 @@ class IndividualDetailsOpsSpec extends AnyFlatSpec with Matchers with OptionValu
     None,
     Some(LocalDate.of(2000, 1, 1)),
     CrnIndicator.False,
-    NameList(Some(List(Name(
-      NameSequenceNumber(1),
-      NameType.RealName,
-      Some(TitleType.Mr),
-      None,
-      NameStartDate(LocalDate.of(2000, 1, 1)),
-      None,
-      None,
-      None,
-      FirstForename("John"),
-      None,
-      Surname("Doe")
-    )))),
-    AddressList(Some(List(Address(
-      AddressSequenceNumber(1),
-      Some(AddressSource.Customer),
-      CountryCode(826),
-      ResidentialAddress,
-      Some(AddressStatus.NotDlo),
-      LocalDate.of(2000, 1, 1),
-      Some(LocalDate.of(2020, 1, 1)),
-      Some(LocalDate.of(2000, 1, 1)),
-      Some(VpaMail(0)),
-      Some(DeliveryInfo("FakeDeliveryInfo")),
-      Some(PafReference("FakePafReference")),
-      AddressLine("FakeStreet"),
-      AddressLine("FakeTown"),
-      Some(AddressLine("FakeCity")),
-      Some(AddressLine("FakeCounty")),
-      Some(AddressLine("FakeCountry")),
-      Some(AddressPostcode("AB12CD"))
-    ))))
+    NameList(
+      Some(
+        List(
+          Name(
+            NameSequenceNumber(1),
+            NameType.RealName,
+            Some(TitleType.Mr),
+            None,
+            NameStartDate(LocalDate.of(2000, 1, 1)),
+            None,
+            None,
+            None,
+            FirstForename("John"),
+            None,
+            Surname("Doe")
+          )
+        )
+      )
+    ),
+    AddressList(
+      Some(
+        List(
+          Address(
+            AddressSequenceNumber(1),
+            Some(AddressSource.Customer),
+            CountryCode(826),
+            ResidentialAddress,
+            Some(AddressStatus.NotDlo),
+            LocalDate.of(2000, 1, 1),
+            Some(LocalDate.of(2020, 1, 1)),
+            Some(LocalDate.of(2000, 1, 1)),
+            Some(VpaMail(0)),
+            Some(DeliveryInfo("FakeDeliveryInfo")),
+            Some(PafReference("FakePafReference")),
+            AddressLine("FakeStreet"),
+            AddressLine("FakeTown"),
+            Some(AddressLine("FakeCity")),
+            Some(AddressLine("FakeCounty")),
+            Some(AddressLine("FakeCountry")),
+            Some(AddressPostcode("AB12CD"))
+          )
+        )
+      )
+    )
   )
 
   "IndividualDetailsOps" should "get residential address" in {

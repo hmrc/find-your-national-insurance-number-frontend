@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,15 +95,15 @@ class CheckDetailsController @Inject() (
       case PDVBadRequestResponse(r)            =>
         logger.error(s"Bad request: ${r.status}")
         auditService.findYourNinoGetPdvDataHttpError(r.status.toString, r.body, request.origin)
-        Future.successful(BadRequest(errorHandler.standardErrorTemplate()))
+        errorHandler.standardErrorTemplate().map(BadRequest(_))
       case PDVUnexpectedResponse(r)            =>
         logger.error(s"Unexpected response: ${r.status}")
         auditService.findYourNinoGetPdvDataHttpError(r.status.toString, r.body, request.origin)
-        Future.successful(InternalServerError(errorHandler.standardErrorTemplate()))
+        errorHandler.standardErrorTemplate().map(InternalServerError(_))
       case PDVErrorResponse(cause)             =>
         logger.error(s"Error response: $cause")
         auditService.findYourNinoGetPdvDataHttpError(cause.status.toString, cause.body, request.origin)
-        Future.successful(InternalServerError(errorHandler.standardErrorTemplate()))
+        errorHandler.standardErrorTemplate().map(InternalServerError(_))
     }
   }
 
@@ -155,37 +155,37 @@ class CheckDetailsController @Inject() (
         }
       case Left(error)   =>
         auditService.findYourNinoPDVMatched(pdvData, origin, None)
-        Future.successful(individualsDetailsError(error, pdvData, origin))
+        individualsDetailsError(error, pdvData, origin)
     }
 
   private def individualsDetailsError(
     error: IndividualDetailsError,
     PDVResponseData: PDVResponseData,
     origin: Option[OriginType]
-  )(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Result =
+  )(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Future[Result] =
     error match {
       case conError: ConnectorError =>
         conError.statusCode match {
           case INTERNAL_SERVER_ERROR | BAD_GATEWAY | SERVICE_UNAVAILABLE =>
             auditService.findYourNinoIdDataError(PDVResponseData, Some(conError.statusCode.toString), error, origin)
             logger.error(s"Failed to retrieve Individual Details data: ${error.errorMessage}")
-            InternalServerError(errorHandler.standardErrorTemplate())
+            errorHandler.standardErrorTemplate().map(InternalServerError(_))
           case BAD_REQUEST                                               =>
             auditService.findYourNinoIdDataError(PDVResponseData, Some(conError.statusCode.toString), error, origin)
             logger.error(s"Failed to retrieve Individual Details data: ${error.errorMessage}")
-            BadRequest(errorHandler.standardErrorTemplate())
+            errorHandler.standardErrorTemplate().map(BadRequest(_))
           case UNPROCESSABLE_ENTITY                                      =>
             auditService.findYourNinoIdDataError(PDVResponseData, Some(conError.statusCode.toString), error, origin)
-            Redirect(routes.InvalidDataNINOHelpController.onPageLoad())
+            Future.successful(Redirect(routes.InvalidDataNINOHelpController.onPageLoad()))
           case code                                                      =>
             auditService.findYourNinoIdDataError(PDVResponseData, Some(code.toString), error, origin)
             logger.error(s"Failed to retrieve Individual Details data: ${error.errorMessage}")
-            InternalServerError(errorHandler.standardErrorTemplate())
+            errorHandler.standardErrorTemplate().map(InternalServerError(_))
         }
       case _                        =>
         auditService.findYourNinoIdDataError(PDVResponseData, None, error, origin)
         logger.error(s"Failed to retrieve Individual Details data: ${error.errorMessage}")
-        InternalServerError(errorHandler.standardErrorTemplate())
+        errorHandler.standardErrorTemplate().map(InternalServerError(_))
     }
 
 }

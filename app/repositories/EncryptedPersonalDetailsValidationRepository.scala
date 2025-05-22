@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import config.FrontendAppConfig
 import models.encryption.pdv.EncryptedPDVResponseData
 import models.encryption.pdv.EncryptedPDVResponseData.{decrypt, encrypt, encryptField}
 import models.pdv.PDVResponseData
+import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.model._
 import play.api.Logging
@@ -34,38 +35,43 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EncryptedPersonalDetailsValidationRepository @Inject()(
-                                                              mongoComponent: MongoComponent,
-                                                              appConfig: FrontendAppConfig
-                                                            )(implicit ec: ExecutionContext) extends PlayMongoRepository[EncryptedPDVResponseData](
-  collectionName = "personal-details-validation",
-  mongoComponent = mongoComponent,
-  domainFormat = EncryptedPDVResponseData.encryptedPDVResponseDataFormat,
-  indexes = Seq(
-    IndexModel(
-      Indexes.ascending("id"),
-      IndexOptions().name("idIdx").unique(true)
-    ),
-    IndexModel(
-      Indexes.ascending("personalDetails.nino"),
-      IndexOptions().name("ninoIdx")
-    ),
-    IndexModel(
-      Indexes.ascending("lastUpdated"),
-      IndexOptions()
-        .name("lastUpdatedIdx")
-        .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
+class EncryptedPersonalDetailsValidationRepository @Inject() (
+  mongoComponent: MongoComponent,
+  appConfig: FrontendAppConfig
+)(implicit ec: ExecutionContext)
+    extends PlayMongoRepository[EncryptedPDVResponseData](
+      collectionName = "personal-details-validation",
+      mongoComponent = mongoComponent,
+      domainFormat = EncryptedPDVResponseData.encryptedPDVResponseDataFormat,
+      indexes = Seq(
+        IndexModel(
+          Indexes.ascending("id"),
+          IndexOptions().name("idIdx").unique(true)
+        ),
+        IndexModel(
+          Indexes.ascending("personalDetails.nino"),
+          IndexOptions().name("ninoIdx")
+        ),
+        IndexModel(
+          Indexes.ascending("lastUpdated"),
+          IndexOptions()
+            .name("lastUpdatedIdx")
+            .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
+        )
+      ),
+      replaceIndexes = true
     )
-  ),
-  replaceIndexes = true
-) with Logging with PersonalDetailsValidationRepoTrait {
-  def insertOrReplacePDVResultData(personalDetailsValidation: PDVResponseData)
-                                  (implicit ec: ExecutionContext): Future[String] = {
+    with Logging
+    with PersonalDetailsValidationRepoTrait {
+  def insertOrReplacePDVResultData(
+    personalDetailsValidation: PDVResponseData
+  )(implicit ec: ExecutionContext): Future[String] = {
     logger.info(s"insert or update one in $collectionName table")
 
-    val filter = Filters.equal("personalDetails.nino", personalDetailsValidation.getNino)
+    val filter  = Filters.equal("personalDetails.nino", personalDetailsValidation.getNino)
     val options = ReplaceOptions().upsert(true)
-    collection.replaceOne(filter, encrypt(personalDetailsValidation, appConfig.encryptionKey), options)
+    collection
+      .replaceOne(filter, encrypt(personalDetailsValidation, appConfig.encryptionKey), options)
       .toFuture()
       .map(_ => personalDetailsValidation.getNino) recover {
       case e: MongoWriteException if e.getCode == 11000 =>
@@ -74,14 +80,24 @@ class EncryptedPersonalDetailsValidationRepository @Inject()(
     }
   }
 
-  def updateCustomerValidityWithReason(nino: String, validCustomer: Boolean, reason: String)(implicit ec: ExecutionContext): Future[String] = {
+  def updateCustomerValidityWithReason(nino: String, validCustomer: Boolean, reason: String)(implicit
+    ec: ExecutionContext
+  ): Future[String] = {
     logger.info(s"Updating one in $collectionName table")
 
-    collection.updateMany(Filters.equal("personalDetails.nino", nino),
+    collection
+      .updateMany(
+        Filters.equal("personalDetails.nino", nino),
         Updates.combine(
-          Updates.set("validCustomer",  toBson(encryptField(validCustomer.toString, appConfig.encryptionKey))),
-          Updates.set("reason",  toBson(encryptField(reason, appConfig.encryptionKey))),
-          Updates.set("CRN", if (reason.contains("CRN;"))  toBson(encryptField("true", appConfig.encryptionKey)) else  toBson(encryptField("false", appConfig.encryptionKey)))))
+          Updates.set("validCustomer", toBson(encryptField(validCustomer.toString, appConfig.encryptionKey))),
+          Updates.set("reason", toBson(encryptField(reason, appConfig.encryptionKey))),
+          Updates.set(
+            "CRN",
+            if (reason.contains("CRN;")) toBson(encryptField("true", appConfig.encryptionKey))
+            else toBson(encryptField("false", appConfig.encryptionKey))
+          )
+        )
+      )
       .toFuture()
       .map(_ => nino) recover {
       case e: MongoWriteException if e.getCode == 11000 =>
@@ -93,9 +109,11 @@ class EncryptedPersonalDetailsValidationRepository @Inject()(
   def updatePDVDataWithNPSPostCode(nino: String, npsPostCode: String)(implicit ec: ExecutionContext): Future[String] = {
     logger.info(s"Updating one in $collectionName table")
 
-    collection.updateMany(Filters.equal("personalDetails.nino", nino),
-        Updates.combine(
-          Updates.set("npsPostCode", toBson(encryptField(npsPostCode, appConfig.encryptionKey)))))
+    collection
+      .updateMany(
+        Filters.equal("personalDetails.nino", nino),
+        Updates.combine(Updates.set("npsPostCode", toBson(encryptField(npsPostCode, appConfig.encryptionKey))))
+      )
       .toFuture()
       .map(_ => nino) recover {
       case e: MongoWriteException if e.getCode == 11000 =>
@@ -104,37 +122,36 @@ class EncryptedPersonalDetailsValidationRepository @Inject()(
     }
   }
 
-  def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] = {
-    collection.find(Filters.equal("id", id))
+  def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] =
+    collection
+      .find(Filters.equal("id", id))
       .first()
       .toFutureOption()
       .map(optEncryptedPDVResponseData =>
-        optEncryptedPDVResponseData.map(encryptedPDVResponseData => decrypt(encryptedPDVResponseData, appConfig.encryptionKey))
+        optEncryptedPDVResponseData.map(encryptedPDVResponseData =>
+          decrypt(encryptedPDVResponseData, appConfig.encryptionKey)
+        )
       )
-      .recoverWith {
-        case e: Throwable => {
-          logger.info(s"Failed finding PDV data by validation id: $id")
-          Future.failed(e)
-        }
+      .recoverWith { case e: Throwable =>
+        logger.info(s"Failed finding PDV data by validation id: $id")
+        Future.failed(e)
       }
-  }
 
-  def findByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] = {
-
-    collection.find(Filters.equal("personalDetails.nino", nino))
+  def findByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] =
+    collection
+      .find(Filters.equal("personalDetails.nino", nino))
       .first()
       .toFutureOption()
       .map(optEncryptedPDVResponseData =>
-        optEncryptedPDVResponseData.map(encryptedPDVResponseData => decrypt(encryptedPDVResponseData, appConfig.encryptionKey))
+        optEncryptedPDVResponseData.map(encryptedPDVResponseData =>
+          decrypt(encryptedPDVResponseData, appConfig.encryptionKey)
+        )
       )
-      .recoverWith {
-        case e: Throwable => {
-          logger.info(s"Failed finding PDV data by NINO: $nino, ${e.getMessage}")
-          Future.failed(e)
-        }
+      .recoverWith { case e: Throwable =>
+        logger.info(s"Failed finding PDV data by NINO: $nino, ${e.getMessage}")
+        Future.failed(e)
       }
-  }
-  def clear(nino: String): Future[Boolean] = {
+  def clear(nino: String): Future[Boolean]                                                     = {
     val filter = Filters.equal("personalDetails.nino", nino)
     collection
       .deleteOne(filter)

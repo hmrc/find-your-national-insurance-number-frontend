@@ -27,30 +27,30 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
 class LetterTechnicalErrorSpec extends AnyFlatSpec with Matchers {
 
   "TLetterTechnicalError options" should "correctly create a sequence of RadioItems" in {
-    implicit val lang: Lang = Lang("en")
+    implicit val lang: Lang               = Lang("en")
     implicit val messagesApi: MessagesApi = stubMessagesApi()
-    implicit val messages: Messages = MessagesImpl(lang, messagesApi)
+    implicit val messages: Messages       = MessagesImpl(lang, messagesApi)
 
     val result = LetterTechnicalError.options
 
     result shouldBe Seq(
       RadioItem(
         content = Text(messages("technicalError.tryAgain")),
-        value   = Some("tryAgain"),
-        id      = Some("value_0"),
-        hint    = Some(Hint(content = Text(messages("technicalError.tryAgain.hint"))))
+        value = Some("tryAgain"),
+        id = Some("value_0"),
+        hint = Some(Hint(content = Text(messages("technicalError.tryAgain.hint"))))
       ),
       RadioItem(
         content = Text(messages("technicalError.printForm")),
-        value   = Some("printForm"),
-        id      = Some("value_1"),
-        hint    = Some(Hint(content = Text(messages("technicalError.printForm.hint"))))
+        value = Some("printForm"),
+        id = Some("value_1"),
+        hint = Some(Hint(content = Text(messages("technicalError.printForm.hint"))))
       ),
       RadioItem(
         content = Text(messages("technicalError.phoneHMRC")),
-        value   = Some("phoneHMRC"),
-        id      = Some("value_2"),
-        hint    = Some(Hint(content = Text(messages("technicalError.phoneHMRC.hint"))))
+        value = Some("phoneHMRC"),
+        id = Some("value_2"),
+        hint = Some(Hint(content = Text(messages("technicalError.phoneHMRC.hint"))))
       )
     )
   }

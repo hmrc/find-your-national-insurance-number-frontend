@@ -32,10 +32,11 @@ class SelectAlternativeServiceSpec extends AnyFreeSpec with Matchers with ScalaC
 
       val gen = Gen.oneOf(SelectAlternativeService.values.toSeq)
 
-      forAll(gen) {
-        selectAlternativeService =>
-
-          JsString(selectAlternativeService.toString).validate[SelectAlternativeService].asOpt.value mustEqual selectAlternativeService
+      forAll(gen) { selectAlternativeService =>
+        JsString(selectAlternativeService.toString)
+          .validate[SelectAlternativeService]
+          .asOpt
+          .value mustEqual selectAlternativeService
       }
     }
 
@@ -43,10 +44,8 @@ class SelectAlternativeServiceSpec extends AnyFreeSpec with Matchers with ScalaC
 
       val gen = arbitrary[String] suchThat (!SelectAlternativeService.values.map(_.toString).contains(_))
 
-      forAll(gen) {
-        invalidValue =>
-
-          JsString(invalidValue).validate[SelectAlternativeService] mustEqual JsError("error.invalid")
+      forAll(gen) { invalidValue =>
+        JsString(invalidValue).validate[SelectAlternativeService] mustEqual JsError("error.invalid")
       }
     }
 
@@ -54,10 +53,8 @@ class SelectAlternativeServiceSpec extends AnyFreeSpec with Matchers with ScalaC
 
       val gen = Gen.oneOf(SelectAlternativeService.values.toSeq)
 
-      forAll(gen) {
-        selectAlternativeService =>
-
-          Json.toJson(selectAlternativeService) mustEqual JsString(selectAlternativeService.toString)
+      forAll(gen) { selectAlternativeService =>
+        Json.toJson(selectAlternativeService) mustEqual JsString(selectAlternativeService.toString)
       }
     }
   }

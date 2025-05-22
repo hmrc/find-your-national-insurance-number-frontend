@@ -23,21 +23,21 @@ import org.scalatest.BeforeAndAfterEach
 import repositories._
 import services.NPSFMNServiceSpec.fakeNino
 
-class SessionCacheServiceSpec extends SpecBase with BeforeAndAfterEach{
+class SessionCacheServiceSpec extends SpecBase with BeforeAndAfterEach {
 
   val mockPersonalDetailsValidationRepository: PersonalDetailsValidationRepository =
     mock[PersonalDetailsValidationRepository]
-  val mockIndividualDetailsRepository: IndividualDetailsRepository =
+  val mockIndividualDetailsRepository: IndividualDetailsRepository                 =
     mock[IndividualDetailsRepository]
 
   val mockEncPersonalDetailsValidationRepository: EncryptedPersonalDetailsValidationRepository =
     mock[EncryptedPersonalDetailsValidationRepository]
-  val mockEncIndividualDetailsRepository: EncryptedIndividualDetailsRepository =
+  val mockEncIndividualDetailsRepository: EncryptedIndividualDetailsRepository                 =
     mock[EncryptedIndividualDetailsRepository]
 
   val mockSessionRepository: SessionRepository = mock[SessionRepository]
 
-  override def beforeEach(): Unit = {
+  override def beforeEach(): Unit =
     reset(
       mockSessionRepository,
       mockPersonalDetailsValidationRepository,
@@ -45,17 +45,18 @@ class SessionCacheServiceSpec extends SpecBase with BeforeAndAfterEach{
       mockEncPersonalDetailsValidationRepository,
       mockEncIndividualDetailsRepository
     )
-  }
 
   val service = new SessionCacheService(
     mockSessionRepository,
     mockIndividualDetailsRepository,
-    mockPersonalDetailsValidationRepository)
+    mockPersonalDetailsValidationRepository
+  )
 
   val serviceEnc = new SessionCacheService(
     mockSessionRepository,
     mockEncIndividualDetailsRepository,
-    mockEncPersonalDetailsValidationRepository)
+    mockEncPersonalDetailsValidationRepository
+  )
 
   "SessionCacheService" - {
 

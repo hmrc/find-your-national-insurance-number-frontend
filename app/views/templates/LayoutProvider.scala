@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@ package views.html.templates
 import config.FrontendAppConfig
 import play.api.Logging
 import play.api.i18n.Messages
-import play.api.mvc.Request
+import play.api.mvc.{Request, RequestHeader}
 import play.twirl.api.{Html, HtmlFormat}
+import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage.ServiceURLs
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import uk.gov.hmrc.sca.models.BannerConfig
 import uk.gov.hmrc.sca.services.WrapperService
@@ -35,34 +37,36 @@ trait LayoutProvider {
     showBetaBanner = false,
     showHelpImproveBanner = true
   )
-  //noinspection ScalaStyle
+  // noinspection ScalaStyle
   def apply(
-             pageTitle: String,
-             showBackLinkJS: Boolean = true,
-             timeout: Boolean = true,
-             showSignOut: Boolean = false,
-             stylesheets: Option[Html] = None,
-             fullWidth: Boolean = false,
-             accountHome: Boolean = false,
-             yourProfileActive: Boolean = false,
-             hideAccountMenu: Boolean = false,
-             backLinkUrl: Option[String] = None,
-             disableSessionExpired: Boolean = false,
-             sidebarContent: Option[Html] = None,
-             messagesActive: Boolean = false,
-             showSignOutInHeader: Boolean = true,
-             bannerConfig: BannerConfig = defaultBannerConfig
-           )(contentBlock: Html)(
-             implicit request: Request[_]
-             , messages: Messages
-           ): HtmlFormat.Appendable
+    pageTitle: String,
+    showBackLinkJS: Boolean = true,
+    timeout: Boolean = true,
+    showSignOut: Boolean = false,
+    stylesheets: Option[Html] = None,
+    fullWidth: Boolean = false,
+    accountHome: Boolean = false,
+    yourProfileActive: Boolean = false,
+    hideAccountMenu: Boolean = false,
+    backLinkUrl: Option[String] = None,
+    disableSessionExpired: Boolean = false,
+    sidebarContent: Option[Html] = None,
+    messagesActive: Boolean = false,
+    showSignOutInHeader: Boolean = true,
+    bannerConfig: BannerConfig = defaultBannerConfig
+  )(contentBlock: Html)(implicit
+    request: RequestHeader,
+    messages: Messages
+  ): HtmlFormat.Appendable
 }
 
-class NewLayoutProvider @Inject()(wrapperService: WrapperService,
-                                  additionalScript: AdditionalScript,
-                                  headBlock: HeadBlock,
-                                  appConfig: FrontendAppConfig
-                                 ) extends LayoutProvider with Logging {
+class NewLayoutProvider @Inject() (
+  wrapperService: WrapperService,
+  additionalScript: AdditionalScript,
+  headBlock: HeadBlock,
+  appConfig: FrontendAppConfig
+) extends LayoutProvider
+    with Logging {
 
   private lazy val newLayoutBannerConfig: BannerConfig = BannerConfig(
     showAlphaBanner = appConfig.showAlphaBanner,
@@ -70,43 +74,46 @@ class NewLayoutProvider @Inject()(wrapperService: WrapperService,
     showHelpImproveBanner = appConfig.showHelpImproveBanner
   )
 
-  //noinspection ScalaStyle
+  // noinspection ScalaStyle
   override def apply(
-                      pageTitle: String,
-                      showBackLinkJS: Boolean,
-                      timeout: Boolean,
-                      showSignOut: Boolean,
-                      stylesheets: Option[Html],
-                      fullWidth: Boolean,
-                      accountHome: Boolean,
-                      yourProfileActive: Boolean,
-                      hideAccountMenu: Boolean,
-                      backLinkUrl: Option[String],
-                      disableSessionExpired: Boolean,
-                      sidebarContent: Option[Html],
-                      messagesActive: Boolean,
-                      showSignOutInHeader: Boolean,
-                      bannerConfig: BannerConfig
-                    )(contentBlock: Html)(
-                      implicit request: Request[_],
-                      messages: Messages
-                    ): HtmlFormat.Appendable = {
+    pageTitle: String,
+    showBackLinkJS: Boolean,
+    timeout: Boolean,
+    showSignOut: Boolean,
+    stylesheets: Option[Html],
+    fullWidth: Boolean,
+    accountHome: Boolean,
+    yourProfileActive: Boolean,
+    hideAccountMenu: Boolean,
+    backLinkUrl: Option[String],
+    disableSessionExpired: Boolean,
+    sidebarContent: Option[Html],
+    messagesActive: Boolean,
+    showSignOutInHeader: Boolean,
+    bannerConfig: BannerConfig
+  )(contentBlock: Html)(implicit
+    request: RequestHeader,
+    messages: Messages
+  ): HtmlFormat.Appendable = {
 
     val keepAliveUrl = controllers.routes.KeepAliveController.keepAlive.url
-
+    val signOutUrl   = if (showSignOutInHeader) Some(appConfig.exitSurveyURL) else None
     wrapperService.standardScaLayout(
       disableSessionExpired = !timeout,
       content = contentBlock,
       pageTitle = Some(pageTitle),
+      serviceURLs = ServiceURLs(
+        signOutUrl = signOutUrl,
+        accessibilityStatementUrl = Some(appConfig.accessibilityStatementUrl(request.uri))
+      ),
       showBackLinkJS = showBackLinkJS,
       backLinkUrl = backLinkUrl,
       scripts = Seq(additionalScript()),
       styleSheets = stylesheets.toSeq :+ headBlock(),
       fullWidth = fullWidth,
-      showSignOutInHeader = showSignOutInHeader,
       hideMenuBar = true,
       bannerConfig = newLayoutBannerConfig,
       keepAliveUrl = keepAliveUrl
-    )(messages, HeaderCarrierConverter.fromRequest(request), request)
+    )
   }
 }

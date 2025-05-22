@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import config.FrontendAppConfig
 import models.{SessionData, UserAnswers}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model._
+import org.mongodb.scala.SingleObservableFuture
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
@@ -31,8 +32,8 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 /*
-  Collection is named user-answers. It was originally just this but now 
-  it holds all session-data, not just users answers. Ideally we'd rename 
+  Collection is named user-answers. It was originally just this but now
+  it holds all session-data, not just users answers. Ideally we'd rename
   it but it would cause issues for people mid-journey so it's been left.
  */
 @Singleton

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,7 +108,7 @@ class SelectNINOLetterAddressController @Inject() (
                     val auditValue = if (value.toString.equals("true")) "postCode" else "notThisAddress"
                     uA.get(SelectNINOLetterAddressPage) match {
                       case Some(false) =>
-                        auditAddress(pdvData, nino, auditValue, uA, request.origin)
+                        auditAddress(pdvData, nino, auditValue, request.origin)
                         Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA)))
                       case Some(true)  =>
                         sendLetter(nino, pdvData, auditValue, uA, mode, request.origin)
@@ -143,7 +143,7 @@ class SelectNINOLetterAddressController @Inject() (
     mode: Mode,
     origin: Option[OriginType]
   )(implicit headerCarrier: HeaderCarrier): Future[Result] = {
-    auditAddress(pdvData, nino, value, uA, origin)
+    auditAddress(pdvData, nino, value, origin)
     individualDetailsService.getIndividualDetailsData(nino) flatMap { idData =>
       npsFMNService.sendLetter(nino, FMNHelper.createNPSFMNRequest(idData)) map {
         case LetterIssuedResponse()                                  =>
@@ -171,7 +171,6 @@ class SelectNINOLetterAddressController @Inject() (
     pdvData: Option[PDVResponseData],
     nino: String,
     value: String,
-    userAnswers: UserAnswers,
     origin: Option[OriginType]
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Unit] =
     individualDetailsService.getIndividualDetailsAddress(IndividualDetailsNino(nino)) map {

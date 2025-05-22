@@ -26,13 +26,13 @@ class EnteredPostCodeNotFoundFormProviderSpec extends OptionFieldBehaviours {
 
   ".value" - {
 
-    val fieldName = "value"
+    val fieldName   = "value"
     val requiredKey = "enteredPostCodeNotFound.error.required"
 
     behave like optionsField[EnteredPostCodeNotFound](
       form,
       fieldName,
-      validValues  = EnteredPostCodeNotFound.values,
+      validValues = EnteredPostCodeNotFound.values,
       invalidError = FormError(fieldName, "error.invalid")
     )
 
