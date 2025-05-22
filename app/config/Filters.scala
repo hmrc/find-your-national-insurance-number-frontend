@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import uk.gov.hmrc.sca.filters.WrapperDataFilter
 
 import javax.inject.{Inject, Singleton};
 
-// $COVERAGE-OFF$
 @Singleton
 class Filters @Inject() (
   defaultFilters: EnabledFilters,
@@ -32,4 +31,3 @@ class Filters @Inject() (
   override val filters: Seq[EssentialFilter] =
     defaultFilters.filters ++ Option(wrapperDataFilter)
 }
-// $COVERAGE-ON$

@@ -82,7 +82,6 @@ class DefaultIndividualDetailsConnector @Inject() (
     }
   }
 
-  // $COVERAGE-OFF$
   override def fromUpstreamErrorToIndividualDetailsError(
     connectorName: String,
     status: Int,
@@ -113,6 +112,5 @@ class DefaultIndividualDetailsConnector @Inject() (
     )
     ConnectorError(status, s"$connectorName, ${upstreamError.code} - ${upstreamError.reason}").some
   }
-  // $COVERAGE-ON$
 
 }
