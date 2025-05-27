@@ -19,11 +19,9 @@ package views.html.templates
 import config.FrontendAppConfig
 import play.api.Logging
 import play.api.i18n.Messages
-import play.api.mvc.{Request, RequestHeader}
+import play.api.mvc.RequestHeader
 import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage.ServiceURLs
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import uk.gov.hmrc.sca.models.BannerConfig
 import uk.gov.hmrc.sca.services.WrapperService
 import views.html.components.{AdditionalScript, HeadBlock}
@@ -103,8 +101,7 @@ class NewLayoutProvider @Inject() (
       content = contentBlock,
       pageTitle = Some(pageTitle),
       serviceURLs = ServiceURLs(
-        signOutUrl = signOutUrl,
-        accessibilityStatementUrl = Some(appConfig.accessibilityStatementUrl(request.uri))
+        signOutUrl = signOutUrl
       ),
       showBackLinkJS = showBackLinkJS,
       backLinkUrl = backLinkUrl,
