@@ -20,9 +20,6 @@ import com.google.inject.{Inject, Singleton}
 import models.OriginType
 import play.api.Configuration
 import play.api.i18n.Lang
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
-import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromAllowlist, OnlyRelative, RedirectUrl}
-
 import java.net.URLEncoder
 
 @Singleton
@@ -33,23 +30,10 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   val enc = URLEncoder.encode(_: String, "UTF-8")
 
-  val loginUrl: String                         = configuration.get[String]("urls.login")
-  val registerUrl: String                      = configuration.get[String]("urls.register")
-  val storeMyNinoUrl: String                   = configuration.get[String]("urls.storeMyNinoUrl")
-  val fmnCheckDetailsUrl: String               = configuration.get[String]("urls.fmnCheckDetailsUrl")
-  private val accessibilityBaseUrl: String     =
-    configuration.get[String]("sca-wrapper.services.accessibility-statement-frontend.url")
-  private val accessibilityRedirectUrl: String = configuration.get[String](s"accessibility-statement.service-path")
-
-  def accessibilityStatementUrl(referrer: String): String = {
-    val redirectUrl = RedirectUrl(accessibilityBaseUrl + referrer).getEither(
-      OnlyRelative | AbsoluteWithHostnameFromAllowlist("localhost")
-    ) match {
-      case Right(safeRedirectUrl) => safeRedirectUrl.url
-      case Left(error)            => throw new IllegalArgumentException(error)
-    }
-    s"$accessibilityBaseUrl/accessibility-statement$accessibilityRedirectUrl?referrerUrl=$redirectUrl"
-  }
+  val loginUrl: String           = configuration.get[String]("urls.login")
+  val registerUrl: String        = configuration.get[String]("urls.register")
+  val storeMyNinoUrl: String     = configuration.get[String]("urls.storeMyNinoUrl")
+  val fmnCheckDetailsUrl: String = configuration.get[String]("urls.fmnCheckDetailsUrl")
 
   val feedbackSurveyFrontendHost = getExternalUrl(s"feedback-survey-frontend.host").getOrElse("")
   val basGatewayFrontendHost     = getExternalUrl(s"bas-gateway-frontend.host").getOrElse("")
