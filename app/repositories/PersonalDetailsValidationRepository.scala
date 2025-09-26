@@ -22,7 +22,7 @@ import config.FrontendAppConfig
 import models.pdv.PDVResponseData
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.model._
-import org.mongodb.scala.ObservableFuture
+//import org.mongodb.scala.ObservableFuture
 import play.api.Logging
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
