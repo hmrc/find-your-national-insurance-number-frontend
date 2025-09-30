@@ -22,7 +22,6 @@ import config.FrontendAppConfig
 import models.encryption.pdv.EncryptedPDVResponseData
 import models.encryption.pdv.EncryptedPDVResponseData.{decrypt, encrypt, encryptField}
 import models.pdv.PDVResponseData
-import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.model._
 import play.api.Logging
