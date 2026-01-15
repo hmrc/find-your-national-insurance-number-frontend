@@ -82,7 +82,7 @@ class IndividualDetailsConnectorSpec
     NameStartDate(LocalDate.parse("1996-12-28")),
     Some(NameEndDate(LocalDate.parse("2017-03-31"))),
     Some(OtherTitle("MR S F BRAINS")),
-    Some(Honours("BSc, MA, NUMPTY")),
+    Some(Honours("BSc, MA")),
     FirstForename("TESTFIRSTNAME"),
     Some(SecondForename("TESTSECONDNAME")),
     Surname("TESTSURNAME")
