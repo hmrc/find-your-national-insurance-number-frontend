@@ -18,14 +18,14 @@ package config
 
 import play.api.http.{EnabledFilters, HttpFilters}
 import play.api.mvc.EssentialFilter
-import uk.gov.hmrc.sca.filters.WrapperDataFilter
+import uk.gov.hmrc.sca.filters.WrapperDataAttributesFilter
 
 import javax.inject.{Inject, Singleton};
 
 @Singleton
 class Filters @Inject() (
   defaultFilters: EnabledFilters,
-  wrapperDataFilter: WrapperDataFilter
+  wrapperDataFilter: WrapperDataAttributesFilter
 ) extends HttpFilters {
 
   override val filters: Seq[EssentialFilter] =
