@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 @import viewmodels.LegendSize
 
 @this(
@@ -60,11 +62,25 @@
         </ul>
         <h2 class="govuk-heading-m">@messages("confirmIdentity.h2.post")</h2>
         <p class="govuk-body">@messages("confirmIdentity.p2.post")</p>
+
+        <hr class="govuk-section-break govuk-section-break--m">
+
         @govukRadios(
             RadiosViewModel(
                 field = form("value"),
                 legend = LegendViewModel(messages("confirmIdentity.legend")).asPageSubHeading(LegendSize.Medium),
-                items = ConfirmIdentity.options
+                items = Seq(
+                    RadioItem(
+                        content = Text(messages("confirmIdentity.online")),
+                        value = Some("true"),
+                        id = Some("value")
+                    ),
+                    RadioItem(
+                        content = Text(messages("confirmIdentity.post")),
+                        value = Some("false"),
+                        id = Some("value-2")
+                    )
+                )
             )
         )
 

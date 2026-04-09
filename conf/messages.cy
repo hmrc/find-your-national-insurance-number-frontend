@@ -188,4 +188,4 @@ confirmIdentity.p2.post = Nodwch eich enw, dyddiad geni a’ch cod post ar-lein.
 confirmIdentity.legend = Sut hoffech gael eich rhif Yswiriant Gwladol?
 confirmIdentity.online = Ar-lein - mae gennyf eitemau sy’n cadarnhau pwy ydw i
 confirmIdentity.post = Drwy’r post
-confirmIdentity.error.required = Ar-lein - mae gennyf eitemau sy’n cadarnhau pwy ydw i
+confirmIdentity.error.required = Dewiswch yr opsiwn ar-lein os oes gennych ID neu wybodaeth arall sy’n barod i’w defnyddio

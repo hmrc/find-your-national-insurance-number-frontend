@@ -184,4 +184,4 @@ confirmIdentity.p2.post = Enter your name, date of birth and postcode online. We
 confirmIdentity.legend = How do you want to get your National Insurance number?
 confirmIdentity.online = Online - I have items that confirm my identity
 confirmIdentity.post = By post
-confirmIdentity.error.required = Select yes if you have ID or other information ready to use
+confirmIdentity.error.required = Select the online option if you have ID or other information ready to use
