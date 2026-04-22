@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 @import viewmodels.LegendSize
 
 @this(
@@ -37,31 +39,48 @@
         }
 
         <h1 class="govuk-heading-l">@messages("confirmIdentity.heading")</h1>
-        <p class="govuk-body">@messages("confirmIdentity.p1")</p>
-        <h2 class="govuk-heading-m">@messages("confirmIdentity.h2")</h2>
 
-        <p class="govuk-body">@messages("confirmIdentity.p2")</p>
+        <p class="govuk-body">@messages("confirmIdentity.p1")</p>
         <ul class="govuk-list govuk-list--bullet">
-            <li>@messages("confirmIdentity.options.passport")</li>
-            <li>@messages("confirmIdentity.options.drivingLicence")</li>
-            <li>@messages("confirmIdentity.options.biometric")</li>
+            <li>@messages("confirmIdentity.options.view.online")</li>
+            <li>@messages("confirmIdentity.options.view.post")</li>
         </ul>
+
+        <h2 class="govuk-heading-m">@messages("confirmIdentity.h2")</h2>
+        <p class="govuk-body">@messages("confirmIdentity.p2")</p>
+        <div class="govuk-inset-text">@messages("confirmIdentity.inset")</div>
 
         <p class="govuk-body">@messages("confirmIdentity.p3")</p>
         <ul class="govuk-list govuk-list--bullet">
-            <li>@messages("confirmIdentity.options.mobile")</li>
-            <li>@messages("confirmIdentity.options.payslip")</li>
-            <li>@messages("confirmIdentity.options.selfAssessment")</li>
-            <li>@messages("confirmIdentity.options.taxClaim")</li>
+            <li>@messages("confirmIdentity.options.international.passport")</li>
+            <li>@messages("confirmIdentity.options.driving.license")</li>
+            <li>@messages("confirmIdentity.options.residence.permit")</li>
+            <li>@messages("confirmIdentity.options.residence.card")</li>
+            <li>@messages("confirmIdentity.options.frontier.worker.permit")</li>
+            <li>@messages("confirmIdentity.options.self.assessment")</li>
+            <li>@messages("confirmIdentity.options.credit.record")</li>
         </ul>
+        <h2 class="govuk-heading-m">@messages("confirmIdentity.h2.post")</h2>
+        <p class="govuk-body">@messages("confirmIdentity.p2.post")</p>
 
-        <div class="govuk-inset-text">@messages("confirmIdentity.inset")</div>
+        <hr class="govuk-section-break govuk-section-break--m">
 
         @govukRadios(
-            RadiosViewModel.yesNoWithHint(
+            RadiosViewModel(
                 field = form("value"),
                 legend = LegendViewModel(messages("confirmIdentity.legend")).asPageSubHeading(LegendSize.Medium),
-                noHint = Some(messages("confirmIdentity.hint"))
+                items = Seq(
+                    RadioItem(
+                        content = Text(messages("confirmIdentity.online")),
+                        value = Some("true"),
+                        id = Some("value")
+                    ),
+                    RadioItem(
+                        content = Text(messages("confirmIdentity.post")),
+                        value = Some("false"),
+                        id = Some("value-2")
+                    )
+                )
             )
         )
 
