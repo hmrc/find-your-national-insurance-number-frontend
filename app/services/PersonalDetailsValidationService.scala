@@ -17,7 +17,7 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.pdv._
+import models.pdv.*
 import org.apache.commons.lang3.StringUtils
 import org.mongodb.scala.MongoException
 import play.api.Logging
@@ -73,15 +73,18 @@ class PersonalDetailsValidationService @Inject() (
             if (reformattedPostCode.strip().nonEmpty) {
               val newPersonalDetails = personalDetails.copy(postCode = Some(reformattedPostCode))
               val newPDVResponseData = pdvResponseData.copy(personalDetails = Some(newPersonalDetails))
-              pdvRepository.insertOrReplacePDVResultData(newPDVResponseData)
-              Future.successful(PDVSuccessResponse(newPDVResponseData))
+              pdvRepository
+                .insertOrReplacePDVResultData(newPDVResponseData)
+                .map(_ => PDVSuccessResponse(newPDVResponseData))
             } else {
-              pdvRepository.insertOrReplacePDVResultData(pdvResponseData)
-              Future.successful(PDVSuccessResponse(pdvResponseData))
+              pdvRepository
+                .insertOrReplacePDVResultData(pdvResponseData)
+                .map(_ => PDVSuccessResponse(pdvResponseData))
             }
           case (ValidationStatus.Failure, None)                  =>
-            pdvRepository.insertOrReplacePDVResultData(pdvResponseData)
-            Future.successful(PDVSuccessResponse(pdvResponseData))
+            pdvRepository
+              .insertOrReplacePDVResultData(pdvResponseData)
+              .map(_ => PDVSuccessResponse(pdvResponseData))
           case (_, None)                                         =>
             Future.failed(new RuntimeException("PersonalDetails is None in PDVResponseData"))
           case _                                                 =>
