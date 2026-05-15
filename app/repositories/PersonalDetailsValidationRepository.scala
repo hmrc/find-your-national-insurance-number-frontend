@@ -21,7 +21,7 @@ import com.mongodb.client.model.Updates
 import config.FrontendAppConfig
 import models.pdv.PDVResponseData
 import org.mongodb.scala.MongoWriteException
-import org.mongodb.scala.model._
+import org.mongodb.scala.model.*
 import play.api.Logging
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -110,22 +110,22 @@ class PersonalDetailsValidationRepository @Inject() (
   def findByValidationId(id: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] =
     collection
       .find(Filters.equal("id", id))
-      .toFuture()
+      .first()
+      .toFutureOption()
       .recoverWith { case e: Throwable =>
-        logger.info(s"Failed finding PDV data by validation id: $id")
+        logger.warn(s"Failed finding PDV data by validation id: $id", e)
         Future.failed(e)
       }
-      .map(_.headOption)
 
   def findByNino(nino: String)(implicit ec: ExecutionContext): Future[Option[PDVResponseData]] =
     collection
       .find(Filters.equal("personalDetails.nino", nino))
-      .toFuture()
+      .first()
+      .toFutureOption()
       .recoverWith { case e: Throwable =>
-        logger.info(s"Failed finding PDV data by NINO: $nino, ${e.getMessage}")
+        logger.warn(s"Failed finding PDV data by NINO: $nino, ${e.getMessage}", e)
         Future.failed(e)
       }
-      .map(_.headOption)
 
   def clear(nino: String): Future[Boolean] = {
     val filter = Filters.equal("personalDetails.nino", nino)

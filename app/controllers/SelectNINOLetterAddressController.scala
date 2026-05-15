@@ -16,9 +16,9 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import forms.SelectNINOLetterAddressFormProvider
-import models.errors._
+import models.errors.*
 import models.nps.{LetterIssuedResponse, RLSDLONFAResponse, TechnicalIssueResponse}
 import models.pdv.PDVResponseData
 import models.requests.DataRequest
@@ -104,15 +104,16 @@ class SelectNINOLetterAddressController @Inject() (
                 request.userAnswers.set(SelectNINOLetterAddressPage, value) match {
                   case Failure(_)  => Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
                   case Success(uA) =>
-                    sessionRepository.setUserAnswers(request.userId, uA)
-                    val auditValue = if (value.toString.equals("true")) "postCode" else "notThisAddress"
-                    uA.get(SelectNINOLetterAddressPage) match {
-                      case Some(false) =>
-                        auditAddress(pdvData, nino, auditValue, request.origin)
-                        Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA)))
-                      case Some(true)  =>
-                        sendLetter(nino, pdvData, auditValue, uA, mode, request.origin)
-                      case _           => throw new IllegalArgumentException("Failed to get SelectNINOLetterAddressPage")
+                    sessionRepository.setUserAnswers(request.userId, uA).flatMap { _ =>
+                      val auditValue = if (value.toString.equals("true")) "postCode" else "notThisAddress"
+                      uA.get(SelectNINOLetterAddressPage) match {
+                        case Some(false) =>
+                          auditAddress(pdvData, nino, auditValue, request.origin)
+                          Future.successful(Redirect(navigator.nextPage(SelectNINOLetterAddressPage, mode, uA)))
+                        case Some(true)  =>
+                          sendLetter(nino, pdvData, auditValue, uA, mode, request.origin)
+                        case _           => throw new IllegalArgumentException("Failed to get SelectNINOLetterAddressPage")
+                      }
                     }
                 }
             )

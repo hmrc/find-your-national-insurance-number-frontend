@@ -20,8 +20,8 @@ import com.google.inject.ImplementedBy
 import connectors.IndividualDetailsConnector
 import models.IndividualDetailsResponseEnvelope.IndividualDetailsResponseEnvelope
 import models.errors.{IndividualDetailsError, InvalidIdentifier}
+import models.individualdetails.*
 import models.individualdetails.AddressType.ResidentialAddress
-import models.individualdetails._
 import models.pdv.PDVResponseData
 import models.{CorrelationId, IndividualDetailsNino, IndividualDetailsResponseEnvelope}
 import org.apache.commons.lang3.StringUtils
@@ -65,7 +65,9 @@ class IndividualDetailsServiceImpl @Inject() (
     with Logging {
 
   override def getNPSPostCode(idData: IndividualDetails): String =
-    getAddressTypeResidential(idData.addressList).addressPostcode.map(_.value).getOrElse("")
+    getAddressTypeResidential(idData.addressList)
+      .flatMap(_.addressPostcode.map(_.value))
+      .getOrElse("")
 
   override def getIdData(
     pdvData: PDVResponseData
@@ -81,19 +83,16 @@ class IndividualDetailsServiceImpl @Inject() (
     nino: IndividualDetailsNino
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Either[IndividualDetailsError, Address]] = {
     val idAddress = for {
-      idData       <- getIndividualDetails(nino)
-      idDataAddress = idData.addressList.getAddress.filter(_.addressType.equals(ResidentialAddress)).head
+      idData        <- getIndividualDetails(nino)
+      idDataAddress <- getAddressTypeResidential(idData.addressList)
+                         .map(IndividualDetailsResponseEnvelope(_))
+                         .getOrElse(IndividualDetailsResponseEnvelope.fromError(InvalidIdentifier(nino)))
     } yield idDataAddress
 
-    idAddress.value
-      .flatMap {
-        case Right(address) => Future.successful(Right(address))
-        case Left(error)    => Future.successful(Left(error))
-      }
-      .recover { case ex =>
-        logger.warn(s"Error while fetching Individual Details Address for $nino", ex)
-        Left(InvalidIdentifier(nino))
-      }
+    idAddress.value.recover { case ex =>
+      logger.warn(s"Error while fetching Individual Details Address for $nino", ex)
+      Left(InvalidIdentifier(nino))
+    }
   }
 
   override def getIndividualDetails(
@@ -136,9 +135,7 @@ class IndividualDetailsServiceImpl @Inject() (
     )
   }
 
-  private def getAddressTypeResidential(addressList: AddressList): Address = {
-    val residentialAddress = addressList.getAddress.filter(_.addressType.equals(ResidentialAddress))
-    residentialAddress.head
-  }
+  private def getAddressTypeResidential(addressList: AddressList): Option[Address] =
+    addressList.getAddress.find(_.addressType.equals(ResidentialAddress))
 
 }

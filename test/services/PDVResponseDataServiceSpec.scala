@@ -17,16 +17,16 @@
 package services
 
 import connectors.PersonalDetailsValidationConnector
-import models.pdv._
+import models.pdv.*
 import models.requests.DataRequest
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{reset, when}
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
-import play.api.http.Status._
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar.mock
+import play.api.http.Status.*
 import play.api.libs.json.Json
 import play.api.mvc.AnyContent
 import repositories.{EncryptedPersonalDetailsValidationRepository, PersonalDetailsValidationRepository}
@@ -39,7 +39,7 @@ import scala.util.Random
 
 class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
 
-  import PDVResponseDataServiceSpec._
+  import PDVResponseDataServiceSpec.*
   implicit val mockDataRequest: DataRequest[AnyContent] = mock[DataRequest[AnyContent]]
 
   override def beforeEach(): Unit =
@@ -238,12 +238,11 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
       }
 
       "createPDVDataRow should reformat the postCode in PersonalDetails" in {
-        val mockEncryptedRepository = mock[EncryptedPersonalDetailsValidationRepository]
-        val mockRepository          = mock[PersonalDetailsValidationRepository]
-        val service                 = new PersonalDetailsValidationService(null, mockEncryptedRepository)(ec)
+        val mockPersonalDetailsValidationRepository = mock[PersonalDetailsValidationRepository]
+        val service                                 = new PersonalDetailsValidationService(null, mockPersonalDetailsValidationRepository)(ec)
 
         val originalPostCode = "Ab 12C d"
-        val expectedPostCode = "AB1 2CD" // assuming this is the expected format after splitPostCode
+        val expectedPostCode = "AB1 2CD"
 
         val personalDetails = PersonalDetails(
           firstName = "John",
@@ -263,7 +262,7 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
           npsPostCode = None
         )
 
-        when(mockRepository.insertOrReplacePDVResultData(any())(any()))
+        when(mockPersonalDetailsValidationRepository.insertOrReplacePDVResultData(any())(any()))
           .thenReturn(Future.successful("AB1 2CD"))
 
         service.createPDVDataRow(PDVSuccessResponse(pdvResponseData)).map {
@@ -303,14 +302,15 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
         when(mockConnector.retrieveMatchingDetails(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, Json.toJson(personalDetailsValidation).toString())))
 
-        when(personalDetailsValidationService.createPDVDataFromPDVMatch(mockPDVRequest))
+        when(mockEncryptedPersonalDetailsValidationRepository.insertOrReplacePDVResultData(any())(any()))
           .thenReturn(Future.failed(new RuntimeException("Failed to get PDV data")))
 
-        val result = personalDetailsValidationService.getPDVData(mockPDVRequest)
-
-        result.failed.map { ex =>
-          ex.getMessage mustBe "Failed to get PDV data"
-        }
+        personalDetailsValidationService
+          .getPDVData(mockPDVRequest)
+          .failed
+          .map { ex =>
+            ex.getMessage mustBe "Failed to get PDV data"
+          }(ec)
       }
 
     }
@@ -518,6 +518,9 @@ class PDVResponseDataServiceSpec extends AsyncWordSpec with Matchers with Mockit
           CRN = None,
           npsPostCode = None
         )
+
+        when(mockPersonalDetailsValidationRepository.insertOrReplacePDVResultData(any())(any()))
+          .thenReturn(Future.successful(""))
 
         when(mockRepository.insertOrReplacePDVResultData(any())(any()))
           .thenReturn(Future.successful("AB1 2CD"))

@@ -19,13 +19,13 @@ package controllers
 import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import handlers.ErrorHandler
 import models.errors.{ConnectorError, IndividualDetailsError}
-import models.pdv._
+import models.pdv.*
 import models.requests.DataRequest
 import models.{Mode, OriginType}
 import org.apache.commons.lang3.StringUtils
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc._
+import play.api.mvc.*
 import services.{AuditService, CheckDetailsService, IndividualDetailsService, PersonalDetailsValidationService}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -121,7 +121,7 @@ class CheckDetailsController @Inject() (
         val checksf: Future[(Boolean, String)] = for {
           _ <- individualDetailsService.createIndividualDetailsData(sessionId, idData)
           c  = checkDetailsService.checkConditions(idData)
-          _  = personalDetailsValidationService.updatePDVDataRowWithValidCustomer(pdvData.getNino, c._1, c._2)
+          _ <- personalDetailsValidationService.updatePDVDataRowWithValidCustomer(pdvData.getNino, c._1, c._2)
         } yield c
 
         checksf.flatMap { api1694Checks =>
@@ -140,11 +140,10 @@ class CheckDetailsController @Inject() (
                 )
               }
             } else {
-              personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(pdvData.getNino, idPostCode)
-              Future.successful(
+              personalDetailsValidationService.updatePDVDataRowWithNPSPostCode(pdvData.getNino, idPostCode).map { _ =>
                 Redirect(routes.ValidDataNINOMatchedNINOHelpController.onPageLoad(mode = mode))
                   .withSession(sessionWithNINO)
-              )
+              }
             }
           } else {
             logger.info(s"API 1694 checks failed: ${api1694Checks._2}")

@@ -19,7 +19,8 @@ package repositories
 import config.FrontendAppConfig
 import models.{SessionData, UserAnswers}
 import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.model._
+import org.mongodb.scala.model.*
+import play.api.Logging
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
@@ -53,7 +54,8 @@ class SessionRepository @Inject() (
             .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
         )
       )
-    ) {
+    )
+    with Logging {
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
@@ -101,11 +103,16 @@ class SessionRepository @Inject() (
       )
       .toFuture()
       .map { updateResult =>
-        if (updateResult.getModifiedCount == 0) {
-          throw new RuntimeException("Nothing matches in Mongo collection to update")
+        if (updateResult.getMatchedCount == 0) {
+          logger.warn(s"setUserAnswers: no session document for id=$id; skipping persist")
+          false
         } else {
           true
         }
+      }
+      .recover { case e: Throwable =>
+        logger.warn(s"setUserAnswers: mongo error for id=$id: ${e.getMessage}", e)
+        false
       }
 
   def clear(id: String): Future[Boolean] =
