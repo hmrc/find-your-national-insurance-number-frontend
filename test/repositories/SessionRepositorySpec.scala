@@ -30,9 +30,7 @@ import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.temporal.ChronoUnit
 import java.time.{Clock, Instant, ZoneId}
-import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
 
 class SessionRepositorySpec
     extends AnyFreeSpec
@@ -72,11 +70,10 @@ class SessionRepositorySpec
   }
 
   ".setUserAnswers" - {
-    "must throw an exception if there is no Mongo document to update" in {
-      a[RuntimeException] mustBe thrownBy {
-        Await.result(repository.setUserAnswers("id", userAnswers), Duration.Inf)
-      }
+    "must return false if there is no Mongo document to update" in {
+      repository.setUserAnswers("id", userAnswers).futureValue mustEqual false
     }
+
     "must set the last updated time to now or greater and the user answers and save them" in {
       val expectedResult = sessionData.copy(lastUpdated = instant, origin = Some(OriginType.PDV))
 
