@@ -17,7 +17,6 @@
 package views.templates
 
 import config.FrontendAppConfig
-import controllers.routes
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -28,6 +27,7 @@ import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.twirl.api.Html
+import uk.gov.hmrc.sca.config.BackLinkConfig
 import uk.gov.hmrc.sca.models.BannerConfig
 import uk.gov.hmrc.sca.services.WrapperService
 import views.html.components.{AdditionalScript, HeadBlock}
@@ -75,10 +75,7 @@ class NewLayoutProviderSpec extends AnyWordSpec with Matchers with MockitoSugar 
           any(),
           any(),
           any(),
-          any(),
-          ArgumentMatchers.eq(routes.KeepAliveController.keepAlive.url),
-          any(),
-          any(),
+          ArgumentMatchers.eq(Some(BackLinkConfig.JsBack)),
           any(),
           any(),
           any(),
