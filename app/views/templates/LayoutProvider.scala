@@ -22,6 +22,7 @@ import play.api.i18n.Messages
 import play.api.mvc.RequestHeader
 import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage.ServiceURLs
+import uk.gov.hmrc.sca.config.BackLinkConfig
 import uk.gov.hmrc.sca.models.BannerConfig
 import uk.gov.hmrc.sca.services.WrapperService
 import views.html.components.{AdditionalScript, HeadBlock}
@@ -94,8 +95,12 @@ class NewLayoutProvider @Inject() (
     messages: Messages
   ): HtmlFormat.Appendable = {
 
-    val keepAliveUrl = controllers.routes.KeepAliveController.keepAlive.url
-    val signOutUrl   = if (showSignOutInHeader) Some(appConfig.exitSurveyURL) else None
+    val signOutUrl = if (showSignOutInHeader) Some(appConfig.exitSurveyURL) else None
+
+    val backLinkConfig: Option[BackLinkConfig] =
+      if (showBackLinkJS) Some(BackLinkConfig.JsBack)
+      else backLinkUrl.map(url => BackLinkConfig.UrlBack(url))
+
     wrapperService.standardScaLayout(
       disableSessionExpired = !timeout,
       content = contentBlock,
@@ -103,14 +108,12 @@ class NewLayoutProvider @Inject() (
       serviceURLs = ServiceURLs(
         signOutUrl = signOutUrl
       ),
-      showBackLinkJS = showBackLinkJS,
-      backLinkUrl = backLinkUrl,
+      backLinkConfig = backLinkConfig,
       scripts = Seq(additionalScript()),
       styleSheets = stylesheets.toSeq :+ headBlock(),
       fullWidth = fullWidth,
       hideMenuBar = true,
-      bannerConfig = newLayoutBannerConfig,
-      keepAliveUrl = keepAliveUrl
+      bannerConfig = newLayoutBannerConfig
     )
   }
 }
