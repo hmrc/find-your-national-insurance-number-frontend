@@ -3,3 +3,4 @@ test-repositories:
   - epaye-api-performance-tests
   - income-tax-subscription-performance-tests
   - find-your-ni-number-acceptance-tests
+serviceNowMapping: SNSVC0016779
